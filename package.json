@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "test:unit": "tsx --test artifacts/api-server/src/lib/s3EvidenceStorage.test.ts .railway/railway.test.ts && tsx --tsconfig artifacts/tehvil/tsconfig.json --test artifacts/tehvil/src/lib/localization.test.ts",
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
@@ -15,6 +16,7 @@
   "devDependencies": {
     "prettier": "^3.9.6",
     "railway": "^3.12.0",
+    "tsx": "4.23.13",
     "typescript": "~5.9.3"
   }
 }

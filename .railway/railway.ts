@@ -3,9 +3,15 @@ import { defineRailway, github, preserve, project, service } from "railway/iac";
 // Own only these two app services; do not manage/delete unrelated resources.
 export const partial = "tehvil-services";
 
-export default defineRailway(() => {
-  const backend = service("backend", {
-    source: github("datacolabaz/tehvil", { branch: "backend", rootDirectory: "/" }),
+export default defineRailway(ctx => {
+  const staging = ctx.isEnvironment("staging");
+  if (!staging && !ctx.isEnvironment("production")) {
+    throw new Error("Link the production or staging Railway environment before planning this configuration.");
+  }
+  const branch = staging ? "develop" : "main";
+  const suffix = staging ? "-staging" : "";
+  const backend = service(`tehvil-api${suffix}`, {
+    source: github("datacolabaz/tehvil", { branch, rootDirectory: "/" }),
     build: "pnpm run typecheck:libs && pnpm --filter @workspace/api-server run build",
     start: "pnpm --filter @workspace/api-server run start",
     healthcheck: "/api/healthz",
@@ -19,16 +25,16 @@ export default defineRailway(() => {
       PUBLIC_APP_URL: preserve(),
       CLERK_PUBLISHABLE_KEY: preserve(),
       CLERK_SECRET_KEY: preserve(),
-      BUCKET_ENDPOINT: preserve(),
-      BUCKET_NAME: preserve(),
-      BUCKET_ACCESS_KEY_ID: preserve(),
-      BUCKET_SECRET_ACCESS_KEY: preserve(),
-      BUCKET_REGION: preserve(),
-      BUCKET_FORCE_PATH_STYLE: preserve(),
+      R2_ENDPOINT: preserve(),
+      R2_BUCKET_NAME: preserve(),
+      R2_ACCESS_KEY_ID: preserve(),
+      R2_SECRET_ACCESS_KEY: preserve(),
+      R2_REGION: "auto",
+      BUCKET_FORCE_PATH_STYLE: "true",
     },
   });
-  const frontend = service("frontend", {
-    source: github("datacolabaz/tehvil", { branch: "frontend", rootDirectory: "/" }),
+  const frontend = service(`tehvil-web${suffix}`, {
+    source: github("datacolabaz/tehvil", { branch, rootDirectory: "/" }),
     build: "pnpm run typecheck:libs && PORT=5000 BASE_PATH=/ pnpm --filter @workspace/tehvil run build",
     start: "pnpm --filter @workspace/tehvil run start",
     healthcheck: "/healthz",
@@ -41,5 +47,5 @@ export default defineRailway(() => {
       VITE_CLERK_PUBLISHABLE_KEY: preserve(),
     },
   });
-  return project("tehvil", { resources: [backend, frontend] });
+  return project(ctx.projectName || "tehvil", { resources: [backend, frontend] });
 });

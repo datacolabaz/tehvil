@@ -5,6 +5,7 @@ import { getListPassportSharesQueryKey, useCreatePassportShare, useListPassportS
 import type { ChangeOrder, Milestone, PaymentItem, ScopeItem } from '@workspace/api-client-react';
 import { Button, PageHeading, QuerySection, Status, actionLabel, date, money, priorityLabel, propLabel, typeLabel, roleLabel, type T } from '@/components/kit';
 import { mediaUrl } from '@/components/evidence';
+import { auditDetail } from '@/lib/audit-detail';
 
 export function PassportSection({ title, children }: { title: string; children?: ReactNode }) { return <section className="passport-section"><h3>{title}</h3>{children || <p className="empty-line">—</p>}</section>; }
 
@@ -45,7 +46,7 @@ export function PassportPage(p: any) {
       <PassportSection title={t('revisionSummary')}>{data.milestones.length ? data.milestones.map((m: Milestone) => <RevisionPrint key={m.id} m={m} projectId={id} t={t} lang={lang} />) : <p className="empty-line">{t('noRevisions')}</p>}</PassportSection>
       <PassportSection title={t('payments')}>{data.payments.map((pay: PaymentItem) => <div className="passport-line" key={pay.id}><strong>{pay.title}</strong><span>{date(pay.dueDate, lang)} · <Status value={pay.status} t={t} /></span><span>{money(pay.amount)} {pay.currency}</span></div>)}</PassportSection>
       <PassportSection title={t('evidenceIndex')}>{evidence.length ? evidence.map(e => <div className="passport-line" key={e.id}><strong>{e.name}</strong><span>{e.from}</span><small className="print-media">{window.location.origin}{mediaUrl(id, e.id)}</small></div>) : undefined}</PassportSection>
-      <PassportSection title={t('timeline')}>{data.timeline.slice(0, 12).map((ev: any) => <div className="passport-line" key={ev.id}><strong>{actionLabel(ev.action, t)}</strong><span>{date(ev.createdAt, lang)} · {roleLabel(ev.actorRole, t)}</span><span>{ev.detail}</span></div>)}</PassportSection>
+      <PassportSection title={t('timeline')}>{data.timeline.slice(0, 12).map((ev: any) => <div className="passport-line" key={ev.id}><strong>{actionLabel(ev.action, t)}</strong><span>{date(ev.createdAt, lang)} · {roleLabel(ev.actorRole, t)}</span><span>{auditDetail(ev, t)}</span></div>)}</PassportSection>
       <div className="passport-disclaimer"><ShieldCheck size={17} />{t('printDisclaimer')} {t('disclaimer')}</div></article>}</QuerySection>
     {project.participantRole === 'owner' && <SharePanel projectId={id} t={t} lang={lang} notify={notify} />}
     <span hidden><Check size={1} /></span></>;

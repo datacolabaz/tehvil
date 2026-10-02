@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { TKey } from '@/lib/i18n';
+import { getLanguage } from '@/lib/language';
 
 export type T = (k: TKey) => any;
 
@@ -22,10 +23,11 @@ export function QuerySection({ q, t, children }: { q: Pick<UseQueryResult<unknow
 }
 
 export function Status({ value, t }: { value: string; t: T }) {
+  if (value === 'archived') return <span className="status-pill status-archived">{t('archivedState')}</span>;
   const m: Record<string, TKey> = { approved: 'approved', accepted: 'accepted', completed: 'accepted', confirmed_received: 'received', planned: 'planned', in_progress: 'inProgress', submitted: 'pendingApproval', pending_approval: 'pendingApproval', submitted_for_handover: 'pendingApproval', revision_requested: 'revise', needs_clarification: 'pendingApproval', due: 'due', marked_sent: 'sent', rejected: 'rejected', resolved: 'resolved', active: 'inProgress', draft: 'scopeDraft', open: 'pendingApproval', contractor_replied: 'sent', disputed: 'revise', excluded: 'excluded' };
   return <span className={`status-pill status-${value}`}>{t(m[value] || 'planned')}</span>;
 }
-export function money(value?: number | null) { return new Intl.NumberFormat('az-AZ', { maximumFractionDigits: 0 }).format(value || 0); }
+export function money(value?: number | null) { const lang = getLanguage(); return new Intl.NumberFormat(lang === 'ru' ? 'ru-RU' : lang === 'en' ? 'en-GB' : 'az-AZ', { maximumFractionDigits: 2 }).format(value || 0); }
 export function date(value?: string | null, lang = 'az') { if (!value) return '—'; try { return new Intl.DateTimeFormat(lang === 'az' ? 'az-AZ' : lang === 'ru' ? 'ru-RU' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(value)); } catch { return value; } }
 export function PageHeading({ eyebrow, title, description, action }: { eyebrow?: string; title: string; description?: string; action?: ReactNode }) {
   return <div className="page-heading"><div>{eyebrow && <div className="eyebrow">{eyebrow}</div>}<h1 className="font-display">{title}</h1>{description && <p>{description}</p>}</div>{action && <div className="heading-action">{action}</div>}</div>;

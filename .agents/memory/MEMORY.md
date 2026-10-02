@@ -1,3 +1,5 @@
 - [Runtime validation](runtime-validation.md) — Vite can serve stale dependency versions after restart; validate the browser runtime, not only installed packages.
 - [API schema naming](api-schema-naming.md) — named request components avoid Orval's Zod value/type export collisions.
-- [Railway setup](railway-setup.md) — new services use IaC or dashboard commands, not deprecated railway.json; preserve the shared workspace on deploy branches.
+- [Railway setup](railway-setup.md) — main/production, develop/staging, private R2; preserve shared workspace and use supported IaC.
+- [Clerk localization](clerk-localization.md) — no official AZ locale; custom resources must preserve interpolation variables while allowing translated link-label literals.
+- [GitHub workflow permission](github-workflow-permission.md) — workflow-path writes fail despite repo access; deliver CI templates separately and do not claim Actions are active.
