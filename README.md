@@ -23,7 +23,7 @@ Mobile-first renovation project records for homeowners and contractors, in Azerb
 - TypeScript, pnpm workspaces, React/Vite, TanStack Query and Wouter
 - Express API, PostgreSQL/Drizzle
 - Replit-managed Clerk and private App Storage
-- Optional external Clerk and private S3-compatible evidence storage for Railway
+- External Clerk and Cloudflare R2 private evidence storage for Railway
 - OpenAPI contract with generated React hooks and Zod validation
 
 ```text
@@ -86,4 +86,14 @@ This is an MVP, not a compliance certification or malware-scanning service. The 
 
 ## Railway
 
-Deploy frontend and backend independently from the `frontend` and `backend` branches. The integrated source is kept on `main`. See [deploy/RAILWAY.md](deploy/RAILWAY.md) for build/start commands, required variables, PostgreSQL schema setup, private buckets and the external Clerk configuration.
+Deploy separate frontend/API Railway services from the **same branch per environment**: `main` for production, `develop` for staging. Use `feature/*` branches for changes and reviewed `hotfix/*` branches for urgent fixes. Legacy `frontend`/`backend` branches are not deployment sources and are not automatically deleted.
+
+Production and staging have separate PostgreSQL databases, private Cloudflare R2 buckets and Clerk configuration. The browser never receives database or R2 credentials. See [deploy/RAILWAY.md](deploy/RAILWAY.md) for topology, commands, variables, provider setup, CI/release checks and migration boundaries.
+
+CI definitions are prepared, not yet activated in GitHub: the source-upload connection lacks workflow-file permission. Exact templates and activation instructions are included in [deploy/github-actions/](deploy/github-actions/README.md). Do not treat a source push as a passed GitHub Actions run or production release.
+
+## Partner architecture
+
+The accepted [partner/distribution architecture](deploy/PARTNER-ARCHITECTURE.md) separates Referral/Solution partner identity from explicit project membership, defines restricted future designer capabilities, server-side first-valid 30-day attribution, private reporting, verified package-purchase commissions and audited solution project credits.
+
+This is an architecture extension, **not implemented partner dashboards, billing, commissions or designer access**. Manual renovation payments do not generate commercial commissions. No database or production infrastructure changes are made by adopting this design.

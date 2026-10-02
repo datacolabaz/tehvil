@@ -55,6 +55,17 @@
   button, input, select, textarea { font: inherit; }
 }
 .font-display { font-family: var(--app-font-serif); }
+.auth-form-side { flex-direction:column; }
+.auth-widget { width:min(440px,100%); }
+.auth-widget-brand { display:flex;justify-content:center;margin-bottom:22px; }
+.auth-switch-link { text-align:center;margin:18px 0 0;font-size:13px;color:hsl(var(--muted-foreground)); }
+.auth-switch-link a { color:hsl(var(--foreground));font-weight:700;margin-left:4px; }
+.auth-form-side>.auth-tools { width:auto;max-width:calc(100% - 24px); }
+@media print {
+  .site-footer,.theme-toggle,.auth-tools { display:none!important; }
+  .passport-sheet,.passport-sheet * { color:#203f36!important;background-color:white!important; }
+}
+.hero h1.font-display, .auth-side h1.font-display { font-family:var(--app-font-serif);font-weight:800;letter-spacing:-.045em; }
 .surface { background: hsl(var(--card)); border: 1px solid hsl(var(--card-border)); border-radius: 20px; }
 .eyebrow { letter-spacing: .15em; text-transform: uppercase; font-size: 10px; font-weight: 700; color: hsl(var(--muted-foreground)); }
 .soft-grid { background-image: linear-gradient(to right, rgba(24,55,47,.035) 1px, transparent 1px),linear-gradient(to bottom, rgba(24,55,47,.035) 1px, transparent 1px); background-size: 36px 36px; }
@@ -132,3 +143,89 @@
 .evidence-video { width:120px;height:68px;border-radius:7px;background:#1b2e28; }
 @media print { .no-print,.sidebar,.topbar,.toast-message,.saving-state,.feedback-banner { display:none!important; } .workspace { display:block!important; } .page-content { padding:0!important; } }
 .share-panel { padding:18px;margin-top:18px; }.share-panel h3 { margin:0 0 8px;font-size:14px;color:#29483e; }.share-created { display:flex;flex-direction:column;gap:8px;margin-top:12px;padding:12px;background:#eef0e6;border-radius:12px;font-size:11px;word-break:break-all; }.check-row { display:flex;align-items:center;gap:9px;margin:10px 0;font-size:11px;color:#50665a; }.share-page { max-width:860px;margin:0 auto;padding:30px 20px 70px; }.share-bar { display:flex;justify-content:space-between;align-items:center;margin-bottom:20px; }
+
+/* ---- auth light contrast, theme toggle, footer ---- */
+.auth-side { background:#e7e8dd;color:#1f3d35;border-right:1px solid #d9dccf; }
+.auth-side:after { border-color:rgba(36,72,63,.14);box-shadow:0 0 0 60px rgba(36,72,63,.03),0 0 0 120px rgba(36,72,63,.025); }
+.auth-side h1 { color:#1e3d35; }.auth-side p { color:#52665d; }.auth-side>span { color:#60746a; }
+.auth-form-side { position:relative; }
+.auth-tools { position:absolute;top:18px;right:18px;display:flex;align-items:center;gap:8px;z-index:2; }
+.theme-toggle { width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;border:1px solid #e2dfd5;border-radius:10px;background:#f7f5ee;color:#486057;cursor:pointer;transition:transform .18s,background .18s; }
+.theme-toggle:hover { transform:translateY(-1px); }.theme-toggle:focus-visible { outline:2px solid #859e8d;outline-offset:2px; }
+.workspace .theme-toggle { background:transparent; }
+.site-footer { border-top:1px solid #e1ded4;background:transparent; }
+.workspace-main { display:flex;flex-direction:column; }.workspace-main>.page-content { flex:1;width:min(1280px,100%); }
+.site-footer-inner { width:min(1160px,calc(100% - 64px));margin-inline:auto;padding:18px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap; }
+.workspace .site-footer-inner { width:calc(100% - 84px); }
+.support-link { display:inline-flex;align-items:center;gap:10px;color:#35574b;text-decoration:none;font-size:12px; }
+.support-link svg { flex:0 0 auto;color:#b3805f; }.support-link span { display:flex;flex-direction:column;gap:2px; }.support-link small { color:#7b877f;font-size:10px; }.support-link b { font-weight:700; }.support-link:hover b { text-decoration:underline; }
+.share-group { display:inline-flex;align-items:center;gap:8px;color:#7b877f;font-size:10px; }
+.share-group a { width:34px;height:34px;display:grid;place-items:center;border:1px solid #dcdfd3;border-radius:10px;color:#36594d;background:#eeede4;transition:transform .18s; }
+.share-group a:hover { transform:translateY(-1px);background:#e3e5d9; }.share-group a:focus-visible,.support-link:focus-visible { outline:2px solid #859e8d;outline-offset:2px; }
+.footer-rights { color:#858e85;font-size:10px; }
+.auth-page+.site-footer { background:#f6f4ed; }
+@media (max-width:760px) {
+  .site-footer-inner,.workspace .site-footer-inner { width:calc(100% - 34px);flex-direction:column;align-items:flex-start;gap:14px; }
+  .auth-tools { top:12px;right:12px; }.auth-form-side { padding-top:60px; }
+  .landing-actions .theme-toggle { width:32px;height:32px; }.workspace .topbar-tools .theme-toggle { width:30px;height:30px; }
+}
+
+/* ---- night theme ---- */
+.dark body { background:#12201c; }
+.dark .landing,.dark .auth-page,.dark .workspace,.dark .workspace-main { background:#12201c; }
+.dark .landing-nav,.dark .landing-footer,.dark .site-footer,.dark .trust-strip { border-color:#2a3f38; }
+.dark .trust-strip { background:#16271f;background:#162621; }
+.dark .trust-items,.dark .landing-nav nav a,.dark .text-link,.dark .quiet-link { color:#b4c4ba; }
+.dark .landing-nav nav a:hover,.dark .text-link:hover { color:#f0ecd9; }
+.dark .hero h1,.dark .workflow-intro h2,.dark .closing-inner h2,.dark .page-heading h1,.dark .section-head h2,.dark .section-head h3,.dark .project-card-body h3,.dark .aside-panel h3,.dark .empty-projects h2,.dark .auth-panel h1,.dark .room-section-head h2,.dark .next-step-card h3,.dark .share-panel h3,.dark .form-section-title h2,.dark .workflow-row h3 { color:#f0ecd9; }
+.dark .hero-copy>p,.dark .workflow-intro p,.dark .workflow-row p,.dark .closing-inner p,.dark .page-heading p,.dark .empty-projects p,.dark .landing-footer p,.dark .hero-proof,.dark .footer-rights { color:#9fb1a7; }
+.dark .eyebrow { color:#93a79c; }
+.dark .brand { color:#f2efe3; }.dark .brand-mark { background:#ddc899;color:#173c33; }
+.dark .button-primary { background:#ddc899;border-color:#ddc899;color:#173c33; }.dark .button-primary:hover { background:#e8d6ac; }
+.dark .button-secondary { background:#22372f;border-color:#2f453d;color:#e3e6d9; }.dark .button-secondary:hover { background:#2a4238; }
+.dark .button-quiet { color:#b4c4ba; }.dark .button-quiet:hover { background:#1d3029; }
+.dark .button-danger { background:#3a2522;border-color:#5b3732;color:#e8a7a0; }
+.dark .lang-picker,.dark .theme-toggle { background:#1a2d27;border-color:#2f453d;color:#cfdad2; }.dark .workspace .theme-toggle,.dark .lang-picker.compact { background:transparent; }
+.dark .lang-picker select { color:#cfdad2; }.dark .lang-picker option { background:#182a25;color:#ece9dc; }
+.dark .hero-art,.dark .closing-inner,.dark .aside-panel,.dark .next-step-card,.dark .scope-summary { background:#1b2e28;border-color:#2c423b;box-shadow:none; }
+.dark .art-topline,.dark .art-foot { color:#9fb1a7; }
+.dark .blueprint { background:#0f1c18; }
+.dark .closing-mark { background:#ddc899;color:#173c33; }
+.dark .workflow-list,.dark .workflow-row { border-color:#2a3f38; }
+.dark .workflow-icon,.dark .count-chip,.dark .project-card-symbol,.dark .user-initials,.dark .form-section-title>span,.dark .action-icon,.dark .next-step-icon,.dark .empty-illustration { background:#22372f;color:#d7e0d4; }
+.dark .workflow-chevron,.dark .card-arrow { color:#7f968a; }
+.dark .sidebar { background:#0e1a17;border-right:1px solid #22372f; }
+.dark .topbar { background:#15251f;border-color:#2a3f38; }
+.dark .crumbs a,.dark .crumbs { color:#93a79c; }.dark .crumbs span { color:#e8e6d6; }
+.dark .mobile-menu { color:#cfdad2; }
+.dark .project-card,.dark .stat-card,.dark .money-card,.dark .loading-card,.dark .auth-panel,.dark .empty-projects,.dark .inline-form,.dark .passport-promo,.dark .evidence-item,.dark .share-created { background:#182a25;border-color:#2c423b;color:#e3e6d9; }
+.dark .project-card:hover { border-color:#4a6358;box-shadow:none; }
+.dark .project-card-meta,.dark .project-card-bottom,.dark .project-card-signals,.dark .money-split span,.dark .stat-card>span:last-child,.dark .stat-card a,.dark .action-link small,.dark .aside-foot,.dark .empty-line,.dark .room-line,.dark .room-line small,.dark .activity-copy p,.dark .activity-meta,.dark .passport-promo small,.dark .scope-description p,.dark .room-item-count { color:#9fb1a7; }
+.dark .project-card-bottom strong,.dark .stat-card>strong,.dark .money-card>strong,.dark .money-split b,.dark .action-link,.dark .action-link strong,.dark .activity-copy strong,.dark .scope-description strong,.dark .scope-summary>span,.dark .passport-promo,.dark .next-step-card p { color:#e3e6d9; }
+.dark .project-action-teaser { background:#22372f;color:#d7e0d4; }
+.dark .progress-track { background:#2a3f38; }
+.dark .status-pill { background:#22372f;color:#b9c8bd; }
+.dark .status-approved,.dark .status-accepted,.dark .status-confirmed_received,.dark .status-resolved,.dark .status-completed { background:#1f3a2e;color:#8fd1ac; }
+.dark .status-submitted,.dark .status-submitted_for_handover,.dark .status-due,.dark .status-revision_requested,.dark .status-needs_clarification { background:#3b3220;color:#e3c27f; }
+.dark .status-rejected,.dark .status-disputed { background:#3a2522;color:#e8a7a0; }
+.dark .action-link,.dark .activity-item,.dark .room-line,.dark .form-section-title.separated,.dark .form-actions,.dark .money-split,.dark .room-section-head,.dark .scope-row { border-color:#2c423b; }
+.dark .aside-stat,.dark .hero-project-panel,.dark .form-aside { background:#0f1c18;border:1px solid #22372f; }
+.dark .field { color:#c4d1c9; }
+.dark .field input,.dark .field select,.dark .field textarea { background:#12201c;border-color:#2f453d;color:#ece9dc; }
+.dark .field input:focus,.dark .field select:focus,.dark .field textarea:focus { border-color:#ddc899;box-shadow:0 0 0 3px rgba(221,200,153,.15); }
+.dark .icon-button { color:#b4c4ba; }.dark .icon-button:hover { background:#22372f; }
+.dark .error-notice,.dark .feedback-banner { background:#3a2522;border-color:#5b3732;color:#e8a7a0; }
+.dark .manual-notice,.dark .scope-state { background:#1d2f29;border-color:#2c423b;color:#c4d1c9; }
+.dark .skeleton { background:linear-gradient(90deg,#1d3029,#26403a,#1d3029);background-size:200% 100%; }
+.dark .auth-side { background:#1d4339;color:#f2efe3;border-right:0; }
+.dark .auth-side:after { border-color:rgba(233,231,213,.16);box-shadow:0 0 0 60px rgba(233,231,213,.025),0 0 0 120px rgba(233,231,213,.025); }
+.dark .auth-side h1 { color:#f0ecd9; }.dark .auth-side p { color:#c0cdbf; }.dark .auth-side>span { color:#a8b9ab; }
+.dark .auth-page+.site-footer { background:#12201c; }
+.dark .support-link { color:#d7e0d4; }.dark .support-link small,.dark .share-group { color:#93a79c; }
+.dark .share-group a { background:#1a2d27;border-color:#2f453d;color:#d7e0d4; }.dark .share-group a:hover { background:#22372f; }
+.dark .modal-card,.dark .passport-sheet { background:#182a25;color:#e3e6d9;border-color:#2c423b; }
+.dark .passport-project h2,.dark .passport-metrics b,.dark .passport-section h3,.dark .passport-line strong { color:#e3e6d9; }
+.dark .passport-project p,.dark .passport-metrics span,.dark .passport-line { color:#aebfb3; }
+.dark .passport-sheet-head,.dark .passport-metrics,.dark .passport-section,.dark .passport-line { border-color:#2c423b; }
+.dark .passport-disclaimer { background:#22372f;color:#aebfb3; }
+.dark .passport-disclaimer svg { color:#b6cbbd; }

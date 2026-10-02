@@ -36,6 +36,9 @@ Mobile-first renovation records for homeowners and contractors in Azerbaijani, R
 - Accepted work is preserved; scope changes create a new version or a change order.
 - Public passport links expose a sanitized summary, not private evidence. Finances are opt-in.
 - One accepted contractor per project keeps the owner/contractor approval model unambiguous.
+- Partner/commercial identity must stay separate from project membership. No referral, credit or partner-admin status grants access to customer projects.
+- Future designer access needs restricted capabilities and API projections; do not alias the existing viewer role to designer.
+- See `deploy/PARTNER-ARCHITECTURE.md` for the accepted Referral/Solution architecture, privacy boundaries and staged rollout. These extensions are not live features.
 
 ## Product
 
@@ -43,8 +46,12 @@ Agreed scope, explicit exclusions, change approvals, evidence-based milestone ha
 
 ## User preferences
 
-User requested this product be pushed to `datacolabaz/tehvil` on `main`.
-Deployment target is Railway, with separate `frontend` and `backend` deployment branches. Keep `main` as the integrated source.
+User requested this product's updated source be pushed to `datacolabaz/tehvil`; use `develop` and a review PR rather than implicitly releasing production.
+Deployment target is Railway: one monorepo, `main` for production and `develop` for staging. Frontend and API are separate services built from the same environment branch.
+Cloudflare R2 private buckets are the Railway media provider. Production and staging must use separate databases, buckets and credentials; only the backend receives database/R2 secrets.
+Keep the existing pnpm workspace and Drizzle ORM. Do not relocate artifact folders or replace the database merely to match an example repository tree.
+Language changes must synchronize every existing interface, including Clerk forms, buttons, statuses, notifications and footer. Preserve user-authored records in their original language.
+Use the navbar's Təhvil wordmark consistently; the user prefers its Manrope typeface and requests a stronger hero weight and no comma after “addımı”.
 Keep the MVP free of marketplace, payment processing/escrow, SİMA, legal advice and claims of legal electronic signature.
 
 ## Gotchas

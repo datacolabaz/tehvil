@@ -48,6 +48,7 @@ Thumbs.db
 .cache/
 .local/
 .conversation/
+/attached_assets/
 .env
 .env.*
 !.env.example

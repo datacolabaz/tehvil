@@ -2,7 +2,10 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
-import { shadcn } from '@clerk/themes';
+import { makeClerkAppearance } from '@/lib/clerk-appearance';
+import { ThemeProvider, useTheme } from '@/lib/theme';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { SiteFooter } from '@/components/site-footer';
 import { Route, Switch, Link, Redirect, Router as WouterRouter, useLocation } from 'wouter';
 import {
   ArrowDownLeft, ArrowRight, ArrowUpRight, Check, CheckCircle2, ChevronDown, ChevronRight,
@@ -24,7 +27,10 @@ import {
 } from '@workspace/api-client-react';
 import type { Project, ProjectInput, Room, ScopeItem } from '@workspace/api-client-react';
 import { copy, type Lang, type TKey } from '@/lib/i18n';
-import { emitFeedback, errorToMsg, onFeedback, type FeedbackMsg } from '@/lib/feedback';
+import { clerkLocalization } from '@/lib/clerk-localization';
+import { uiT } from '@/lib/i18n-ui';
+import { getLanguage, storeLanguage } from '@/lib/language';
+import { emitFeedback, errorToMsg, onFeedback, apiErrorText, type FeedbackMsg } from '@/lib/feedback';
 import { Button, ErrorNotice, EmptyLine, Field, Loading, PageHeading, Status, actionItemText, date, money, propLabel, roleLabel, typeLabel } from '@/components/kit';
 import { LanguagePicker } from '@/components/language-picker';
 import { ScopePage } from '@/pages/scope-page';
@@ -48,19 +54,28 @@ function stripBase(path: string) { return basePath && path.startsWith(basePath) 
 
 
 function useLanguage() {
-  const [lang, setLang] = useState<Lang>(() => {
-    const value = localStorage.getItem('tehvil-language');
-    return value === 'ru' || value === 'en' ? value : 'az';
-  });
+  const [lang, setLang] = useState<Lang>(getLanguage);
   const t = (key: TKey): any => {
     const value = copy[lang][key];
     return typeof value === 'string' ? value.replace(/\\n/g, '\n') : value;
   };
-  const change = (value: Lang) => { localStorage.setItem('tehvil-language', value); setLang(value); };
+  const change = (value: Lang) => { storeLanguage(value); setLang(value); };
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.title = `Təhvil — ${copy[lang].tagline}`;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', copy[lang].lead);
+  }, [lang]);
+  useEffect(() => {
+    const sync = (event: StorageEvent) => {
+      if (event.key === 'tehvil-language') setLang(event.newValue === 'ru' || event.newValue === 'en' ? event.newValue : 'az');
+    };
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, []);
   return { lang, t, change };
 }
 function Brand({ inverse = false }: { inverse?: boolean }) {
-  return <Link href="/" className={`brand ${inverse ? 'inverse' : ''}`} data-testid="link-brand"><span className="brand-mark">t.</span><span>Təhvil</span></Link>;
+  return <Link href="/" className={`brand ${inverse ? 'inverse' : ''}`} data-testid="link-brand"><span className="brand-mark" aria-hidden="true">t.</span><span>Təhvil</span></Link>;
 }
 function AppShell({ children, project, projectId, active, lang, change, t }: { children: ReactNode; project?: Project; projectId?: string; active?: string; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string }) {
   const [open, setOpen] = useState(false);
@@ -84,8 +99,8 @@ function AppShell({ children, project, projectId, active, lang, change, t }: { c
       <nav className="side-nav">{nav.map(({ href, icon: Icon, key }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${active === key || (!active && key === 'dashboard') ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{t(key)}</span>{active === key && <span className="nav-active-dot"/>}</Link>)}</nav>
       <div className="sidebar-bottom"><div className="privacy-note"><ShieldCheck size={17}/><p>{t('disclaimer')}</p></div><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
     </aside>
-    <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs"><Link href="/dashboard">{t('dashboard')}</Link>{project && <><ChevronRight size={13}/><span>{project.name}</span></>}</div><div className="topbar-tools"><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
-      <main className="page-content">{children}</main>
+    <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs"><Link href="/dashboard">{t('dashboard')}</Link>{project && <><ChevronRight size={13}/><span>{project.name}</span></>}</div><div className="topbar-tools"><ThemeToggle lang={lang}/><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
+      <main className="page-content">{children}</main><SiteFooter lang={lang}/>
     </div>{open && <button className="scrim" aria-label={t('close')} onClick={() => setOpen(false)}/>}
   </div>;
 }
@@ -93,13 +108,14 @@ function Landing({ lang, change, t }: { lang: Lang; change: (v: Lang)=>void; t: 
   const [, setLocation] = useLocation();
   const stages = copy[lang].stages;
   const descriptions = copy[lang].stageDescs;
-  return <div className="landing"><header className="landing-nav wrap"><Brand/><nav><a href="#how">{t('learn')}</a><Link href="/dashboard">{t('dashboard')}</Link></nav><div className="landing-actions"><LanguagePicker lang={lang} change={change}/><Link href="/sign-in" className="text-link">{t('signIn')}</Link><Link href="/sign-up" className="button button-primary">{t('signUp')}<ArrowUpRight size={16}/></Link></div></header>
+  return <div className="landing"><header className="landing-nav wrap"><Brand/><nav><a href="#how">{t('learn')}</a><Link href="/dashboard">{t('dashboard')}</Link></nav><div className="landing-actions"><ThemeToggle lang={lang}/><LanguagePicker lang={lang} change={change}/><Link href="/sign-in" className="text-link">{t('signIn')}</Link><Link href="/sign-up" className="button button-primary">{t('signUp')}<ArrowUpRight size={16}/></Link></div></header>
     <section className="hero wrap"><div className="hero-copy appear"><div className="eyebrow"><span className="eyebrow-dot"/>{t('tagline')}</div><h1 className="font-display">{t('hero')}</h1><p>{t('lead')}</p><div className="hero-cta"><Button onClick={() => setLocation('/sign-up')}>{t('start')}<ArrowRight size={17}/></Button><a href="#how" className="quiet-link">{t('learn')}<ArrowDownLeft size={16}/></a></div><div className="hero-proof"><ShieldCheck size={17}/><span>{t('disclaimer')}</span></div></div>
-      <div className="hero-art appear-delay"><div className="art-topline"><span><i/> {t('artTop')}</span><span>01 — 03</span></div><div className="blueprint"><div className="blueprint-label">BAKI · RESIDENTIAL / 02</div><div className="blueprint-plan"><div className="plan-room room-living"><span>{t('planLiving')}</span><small>01</small></div><div className="plan-room room-kitchen"><span>{t('planKitchen')}</span><small>02</small></div><div className="plan-room room-bed"><span>{t('planBed')}</span><small>03</small></div><div className="plan-room room-bath"><span>{t('planBath')}</span><small>04</small></div><div className="plan-door"/></div><div className="plan-dim">6.40 m <span>3.80 m</span></div><div className="plan-status"><div className="status-check"><Check size={15}/></div><div><strong>{t('planApproved')}</strong><small>{t('planParties')}</small></div><div className="status-mini">{t('planRecorded')}</div></div></div><div className="art-foot"><span>{t('artOne')}</span><span>40°22' N / 49°50' E</span></div></div>
+      <div className="hero-art appear-delay"><div className="art-topline"><span><i/> {t('artTop')}</span><span>01 — 03</span></div><div className="blueprint"><div className="blueprint-label">{t('blueprintTitle')}</div><div className="blueprint-plan"><div className="plan-room room-living"><span>{t('planLiving')}</span><small>01</small></div><div className="plan-room room-kitchen"><span>{t('planKitchen')}</span><small>02</small></div><div className="plan-room room-bed"><span>{t('planBed')}</span><small>03</small></div><div className="plan-room room-bath"><span>{t('planBath')}</span><small>04</small></div><div className="plan-door"/></div><div className="plan-dim">{money(6.4)} m <span>{money(3.8)} m</span></div><div className="plan-status"><div className="status-check"><Check size={15}/></div><div><strong>{t('planApproved')}</strong><small>{t('planParties')}</small></div><div className="status-mini">{t('planRecorded')}</div></div></div><div className="art-foot"><span>{t('artOne')}</span><span>40°22' N / 49°50' E</span></div></div>
     </section><div className="trust-strip"><div className="wrap trust-items"><span>{t('trust')}</span><i/><span>{t('clarity')}</span><i/><span>{t('history')}</span></div></div>
     <section className="workflow wrap" id="how"><div className="workflow-intro"><div className="eyebrow">{t('eyCertain')}</div><h2 className="font-display">{t('workflow')}</h2><p>{t('workflowLead')}</p></div><div className="workflow-list">{stages.map((stage, i) => { const Icons=[FileCheck2, ArrowRight, ImagePlus]; const Icon=Icons[i]; return <article className="workflow-row" key={stage}><div className="workflow-number">0{i+1}</div><div className="workflow-icon"><Icon size={20}/></div><div><h3>{stage}</h3><p>{descriptions[i]}</p></div><ChevronRight className="workflow-chevron" size={18}/></article>; })}</div></section>
     <section className="closing wrap"><div className="closing-inner"><div className="closing-mark">t.</div><div><div className="eyebrow">{t('tagline')}</div><h2 className="font-display">{t('start')}</h2><p>{t('lead')}</p></div><Link href="/sign-up" className="button button-primary">{t('createFirst')}<ArrowRight size={16}/></Link></div></section>
     <footer className="landing-footer wrap"><Brand/><p>{t('disclaimer')}</p><LanguagePicker lang={lang} change={change}/></footer>
+    <SiteFooter lang={lang}/>
   </div>;
 }
 function Protected({ children, t }: { children: ReactNode; t: (k:TKey)=>string }) {
@@ -124,7 +140,7 @@ function DashboardContent({ lang, change, t }: { lang: Lang; change:(v:Lang)=>vo
   const { data: projects, isLoading, isError, refetch } = useListProjects();
   if (isLoading) return <AppShell lang={lang} change={change} t={t}><Loading t={t}/></AppShell>;
   return <AppShell lang={lang} change={change} t={t}><PageHeading eyebrow={t('eyWorkspace')} title={t('welcome')} description={t('pending')} action={<Link href="/projects/new" className="button button-primary"><Plus size={17}/>{t('newProject')}</Link>}/>
-    {isError ? <ErrorNotice t={t} retry={() => refetch()}/> : projects?.length ? <div className="dashboard-grid"><section className="project-list-area"><div className="section-head"><div><div className="eyebrow">{t('active')}</div><h2>{t('projects')}</h2></div><span className="count-chip">{projects.length.toString().padStart(2,'0')}</span></div>{projects.map((project, i) => <ProjectCard key={project.id} project={project} lang={lang} t={t} index={i}/>)}</section>
+    {isError ? <ErrorNotice t={t} retry={() => refetch()}/> : projects?.length ? <div className="dashboard-grid"><section className="project-list-area"><div className="section-head"><div><div className="eyebrow">{t('projects')}</div><h2>{t('projects')}</h2></div><span className="count-chip">{projects.length.toString().padStart(2,'0')}</span></div>{projects.map((project, i) => <ProjectCard key={project.id} project={project} lang={lang} t={t} index={i}/>)}</section>
       <aside className="dashboard-aside"><div className="aside-panel"><div className="eyebrow">{t('actions')}</div><h3>{t('pending')}</h3>{projects.slice(0,2).map((p, i) => <Link href={`/projects/${p.id}`} className="action-link" key={p.id}><span className={`action-icon action-icon-${i}`}><ClipboardCheck size={16}/></span><span><strong>{p.name}</strong><small>{roleLabel(p.participantRole,t)} · {p.city}</small></span><ArrowUpRight size={14}/></Link>)}<div className="aside-foot"><ShieldCheck size={15}/>{t('disclaimer')}</div></div><div className="aside-stat"><span className="eyebrow">{t('history')}</span><strong>{projects.length} <small>{t('projects').toLowerCase()}</small></strong><span>{t('trust')}</span></div></aside>
     </div> : <div className="empty-projects"><div className="empty-illustration"><div className="empty-window"><div/><div/><div/></div><DoorOpen size={36}/></div><span className="eyebrow">{t('active')}</span><h2 className="font-display">{t('noProjects')}</h2><p>{t('noProjectsText')}</p><Link href="/projects/new" className="button button-primary"><Plus size={17}/>{t('createFirst')}</Link></div>}
   </AppShell>;
@@ -222,9 +238,18 @@ function InvitationPage({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TK
   const accept=useAcceptInvitation();const [,setLocation]=useLocation();const token=new URLSearchParams(window.location.search).get('token')||'';const [typed,setTyped]=useState(token);
   return <Protected t={t}><AppShell lang={lang} change={change} t={t}><div className="invite-page"><div className="invite-mark"><FileCheck2 size={25}/></div><div className="eyebrow">{t('eyAccess')}</div><h1 className="font-display">{t('acceptInvite')}</h1><p>{t('trust')}</p><form onSubmit={e=>{e.preventDefault();accept.mutate({data:{token:typed}},{onSuccess:()=>{setLocation('/dashboard');}});}}><Field label={t('invitationToken')} name="invite-token" required value={typed} onChange={setTyped}/><Button type="submit" disabled={accept.isPending}>{t('accept')}<ArrowRight size={15}/></Button></form>{accept.isError&&<p className="form-error">{t('error')}</p>}</div></AppShell></Protected>;
 }
-function authCopy() { return copy[((localStorage.getItem('tehvil-language') as Lang) || 'az')]; }
-function SignInPage() { const c=authCopy(); return <div className="auth-page"><div className="auth-side"><Brand/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>BAKI · PROJECT SPACE</span></div><div className="auth-form-side"><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`}/></div></div>; }
-function SignUpPage() { const c=authCopy(); return <div className="auth-page"><div className="auth-side"><Brand/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>BAKI · PROJECT SPACE</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`}/></div></div>; }
+function authCopy(lang: Lang) { return copy[lang]; }
+function AuthTools({lang,change}:{lang:Lang;change:(v:Lang)=>void}) { return <div className="auth-tools"><ThemeToggle lang={lang}/><LanguagePicker lang={lang} change={change}/></div>; }
+function AuthPage({lang,change,signup}:{lang:Lang;change:(v:Lang)=>void;signup:boolean}) {
+  const c=authCopy(lang);
+  return <><div className="auth-page"><div className="auth-side"><Brand/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>{uiT(lang,'authWorkspace')}</span></div>
+    <div className="auth-form-side"><AuthTools lang={lang} change={change}/><div className="auth-widget"><div className="auth-widget-brand"><Brand/></div>
+      {signup ? <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`}/> : <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`}/>}
+      <p className="auth-switch-link">{uiT(lang,signup?'authAlreadyAccount':'authNoAccount')} <Link href={signup?'/sign-in':'/sign-up'}>{signup?c.signIn:c.signUp}</Link></p>
+    </div></div></div><SiteFooter lang={lang}/></>;
+}
+function SignInPage(props:{lang:Lang;change:(v:Lang)=>void}) { return <AuthPage {...props} signup={false}/>; }
+function SignUpPage(props:{lang:Lang;change:(v:Lang)=>void}) { return <AuthPage {...props} signup/>; }
 function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/dashboard"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
 function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   const [msg, setMsg] = useState<FeedbackMsg | null>(null);
@@ -232,7 +257,8 @@ function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   useEffect(() => { if (!msg) return; const timer = window.setTimeout(() => setMsg(null), 7000); return () => window.clearTimeout(timer); }, [msg]);
   if (!msg) return null;
   const key = (msg.key ?? (msg.status === 401 ? 'errAuth' : msg.status === 403 ? 'errForbidden' : msg.status && msg.status < 500 ? 'errState' : 'error')) as TKey;
-  return <div className="feedback-banner" role="alert" data-testid="feedback-banner"><div><strong>{t('errTitle')}</strong>{t(key)}{msg.detail && <small>{msg.detail}</small>}</div><button className="icon-button" aria-label={t('dismiss')} onClick={() => setMsg(null)}><X size={14} /></button></div>;
+  const detail = apiErrorText(msg.detail, t);
+  return <div className="feedback-banner" role="alert" data-testid="feedback-banner"><div><strong>{t('errTitle')}</strong>{t(key)}{detail && <small>{detail}</small>}</div><button className="icon-button" aria-label={t('dismiss')} onClick={() => setMsg(null)}><X size={14} /></button></div>;
 }
 function ClerkCacheInvalidator() {
   const {addListener}=useClerk();const qc=useQueryClient();
@@ -243,30 +269,32 @@ function ClerkRoutes() {
   const [,setLocation]=useLocation();
   const {lang,change:changeLang}=useLanguage();
   const t=(key:TKey):any=>copy[lang][key];
+  const {theme}=useTheme();
   return <ClerkProvider publishableKey={clerkPubKey} proxyUrl={clerkProxyUrl} signInUrl={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`}
-    appearance={{theme:shadcn,cssLayerName:'clerk',options:{logoPlacement:'inside',logoLinkUrl:basePath||'/',logoImageUrl:`${window.location.origin}${basePath}/logo.svg`},variables:{colorPrimary:'#24483f',colorForeground:'#213a34',colorMutedForeground:'#6b7b73',colorDanger:'#a9433d',colorBackground:'#fbf9f4',colorInput:'#fffdf9',colorInputForeground:'#213a34',colorNeutral:'#d8d5ca',fontFamily:'DM Sans, sans-serif',borderRadius:'1rem'},elements:{rootBox:'w-full flex justify-center',cardBox:'bg-[#fbf9f4] rounded-2xl w-[440px] max-w-full overflow-hidden border border-[#e5e0d5]',card:'!shadow-none !border-0 !bg-transparent !rounded-none',footer:'!shadow-none !border-0 !bg-transparent !rounded-none',headerTitle:'text-[#213a34] font-semibold',headerSubtitle:'text-[#66766f]',socialButtonsBlockButtonText:'text-[#213a34]',formFieldLabel:'text-[#344b43]',footerActionLink:'text-[#24483f] font-semibold',footerActionText:'text-[#66766f]',dividerText:'text-[#758078]',identityPreviewEditButton:'text-[#24483f]',formFieldSuccessText:'text-[#24483f]',alertText:'text-[#a9433d]',logoBox:'mb-3',logoImage:'max-h-10',socialButtonsBlockButton:'border-[#d8d5ca] bg-[#fffdf9] rounded-xl',formButtonPrimary:'bg-[#24483f] hover:bg-[#1b3932] rounded-xl',formFieldInput:'bg-[#fffdf9] border-[#d8d5ca] rounded-xl text-[#213a34]',footerAction:'border-0',dividerLine:'bg-[#e5e0d5]',alert:'bg-[#f6e8e4] border-[#ecd1cb]',otpCodeFieldInput:'border-[#d8d5ca] rounded-lg',formFieldRow:'mb-4',main:'gap-4'}}}
-    localization={{signIn:{start:{title:'Layihənizə qayıdın',subtitle:'Daxil olun və işin gedişini izləyin'}},signUp:{start:{title:'Təhvil hesabı yaradın',subtitle:'Layihəniz üçün ortaq, aydın qeyd sahəsi'}}}}
+    appearance={makeClerkAppearance(theme)}
+    localization={clerkLocalization(lang)}
     routerPush={to=>setLocation(stripBase(to))} routerReplace={to=>setLocation(stripBase(to),{replace:true})}>
     <QueryClientProvider client={queryClient}><ClerkCacheInvalidator/><Switch>
-      <Route path="/share/:token" component={()=> <SharedPassportPage token={window.location.pathname.split('/').filter(Boolean).pop()||''} lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/" component={()=> <HomeRedirect lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/sign-in/*?" component={SignInPage}/><Route path="/sign-up/*?" component={SignUpPage}/>
-      <Route path="/dashboard" component={()=> <DashboardPage lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/projects/new" component={()=> <NewRoute lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/projects/:projectId/scope" component={()=> <ProjectRoute section="scope" lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/projects/:projectId/changes" component={()=> <ProjectRoute section="changes" lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/projects/:projectId/milestones" component={()=> <ProjectRoute section="milestones" lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/projects/:projectId/payments" component={()=> <ProjectRoute section="payments" lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/projects/:projectId/timeline" component={()=> <ProjectRoute section="timeline" lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/projects/:projectId/passport" component={()=> <ProjectRoute section="passport" lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/projects/:projectId" component={()=> <ProjectRoute lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/invites/accept" component={()=> <InvitationPage lang={lang} change={changeLang} t={t}/>}/>
-      <Route component={NotFound}/>
+      <Route path="/share/:token"><SharedPassportPage token={window.location.pathname.split('/').filter(Boolean).pop()||''} lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/"><HomeRedirect lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/sign-in/*?"><SignInPage lang={lang} change={changeLang}/></Route>
+      <Route path="/sign-up/*?"><SignUpPage lang={lang} change={changeLang}/></Route>
+      <Route path="/dashboard"><DashboardPage lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/projects/new"><NewRoute lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/projects/:projectId/scope"><ProjectRoute section="scope" lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/projects/:projectId/changes"><ProjectRoute section="changes" lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/projects/:projectId/milestones"><ProjectRoute section="milestones" lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/projects/:projectId/payments"><ProjectRoute section="payments" lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/projects/:projectId/timeline"><ProjectRoute section="timeline" lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/projects/:projectId/passport"><ProjectRoute section="passport" lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/projects/:projectId"><ProjectRoute lang={lang} change={changeLang} t={t}/></Route>
+      <Route path="/invites/accept"><InvitationPage lang={lang} change={changeLang} t={t}/></Route>
+      <Route><NotFound lang={lang}/></Route>
     </Switch><Toaster/><FeedbackBanner t={t}/></QueryClientProvider>
   </ClerkProvider>;
 }
 function App() {
-  return <ErrorBoundary><TooltipProvider><WouterRouter base={basePath}><ClerkRoutes/></WouterRouter></TooltipProvider></ErrorBoundary>;
+  return <ErrorBoundary><ThemeProvider><TooltipProvider><WouterRouter base={basePath}><ClerkRoutes/></WouterRouter></TooltipProvider></ThemeProvider></ErrorBoundary>;
 }
 
 export default App;

@@ -1,0 +1,523 @@
+{
+  "locale": "az-AZ",
+  "actionBlocked": {
+    "subtitle": "Təhlükəsizliyiniz üçün bu sorğu tamamlanmadı.",
+    "title": "Bu sorğunu tamamlaya bilmədik",
+    "traceIdLabel": "İstinad"
+  },
+  "backButton": "Geri",
+  "badge__activePlan": "Aktiv",
+  "badge__banned": "Qadağan edilib",
+  "badge__canceledEndsAt": "Ləğv edildi • Bitir {{ date | shortDate('en-US') }}",
+  "badge__currentPlan": "Cari plan",
+  "badge__default": "Varsayılan",
+  "badge__deprovisioned": "Təminatı dayandırılıb",
+  "badge__endsAt": "Bitir {{ date | shortDate('en-US') }}",
+  "badge__expired": "Müddəti bitib",
+  "badge__freeTrial": "Pulsuz sınaq",
+  "badge__otherImpersonatorDevice": "Digər təqlidçi cihaz",
+  "badge__pastDueAt": "Gecikmə {{ date | shortDate('en-US') }}",
+  "badge__pastDuePlan": "Gecikmiş",
+  "badge__primary": "Əsas",
+  "badge__renewsAt": "Yenilənir {{ date | shortDate('en-US') }}",
+  "badge__requiresAction": "Hərəkət tələb olunur",
+  "badge__startsAt": "Başlayır {{ date | shortDate('en-US') }}",
+  "badge__thisDevice": "Bu cihaz",
+  "badge__trialEndsAt": "Sınaq müddəti bitir {{ date | shortDate('en-US') }}",
+  "badge__unverified": "Təsdiqlənməyib",
+  "badge__upcomingPlan": "Qarşıdan gələn",
+  "badge__userDevice": "İstifadəçi cihazı",
+  "badge__you": "Siz",
+  "dates": {
+    "lastDay": "Dünən, saat {{ date | timeString('en-US') }}",
+    "next6Days": "{{ date | weekday('en-US','long') }}, saat {{ date | timeString('en-US') }}",
+    "nextDay": "Sabah, saat {{ date | timeString('en-US') }}",
+    "numeric": "{{ date | numeric('en-US') }}",
+    "previous6Days": "Keçən {{ date | weekday('en-US','long') }}, saat {{ date | timeString('en-US') }}",
+    "sameDay": "Bu gün, saat {{ date | timeString('en-US') }}"
+  },
+  "dividerText": "və ya",
+  "footerActionLink__alternativePhoneCodeProvider": "Kodu əvəzində SMS ilə göndər",
+  "footerActionLink__useAnotherMethod": "Başqa üsuldan istifadə et",
+  "footerPageLink__help": "Kömək",
+  "footerPageLink__privacy": "Məxfilik",
+  "footerPageLink__terms": "Şərtlər",
+  "formButtonPrimary": "Davam et",
+  "formButtonPrimary__verify": "Təsdiqlə",
+  "formFieldAction__forgotPassword": "Şifrəni unutmusunuz?",
+  "formFieldAction__hidePassword": "Şifrəni gizlət",
+  "formFieldAction__showPassword": "Şifrəni göstər",
+  "formFieldError__matchingPasswords": "Şifrələr uyğundur.",
+  "formFieldError__notMatchingPasswords": "Şifrələr uyğun deyil.",
+  "formFieldError__verificationLinkExpired": "Təsdiqləmə linkinin müddəti bitib. Xahiş edirik, yeni link tələb edin.",
+  "formFieldHintText__optional": "İstəyə bağlı",
+  "formFieldHintText__slug": "Slug insan tərəfindən oxuna bilən və unikal ID-dir. Tez-tez URL-lərdə istifadə olunur.",
+  "formFieldInputPlaceholder__apiKeyDescription": "Bu açarı niyə yaratdığınızı izah edin",
+  "formFieldInputPlaceholder__apiKeyExpirationDate": "Tarix seçin",
+  "formFieldInputPlaceholder__apiKeyName": "Gizli açarınızın adını daxil edin",
+  "formFieldInputPlaceholder__backupCode": "Ehtiyat kodunu daxil edin",
+  "formFieldInputPlaceholder__confirmDeletionUserAccount": "Hesabı sil",
+  "formFieldInputPlaceholder__emailAddress": "E-poçt ünvanınızı daxil edin",
+  "formFieldInputPlaceholder__emailAddress_username": "E-poçt və ya istifadəçi adını daxil edin",
+  "formFieldInputPlaceholder__emailAddresses": "example@email.com, example2@email.com",
+  "formFieldInputPlaceholder__firstName": "Ad",
+  "formFieldInputPlaceholder__lastName": "Soyad",
+  "formFieldInputPlaceholder__organizationDomain": "example.com",
+  "formFieldInputPlaceholder__organizationDomainEmailAddress": "you@example.com",
+  "formFieldInputPlaceholder__organizationName": "Təşkilatın adı",
+  "formFieldInputPlaceholder__organizationSlug": "my-org",
+  "formFieldInputPlaceholder__password": "Şifrənizi daxil edin",
+  "formFieldInputPlaceholder__phoneNumber": "Telefon nömrənizi daxil edin",
+  "formFieldInputPlaceholder__signUpPassword": "Şifrə yaradın",
+  "formFieldInputPlaceholder__username": "İstifadəçi adınızı daxil edin",
+  "formFieldInput__emailAddress_format": "Nümunə formatı: name@example.com",
+  "formFieldLabel__apiKey": "API açarı",
+  "formFieldLabel__apiKeyDescription": "Təsvir",
+  "formFieldLabel__apiKeyExpiration": "Müddət",
+  "formFieldLabel__apiKeyName": "Gizli açar adı",
+  "formFieldLabel__automaticInvitations": "Bu domen üçün avtomatik dəvətləri aktivləşdirin",
+  "formFieldLabel__backupCode": "Ehtiyat kodu",
+  "formFieldLabel__confirmDeletion": "Təsdiqləmə",
+  "formFieldLabel__confirmPassword": "Şifrəni təsdiqləyin",
+  "formFieldLabel__currentPassword": "Cari şifrə",
+  "formFieldLabel__emailAddress": "E-poçt ünvanı",
+  "formFieldLabel__emailAddress_username": "E-poçt ünvanı və ya istifadəçi adı",
+  "formFieldLabel__emailAddresses": "E-poçt ünvanları",
+  "formFieldLabel__firstName": "Ad",
+  "formFieldLabel__lastName": "Soyad",
+  "formFieldLabel__newPassword": "Yeni şifrə",
+  "formFieldLabel__organizationDomain": "Domen",
+  "formFieldLabel__organizationDomainDeletePending": "Gözlənilən dəvətləri və təklifləri silin",
+  "formFieldLabel__organizationDomainEmailAddress": "Təsdiq üçün e-poçt ünvanı",
+  "formFieldLabel__organizationDomainEmailAddressDescription": "Kodu almaq və bu domeni təsdiqləmək üçün həmin domenə aid bir e-poçt ünvanı daxil edin.",
+  "formFieldLabel__organizationName": "Ad",
+  "formFieldLabel__organizationSlug": "Slug",
+  "formFieldLabel__passkeyName": "Passkey-in adı",
+  "formFieldLabel__password": "Şifrə",
+  "formFieldLabel__phoneNumber": "Telefon nömrəsi",
+  "formFieldLabel__role": "Rol",
+  "formFieldLabel__signOutOfOtherSessions": "Bütün digər cihazlardan çıxış edin",
+  "formFieldLabel__username": "İstifadəçi adı",
+  "identityPreviewEditButton__emailAddress": "E-poçt ünvanını redaktə et",
+  "identityPreviewEditButton__identifier": "İdentifikatoru redaktə et",
+  "identityPreviewEditButton__phoneNumber": "Telefon nömrəsini redaktə et",
+  "impersonationFab": {
+    "action__signOut": "Çıxış",
+    "title": "{{identifier}} kimi daxil olub"
+  },
+  "lastAuthenticationStrategy": "Sonuncu dəfə istifadə olunub",
+  "maintenanceMode": "Hazırda texniki baxış işləri aparırıq, narahat olmayın, bu bir neçə dəqiqədən çox çəkməyəcək.",
+  "membershipRole__admin": "İdarəçi",
+  "membershipRole__basicMember": "Üzv",
+  "membershipRole__guestMember": "Qonaq",
+  "paginationButton__next": "Növbəti",
+  "paginationButton__previous": "Əvvəlki",
+  "paginationRowText__displaying": "Göstərilir",
+  "paginationRowText__of": "cəmi",
+  "signIn": {
+    "accountSwitcher": {
+      "action__addAccount": "Hesab əlavə et",
+      "action__signOutAll": "Bütün hesablardan çıxış et",
+      "subtitle": "Davam etmək istədiyiniz hesabı seçin.",
+      "title": "Hesab seçin"
+    },
+    "alternativeMethods": {
+      "actionLink": "Kömək alın",
+      "actionText": "Bunlardan heç biri yoxdur?",
+      "blockButton__backupCode": "Ehtiyat kodundan istifadə et",
+      "blockButton__emailCode": "{{identifier}} ünvanına kod göndər",
+      "blockButton__emailLink": "{{identifier}} ünvanına keçid göndər",
+      "blockButton__passkey": "Passkey ilə daxil olun",
+      "blockButton__password": "Şifrə ilə daxil olun",
+      "blockButton__phoneCode": "{{identifier}} nömrəsinə SMS kodu göndər",
+      "blockButton__totp": "Doğrulama tətbiqinizdən istifadə edin",
+      "getHelp": {
+        "blockButton__emailSupport": "Dəstək xidmətinə e-poçt göndər",
+        "content": "Hesabınıza daxil olmaqda çətinlik çəkirsinizsə, bizə e-poçt göndərin və girişi bərpa etmək üçün ən qısa zamanda sizinlə işləyəcəyik.",
+        "title": "Kömək alın"
+      },
+      "subtitle": "Problem yaşayırsınız? Daxil olmaq üçün bu üsullardan istənilən birini istifadə edə bilərsiniz.",
+      "title": "Başqa üsul istifadə et"
+    },
+    "alternativePhoneCodeProvider": {
+      "formTitle": "Təsdiq kodu",
+      "resendButton": "Kod gəlmədi? Yenidən göndər",
+      "subtitle": "{{applicationName}} platformasına davam etmək üçün",
+      "title": "{{provider}} ünvanınızı yoxlayın"
+    },
+    "backupCodeMfa": {
+      "subtitle": "Ehtiyat kodunuz iki-mərhələli doğrulamanı qurarkən aldığınız koddur.",
+      "title": "Ehtiyat kodunu daxil edin"
+    },
+    "emailCode": {
+      "formTitle": "Təsdiq kodu",
+      "resendButton": "Kod gəlmədi? Yenidən göndər",
+      "subtitle": "{{applicationName}} platformasına davam etmək üçün",
+      "title": "E-poçtunuzu yoxlayın"
+    },
+    "emailCodeMfa": {
+      "formTitle": "E-poçtunuzu yoxlayın",
+      "resendButton": "Kod gəlmədi? Yenidən göndər",
+      "subtitle": "{{applicationName}} platformasına davam etmək üçün",
+      "title": "E-poçtunuzu yoxlayın"
+    },
+    "emailLink": {
+      "clientMismatch": {
+        "subtitle": "Davam etmək üçün təsdiq keçidini daxil olmağa başladığınız cihazda və brauzerdə açın",
+        "title": "Təsdiq keçidi bu cihaz üçün etibarsızdır"
+      },
+      "expired": {
+        "subtitle": "Davam etmək üçün orijinal sekməyə qayıdın.",
+        "title": "Bu təsdiq keçidinin vaxtı bitib"
+      },
+      "failed": {
+        "subtitle": "Davam etmək üçün orijinal sekməyə qayıdın.",
+        "title": "Bu təsdiq keçidi etibarsızdır"
+      },
+      "formSubtitle": "E-poçtunuza göndərilən təsdiq keçidindən istifadə edin",
+      "formTitle": "Təsdiq keçidi",
+      "loading": {
+        "subtitle": "Tezliklə yönləndiriləcəksiniz",
+        "title": "Daxil olunur..."
+      },
+      "resendButton": "Keçid gəlmədi? Yenidən göndər",
+      "subtitle": "{{applicationName}} platformasına davam etmək üçün",
+      "title": "E-poçtunuzu yoxlayın",
+      "unusedTab": {
+        "title": "Bu sekməni bağlaya bilərsiniz"
+      },
+      "verified": {
+        "subtitle": "Tezliklə yönləndiriləcəksiniz",
+        "title": "Uğurla daxil oldunuz"
+      },
+      "verifiedSwitchTab": {
+        "subtitle": "Davam etmək üçün orijinal sekməyə qayıdın",
+        "subtitleNewTab": "Davam etmək üçün yeni açılan sekməyə qayıdın",
+        "titleNewTab": "Başqa sekmədə daxil olundu"
+      },
+      "verifiedTransferable": {
+        "subtitle": "Davam etmək üçün orijinal sekməyə qayıdın",
+        "title": "E-poçt təsdiqləndi"
+      }
+    },
+    "emailLinkMfa": {
+      "formSubtitle": "E-poçtunuza göndərilən təsdiq linkindən istifadə edin",
+      "resendButton": "Link almadınız? Yenidən göndər",
+      "subtitle": "{{applicationName}} davam etmək üçün",
+      "title": "E-poçtunuzu yoxlayın"
+    },
+    "enterpriseConnections": {
+      "subtitle": "Davam etmək üçün korporativ hesab seçin.",
+      "title": "Hesab seçin"
+    },
+    "enterpriseSSO": {
+      "formButtonPrimary": "SSO ilə davam et"
+    },
+    "forgotPassword": {
+      "formTitle": "Şifrə sıfırlama kodu",
+      "resendButton": "Kod almadınız? Yenidən göndər",
+      "subtitle": "şifrənizi sıfırlamaq üçün",
+      "subtitle_email": "Əvvəlcə, e-poçt ünvanınıza göndərilən kodu daxil edin",
+      "subtitle_phone": "Əvvəlcə, telefonunuza göndərilən kodu daxil edin",
+      "title": "Şifrəni sıfırla"
+    },
+    "forgotPasswordAlternativeMethods": {
+      "blockButton__resetPassword": "Şifrənizi sıfırlayın",
+      "label__alternativeMethods": "Və ya başqa üsulla daxil olun",
+      "title": "Şifrəni unutmusunuz?"
+    },
+    "newDeviceVerificationNotice": "Yeni cihazdan daxil olursunuz. Hesabınızı qorumaq üçün yoxlama tələb edirik.",
+    "noAvailableMethods": {
+      "message": "Daxil ola bilmirsiniz. Mövcud identifikasiya faktoru yoxdur.",
+      "subtitle": "Xəta baş verdi",
+      "title": "Daxil olmaq mümkün deyil"
+    },
+    "passkey": {
+      "subtitle": "Keçid açarından (passkey) istifadə sizin olduğunuzu təsdiqləyir. Cihazınız barmaq izi, üz tanıma və ya ekran kilidini soruşa bilər.",
+      "title": "Keçid açarınızdan (passkey) istifadə edin"
+    },
+    "password": {
+      "actionLink": "Başqa üsuldan istifadə et",
+      "subtitle": "Hesabınızla əlaqəli şifrəni daxil edin",
+      "title": "Şifrənizi daxil edin"
+    },
+    "passwordCompromised": {
+      "title": "Şifrə təhlükə altındadır"
+    },
+    "passwordPwned": {
+      "title": "Şifrə təhlükə altındadır"
+    },
+    "passwordUntrusted": {
+      "title": "Şifrə etibarsızdır"
+    },
+    "phoneCode": {
+      "formTitle": "Təsdiqləmə kodu",
+      "resendButton": "Kod almadınız? Yenidən göndər",
+      "subtitle": "{{applicationName}} davam etmək üçün",
+      "title": "Telefonunuzu yoxlayın"
+    },
+    "phoneCodeMfa": {
+      "formTitle": "Təsdiqləmə kodu",
+      "resendButton": "Kod almadınız? Yenidən göndər",
+      "subtitle": "Davam etmək üçün zəhmət olmasa telefonunuza göndərilən təsdiq kodunu daxil edin",
+      "title": "Telefonunuzu yoxlayın"
+    },
+    "protectCheck": {
+      "loading": "Yüklənir...",
+      "retryButton": "Yenidən cəhd edin",
+      "subtitle": "Zəhmət olmasa, sorğunuzu doğrulayarkən gözləyin.",
+      "title": "Sorğunuz yoxlanılır"
+    },
+    "resetPassword": {
+      "formButtonPrimary": "Şifrəni sıfırla",
+      "requiredMessage": "Təhlükəsizlik səbəbi ilə şifrənizi sıfırlamağınız tələb olunur.",
+      "successMessage": "Şifrəniz uğurla dəyişdirildi. Daxil olursunuz, zəhmət olmasa gözləyin.",
+      "title": "Yeni şifrə təyin edin"
+    },
+    "resetPasswordMfa": {
+      "detailsLabel": "Şifrəni sıfırlamazdan əvvəl şəxsiyyətinizi təsdiqləməliyik."
+    },
+    "ssoBypass": {
+      "actionLink": "SSO istifadə edə bilmirsiniz?",
+      "code": {
+        "resendButton": "Kod almadınız? Yenidən göndər",
+        "subtitle": "{{applicationName}} davam etmək üçün",
+        "title": "E-poçtunuzu yoxlayın"
+      },
+      "notice": "Təşkilatınız vahid giriş (SSO) tələb edir. Onsuz davam etmək qeydə alınır."
+    },
+    "start": {
+      "actionLink": "Qeydiyyatdan keç",
+      "actionLink__join_waitlist": "Gözləmə siyahısına qoşul",
+      "actionLink__use_email": "E-poçtdan istifadə et",
+      "actionLink__use_email_username": "E-poçt və ya istifadəçi adı ilə daxil ol",
+      "actionLink__use_passkey": "Əvəzinə keçid açarından (passkey) istifadə et",
+      "actionLink__use_phone": "Telefondan istifadə et",
+      "actionLink__use_username": "İstifadəçi adı ilə daxil ol",
+      "actionText": "Hesabınız yoxdur?",
+      "actionText__join_waitlist": "İlkin giriş əldə etmək istəyirsiniz?",
+      "alternativePhoneCodeProvider": {
+        "actionLink": "Başqa üsuldan istifadə et",
+        "label": "{{provider}} telefon nömrəsi",
+        "subtitle": "{{provider}} üzərindən təsdiq kodu almaq üçün telefon nömrənizi daxil edin.",
+        "title": "{{provider}} ilə {{applicationName}} daxil olun"
+      },
+      "subtitle": "Yenidən xoş gəlmisiniz! Davam etmək üçün daxil olun",
+      "title": "{{applicationName}} daxil olun",
+      "titleCombined": "{{applicationName}} davam et"
+    },
+    "totpMfa": {
+      "formTitle": "Təsdiqləmə kodu",
+      "subtitle": "Davam etmək üçün zəhmət olmasa authenticator tətbiqiniz tərəfindən yaradılan təsdiq kodunu daxil edin",
+      "title": "İki addımlı təsdiq"
+    },
+    "web3Solana": {
+      "subtitle": "Daxil olmaq üçün aşağıdan pulqabı seçin",
+      "title": "Solana ilə daxil olun"
+    }
+  },
+  "signInEnterPasswordTitle": "Şifrənizi daxil edin",
+  "signUp": {
+    "alternativePhoneCodeProvider": {
+      "resendButton": "Kod almadınız? Yenidən göndər",
+      "subtitle": "{{provider}} ünvanınıza göndərilən təsdiq kodunu daxil edin",
+      "title": "{{provider}} yoxlayın"
+    },
+    "continue": {
+      "actionLink": "Daxil olun",
+      "actionText": "Artıq hesabınız var?",
+      "subtitle": "Davam etmək üçün qalan detalları doldurun.",
+      "title": "Çatışmayan sahələri doldurun"
+    },
+    "emailCode": {
+      "formSubtitle": "E-poçt ünvanınıza göndərilən təsdiq kodunu daxil edin",
+      "formTitle": "Təsdiq kodu",
+      "resendButton": "Kod gəlmədi? Yenidən göndər",
+      "subtitle": "E-poçtunuza göndərilən təsdiq kodunu daxil edin",
+      "title": "E-poçtunuzu təsdiqləyin"
+    },
+    "emailLink": {
+      "clientMismatch": {
+        "subtitle": "Davam etmək üçün qeydiyyata başladığınız cihazda və brauzerdə təsdiq keçidini açın",
+        "title": "Təsdiq keçidi bu cihaz üçün etibarsızdır"
+      },
+      "formSubtitle": "E-poçt ünvanınıza göndərilən təsdiq keçidindən istifadə edin",
+      "formTitle": "Təsdiq keçidi",
+      "loading": {
+        "title": "Qeydiyyatdan keçilir..."
+      },
+      "resendButton": "Keçid gəlmədi? Yenidən göndər",
+      "subtitle": "{{applicationName}} platformasına davam etmək üçün",
+      "title": "E-poçtunuzu təsdiqləyin",
+      "verified": {
+        "title": "Uğurla qeydiyyatdan keçdiniz"
+      },
+      "verifiedSwitchTab": {
+        "subtitle": "Davam etmək üçün yeni açılmış taba qayıdın",
+        "subtitleNewTab": "Davam etmək üçün əvvəlki taba qayıdın",
+        "title": "E-poçt uğurla təsdiqləndi"
+      }
+    },
+    "enterpriseConnections": {
+      "subtitle": "Davam etmək üçün korporativ hesab seçin.",
+      "title": "Hesab seçin"
+    },
+    "legalConsent": {
+      "checkbox": {
+        "label__onlyPrivacyPolicy": "{{ privacyPolicyLink || link(\"Məxfilik Siyasəti\") }} ilə razıyam",
+        "label__onlyTermsOfService": "{{ termsOfServiceLink || link(\"Xidmət Şərtləri\") }} ilə razıyam",
+        "label__termsOfServiceAndPrivacyPolicy": "{{ termsOfServiceLink || link(\"Xidmət Şərtləri\") }} və {{ privacyPolicyLink || link(\"Məxfilik Siyasəti\") }} ilə razıyam"
+      },
+      "continue": {
+        "subtitle": "Davam etmək üçün şərtləri oxuyun və qəbul edin",
+        "title": "Hüquqi razılıq"
+      }
+    },
+    "phoneCode": {
+      "formSubtitle": "Telefon nömrənizə göndərilən təsdiq kodunu daxil edin",
+      "formTitle": "Təsdiq kodu",
+      "resendButton": "Kod gəlmədi? Yenidən göndər",
+      "subtitle": "Telefonunuza göndərilən təsdiq kodunu daxil edin",
+      "title": "Telefonunuzu təsdiqləyin"
+    },
+    "protectCheck": {
+      "loading": "Yüklənir...",
+      "retryButton": "Yenidən cəhd et",
+      "subtitle": "Zəhmət olmasa, sorğunuz təsdiqlənənə qədər gözləyin.",
+      "title": "Sorğunuz təsdiqlənir"
+    },
+    "restrictedAccess": {
+      "actionLink": "Daxil olun",
+      "actionText": "Artıq hesabınız var?",
+      "blockButton__emailSupport": "Dəstək xidmətinə yazın",
+      "blockButton__joinWaitlist": "Gözləmə siyahısına qoşulun",
+      "subtitle": "Qeydiyyat hazırda deaktiv edilib. Giriş hüququnuzun olduğunu düşünürsünüzsə, dəstək xidməti ilə əlaqə saxlayın.",
+      "subtitleWaitlist": "Qeydiyyat hazırda deaktiv edilib. Başlanğıc zamanı ilk xəbərdar olanlardan biri olmaq üçün gözləmə siyahısına qoşulun.",
+      "title": "Giriş məhdudlaşdırılıb"
+    },
+    "start": {
+      "actionLink": "Daxil olun",
+      "actionLink__use_email": "Əvəzinə e-poçtdan istifadə edin",
+      "actionLink__use_phone": "Əvəzinə telefondan istifadə edin",
+      "actionText": "Artıq hesabınız var?",
+      "alternativePhoneCodeProvider": {
+        "actionLink": "Başqa üsuldan istifadə edin",
+        "label": "{{provider}} telefon nömrəsi",
+        "subtitle": "{{provider}} vasitəsilə təsdiq kodu almaq üçün telefon nömrənizi daxil edin.",
+        "title": "{{provider}} ilə {{applicationName}} platformasında qeydiyyatdan keçin"
+      },
+      "subtitle": "Xoş gəlmisiniz! Başlamaq üçün məlumatları daxil edin.",
+      "subtitleCombined": "Xoş gəlmisiniz! Başlamaq üçün məlumatları daxil edin.",
+      "title": "Hesab yaradın",
+      "titleCombined": "Hesab yaradın"
+    },
+    "web3Solana": {
+      "subtitle": "Qeydiyyatdan keçmək üçün aşağıdan cüzdan seçin",
+      "title": "Solana ilə qeydiyyatdan keçin"
+    }
+  },
+  "socialButtonsBlockButton": "{{provider|titleize}} ilə davam edin",
+  "socialButtonsBlockButtonManyInView": "{{provider|titleize}}",
+  "unstable__errors": {
+    "action_blocked": "Bu əməliyyat tamamlana bilmədi. Zəhmət olmasa daha sonra yenidən cəhd edin və ya problem davam edərsə, dəstək xidməti ilə əlaqə saxlayın.",
+    "already_a_member_in_organization": "{{email}} artıq təşkilatın üzvüdür.",
+    "api_key_name_already_exists": "API açarı adı artıq mövcuddur.",
+    "api_key_usage_exceeded": "İstifadə limitinizə çatdınız. Ödənişli plana keçərək limiti qaldıra bilərsiniz.",
+    "avatar_file_size_exceeded": "Fayl ölçüsü maksimum 10MB limitini aşır. Zəhmət olmasa daha kiçik bir fayl seçin.",
+    "avatar_file_type_invalid": "Fayl növü dəstəklənmir. Zəhmət olmasa JPG, PNG, GIF və ya WEBP formatında şəkil yükləyin.",
+    "captcha_unavailable": "Bot yoxlaması uğursuz olduğu üçün qeydiyyat alınmadı. Yenidən cəhd etmək üçün səhifəni yeniləyin və ya əlavə yardım üçün dəstək xidmətinə müraciət edin.",
+    "form_new_password_matches_current": "Yeni şifrə cari şifrə ilə eyni ola bilməz.",
+    "form_password_length_too_short": "Şifrəniz çox qısadır. Şifrə azı 8 simvoldan ibarət olmalıdır.",
+    "form_password_matches_identifier": "Şifrə sizin e-poçt ünvanınız, telefon nömrəniz və ya istifadəçi adınızla eyni ola bilməz. Hesab təhlükəsizliyi üçün fərqli bir şifrədən istifadə edin.",
+    "form_password_not_strong_enough": "Şifrəniz kifayət qədər güclü deyil.",
+    "form_password_pwned": "Bu şifrə məlumat sızmasında aşkar edilib və istifadə oluna bilməz, zəhmət olmasa başqa şifrədən istifadə edin.",
+    "form_password_pwned__sign_in": "Bu şifrə məlumat sızmasında aşkar edilib və istifadə oluna bilməz, zəhmət olmasa şifrənizi sıfırlayın.",
+    "form_password_untrusted__sign_in": "Şifrəniz təhlükə altında ola bilər. Hesabınızı qorumaq üçün alternativ giriş üsulu ilə davam edin. Daxil olduqdan sonra şifrənizi sıfırlamanız tələb olunacaq.",
+    "form_username_invalid_length": "İstifadəçi adınız {{min_length}} və {{max_length}} simvol arasında olmalıdır.",
+    "form_username_needs_non_number_char": "İstifadəçi adınız ən azı bir rəqəm olmayan simvol içərməlidir.",
+    "insufficient_seats_change_plan": "Təşkilatınızda üzvləri dəvət etmək üçün kifayət qədər yer yoxdur. Zəhmət olmasa dəvət etmək istədiyiniz üzv sayını dəstəkləyən plana keçin.",
+    "insufficient_seats_contact_support": "Təşkilatınızda üzvləri dəvət etmək üçün kifayət qədər yer yoxdur. Zəhmət olmasa dəstək xidməti ilə əlaqə saxlayın.",
+    "oauth_access_denied": "Hesabınıza giriş icazəsi vermədiniz.",
+    "organization_membership_quota_exceeded": "Təşkilat üzvlüyü limitinizə çatdınız (açıq dəvətlər də daxil olmaqla).",
+    "organization_not_found_or_unauthorized": "Artıq bu təşkilatın üzvü deyilsiniz. Zəhmət olmasa başqasını seçin və ya yaradın.",
+    "organization_not_found_or_unauthorized_with_create_organization_disabled": "Artıq bu təşkilatın üzvü deyilsiniz. Zəhmət olmasa başqasını seçin.",
+    "passkey_already_exists": "Bu cihazda artıq bir passkey qeydiyyatdan keçib.",
+    "passkey_not_supported": "Passkey-lər bu cihazda dəstəklənmir.",
+    "passkey_pa_not_supported": "Qeydiyyat platforma identifikasiyasını tələb edir, lakin cihaz bunu dəstəkləmir.",
+    "passkey_registration_cancelled": "Passkey qeydiyyatı ləğv edildi və ya vaxtı bitdi.",
+    "passkey_retrieval_cancelled": "Passkey yoxlanışı ləğv edildi və ya vaxtı bitdi.",
+    "passwordComplexity": {
+      "maximumLength": "{{length}} simvoldan az",
+      "minimumLength": "{{length}} və ya daha çox simvol",
+      "requireLowercase": "kiçik hərf",
+      "requireNumbers": "rəqəm",
+      "requireSpecialCharacter": "xüsusi simvol",
+      "requireUppercase": "böyük hərf",
+      "sentencePrefix": "Parolunuz aşağıdakıları ehtiva etməlidir"
+    },
+    "protect_check_execution_failed": "Yoxlama tamamlanmadı. Zəhmət olmasa yenidən cəhd edin.",
+    "protect_check_invalid_script": "Yoxlama yüklənə bilmədi. Problem davam edərsə, dəstək xidməti ilə əlaqə saxlayın.",
+    "protect_check_invalid_sdk_url": "Yoxlama başlada bilmədi. Zəhmət olmasa dəstək xidməti ilə əlaqə saxlayın.",
+    "protect_check_required": "Bu giriş burada göstərilə bilməyən əlavə bir yoxlama addımı tələb edir. Zəhmət olmasa yenidən cəhd edin və ya fərqli giriş üsulundan istifadə edin.",
+    "protect_check_script_load_failed": "Yoxlama yüklənə bilmədi. Bu, şəbəkə problemi və ya yoxlama skriptini bloklayan Məzmun Təhlükəsizliyi Siyasəti səbəbindən baş verə bilər. Zəhmət olmasa yenidən cəhd edin və ya dəstək xidməti ilə əlaqə saxlayın.",
+    "protect_check_timed_out": "Yoxlama vaxtında tamamlanmadı. Zəhmət olmasa yenidən cəhd edin.",
+    "protect_check_unsupported_environment": "Yoxlama bu mühitdə dəstəklənmir. Zəhmət olmasa standart brauzerdə davam edin və ya dəstək xidməti ilə əlaqə saxlayın.",
+    "sso_bypass_domain_not_served": "E-poçt ünvanı heç bir bağlantı tərəfindən xidmət olunmadığı üçün bu üzv əlavə edilə bilmədi.",
+    "ticket_expired_code": "Bu keçidin vaxtı bitib. Zəhmət olmasa yenidən başlayın və ya yeni keçid tələb edin.",
+    "ticket_invalid_code": "Bu keçid artıq etibarlı deyil və ya ondan istifadə olunub. Zəhmət olmasa yenidən başlayın və ya yeni keçid tələb edin.",
+    "too_many_unverified_identifications": "Bu hesabda çox sayda gözləyən yoxlama var. Ehtiyacınız olmayan təsdiqlənməmiş e-poçt ünvanını, telefon nömrəsini və ya pul kisəsini silin və ya natamam passkey quraşdırmasının müddətinin bitməsi üçün bir neçə dəqiqə gözləyin, sonra yenidən cəhd edin.",
+    "web3_missing_identifier": "Web3 pul kisəsi genişləndirməsi tapılmadı. Davam etmək üçün zəhmət olmasa birini quraşdırın.",
+    "web3_signature_request_rejected": "İmza sorğusunu rədd etdiniz. Davam etmək üçün zəhmət olmasa yenidən cəhd edin.",
+    "web3_solana_signature_generation_failed": "İmza yaradılarkən xəta baş verdi. Davam etmək üçün zəhmət olmasa yenidən cəhd edin.",
+    "zxcvbn": {
+      "couldBeStronger": "Parolunuz işləyir, lakin daha güclü ola bilər. Daha çox simvol əlavə etməyə çalışın.",
+      "goodPassword": "Parolunuz bütün zəruri tələblərə cavab verir.",
+      "notEnough": "Parolunuz kifayət qədər güclü deyil.",
+      "suggestions": {
+        "allUppercase": "Bəzi hərfləri böyük edin, amma hamısını deyil.",
+        "anotherWord": "Daha az yayılmış sözlər əlavə edin.",
+        "associatedYears": "Sizə aid olan illərdən istifadə etməyin.",
+        "capitalization": "Birinci hərfdən başqa hərfləri də böyük edin.",
+        "dates": "Sizə aid olan tarixlərdən və illərdən istifadə etməyin.",
+        "l33t": "'a' üçün '@' kimi proqnozlaşdırıla bilən hərf əvəzetmələrindən çəkinin.",
+        "longerKeyboardPattern": "Daha uzun klaviatura nümunələrindən istifadə edin və yazma istiqamətini bir neçə dəfə dəyişin.",
+        "noNeed": "Simvollardan, rəqəmlərdən və ya böyük hərflərdən istifadə etmədən güclü parollar yarada bilərsiniz.",
+        "pwned": "Bu parolu başqa yerdə istifadə edirsinizsə, onu dəyişməlisiniz.",
+        "recentYears": "Son illərdən istifadə etməyin.",
+        "repeated": "Təkrarlanan sözlərdən və simvollardan istifadə etməyin.",
+        "reverseWords": "Ümumi sözlərin tərsinə yazılışından istifadə etməyin.",
+        "sequences": "Ümumi simvol ardıcıllığından istifadə etməyin.",
+        "useWords": "Çoxlu sözlərdən istifadə edin, lakin ümumi ifadələrdən çəkinin."
+      },
+      "warnings": {
+        "common": "Bu, çox istifadə olunan bir paroldur.",
+        "commonNames": "Ümumi adlar və soyadları təxmin etmək asandır.",
+        "dates": "Tarixləri təxmin etmək asandır.",
+        "extendedRepeat": "\"abcabcabc\" kimi təkrarlanan simvol nümunələrini təxmin etmək asandır.",
+        "keyPattern": "Qısa klaviatura nümunələrini təxmin etmək asandır.",
+        "namesByThemselves": "Tək adları və ya soyadları təxmin etmək asandır.",
+        "pwned": "Parolunuz İnternetdəki məlumat sızması nəticəsində ifşa olunub.",
+        "recentYears": "Son illəri təxmin etmək asandır.",
+        "sequences": "\"abc\" kimi ümumi simvol ardıcıllığını təxmin etmək asandır.",
+        "similarToCommon": "Bu, çox istifadə olunan parola bənzəyir.",
+        "simpleRepeat": "\"aaa\" kimi təkrarlanan simvolları təxmin etmək asandır.",
+        "straightRow": "Klaviatura düymələrinin düz sıralarını təxmin etmək asandır.",
+        "topHundred": "Bu, tez-tez istifadə olunan bir paroldur.",
+        "topTen": "Bu, çox istifadə olunan bir paroldur.",
+        "userInputs": "Heç bir şəxsi və ya səhifə ilə əlaqəli məlumat olmamalıdır.",
+        "wordByItself": "Tək sözləri təxmin etmək asandır."
+      }
+    }
+  },
+  "userButton": {
+    "action__addAccount": "Hesab əlavə et",
+    "action__closeUserMenu": "İstifadəçi menyusunu bağla",
+    "action__manageAccount": "Hesabı idarə et",
+    "action__openUserMenu": "İstifadəçi menyusunu aç",
+    "action__signOut": "Çıxış et",
+    "action__signOutAll": "Bütün hesablardan çıxış et",
+    "label__accountActions": "Hesab əməliyyatları",
+    "label__activeSessions": "Aktiv sessiyalar",
+    "label__userButtonPopover": "Hesab paneli"
+  }
+}

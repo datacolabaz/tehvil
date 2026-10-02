@@ -168,6 +168,9 @@ importers:
       railway:
         specifier: ^3.12.0
         version: 3.12.0
+      tsx:
+        specifier: 4.23.13
+        version: 4.23.13
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -430,6 +433,9 @@ importers:
 
   artifacts/tehvil:
     dependencies:
+      '@clerk/localizations':
+        specifier: ^4.21.1
+        version: 4.21.1(react-dom@19.1.4(react@19.1.4))(react@19.1.4)
       '@clerk/react':
         specifier: ^6.17.4
         version: 6.17.4(react-dom@19.1.4(react@19.1.4))(react@19.1.4)
@@ -859,6 +865,10 @@ packages:
     engines: {node: '>=20.9.0'}
     peerDependencies:
       express: ^4.17.0 || ^5.0.0
+
+  '@clerk/localizations@4.21.1':
+    resolution: {integrity: sha512-SN/94kYGJa6MSiwlR0mjUhxrtQthYuZuCtvlBnAtN/H60hiLXk/kjw5TWfDMdLFqS8rYvhS3C22kNy0adLG3IQ==}
+    engines: {node: '>=20.9.0'}
 
   '@clerk/react@6.17.4':
     resolution: {integrity: sha512-rWpdpePDf7BrQQ+vN8yO4qeH6WxehHHa3rmg3+cxyLz/0Oy9bt8MrEDzvWnkUGZPQ4RYW5n64sytf8Ry0jGyUw==}
@@ -3896,6 +3906,13 @@ snapshots:
       '@clerk/shared': 4.37.1(react-dom@19.1.4(react@19.1.4))(react@19.1.4)
       express: 5.2.1
       tslib: 2.8.1
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
+  '@clerk/localizations@4.21.1(react-dom@19.1.4(react@19.1.4))(react@19.1.4)':
+    dependencies:
+      '@clerk/shared': 4.37.1(react-dom@19.1.4(react@19.1.4))(react@19.1.4)
     transitivePeerDependencies:
       - react
       - react-dom

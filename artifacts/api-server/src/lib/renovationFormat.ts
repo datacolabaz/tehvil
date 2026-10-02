@@ -68,7 +68,7 @@ export async function formatProject(
       milestoneRows.length === 0
         ? 0
         : Math.round((acceptedMilestones / milestoneRows.length) * 100),
-    status: project.status,
+    status: project.archived ? "archived" : project.status,
     scopeVersion: project.scopeVersion,
     scopeStatus: project.scopeStatus,
     archived: project.archived,

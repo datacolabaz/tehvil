@@ -48,7 +48,7 @@ export function FilePicker({ files, onChange, t, label, tip, camera = false, tes
   };
   return <div className="file-picker">
     <label className="upload-drop"><input ref={ref} data-testid={`input-${testId}`} type="file" accept="image/*,video/*,application/pdf" multiple onChange={e => add(e.target.files)} /><span className="upload-icon"><ImagePlus size={19} /></span><strong>{files.length ? `${files.length} ${t('evidenceReady')}` : label || t('attachEvidence')}</strong><small>{tip || t('evidenceTip')}</small></label>
-    {camera && <label className="button button-secondary camera-button"><input data-testid={`input-${testId}-camera`} type="file" accept="image/*" capture="environment" onChange={e => add(e.target.files)} hidden /><Camera size={15} />{t('attachEvidence').split(' ')[0]}</label>}
+    {camera && <label className="button button-secondary camera-button"><input data-testid={`input-${testId}-camera`} type="file" accept="image/*" capture="environment" onChange={e => add(e.target.files)} hidden /><Camera size={15} />{t('camera')}</label>}
     {files.length > 0 && <ul className="picked-files">{files.map((f, i) => <li key={`${f.name}-${i}`}><span>{f.name}</span><button type="button" className="icon-button" aria-label={t('dismiss')} onClick={() => onChange(files.filter((_, j) => j !== i))}><X size={14} /></button></li>)}</ul>}
   </div>;
 }

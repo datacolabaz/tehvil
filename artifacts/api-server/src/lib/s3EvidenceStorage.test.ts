@@ -25,8 +25,8 @@ before(async () => {
   const address = server.address() as { port: number };
   endpoint = `http://127.0.0.1:${address.port}`;
   Object.assign(process.env, {
-    BUCKET_ENDPOINT: endpoint, BUCKET_NAME: "test-bucket",
-    BUCKET_ACCESS_KEY_ID: "fixture-access", BUCKET_SECRET_ACCESS_KEY: "fixture-secret-not-a-real-key",
+    R2_ENDPOINT: endpoint, R2_BUCKET_NAME: "test-bucket", R2_REGION: "auto",
+    R2_ACCESS_KEY_ID: "fixture-access", R2_SECRET_ACCESS_KEY: "fixture-secret-not-a-real-key",
     BUCKET_FORCE_PATH_STYLE: "true",
   });
 });
@@ -52,11 +52,11 @@ test("normalization rejects foreign origins and traversal, and supports virtual-
   const id = "00000000-0000-4000-8000-000000000001";
   assert.throws(() => normalizeS3EvidencePath(`https://foreign.example/test-bucket/private/uploads/${id}`));
   assert.throws(() => normalizeS3EvidencePath(`/objects/uploads/../private`));
-  process.env.BUCKET_ENDPOINT = "https://storage.example.test";
+  process.env.R2_ENDPOINT = "https://storage.example.test";
   try {
     assert.equal(normalizeS3EvidencePath(`https://test-bucket.storage.example.test/private/uploads/${id}`), `/objects/uploads/${id}`);
     assert.equal(normalizeS3EvidencePath(`https://storage.example.test/test-bucket/private/uploads/${id}`), `/objects/uploads/${id}`);
-  } finally { process.env.BUCKET_ENDPOINT = endpoint; }
+  } finally { process.env.R2_ENDPOINT = endpoint; }
 });
 
 test("unuploaded and invalid objects cannot be attached as evidence", async () => {

@@ -4,20 +4,20 @@ import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from 
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 let client: S3Client | undefined;
-function required(name: string) {
-  const value = process.env[name];
+function required(name: string, legacy?: string) {
+  const value = process.env[name] || (legacy ? process.env[legacy] : undefined);
   if (!value) throw new Error(`Missing required storage configuration: ${name}`);
   return value;
 }
-function bucket() { return required("BUCKET_NAME"); }
+function bucket() { return required("R2_BUCKET_NAME", "BUCKET_NAME"); }
 function s3() {
   return client ??= new S3Client({
-    endpoint: required("BUCKET_ENDPOINT"),
-    region: process.env.BUCKET_REGION || "us-east-1",
+    endpoint: required("R2_ENDPOINT", "BUCKET_ENDPOINT"),
+    region: process.env.R2_REGION || process.env.BUCKET_REGION || (process.env.R2_ENDPOINT ? "auto" : "us-east-1"),
     forcePathStyle: process.env.BUCKET_FORCE_PATH_STYLE === "true",
     credentials: {
-      accessKeyId: required("BUCKET_ACCESS_KEY_ID"),
-      secretAccessKey: required("BUCKET_SECRET_ACCESS_KEY"),
+      accessKeyId: required("R2_ACCESS_KEY_ID", "BUCKET_ACCESS_KEY_ID"),
+      secretAccessKey: required("R2_SECRET_ACCESS_KEY", "BUCKET_SECRET_ACCESS_KEY"),
     },
     requestChecksumCalculation: "WHEN_REQUIRED",
   });
@@ -31,7 +31,7 @@ export async function createS3EvidenceUpload() {
 export function normalizeS3EvidencePath(raw: string) {
   if (/^\/objects\/uploads\/[a-f0-9-]{36}$/.test(raw)) return raw;
   const url = new URL(raw);
-  const endpoint = new URL(required("BUCKET_ENDPOINT"));
+  const endpoint = new URL(required("R2_ENDPOINT", "BUCKET_ENDPOINT"));
   const base = endpoint.pathname.replace(/\/$/, "");
   const path = decodeURIComponent(url.pathname);
   let key: string;

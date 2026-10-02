@@ -4,6 +4,8 @@ import {
   type ErrorInfo,
   type ReactNode,
 } from 'react';
+import { copy } from '@/lib/i18n';
+import { getLanguage } from '@/lib/language';
 
 export interface ErrorFallbackProps {
   error: Error;
@@ -36,15 +38,15 @@ function toError(value: unknown): Error {
 }
 
 function DefaultFallback({ error, resetError }: ErrorFallbackProps) {
+  const c = copy[getLanguage()];
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-6">
+    <div className="min-h-screen w-full flex items-center justify-center bg-background p-6">
       <div className="max-w-lg w-full text-center">
-        <h1 className="text-xl font-semibold text-gray-900">
-          Something went wrong
+        <h1 className="text-xl font-semibold text-foreground">
+          {c.crashTitle}
         </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          This part of the app hit an error. The rest of the app is still
-          running.
+        <p className="mt-2 text-sm text-muted-foreground">
+          {c.crashNote}
         </p>
         {/* Dev only: messages can carry API responses and other internals. */}
         {import.meta.env.DEV ? (
@@ -57,7 +59,7 @@ function DefaultFallback({ error, resetError }: ErrorFallbackProps) {
           onClick={resetError}
           className="mt-4 rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700"
         >
-          Try again
+          {c.retry}
         </button>
       </div>
     </div>
