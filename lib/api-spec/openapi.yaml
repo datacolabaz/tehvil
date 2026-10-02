@@ -1,0 +1,1100 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Təhvil renovation project coordination API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: projects
+    description: Renovation projects and dashboard
+  - name: scope
+    description: Rooms and agreed work scope
+  - name: changes
+    description: Change orders
+  - name: milestones
+    description: Handover and revision workflows
+  - name: payments
+    description: Manual payment tracking
+  - name: activity
+    description: Audit timeline, invitations, and passport
+  - name: storage
+    description: Private project evidence and document storage
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List projects available to the signed-in participant
+      responses:
+        "200":
+          description: Project list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a renovation project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /projects/{projectId}/archive:
+    post:
+      operationId: archiveProject
+      tags: [projects]
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Archived project
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+  /projects/{projectId}/scope/new-version:
+    post:
+      operationId: createScopeVersion
+      tags: [scope]
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: New editable version created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /projects/{projectId}/scope-items/{scopeItemId}:
+    put:
+      operationId: updateScopeItem
+      tags: [scope]
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+        - name: scopeItemId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScopeItemInput" }
+      responses:
+        "200":
+          description: Draft item updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScopeItem" }
+  /projects/{projectId}/passport/shares:
+    get:
+      operationId: listPassportShares
+      tags: [activity]
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Owner's share records, without secret tokens
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PassportShareRecord" }
+    post:
+      operationId: createPassportShare
+      tags: [activity]
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PassportShareInput" }
+      responses:
+        "201":
+          description: Expiring read-only share created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PassportShare" }
+  /projects/{projectId}/passport/shares/{shareId}:
+    delete:
+      operationId: revokePassportShare
+      tags: [activity]
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+        - name: shareId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Share revoked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /shared-passports/{token}:
+    get:
+      operationId: getSharedPassport
+      tags: [activity]
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string, minLength: 40, maxLength: 100 }
+      responses:
+        "200":
+          description: Sanitized read-only summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  passport: { $ref: "#/components/schemas/Passport" }
+                  includeFinancial: { type: boolean }
+                  expiresAt: { type: string, format: date-time }
+                required: [passport, includeFinancial, expiresAt]
+  /projects/{projectId}/dashboard:
+    get:
+      operationId: getProjectDashboard
+      tags: [projects]
+      summary: Get the project overview and action items
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Project dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /projects/{projectId}/rooms:
+    get:
+      operationId: listRooms
+      tags: [scope]
+      summary: List project rooms
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Project rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+    post:
+      operationId: createRoom
+      tags: [scope]
+      summary: Add a room or zone
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomInput"
+      responses:
+        "201":
+          description: Room created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+  /projects/{projectId}/scope-items:
+    get:
+      operationId: listScopeItems
+      tags: [scope]
+      summary: List included and excluded scope items
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Scope items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScopeItem"
+    post:
+      operationId: createScopeItem
+      tags: [scope]
+      summary: Add an included or excluded scope item
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScopeItemInput"
+      responses:
+        "201":
+          description: Scope item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScopeItem"
+  /projects/{projectId}/scope/submit:
+    post:
+      operationId: submitScope
+      tags: [scope]
+      summary: Submit the current scope version for approval
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Scope submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+  /projects/{projectId}/scope/approve:
+    post:
+      operationId: approveScope
+      tags: [scope]
+      summary: Approve the pending scope version
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApprovalInput"
+      responses:
+        "200":
+          description: Scope approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+  /projects/{projectId}/change-orders:
+    get:
+      operationId: listChangeOrders
+      tags: [changes]
+      summary: List project change orders
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Change orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChangeOrder"
+    post:
+      operationId: createChangeOrder
+      tags: [changes]
+      summary: Create and submit a change order
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeOrderInput"
+      responses:
+        "201":
+          description: Change order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeOrder"
+  /change-orders/{changeOrderId}/decision:
+    post:
+      operationId: decideChangeOrder
+      tags: [changes]
+      summary: Approve, reject, or request clarification on a change order
+      parameters:
+        - name: changeOrderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeOrderDecision"
+      responses:
+        "200":
+          description: Change order updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeOrder"
+  /projects/{projectId}/milestones:
+    get:
+      operationId: listMilestones
+      tags: [milestones]
+      summary: List project milestones
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Milestones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Milestone"
+    post:
+      operationId: createMilestone
+      tags: [milestones]
+      summary: Create a project milestone
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MilestoneInput"
+      responses:
+        "201":
+          description: Milestone created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+  /milestones/{milestoneId}/handover:
+    post:
+      operationId: submitMilestoneHandover
+      tags: [milestones]
+      summary: Submit a milestone with evidence for handover
+      parameters:
+        - name: milestoneId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HandoverInput"
+      responses:
+        "200":
+          description: Milestone submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+  /milestones/{milestoneId}/decision:
+    post:
+      operationId: decideMilestone
+      tags: [milestones]
+      summary: Accept a handover or request a revision
+      parameters:
+        - name: milestoneId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MilestoneDecision"
+      responses:
+        "200":
+          description: Milestone decision recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+  /milestones/{milestoneId}/revisions:
+    get:
+      operationId: listRevisionRequests
+      tags: [milestones]
+      summary: List revision requests for a milestone
+      parameters:
+        - name: milestoneId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Revision requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RevisionRequest"
+    post:
+      operationId: createRevisionRequest
+      tags: [milestones]
+      summary: Create a structured revision request
+      parameters:
+        - name: milestoneId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RevisionInput"
+      responses:
+        "201":
+          description: Revision request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevisionRequest"
+  /revisions/{revisionId}/reply:
+    post:
+      operationId: replyToRevision
+      tags: [milestones]
+      summary: Record a contractor response to a revision request
+      parameters:
+        - name: revisionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RevisionReply"
+      responses:
+        "200":
+          description: Revision response recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevisionRequest"
+  /revisions/{revisionId}/resolve:
+    post:
+      operationId: resolveRevision
+      tags: [milestones]
+      summary: Resolve a revision request
+      parameters:
+        - name: revisionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Revision resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevisionRequest"
+  /projects/{projectId}/payments:
+    get:
+      operationId: listPayments
+      tags: [payments]
+      summary: List the manual project payment schedule
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Payment schedule
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentItem"
+    post:
+      operationId: createPayment
+      tags: [payments]
+      summary: Add a manual payment schedule item
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInput"
+      responses:
+        "201":
+          description: Payment item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentItem"
+  /payments/{paymentId}/mark-sent:
+    post:
+      operationId: markPaymentSent
+      tags: [payments]
+      summary: Mark that the owner sent a payment
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentNote"
+      responses:
+        "200":
+          description: Payment marked as sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentItem"
+  /payments/{paymentId}/confirm:
+    post:
+      operationId: confirmPaymentReceived
+      tags: [payments]
+      summary: Confirm payment receipt
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentNote"
+      responses:
+        "200":
+          description: Payment receipt confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentItem"
+  /projects/{projectId}/timeline:
+    get:
+      operationId: listTimeline
+      tags: [activity]
+      summary: Get the append-only audit timeline
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Project activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimelineEvent"
+  /projects/{projectId}/invitations:
+    post:
+      operationId: createInvitation
+      tags: [activity]
+      summary: Invite a contractor or viewer to a project
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvitationInput"
+      responses:
+        "201":
+          description: Invitation created with a one-time share URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invitation"
+  /invitations/accept:
+    post:
+      operationId: acceptInvitation
+      tags: [activity]
+      summary: Accept a valid project invitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvitationAcceptInput"
+      responses:
+        "200":
+          description: Invitation accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /projects/{projectId}/passport:
+    get:
+      operationId: getRenovationPassport
+      tags: [activity]
+      summary: Get the printable renovation passport summary
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Project archive summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Passport"
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a private presigned upload URL
+      description: The file is uploaded directly to private object storage after this request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Presigned upload URL and object path
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+  /projects/{projectId}/media/{mediaId}:
+    get:
+      operationId: getProjectMedia
+      tags: [storage]
+      summary: Serve project media after participant authorization
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Private file content
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ActionResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+      required: [success, message]
+    Project:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        propertyType: { type: string }
+        city: { type: string }
+        projectType: { type: string }
+        plannedStartDate: { type: ["string", "null"], format: date }
+        plannedCompletionDate: { type: ["string", "null"], format: date }
+        budget: { type: ["number", "null"] }
+        approvedBudget: { type: number }
+        approvedChanges: { type: number }
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        status: { type: string }
+        scopeVersion: { type: integer }
+        scopeStatus: { type: string, enum: [draft, pending_approval, approved] }
+        archived: { type: boolean }
+        participantRole: { type: string, enum: [owner, contractor, viewer] }
+        contractorName: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, propertyType, city, projectType, approvedBudget, approvedChanges, progress, status, scopeVersion, scopeStatus, archived, participantRole, createdAt]
+    ProjectInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        propertyType: { type: string, enum: [apartment, house, office, commercial, other] }
+        city: { type: string, minLength: 1, maxLength: 100 }
+        projectType: { type: string, enum: [full, partial, kitchen, bathroom, electrical, plumbing, flooring, painting, other] }
+        plannedStartDate: { type: ["string", "null"], format: date }
+        plannedCompletionDate: { type: ["string", "null"], format: date }
+        budget: { type: ["number", "null"], minimum: 0 }
+      required: [name, propertyType, city, projectType]
+    Dashboard:
+      type: object
+      properties:
+        project: { $ref: "#/components/schemas/Project" }
+        roomCount: { type: integer }
+        includedCount: { type: integer }
+        excludedCount: { type: integer }
+        pendingChanges: { type: integer }
+        awaitingHandover: { type: integer }
+        nextPayment: { type: ["number", "null"] }
+        actionItems:
+          type: array
+          items: { $ref: "#/components/schemas/ActionItem" }
+        milestones:
+          type: array
+          items: { $ref: "#/components/schemas/Milestone" }
+        recentActivity:
+          type: array
+          items: { $ref: "#/components/schemas/TimelineEvent" }
+      required: [project, roomCount, includedCount, excludedCount, pendingChanges, awaitingHandover, actionItems, milestones, recentActivity]
+    ActionItem:
+      type: object
+      properties:
+        id: { type: string }
+        label: { type: string }
+        detail: { type: string }
+        kind: { type: string, enum: [change, handover, payment, scope] }
+        href: { type: string }
+      required: [id, label, detail, kind, href]
+    Room:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        name: { type: string }
+        itemCount: { type: integer }
+      required: [id, projectId, name, itemCount]
+    RoomInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+      required: [name]
+    ScopeItem:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        roomId: { type: ["string", "null"] }
+        roomName: { type: ["string", "null"] }
+        title: { type: string }
+        description: { type: ["string", "null"] }
+        inclusionType: { type: string, enum: [included, excluded] }
+        materialResponsibility: { type: string, enum: [owner, contractor, shared, not_applicable] }
+        laborAmount: { type: ["number", "null"] }
+        materialEstimate: { type: ["number", "null"] }
+        warrantyMonths: { type: ["integer", "null"] }
+        status: { type: string, enum: [draft, active, completed, excluded] }
+        createdAt: { type: string, format: date-time }
+      required: [id, projectId, title, inclusionType, materialResponsibility, status, createdAt]
+    ScopeItemInput:
+      type: object
+      properties:
+        roomId: { type: ["string", "null"] }
+        title: { type: string, minLength: 1, maxLength: 160 }
+        description: { type: ["string", "null"] }
+        inclusionType: { type: string, enum: [included, excluded] }
+        materialResponsibility: { type: string, enum: [owner, contractor, shared, not_applicable] }
+        laborAmount: { type: ["number", "null"], minimum: 0 }
+        materialEstimate: { type: ["number", "null"], minimum: 0 }
+        warrantyMonths: { type: ["integer", "null"], minimum: 0 }
+      required: [title, inclusionType, materialResponsibility]
+    ApprovalInput:
+      type: object
+      properties:
+        comment: { type: ["string", "null"], maxLength: 500 }
+      required: []
+    ChangeOrder:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        number: { type: integer }
+        roomName: { type: ["string", "null"] }
+        title: { type: string }
+        reason: { type: string }
+        description: { type: ["string", "null"] }
+        laborAmount: { type: number }
+        materialAmount: { type: number }
+        totalAmount: { type: number }
+        scheduleImpactDays: { type: integer }
+        newCompletionDate: { type: ["string", "null"], format: date }
+        status: { type: string, enum: [submitted, needs_clarification, approved, rejected] }
+        createdBy: { type: string }
+        createdAt: { type: string, format: date-time }
+        decisionComment: { type: ["string", "null"] }
+      required: [id, projectId, number, title, reason, laborAmount, materialAmount, totalAmount, scheduleImpactDays, status, createdBy, createdAt]
+    ChangeOrderInput:
+      type: object
+      properties:
+        roomId: { type: ["string", "null"] }
+        title: { type: string, minLength: 2, maxLength: 160 }
+        reason: { type: string, minLength: 2, maxLength: 1000 }
+        description: { type: ["string", "null"], maxLength: 3000 }
+        laborAmount: { type: number, minimum: 0 }
+        materialAmount: { type: number, minimum: 0 }
+        scheduleImpactDays: { type: integer, minimum: 0 }
+        newCompletionDate: { type: ["string", "null"], format: date }
+      required: [title, reason, laborAmount, materialAmount, scheduleImpactDays]
+    ChangeOrderDecision:
+      type: object
+      properties:
+        decision: { type: string, enum: [approve, reject, clarify] }
+        comment: { type: ["string", "null"], maxLength: 1000 }
+      required: [decision]
+    Milestone:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        title: { type: string }
+        description: { type: ["string", "null"] }
+        plannedCompletionDate: { type: ["string", "null"], format: date }
+        status: { type: string, enum: [planned, in_progress, submitted_for_handover, revision_requested, accepted] }
+        note: { type: ["string", "null"] }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaItem" }
+        acceptedAt: { type: ["string", "null"], format: date-time }
+      required: [id, projectId, title, status, media]
+    MilestoneInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 2, maxLength: 120 }
+        description: { type: ["string", "null"], maxLength: 1000 }
+        plannedCompletionDate: { type: ["string", "null"], format: date }
+      required: [title]
+    MediaItem:
+      type: object
+      properties:
+        id: { type: string }
+        objectPath: { type: string }
+        originalName: { type: string }
+        contentType: { type: string }
+        size: { type: integer }
+        uploadedAt: { type: string, format: date-time }
+      required: [id, objectPath, originalName, contentType, size, uploadedAt]
+    HandoverInput:
+      type: object
+      properties:
+        note: { type: ["string", "null"], maxLength: 1000 }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaInput" }
+      required: [media]
+    MediaInput:
+      type: object
+      properties:
+        objectPath: { type: string, minLength: 1 }
+        originalName: { type: string, minLength: 1, maxLength: 255 }
+        contentType: { type: string }
+        size: { type: integer, minimum: 1, maximum: 52428800 }
+      required: [objectPath, originalName, contentType, size]
+    MilestoneDecision:
+      type: object
+      properties:
+        decision: { type: string, enum: [accept, revise] }
+        note: { type: ["string", "null"], maxLength: 1000 }
+        revisionTitle: { type: ["string", "null"], maxLength: 160 }
+        priority: { type: string, enum: [low, normal, high] }
+      required: [decision]
+    RevisionRequest:
+      type: object
+      properties:
+        id: { type: string }
+        milestoneId: { type: string }
+        title: { type: string }
+        issueDescription: { type: string }
+        priority: { type: string, enum: [low, normal, high] }
+        status: { type: string, enum: [open, contractor_replied, resolved] }
+        response: { type: ["string", "null"] }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaItem" }
+        createdAt: { type: string, format: date-time }
+      required: [id, milestoneId, title, issueDescription, priority, status, media, createdAt]
+    RevisionInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 2, maxLength: 160 }
+        issueDescription: { type: string, minLength: 2, maxLength: 1500 }
+        priority: { type: string, enum: [low, normal, high] }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaInput" }
+      required: [title, issueDescription, priority]
+    RevisionReply:
+      type: object
+      properties:
+        response: { type: string, minLength: 2, maxLength: 1500 }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaInput" }
+      required: [response]
+    PaymentItem:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        title: { type: string }
+        amount: { type: number }
+        currency: { type: string, enum: [AZN] }
+        dueCondition: { type: ["string", "null"] }
+        dueDate: { type: ["string", "null"], format: date }
+        status: { type: string, enum: [planned, due, marked_sent, confirmed_received, disputed] }
+        note: { type: ["string", "null"] }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaItem" }
+        updatedAt: { type: string, format: date-time }
+      required: [id, projectId, title, amount, currency, status, media, updatedAt]
+    PaymentInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 2, maxLength: 160 }
+        amount: { type: number, minimum: 0 }
+        dueCondition: { type: ["string", "null"], maxLength: 250 }
+        dueDate: { type: ["string", "null"], format: date }
+      required: [title, amount]
+    PaymentNote:
+      type: object
+      properties:
+        note: { type: ["string", "null"], maxLength: 1000 }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaInput" }
+      required: []
+    TimelineEvent:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        action: { type: string }
+        detail: { type: string }
+        actorRole: { type: string, enum: [owner, contractor, viewer] }
+        createdAt: { type: string, format: date-time }
+      required: [id, projectId, action, detail, actorRole, createdAt]
+    Invitation:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        inviteUrl: { type: string }
+        role: { type: string, enum: [contractor, viewer] }
+        expiresAt: { type: string, format: date-time }
+      required: [id, projectId, inviteUrl, role, expiresAt]
+    InvitationInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        contact: { type: string, minLength: 3, maxLength: 254 }
+        role: { type: string, enum: [contractor, viewer] }
+      required: [name, contact, role]
+    InvitationAcceptInput:
+      type: object
+      properties:
+        token: { type: string, minLength: 20 }
+      required: [token]
+    PassportShareInput:
+      type: object
+      properties:
+        includeFinancial: { type: boolean }
+      required: [includeFinancial]
+    PassportShare:
+      type: object
+      properties:
+        id: { type: string }
+        url: { type: string }
+        expiresAt: { type: string, format: date-time }
+        includeFinancial: { type: boolean }
+      required: [id, url, expiresAt, includeFinancial]
+    PassportShareRecord:
+      type: object
+      properties:
+        id: { type: string }
+        expiresAt: { type: string, format: date-time }
+        includeFinancial: { type: boolean }
+        revokedAt: { type: ["string", "null"], format: date-time }
+      required: [id, expiresAt, includeFinancial, revokedAt]
+    Passport:
+      type: object
+      properties:
+        project: { $ref: "#/components/schemas/Project" }
+        rooms:
+          type: array
+          items: { $ref: "#/components/schemas/Room" }
+        scopeItems:
+          type: array
+          items: { $ref: "#/components/schemas/ScopeItem" }
+        changeOrders:
+          type: array
+          items: { $ref: "#/components/schemas/ChangeOrder" }
+        milestones:
+          type: array
+          items: { $ref: "#/components/schemas/Milestone" }
+        payments:
+          type: array
+          items: { $ref: "#/components/schemas/PaymentItem" }
+        timeline:
+          type: array
+          items: { $ref: "#/components/schemas/TimelineEvent" }
+        disclaimer: { type: string }
+      required: [project, rooms, scopeItems, changeOrders, milestones, payments, timeline, disclaimer]
+    UploadUrlRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 255 }
+        size: { type: integer, minimum: 1, maximum: 52428800 }
+        contentType: { type: string, minLength: 1, maxLength: 120 }
+      required: [name, size, contentType]
+    UploadUrlResponse:
+      type: object
+      properties:
+        uploadURL: { type: string, format: uri }
+        objectPath: { type: string }
+        metadata: { $ref: "#/components/schemas/UploadUrlRequest" }
+      required: [uploadURL, objectPath, metadata]
+

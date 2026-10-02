@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Təhvil"
+description = "A multilingual renovation project workspace for homeowners and contractors to agree scope, approve changes, hand over work with photo evidence, track payments manually, and keep a renovation passport."
+version = "1.0.0"
+id = "artifacts/tehvil"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25602
+
+[services.development]
+run = "pnpm --filter @workspace/tehvil run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tehvil", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/tehvil/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25602"
+BASE_PATH = "/"
