@@ -27,6 +27,7 @@ import { copy, type Lang, type TKey } from '@/lib/i18n';
 import { emitFeedback, errorToMsg, onFeedback, type FeedbackMsg } from '@/lib/feedback';
 import { Button, ErrorNotice, EmptyLine, Field, Loading, PageHeading, Status, actionItemText, date, money, propLabel, roleLabel, typeLabel } from '@/components/kit';
 import { LanguagePicker } from '@/components/language-picker';
+import { Partners } from '@/components/partners';
 import { ScopePage } from '@/pages/scope-page';
 import { ChangesPage } from '@/pages/changes-page';
 import { MilestonesPage } from '@/pages/milestones-page';
@@ -99,6 +100,7 @@ function Landing({ lang, change, t }: { lang: Lang; change: (v: Lang)=>void; t: 
     </section><div className="trust-strip"><div className="wrap trust-items"><span>{t('trust')}</span><i/><span>{t('clarity')}</span><i/><span>{t('history')}</span></div></div>
     <section className="workflow wrap" id="how"><div className="workflow-intro"><div className="eyebrow">{t('eyCertain')}</div><h2 className="font-display">{t('workflow')}</h2><p>{t('workflowLead')}</p></div><div className="workflow-list">{stages.map((stage, i) => { const Icons=[FileCheck2, ArrowRight, ImagePlus]; const Icon=Icons[i]; return <article className="workflow-row" key={stage}><div className="workflow-number">0{i+1}</div><div className="workflow-icon"><Icon size={20}/></div><div><h3>{stage}</h3><p>{descriptions[i]}</p></div><ChevronRight className="workflow-chevron" size={18}/></article>; })}</div></section>
     <section className="closing wrap"><div className="closing-inner"><div className="closing-mark">t.</div><div><div className="eyebrow">{t('tagline')}</div><h2 className="font-display">{t('start')}</h2><p>{t('lead')}</p></div><Link href="/sign-up" className="button button-primary">{t('createFirst')}<ArrowRight size={16}/></Link></div></section>
+    <Partners lang={lang}/>
     <footer className="landing-footer wrap"><Brand/><p>{t('disclaimer')}</p><LanguagePicker lang={lang} change={change}/></footer>
   </div>;
 }
