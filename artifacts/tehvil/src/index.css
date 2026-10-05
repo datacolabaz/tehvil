@@ -142,7 +142,7 @@
 .partner-fill { position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 50% 120%,#2f6153 0,#1d4339 62%);clip-path:circle(0% at 50% 100%);transition:clip-path .6s cubic-bezier(.22,.8,.25,1); }
 .partner-corner { position:absolute;top:14px;right:14px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#eee8dc;color:#987651;transition:transform .45s cubic-bezier(.22,.8,.25,1),background .35s,color .35s; }
 .partner-logo { display:grid;place-items:center;width:44%;aspect-ratio:1/1;border-radius:24%;background:#f0efe7;transition:transform .5s cubic-bezier(.22,.8,.25,1),background .35s,border-radius .5s; }
-.partner-img { width:68%;height:68%;object-fit:contain; }
+.partner-img { width:76%;height:76%;object-fit:contain;border-radius:18%; }
 .partner-mono { font-family:var(--app-font-serif);font-weight:800;font-size:clamp(28px,4vw,46px);letter-spacing:-.06em;line-height:1; }
 .partner-name { margin-top:12px;font-family:var(--app-font-serif);font-weight:800;font-size:19px;letter-spacing:-.04em;transition:transform .45s cubic-bezier(.22,.8,.25,1); }
 .partner-domain { color:#858e85;font:13px var(--app-font-mono);transition:opacity .25s,transform .45s cubic-bezier(.22,.8,.25,1); }
