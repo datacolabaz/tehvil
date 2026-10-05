@@ -3,24 +3,60 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Təhvil</title>
+    <title>Təhvil — təmir işlərinin razılaşdırılması və foto sübutlu təhvili</title>
     <meta name="description" content="Təhvil — təmir iş həcmini razılaşdırın, dəyişiklikləri təsdiqləyin və foto sübutlu təhvil tarixçəsini saxlayın." />
     <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="Təhvil" />
+    <link rel="canonical" href="https://tehvil.az/" />
+    <meta name="theme-color" content="#29473f" />
+    <meta property="og:site_name" content="Təhvil" />
+    <meta property="og:locale" content="az_AZ" />
+    <meta property="og:url" content="https://tehvil.az/" />
+    <meta property="og:title" content="Təhvil — təmirin hər addımı aydın və razılaşdırılmış" />
     <meta property="og:description" content="Ev sahibi və podratçı üçün razılaşdırılmış iş həcmi, dəyişiklik sifarişləri və foto sübutlu mərhələ təhvili." />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Təhvil" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Təhvil — təmirin hər addımı aydın və razılaşdırılmış" />
     <meta name="twitter:description" content="Ev sahibi və podratçı üçün təmir layihəsinin vahid qeydi." />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@graph":[
+        {"@type":"WebSite","@id":"https://tehvil.az/#website","url":"https://tehvil.az/","name":"Təhvil","inLanguage":"az"},
+        {"@type":"SoftwareApplication","name":"Təhvil","url":"https://tehvil.az/","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"Ev sahibi və podratçı üçün təmir iş həcminin razılaşdırılması, dəyişikliklərin qeydi və foto sübutlu mərhələ təhvili."}
+      ]}
+    </script>
     <!-- Declared before the stylesheet so Clerk styles sit above the Tailwind reset -->
     <style>@layer theme, base, clerk, components, utilities;</style>
+    <style>
+      /* Shown until the app loads, and to visitors and crawlers without JavaScript */
+      .boot { min-height:100dvh; display:grid; place-items:center; padding:32px 24px; background:#f6f4ed; color:#213a34; font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+      .boot-inner { max-width:620px; }
+      .boot-brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:20px; letter-spacing:-.03em; }
+      .boot-brand img { width:32px; height:32px; }
+      .boot h1 { margin:28px 0 14px; font-size:clamp(32px,6vw,52px); line-height:1.05; letter-spacing:-.05em; font-weight:500; }
+      .boot p { margin:0 0 22px; font-size:17px; line-height:1.6; color:#55665f; }
+      .boot nav { display:flex; flex-wrap:wrap; gap:10px 20px; font-size:15px; }
+      .boot a { color:#29473f; font-weight:600; }
+    </style>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main class="boot">
+        <div class="boot-inner">
+          <div class="boot-brand"><img src="/favicon.svg" alt="" width="32" height="32" />Təhvil</div>
+          <h1>Təmirin hər addımı aydın və razılaşdırılmış.</h1>
+          <p>Ev sahibi və podratçı bütün layihə detallarını bir yerdə razılaşdırır. Dəyişikliklər qeyd olunur, görülən işlər isə foto sübutla təhvil verilir.</p>
+          <nav aria-label="Əsas keçidlər">
+            <a href="/sign-up">Hesab yarat</a>
+            <a href="/sign-in">Daxil ol</a>
+            <a href="/privacy.html">Məxfilik siyasəti</a>
+            <a href="/terms.html">İstifadə şərtləri</a>
+          </nav>
+        </div>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
