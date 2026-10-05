@@ -6,7 +6,7 @@ const baseCopy = {
     home: 'Ana səhifə', dashboard: 'İş sahəsi', projects: 'Layihələr', scope: 'İş həcmi', changes: 'Dəyişikliklər',
     milestones: 'Mərhələlər', payments: 'Ödəniş qeydləri', timeline: 'Tarixçə', passport: 'Təmir pasportu',
     newProject: 'Layihə yarat', signIn: 'Daxil ol', signUp: 'Hesab yarat', signOut: 'Çıxış', language: 'Dil',
-    tagline: 'Təmir zamanı aydın razılaşma.', hero: 'Təmirin hər addımı, aydın və razılaşdırılmış.', lead: 'Təhvil ev sahibi və podratçını eyni layihə qeydlərində birləşdirir — iş başlamazdan əvvəl razılaşdırılmış həcm, dəyişikliklər və foto sübutlu təhvil.', start: 'Layihəyə başlayın', learn: 'İş prinsipi',
+    tagline: 'Təmir zamanı aydın razılaşma.', hero: 'Təmirin hər addımı aydın və razılaşdırılmış.', lead: 'Təhvil ev sahibi və podratçını eyni layihə qeydlərində birləşdirir — iş başlamazdan əvvəl razılaşdırılmış həcm, dəyişikliklər və foto sübutlu təhvil.', start: 'Layihəyə başlayın', learn: 'İş prinsipi',
     trust: 'Birgə iş üçün layihə qeydi', clarity: 'Əvvəlcədən razılaşdırılmış həcm', history: 'Axtarıla bilən layihə tarixçəsi', workflow: 'Sakit koordinasiya. Aydın razılaşma.',
     workflowLead: 'Sözlə deyil, hər iki tərəfin görə biləcəyi qeydlərlə.', stages: ['Həcmi razılaşdırın', 'Dəyişiklikləri qeyd edin', 'Foto ilə təhvil verin'],
     stageDescs: ['Hər otaq üzrə daxil olan və olmayan işləri, material məsuliyyətini və təxminləri yazın.', 'İş gedişində yeni tələb yaranarsa, vaxt və məbləğ təsirini qərardan əvvəl qeyd edin.', 'Mərhələni foto və qeydlərlə təqdim edin. Ev sahibi qəbul edə və ya düzəliş istəyə bilər.'],
