@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import type { Lang } from '@/lib/i18n';
 
-// Official logo files go in public/partners/<id>.png.
-// Until a file exists, the tile shows the partner's initial instead.
+// Logos are the partners' own official files, loaded from their sites.
+// If one fails to load, the tile shows the partner's initial instead.
 const partners = [
-  { id: 'spotva', name: 'Spotva', domain: 'spotva.co' },
-  { id: 'metbuat', name: 'Metbuat', domain: 'metbuat.az' },
-  { id: 'resulio', name: 'Resulio', domain: 'resulio.co' },
-  { id: 'sayt', name: 'Sayt.az', domain: 'sayt.az' },
-].map(p => ({ ...p, logo: '/partners/' + p.id + '.png' }));
+  { id: 'spotva', name: 'Spotva', domain: 'spotva.co', logo: 'https://spotva.co/apple-icon.png' },
+  { id: 'metbuat', name: 'Metbuat', domain: 'metbuat.az', logo: 'https://metbuat.az/apple-touch-icon.png' },
+  { id: 'resulio', name: 'Resulio', domain: 'resulio.co', logo: 'https://resulio.co/brand/resulio-icon.png' },
+  { id: 'sayt', name: 'Sayt.az', domain: 'sayt.az', logo: 'https://sayt.az/icons/saytaz.svg' },
+];
 
 const text: Record<Lang, { eyebrow: string; title: string; visit: string }> = {
   az: { eyebrow: 'Tərəfdaşlar', title: 'Bizimlə birlikdə', visit: 'Sayta keç' },
@@ -20,7 +20,7 @@ const text: Record<Lang, { eyebrow: string; title: string; visit: string }> = {
 function PartnerLogo({ name, logo }: { name: string; logo: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <span className="partner-mono" aria-hidden="true">{name.charAt(0)}</span>;
-  return <img className="partner-img" src={logo} alt="" loading="lazy" onError={() => setFailed(true)} />;
+  return <img className="partner-img" src={logo} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)} />;
 }
 
 export function Partners({ lang }: { lang: Lang }) {
