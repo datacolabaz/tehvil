@@ -13,6 +13,7 @@ import {
   RequestSharedEstimateRevisionParams,
   RequestSharedEstimateRevisionResponse,
   type SharedEstimate,
+  type SharedEstimateCompany,
   type SharedEstimateSnapshot,
 } from "@workspace/api-zod";
 import {
@@ -25,6 +26,7 @@ import {
   smetaRevisionRequestsTable,
   smetaSharesTable,
 } from "@workspace/db";
+import { findCompanyProfile, toPublicCompany } from "../lib/contractorAccount";
 import { rateLimit } from "../lib/rateLimit";
 import { round2 } from "../lib/smetaCalc";
 import { notifySmeta } from "../lib/smetaNotifications";
@@ -56,7 +58,16 @@ async function buildSharedEstimate({ share, project, version }: ShareRow): Promi
     db.select().from(smetaClientApprovalsTable).where(and(eq(smetaClientApprovalsTable.projectId, project.id), eq(smetaClientApprovalsTable.version, share.version))),
     db.select().from(smetaRevisionRequestsTable).where(and(eq(smetaRevisionRequestsTable.projectId, project.id), eq(smetaRevisionRequestsTable.version, share.version))).orderBy(asc(smetaRevisionRequestsTable.createdAt)),
   ]);
-  const estimate = version.publicSnapshot as unknown as SharedEstimateSnapshot;
+  const { company: frozenCompany, ...publicSnapshot } = version.publicSnapshot as { company?: SharedEstimateCompany };
+  const estimate = publicSnapshot as unknown as SharedEstimateSnapshot;
+  // Versions sent before company profiles existed fall back to the live profile, then to the project's contractor.
+  const liveProfile = frozenCompany ? null : await findCompanyProfile(project.ownerUserId);
+  const company: SharedEstimateCompany = frozenCompany
+    ?? (liveProfile ? toPublicCompany(liveProfile) : {
+      name: project.contractor.company || project.contractor.name,
+      phone: project.contractor.phone || undefined,
+      services: [],
+    });
   const impact = (c: (typeof changeOrders)[number]) => round2(c.materialDelta + c.laborDelta + c.additionalCost);
   const approvedChangesTotal = round2(changeOrders.filter((c) => c.status === "approved").reduce((sum, c) => sum + impact(c), 0));
   const finalTotal = round2(estimate.total + approvedChangesTotal);
@@ -101,6 +112,7 @@ async function buildSharedEstimate({ share, project, version }: ShareRow): Promi
     payments: payments.map((m) => ({ id: m.id, title: m.title, share: m.share, condition: m.condition, amount: round2(finalTotal * m.share) })),
     approval: approval ? { approvedAt: approval.approvedAt.toISOString(), name: approval.name } : undefined,
     revisionRequestedAt: revision?.createdAt.toISOString(),
+    company,
   };
 }
 

@@ -26,6 +26,7 @@ import {
   smetaProjectsTable,
   smetaSharesTable,
 } from "@workspace/db";
+import { findCompanyProfile, toPublicCompany } from "../lib/contractorAccount";
 import { buildPublicSnapshot, estimateTotal, stableStringify } from "../lib/smetaCalc";
 import { notifySmeta } from "../lib/smetaNotifications";
 import {
@@ -39,7 +40,7 @@ import {
 
 const router: IRouter = Router();
 
-/** Share links stay valid this long after each send; enforced on every public request. */
+/** Default link validity after each send (the company profile can set 7–90 days); enforced on every public request. */
 export const SMETA_SHARE_DAYS = 30;
 const DAY_MS = 86_400_000;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -151,8 +152,9 @@ router.post("/smeta/projects/:projectId/share", async (req, res): Promise<void> 
     || lastSnapshot.margin !== current.defaultMarginPercentage;
   const version = lastSnapshot ? lastSnapshot.estimate.version + (changed ? 1 : 0) : current.estimate.version;
 
+  const profile = await findCompanyProfile(userId);
   const sentAt = new Date();
-  const expiresAt = new Date(sentAt.getTime() + SMETA_SHARE_DAYS * DAY_MS);
+  const expiresAt = new Date(sentAt.getTime() + (profile?.defaultValidityDays ?? SMETA_SHARE_DAYS) * DAY_MS);
   const validUntil = expiresAt.toISOString().slice(0, 10);
   const estimate = {
     ...current.estimate,
@@ -161,7 +163,10 @@ router.post("/smeta/projects/:projectId/share", async (req, res): Promise<void> 
     sections: current.estimate.sections.map((s) => ({ ...s, items: s.items.map((i) => ({ ...i, status: "approved" as const })) })),
   };
   const snapshot: SmetaVersionSnapshot = { estimate, projectCosts: current.projectCosts, margin: current.defaultMarginPercentage };
-  const publicSnapshot = buildPublicSnapshot(estimate, current.projectCosts, current.defaultMarginPercentage, sentAt);
+  const publicSnapshot = {
+    ...buildPublicSnapshot(estimate, current.projectCosts, current.defaultMarginPercentage, sentAt),
+    ...(profile ? { company: toPublicCompany(profile) } : {}),
+  };
   const total = estimateTotal(estimate, current.projectCosts, current.defaultMarginPercentage);
   const email = body.data.email?.trim() || null;
   const details = {
