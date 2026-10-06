@@ -137,7 +137,7 @@ is "Diqqət tələb edir".
   "hələ göndərilməyib" banner while there are unsent edits.
 - Sending again after edits creates a new version (v2 → v3) and requires a new
   client approval. Sending again without edits keeps the version and only
-  refreshes the 30-day validity. The share token stays the same, so a saved link
+  refreshes the validity (the company profile's default, otherwise 30 days). The share token stays the same, so a saved link
   always shows the latest sent version.
 - Editing an approved line after the client approved it marks it "Dəyişdirilib".
 - Change orders never modify the base estimate. They are added to the final total
@@ -150,7 +150,7 @@ is "Diqqət tələb edir".
 | --- | --- |
 | Calculations, totals, budget forecast, scenarios | Real (client-side, deterministic) |
 | Estimate editing, measurements, change orders, expenses, payment schedule, versioning | Real. **Persisted in PostgreSQL** per contractor (Clerk user) |
-| Share links, client approval, revision requests, client change-order decisions | Real. Public token endpoints, 30-day validity enforced by the server, audit fields stored |
+| Share links, client approval, revision requests, client change-order decisions | Real. Public token endpoints, validity (company default, otherwise 30 days) enforced by the server, audit fields stored |
 | Demo projects (Nərimanov, …) | Browser-only by design (see Routes) |
 | Excel export | Real `.xlsx` generated in the browser (6 sheets) |
 | PDF export | Browser print of `/smeta/:id/print` ("PDF kimi saxla") |
@@ -221,7 +221,7 @@ get 404):
 | GET | `/api/smeta/projects/:projectId` | Read one |
 | PUT | `/api/smeta/projects/:projectId` | Save the whole project document |
 | DELETE | `/api/smeta/projects/:projectId` | Delete with all child rows |
-| POST | `/api/smeta/projects/:projectId/share` | Send: new version if changed, create or reuse the link, extend validity to 30 days |
+| POST | `/api/smeta/projects/:projectId/share` | Send: new version if changed, create or reuse the link, extend validity (company default, otherwise 30 days) |
 | DELETE | `/api/smeta/projects/:projectId/share` | Revoke the link (the next send issues a new token). No UI yet |
 
 Public (no auth, keyed by the share token, `Cache-Control: no-store`):
@@ -249,7 +249,10 @@ Rules enforced on the server:
   fields are never part of a public response, and responses are parsed through
   the generated Zod schema.
 - **Validity:** a link resolves only while `revoked_at IS NULL AND expires_at > now()`
-  (30 days from the last send). Expired or revoked links return 404.
+  (the company profile's `default_validity_days`, otherwise 30 days, from the
+  last send). Expired or revoked links return 404. The public snapshot also
+  freezes the public-safe company header at send time; see
+  [CONTRACTOR_ONBOARDING.md](./CONTRACTOR_ONBOARDING.md).
 - **Stale actions:** approval and revision requests must name the version the
   client saw. Older versions get 409, approving twice is idempotent, and a
   revision request after approval gets 409.
