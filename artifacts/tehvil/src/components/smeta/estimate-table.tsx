@@ -65,8 +65,8 @@ export function EstimateTable({ project: p }: { project: Project }) {
 
     {sections.length > 0 && <div className="sm-table-wrap desktop-only" role="region" aria-label="Detallı smeta cədvəli" tabIndex={0}>
       <table className="sm-table">
-        <colgroup><col style={{ width: 62 }} /><col style={{ width: 250 }} /><col style={{ width: 150 }} /><col style={{ width: 86 }} /><col style={{ width: 92 }} /><col style={{ width: 118 }} /><col style={{ width: 104 }} /><col style={{ width: 100 }} /><col style={{ width: 100 }} /><col style={{ width: 90 }} /><col style={{ width: 110 }} /><col style={{ width: 118 }} /><col style={{ width: 140 }} /></colgroup>
-        <thead><tr><th>Bölmə</th><th>İşin adı</th><th>Otaq / Zona</th><th>Vahid</th><th className="r">Miqdar</th><th className="r">Material vahid qiyməti</th><th className="r">Material məbləği</th><th className="r">İşçilik vahid qiyməti</th><th className="r">İşçilik məbləği</th><th className="r">Əlavə xərc</th><th className="r">Cəmi</th><th>Status</th><th><span className="sm-sr">Əməliyyatlar</span></th></tr></thead>
+        <colgroup><col style={{ width: 54 }} /><col style={{ width: 240 }} /><col style={{ width: 122 }} /><col style={{ width: 86 }} /><col style={{ width: 84 }} /><col style={{ width: 104 }} /><col style={{ width: 96 }} /><col style={{ width: 96 }} /><col style={{ width: 96 }} /><col style={{ width: 84 }} /><col style={{ width: 104 }} /><col style={{ width: 112 }} /><col style={{ width: 112 }} /></colgroup>
+        <thead><tr><th className="stick-1">Bölmə</th><th className="stick-2">İşin adı</th><th>Otaq / Zona</th><th>Vahid</th><th className="r">Miqdar</th><th className="r">Material vahid qiyməti</th><th className="r">Material məbləği</th><th className="r">İşçilik vahid qiyməti</th><th className="r">İşçilik məbləği</th><th className="r">Əlavə xərc</th><th className="r">Cəmi</th><th>Status</th><th><span className="sm-sr">Əməliyyatlar</span></th></tr></thead>
         <tbody>
           {sections.map(({ s, items }) => {
             const si = p.estimate.sections.indexOf(s) + 1;
@@ -107,8 +107,8 @@ function LineRow({ p, it, code, open, onDetail, actions }: { p: Project; it: Est
   const stale = isPriceStale(it);
   return <>
     <tr className={`item ${it.status}`}>
-      <td className="sm-muted num" style={{ font: '12px var(--app-font-mono)' }}>{code}</td>
-      <td><input className="sm-cell-input name" aria-label="İşin adı" value={it.name} onChange={e => upd({ name: e.target.value })} /><div className="sm-cell-sub sm-muted" style={{ fontSize: 11 }} title="Miqdarın mənbəyi">{it.quantitySource.label}</div></td>
+      <td className="sm-muted num stick-1" style={{ font: '12px var(--app-font-mono)' }}>{code}</td>
+      <td className="stick-2"><input className="sm-cell-input name" aria-label="İşin adı" value={it.name} onChange={e => upd({ name: e.target.value })} /><div className="sm-cell-sub sm-muted" style={{ fontSize: 11 }} title="Miqdarın mənbəyi">{it.quantitySource.label}</div></td>
       <td><input className="sm-cell-input" aria-label="Otaq / Zona" value={it.zone} onChange={e => upd({ zone: e.target.value })} /></td>
       <td><select className="sm-cell-input" aria-label="Vahid" value={it.unit} onChange={e => upd({ unit: e.target.value as Unit })}>{UNITS.map(u => <option key={u}>{u}</option>)}</select></td>
       <td><NumberInput label={`${it.name}: miqdar`} value={it.quantity} onCommit={v => upd({ quantity: v })} /></td>

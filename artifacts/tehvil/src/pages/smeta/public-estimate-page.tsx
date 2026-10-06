@@ -4,7 +4,7 @@ import { CheckCircle2, ChevronRight, CircleMinus, CirclePlus, FileWarning, Info,
 import { Button } from '@/components/kit';
 import { changeImpact, changeTotals, lineTotals, projectTotals, round2 } from '@/lib/smeta/calc';
 import { PROPERTY_LABEL, RENOVATION_LABEL } from '@/lib/smeta/catalog';
-import { azn, dateAz, num, signedAzn } from '@/lib/smeta/format';
+import { azn, dateAz, num, signedAzn, qty } from '@/lib/smeta/format';
 import { smeta, useSharedProject } from '@/lib/smeta/store';
 import type { Estimate, EstimateSection, Project } from '@/lib/smeta/types';
 import { ChangeStatusPill } from '@/components/smeta/changes-tab';
@@ -67,7 +67,7 @@ function PublicEstimate({ project: p, token }: { project: Project; token: string
           <span className="sm-tag">Versiya {snap.version}</span>
           <span className="sm-tag">Tarix: {dateAz(share.createdAt)}</span>
           <span className="sm-tag">Etibarlıdır: {dateAz(snap.validUntil)}</span>
-          <span className="sm-tag">{PROPERTY_LABEL[p.propertyKind]} · {num(p.areaM2)} m² · {RENOVATION_LABEL[p.renovationKind]} təmir</span>
+          <span className="sm-tag">{PROPERTY_LABEL[p.propertyKind]} · {qty(p.areaM2)} m² · {RENOVATION_LABEL[p.renovationKind]} təmir</span>
         </div>
       </div>
       <div className="sm-public-total">
@@ -108,7 +108,7 @@ function PublicEstimate({ project: p, token }: { project: Project; token: string
                 const k = 1 + l.marginPercentage;
                 return <div className="sm-pub-line" key={it.id}>
                   <strong>{it.name}</strong><b className="num">{azn(l.rowTotal, 'auto')}</b>
-                  <small>{it.zone} · {num(it.quantity)} {it.unit} · <em>Miqdar: {it.quantitySource.label}</em></small>
+                  <small>{it.zone} · {qty(it.quantity)} {it.unit} · <em>Miqdar: {it.quantitySource.label}</em></small>
                   <small>Material {azn(round2((l.materialTotal + l.wasteAmount) * k), 'auto')} · İşçilik {azn(round2(l.laborTotal * k), 'auto')}{it.additionalCost ? ` · Əlavə ${azn(round2(it.additionalCost * k), 'auto')}` : ''}</small>
                 </div>;
               })}</div>}
@@ -163,14 +163,15 @@ function PublicEstimate({ project: p, token }: { project: Project; token: string
           <div className="sm-contractor-stats">
             <div><b>{p.contractor.experienceYears}</b><small>il təcrübə</small></div>
             <div><b>{p.contractor.completedProjects}</b><small>layihə</small></div>
-            <div><b><Star size={13} aria-hidden style={{ verticalAlign: -1, color: '#c28e68' }} /> {num(p.contractor.rating, 1)}</b><small>reytinq</small></div>
+            <div><b><Star size={13} aria-hidden className="sm-ii" style={{ color: '#c28e68' }} /> {num(p.contractor.rating, 1)}</b><small>reytinq</small></div>
           </div>
         </div>
 
         <div className="surface sm-panel">
           <div className="eyebrow">Ödəniş qrafiki</div>
           <h2 style={{ marginBottom: 6 }}>Mərhələlər üzrə</h2>
-          <div className="sm-schedule">{p.payments.map((m, i) => <div key={m.id}><span className="n">{i + 1}</span><div><strong>{m.title}</strong><small>{m.condition}</small></div><b className="num">{azn(round2(totals.total * m.share))}<small>{Math.round(m.share * 100)}%</small></b></div>)}</div>
+          <div className="sm-schedule">{p.payments.map((m, i) => <div key={m.id}><span className="n">{i + 1}</span><div><strong>{m.title}</strong><small>{m.condition}</small></div><b className="num">{azn(round2(finalTotal * m.share))}<small>{Math.round(m.share * 100)}%</small></b></div>)}</div>
+          {ct.approved !== 0 && <p className="sm-muted" style={{ margin: '8px 0 0', fontSize: 12 }}>Təsdiqlənmiş dəyişikliklər daxil olmaqla {azn(finalTotal)} üzrə.</p>}
         </div>
       </aside>
     </div>

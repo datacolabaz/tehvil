@@ -5,7 +5,7 @@ import { Button } from '@/components/kit';
 import { changeImpact, changeTotals, lineTotals, projectTotals, round2 } from '@/lib/smeta/calc';
 import { PROPERTY_LABEL, QUALITY_LABEL, RENOVATION_LABEL } from '@/lib/smeta/catalog';
 import { CHANGE_STATUS_LABEL } from '@/lib/smeta/export';
-import { azn, dateAz, dateTimeAz, num, signedAzn } from '@/lib/smeta/format';
+import { azn, dateAz, dateTimeAz, num, signedAzn, qty } from '@/lib/smeta/format';
 import { ESTIMATE_STATUS_LABEL, hasUnsentChanges, useSmetaProject } from '@/lib/smeta/store';
 
 /**
@@ -44,12 +44,12 @@ export function EstimatePrintPage({ projectId }: { projectId: string }) {
       <div className="sm-print-head"><span className="brand"><span className="brand-mark">t.</span><span>Təhvil</span></span><span className="eyebrow">Təmir smetası · v{p.estimate.version}</span></div>
       <div className="eyebrow" style={{ marginTop: 18, fontSize: 11 }}>{PROPERTY_LABEL[p.propertyKind]} · {RENOVATION_LABEL[p.renovationKind]} təmir · {QUALITY_LABEL[p.quality]} keyfiyyət</div>
       <h2>{p.name}</h2>
-      <div style={{ color: '#6d7c72' }}>{p.address} · {num(p.areaM2)} m² · Plan: {dateAz(p.startDate)} — {dateAz(p.endDate)}</div>
+      <div style={{ color: '#6d7c72' }}>{p.address} · {qty(p.areaM2)} m² · Plan: {dateAz(p.startDate)} — {dateAz(p.endDate)}</div>
 
       <div className="sm-print-parties">
         <div><span>Sifarişçi</span><b>{p.client.name}</b><b style={{ fontWeight: 500 }}>{p.client.phone}{p.client.email ? ` · ${p.client.email}` : ''}</b></div>
         <div><span>Podratçı</span><b>{p.contractor.company}</b><b style={{ fontWeight: 500 }}>{p.contractor.name} · {p.contractor.phone}</b></div>
-        <div><span>Status</span><b>{draft ? 'Qaralama — sifarişçiyə göndərilməyib' : approval ? `Sifarişçi təsdiq edib · ${dateAz(approval.approvedAt)}` : ESTIMATE_STATUS_LABEL[p.status]}</b><b style={{ fontWeight: 500 }}>Etibarlıdır: {dateAz(p.estimate.validUntil)}</b></div>
+        <div><span>Status</span><b>{draft ? (p.share ? `Yenilənmiş qaralama — sifarişçi v${p.share.snapshot.version} versiyasını görür` : 'Qaralama — sifarişçiyə göndərilməyib') : approval ? `Sifarişçi təsdiq edib · ${dateAz(approval.approvedAt)}` : ESTIMATE_STATUS_LABEL[p.status]}</b><b style={{ fontWeight: 500 }}>Etibarlıdır: {dateAz(p.estimate.validUntil)}</b></div>
       </div>
 
       <h3>Xülasə</h3>
@@ -67,7 +67,7 @@ export function EstimatePrintPage({ projectId }: { projectId: string }) {
         <tbody>{p.estimate.sections.map((s, si) => <Fragment key={s.id}>
           <tr className="cat"><td colSpan={7}>{String(si + 1).padStart(2, '0')}. {s.title}</td></tr>
           {s.items.map((it, ii) => { const l = lineTotals(it, p.defaultMarginPercentage); return <tr key={it.id}>
-            <td>{si + 1}.{ii + 1}</td><td>{it.name}</td><td>{it.zone}</td><td className="r">{num(it.quantity)} {it.unit}</td>
+            <td>{si + 1}.{ii + 1}</td><td>{it.name}</td><td>{it.zone}</td><td className="r">{qty(it.quantity)} {it.unit}</td>
             <td className="r">{num(clientPart(l.materialTotal + l.wasteAmount, l.marginPercentage), 2)}</td><td className="r">{num(clientPart(l.laborTotal, l.marginPercentage), 2)}</td><td className="r"><b>{num(l.rowTotal, 2)}</b></td>
           </tr>; })}
         </Fragment>)}

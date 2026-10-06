@@ -7,7 +7,7 @@ import { ConfidenceChip, SmetaToaster, toast } from '@/components/smeta/ui';
 import { TAKEOFF_STEPS, analyzeDrawing } from '@/lib/smeta/ai';
 import { estimateTotals, round2, sectionTotals } from '@/lib/smeta/calc';
 import { CATEGORY_HINT, CATEGORY_LABEL, CATEGORY_ORDER, DEFAULT_PACKAGES, PROPERTY_LABEL, QUALITY_LABEL, RENOVATION_LABEL, TEMPLATES, forecastDays, generateSections, guessRoomKind, roomMeasurements, type GeneratorContext, type RoomInput, type RoomKind } from '@/lib/smeta/catalog';
-import { addDaysISO, azn, num, parseNumber, todayISO, uid } from '@/lib/smeta/format';
+import { addDaysISO, azn, num, parseNumber, todayISO, uid, qty } from '@/lib/smeta/format';
 import { DEFAULT_CONTRACTOR } from '@/lib/smeta/mock-data';
 import { smeta } from '@/lib/smeta/store';
 import type { Drawing, Measurement, Project, PropertyKind, QualityLevel, RenovationKind, WorkCategory } from '@/lib/smeta/types';
@@ -31,7 +31,7 @@ export function NewEstimatePage() {
   const [step, setStep] = useState(0);
   const [reached, setReached] = useState(0);
   const [info, setInfo] = useState<InfoForm>(() => ({
-    name: '', propertyKind: init.tpl?.propertyKind ?? 'menzil', address: '', area: init.tpl ? num(init.tpl.rooms.reduce((s, r) => s + r.area, 0)) : '',
+    name: '', propertyKind: init.tpl?.propertyKind ?? 'menzil', address: '', area: init.tpl ? qty(init.tpl.rooms.reduce((s, r) => s + r.area, 0)) : '',
     renovationKind: init.tpl?.renovationKind ?? 'standart', quality: 'standart', startDate: addDaysISO(todayISO(), 14), endDate: addDaysISO(todayISO(), 74), clientName: '', clientPhone: '',
   }));
   const [source, setSource] = useState<Source | null>(init.source);
@@ -88,7 +88,7 @@ export function NewEstimatePage() {
     setTemplateId(id);
     setRooms(t.rooms.map(r => ({ ...r, id: uid('r') })));
     setPackages(new Set(t.packages)); setPackagesTouched(true);
-    setInfo(i => ({ ...i, propertyKind: t.propertyKind, renovationKind: t.renovationKind, area: i.area || num(t.rooms.reduce((s, r) => s + r.area, 0)) }));
+    setInfo(i => ({ ...i, propertyKind: t.propertyKind, renovationKind: t.renovationKind, area: i.area || qty(t.rooms.reduce((s, r) => s + r.area, 0)) }));
     toast(`“${t.title}” şablonu tətbiq edildi`);
   };
   const chooseSource = (s: Source) => {
@@ -165,11 +165,11 @@ export function NewEstimatePage() {
             <Choice selected={source === 'manual'} onClick={() => chooseSource('manual')} icon={<PencilRuler size={19} />} title="Ölçüləri əl ilə daxil et" text="Otaqları və sahələri özünüz yazın" />
             <Choice selected={source === 'template'} onClick={() => chooseSource('template')} icon={<LayoutTemplate size={19} />} title="Hazır təmir şablonundan başla" text="Tipik iş həcmi və orta ölçülər" />
           </div>
-          {source === 'drawing' && <DrawingStep drawing={drawing} onResult={r => { setDrawing(r); setRooms(roomsFromDrawing(r.measurements)); if (!info.area) set('area', num(r.measurements.filter(m => m.roomId).reduce((s, m) => s + m.value, 0))); }} onClear={() => { setDrawing(null); setRooms([]); }} />}
+          {source === 'drawing' && <DrawingStep drawing={drawing} onResult={r => { setDrawing(r); setRooms(roomsFromDrawing(r.measurements)); if (!info.area) set('area', qty(r.measurements.filter(m => m.roomId).reduce((s, m) => s + m.value, 0))); }} onClear={() => { setDrawing(null); setRooms([]); }} />}
           {source === 'template' && <div style={{ marginTop: 16 }}>
             <div className="eyebrow" style={{ marginBottom: 10, fontSize: 11 }}>Ağıllı şablonlar</div>
             <div className="sm-templates">{TEMPLATES.map(t => <button key={t.id} type="button" className={`sm-template ${templateId === t.id ? 'selected' : ''}`} aria-pressed={templateId === t.id} onClick={() => chooseTemplate(t.id)}>
-              <strong>{t.title}</strong><small>{t.description}</small><em>{t.rooms.length} zona · {num(t.rooms.reduce((s, r) => s + r.area, 0))} m² · {t.packages.length} paket</em>
+              <strong>{t.title}</strong><small>{t.description}</small><em>{t.rooms.length} zona · {qty(t.rooms.reduce((s, r) => s + r.area, 0))} m² · {t.packages.length} paket</em>
             </button>)}</div>
           </div>}
           {source && (source !== 'drawing' || drawing) && (source !== 'template' || templateId) && <RoomsEditor rooms={rooms} source={source} drawing={drawing} onChange={updateRoom} onAdd={() => setRooms(rs => [...rs, { id: uid('r'), name: '', area: 0, kind: 'other' }])} onRemove={id => setRooms(rs => rs.filter(r => r.id !== id))} roomSum={roomSum} area={area} />}
@@ -189,7 +189,7 @@ export function NewEstimatePage() {
             const first = s?.items[0];
             return <button key={c} type="button" className={`sm-package ${sel ? 'selected' : ''}`} aria-pressed={sel} onClick={() => { setPackages(ps => { const n = new Set(ps); if (n.has(c)) n.delete(c); else n.add(c); return n; }); setPackagesTouched(true); }}>
               <span className="sm-package-box"><Check size={13} /></span>
-              <span><strong>{CATEGORY_LABEL[c]}</strong><small>{CATEGORY_HINT[c]}</small>{first && <small>≈ {num(first.quantity)} {first.unit} · {s!.items.length} iş</small>}</span>
+              <span><strong>{CATEGORY_LABEL[c]}</strong><small>{CATEGORY_HINT[c]}</small>{first && <small>≈ {qty(first.quantity)} {first.unit} · {s!.items.length} iş</small>}</span>
               <span className="sm-package-price">{s ? <><b>≈ {azn(sectionTotals(s, margin / 100).rowsTotal)}</b><small>ilkin qiymət</small></> : <small>Uyğun otaq yoxdur</small>}</span>
             </button>;
           })}</div>
@@ -224,8 +224,8 @@ export function NewEstimatePage() {
           <strong className="num">{validRooms.length && packages.size ? azn(totals.total) : '—'}</strong>
           <p>{validRooms.length ? 'Seçimlərə əsasən təxmini məbləğ. Son qiymət yoxlamadan sonra dəqiqləşir.' : 'Otaqları daxil etdikdən sonra təxmini məbləğ burada görünəcək.'}</p>
           <dl>
-            <dt>Ümumi sahə</dt><dd>{area ? `${num(area)} m²` : '—'}</dd>
-            <dt>Otaqlar</dt><dd>{validRooms.length ? `${validRooms.length} · ${num(roomSum)} m²` : '—'}</dd>
+            <dt>Ümumi sahə</dt><dd>{area ? `${qty(area)} m²` : '—'}</dd>
+            <dt>Otaqlar</dt><dd>{validRooms.length ? `${validRooms.length} · ${qty(roomSum)} m²` : '—'}</dd>
             <dt>İş paketləri</dt><dd>{packages.size}</dd>
             <dt>Təxmini müddət</dt><dd>{days ? `${days} gün` : '—'}</dd>
           </dl>
@@ -289,12 +289,12 @@ function DrawingStep({ drawing, onResult, onClear }: { drawing: { drawing: Drawi
 function RoomsEditor({ rooms, source, drawing, onChange, onAdd, onRemove, roomSum, area }: { rooms: RoomInput[]; source: Source; drawing: { measurements: Measurement[] } | null; onChange: (id: string, patch: Partial<RoomInput>) => void; onAdd: () => void; onRemove: (id: string) => void; roomSum: number; area: number }) {
   const diff = area > 0 ? Math.abs(roomSum - area) / area : 0;
   return <div style={{ marginTop: 18 }}>
-    <div className="section-head"><div className="eyebrow" style={{ fontSize: 11 }}>{source === 'drawing' ? 'Aşkar edilən otaqlar' : 'Otaqlar və sahələr'}</div><span className="sm-muted" style={{ fontSize: 12 }}>Cəmi {num(roomSum)} m²{area ? ` · ümumi sahə ${num(area)} m²` : ''}</span></div>
+    <div className="section-head"><div className="eyebrow" style={{ fontSize: 11 }}>{source === 'drawing' ? 'Aşkar edilən otaqlar' : 'Otaqlar və sahələr'}</div><span className="sm-muted" style={{ fontSize: 12 }}>Cəmi {qty(roomSum)} m²{area ? ` · ümumi sahə ${qty(area)} m²` : ''}</span></div>
     <div className="sm-rooms-edit">{rooms.map(r => {
       const m = drawing?.measurements.find(x => x.roomId === r.id);
       return <div className="sm-room-row" key={r.id}>
         <input aria-label="Otağın adı" value={r.name} onChange={e => onChange(r.id, { name: e.target.value })} placeholder="Otağın adı" />
-        <input aria-label={`${r.name || 'Otaq'}: sahə, m²`} inputMode="decimal" defaultValue={r.area ? num(r.area) : ''} placeholder="m²" onChange={e => { const v = parseNumber(e.target.value); if (v !== null && v >= 0) onChange(r.id, { area: v }); }} />
+        <input aria-label={`${r.name || 'Otaq'}: sahə, m²`} inputMode="decimal" defaultValue={r.area ? qty(r.area) : ''} placeholder="m²" onChange={e => { const v = parseNumber(e.target.value); if (v !== null && v >= 0) onChange(r.id, { area: v }); }} />
         {m ? <span className="room-kind">{m.status === 'edited' ? <span className="sm-muted" style={{ fontSize: 12, fontWeight: 700 }}>Düzəldilib</span> : <ConfidenceChip confidence={m.confidence} />}</span>
           : <select className="room-kind" aria-label="Otağın növü" value={r.kind} onChange={e => onChange(r.id, { kind: e.target.value as RoomKind })} style={{ minHeight: 39, padding: '0 8px', border: '1px solid #dcded3', borderRadius: 10, background: '#fffef9', color: '#2b483e' }}>{(Object.keys(ROOM_KIND_LABEL) as RoomKind[]).map(k => <option key={k} value={k}>{ROOM_KIND_LABEL[k]}</option>)}</select>}
         <button type="button" className="icon-button" aria-label={`${r.name || 'Otağı'} sil`} onClick={() => onRemove(r.id)}><Trash2 size={15} /></button>

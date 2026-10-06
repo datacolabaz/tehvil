@@ -13,10 +13,10 @@ export function SummaryTab({ project: p }: { project: Project }) {
   const spentShare = b.plannedBudget > 0 ? b.actualSpending / b.plannedBudget : 0;
   return <>
     <div className="sm-fin-cards">
-      <div className="sm-fin accent"><span className="eyebrow">Plan</span><strong className="num">{num(b.plannedBudget)} <small>AZN</small></strong><span>Smeta v{p.estimate.version} üzrə</span></div>
-      <div className="sm-fin"><span className="eyebrow">Faktiki</span><strong className="num">{num(b.actualSpending)} <small>AZN</small></strong><span>Planın {pct(spentShare)}-i xərclənib</span></div>
-      <div className="sm-fin"><span className="eyebrow">Qalıq</span><strong className="num">{num(b.remainingBudget)} <small>AZN</small></strong><span>Plan − faktiki xərc</span></div>
-      <div className="sm-fin"><span className="eyebrow">Təsdiqlənmiş əlavə işlər</span><strong className="num">{num(b.approvedChanges)} <small>AZN</small></strong><span>{approvedCount ? `${approvedCount} dəyişiklik sifarişi` : 'Hələ yoxdur'}</span></div>
+      <div className="sm-fin accent"><span className="eyebrow">Plan</span><strong className="num">{num(b.plannedBudget, 0)} <small>AZN</small></strong><span>Smeta v{p.estimate.version} üzrə</span></div>
+      <div className="sm-fin"><span className="eyebrow">Faktiki</span><strong className="num">{num(b.actualSpending, 0)} <small>AZN</small></strong><span>Planın {pct(spentShare)}-i xərclənib</span></div>
+      <div className="sm-fin"><span className="eyebrow">Qalıq</span><strong className="num">{num(b.remainingBudget, 0)} <small>AZN</small></strong><span>Plan − faktiki xərc</span></div>
+      <div className="sm-fin"><span className="eyebrow">Təsdiqlənmiş əlavə işlər</span><strong className="num">{num(b.approvedChanges, 0)} <small>AZN</small></strong><span>{approvedCount ? `${approvedCount} dəyişiklik sifarişi` : 'Hələ yoxdur'}</span></div>
       <div className="sm-fin"><span className="eyebrow">Tamamlanma</span><strong className="num">{b.completion}%</strong><div className="progress-track" style={{ marginTop: 8 }} role="img" aria-label={`İşlərin ${b.completion}%-i tamamlanıb`}><span style={{ width: `${b.completion}%` }} /></div></div>
     </div>
 
@@ -26,7 +26,7 @@ export function SummaryTab({ project: p }: { project: Project }) {
         <PlanVsActual project={p} />
       </section>
       <section className="surface sm-panel" aria-labelledby="ai-check-title">
-        <div className="section-head"><div><div className="eyebrow"><Sparkles size={11} aria-hidden style={{ verticalAlign: -1 }} /> Avtomatik yoxlama</div><h2 id="ai-check-title">AI büdcə yoxlaması</h2></div></div>
+        <div className="section-head"><div><div className="eyebrow"><Sparkles size={11} aria-hidden className="sm-ii" /> Avtomatik yoxlama</div><h2 id="ai-check-title">AI büdcə yoxlaması</h2></div></div>
         <Insights items={budgetInsights(p)} />
         <p className="sm-muted" style={{ margin: '12px 0 0', fontSize: 12, lineHeight: 1.5 }}>Nəticələr daxil edilmiş qəbzlərə və smeta sətirlərinə əsaslanır. İlkin qiymətləndirmədir — qərar verməzdən əvvəl yoxlayın.</p>
       </section>

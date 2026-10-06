@@ -6,7 +6,7 @@ import { HealthLabel, SkeletonDashboard, SmetaToaster, StatusBadge, toast } from
 import { portfolioInsight } from '@/lib/smeta/ai';
 import { budgetSummary, changeTotals, round2 } from '@/lib/smeta/calc';
 import { PROPERTY_LABEL, RENOVATION_LABEL, TEMPLATES } from '@/lib/smeta/catalog';
-import { azn, dateAz, num } from '@/lib/smeta/format';
+import { azn, dateAz, num, qty } from '@/lib/smeta/format';
 import { displayStatus, smeta, useFirstLoad, useSmetaProjects } from '@/lib/smeta/store';
 import type { Project } from '@/lib/smeta/types';
 
@@ -101,7 +101,7 @@ function ProjectCard({ project: p, index }: { project: Project; index: number })
     <div className="sm-card-top"><div className="project-card-symbol">{p.propertyKind === 'ofis' ? 'O' : p.propertyKind === 'villa' ? 'V' : 'M'}</div><StatusBadge status={displayStatus(p)} /><ArrowUpRight size={16} className="card-arrow" /></div>
     <div className="eyebrow">{PROPERTY_LABEL[p.propertyKind]} · {RENOVATION_LABEL[p.renovationKind]} təmir</div>
     <h3>{p.name}</h3>
-    <div className="sm-card-meta"><span><MapPin size={12} aria-hidden />{p.district}</span><span>{num(p.areaM2)} m²</span></div>
+    <div className="sm-card-meta"><span><MapPin size={12} aria-hidden />{p.district}</span><span>{qty(p.areaM2)} m²</span></div>
     <div className="sm-money-row"><div><small>Plan büdcəsi</small><b className="num">{azn(b.plannedBudget)}</b></div><div><small>Faktiki xərc</small><b className="num">{azn(b.actualSpending)}</b></div></div>
     <div className="sm-card-foot" style={{ marginTop: 0, marginBottom: 6 }}><span>Büdcə istifadəsi</span><b className="num">{Math.round(used * 100)}%</b></div>
     <div className={`sm-budget-bar ${b.health}`} role="img" aria-label={`Büdcənin ${Math.round(used * 100)}%-i xərclənib`}><span style={{ width: `${Math.min(100, used * 100)}%` }} /></div>

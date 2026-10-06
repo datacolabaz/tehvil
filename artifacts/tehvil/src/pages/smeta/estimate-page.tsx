@@ -15,7 +15,7 @@ import { runExport } from '@/components/smeta/export-actions';
 import { DropItem, DropMenu, DropSep, SmetaToaster, StatusBadge } from '@/components/smeta/ui';
 import { projectTotals } from '@/lib/smeta/calc';
 import { PROPERTY_LABEL, RENOVATION_LABEL } from '@/lib/smeta/catalog';
-import { azn, dateAz, num } from '@/lib/smeta/format';
+import { azn, dateAz, num, qty } from '@/lib/smeta/format';
 import { displayStatus, hasUnsentChanges, useFirstLoad, useSmetaProject } from '@/lib/smeta/store';
 
 const TABS = [
@@ -83,15 +83,15 @@ export function EstimateDetailPage({ projectId }: { projectId: string }) {
         <div className="sm-detail-meta">
           <StatusBadge status={displayStatus(p)} />
           <span><CalendarDays size={13} aria-hidden />Son yenilənmə: {dateAz(p.updatedAt)}</span>
-          <span><MapPin size={13} aria-hidden />{p.district} · {num(p.areaM2)} m²</span>
+          <span><MapPin size={13} aria-hidden />{p.district} · {qty(p.areaM2)} m²</span>
           <span><UserRound size={13} aria-hidden />{p.client.name}</span>
         </div>
       </div>
       <div className="sm-total-block" aria-live="polite">
         <span className="eyebrow">Ümumi smeta</span>
         <strong className="num" data-testid="text-header-total">{azn(t.total)}</strong>
-        <small>Materiallar {azn(t.material + t.waste)} · İşçilik {azn(t.labor)}</small>
-        {lastApproval && <small><Check size={11} aria-hidden style={{ verticalAlign: -1 }} /> Sifarişçi v{lastApproval.estimateVersion} versiyasını {dateAz(lastApproval.approvedAt)} təsdiqləyib</small>}
+        <small>Materiallar {azn(t.material)} · İşçilik {azn(t.labor)}</small>
+        {lastApproval && <small><Check size={11} aria-hidden className="sm-ii" /> Sifarişçi v{lastApproval.estimateVersion} versiyasını {dateAz(lastApproval.approvedAt)} təsdiqləyib</small>}
       </div>
     </header>
 

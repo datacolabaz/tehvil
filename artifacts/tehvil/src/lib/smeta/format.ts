@@ -13,6 +13,11 @@ export function num(value: number, fraction: 0 | 1 | 2 | 'auto' = 'auto'): strin
   return `${sign}${grouped}${dec ? `,${dec}` : ''}`;
 }
 
+/** Quantities and areas: up to 2 decimals without trailing zeros — 62,4 / 196 / 32,56 */
+export function qty(value: number): string {
+  return num(value, 2).replace(/,?0+$/, '');
+}
+
 /** "24 860 AZN" */
 export function azn(value: number, fraction: 0 | 1 | 2 | 'auto' = 0): string {
   return `${num(value, fraction)}${NBSP}AZN`;

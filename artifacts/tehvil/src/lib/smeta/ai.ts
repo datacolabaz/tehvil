@@ -12,7 +12,7 @@
  */
 import { allItems, budgetSummary, changeTotals, lineTotals, planVsActual, projectTotals, round2 } from './calc';
 import { BREAKDOWN_GROUP, CATEGORY_LABEL, CATEGORY_ORDER, DEFAULT_PACKAGES, QUALITY_FACTOR, QUALITY_LABEL, forecastDays } from './catalog';
-import { azn, dateAz, num, pct, todayISO } from './format';
+import { azn, dateAz, num, pct, todayISO, qty } from './format';
 import { SAMPLE_DRAWING, drawingMeasurements } from './mock-data';
 import type { Drawing, EstimateLineItem, Measurement, Project, QualityLevel, ReceiptSuggestion, WorkCategory } from './types';
 
@@ -204,7 +204,7 @@ function answerClientSummary(p: Project): string {
   const sections = p.estimate.sections.filter(s => s.items.length).map(s => s.title.toLocaleLowerCase('az'));
   return [
     `Hörmətli ${p.client.name.split(' ')[0]},`,
-    `${p.name} üzrə smeta ${num(p.areaM2)} m² sahə üçün hazırlanıb və ${sections.slice(0, 5).join(', ')}${sections.length > 5 ? ' və digər işləri' : ''} əhatə edir.`,
+    `${p.name} üzrə smeta ${qty(p.areaM2)} m² sahə üçün hazırlanıb və ${sections.slice(0, 5).join(', ')}${sections.length > 5 ? ' və digər işləri' : ''} əhatə edir.`,
     `Ümumi məbləğ ${azn(t.total)} təşkil edir: materiallar ${azn(t.material + t.waste)}, işçilik ${azn(t.labor)}, əlavə xərclər və podratçı xidməti ${azn(t.additional + t.projectCosts + t.margin)}.`,
     ch.approved ? `Təsdiqlənmiş əlavə işlər: ${azn(ch.approved)}. Yekun məbləğ: ${azn(t.total + ch.approved)}.` : 'Hazırda təsdiqlənmiş əlavə iş yoxdur.',
     'Hər bir sətirdə miqdarın haradan götürüldüyü göstərilib. Sonradan yaranan dəyişikliklər yalnız sizin təsdiqinizlə əlavə olunacaq.',

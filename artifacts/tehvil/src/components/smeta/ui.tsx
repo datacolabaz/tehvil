@@ -3,7 +3,7 @@ import * as Menu from '@radix-ui/react-dropdown-menu';
 import { AlertTriangle, CheckCircle2, CircleDashed, Pencil, ShieldCheck, Sparkles, X } from 'lucide-react';
 import type { DisplayStatus, StatusTone } from '@/lib/smeta/store';
 import { PRICE_SOURCE_LABEL } from '@/lib/smeta/export';
-import { dateAz, num, parseNumber } from '@/lib/smeta/format';
+import { dateAz, num, parseNumber, qty } from '@/lib/smeta/format';
 import type { BudgetHealth } from '@/lib/smeta/calc';
 import type { LineStatus, PriceSource } from '@/lib/smeta/types';
 
@@ -125,7 +125,7 @@ export function SmetaToaster() {
 /** Text input that accepts "1 234,5" style numbers and commits every valid change. */
 export function NumberInput({ value, onCommit, label, className = '', min = 0, max, fraction = 'auto' as const, id }: { value: number; onCommit: (v: number) => void; label: string; className?: string; min?: number; max?: number; fraction?: 0 | 2 | 'auto'; id?: string }) {
   const [draft, setDraft] = useState<string | null>(null);
-  const shown = draft ?? num(value, fraction);
+  const shown = draft ?? (fraction === 'auto' ? qty(value) : num(value, fraction));
   const parsed = draft === null ? value : parseNumber(draft);
   const invalid = draft !== null && (parsed === null || parsed < min || (max !== undefined && parsed > max));
   return <input

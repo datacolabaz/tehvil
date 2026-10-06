@@ -3,7 +3,7 @@ import { AlertTriangle, Check, CheckCircle2, FileUp, Info, LoaderCircle, Pencil,
 import { Button } from '@/components/kit';
 import { TAKEOFF_STEPS, analyzeDrawing } from '@/lib/smeta/ai';
 import { quantityFromMeasurements } from '@/lib/smeta/calc';
-import { dateAz, num, parseNumber } from '@/lib/smeta/format';
+import { dateAz, num, parseNumber, qty } from '@/lib/smeta/format';
 import { smeta } from '@/lib/smeta/store';
 import type { Drawing, Measurement, Project } from '@/lib/smeta/types';
 import { ConfidenceChip, toast } from './ui';
@@ -30,7 +30,7 @@ export function FloorPlan({ drawing, measurements, selectedRoom, onSelect }: { d
       const m = byRoom.get(r.id);
       const review = m?.status === 'suggested' && m.confidence < 0.8;
       return <rect key={r.id} className={`room ${selectedRoom === r.id ? 'selected' : ''} ${review ? 'review' : ''}`} x={X(r.x)} y={Y(r.y)} width={r.w * S} height={r.h * S}
-        tabIndex={0} role="button" aria-pressed={selectedRoom === r.id} aria-label={`${r.name}${m ? `, ${num(m.value)} m²` : ''}${review ? ', yoxlanmalıdır' : ''}`}
+        tabIndex={0} role="button" aria-pressed={selectedRoom === r.id} aria-label={`${r.name}${m ? `, ${qty(m.value)} m²` : ''}${review ? ', yoxlanmalıdır' : ''}`}
         onClick={() => onSelect(r.id)} onKeyDown={e => onKey(e, r.id)} />;
     })}
 
@@ -53,7 +53,7 @@ export function FloorPlan({ drawing, measurements, selectedRoom, onSelect }: { d
       const small = r.w < 2.6;
       return <g key={`l-${r.id}`}>
         <text className={`label ${sel ? 'sel' : ''}`} x={cx} y={cy - 4} textAnchor="middle" style={small ? { fontSize: 12 } : undefined}>{r.name.replace(' otağı', '')}</text>
-        {m && <text className={`label area ${sel ? 'sel' : ''}`} x={cx} y={cy + 15} textAnchor="middle">{m.status === 'suggested' && m.confidence < 0.8 ? '≈ ' : ''}{num(m.value)} m²</text>}
+        {m && <text className={`label area ${sel ? 'sel' : ''}`} x={cx} y={cy + 15} textAnchor="middle">{m.status === 'suggested' && m.confidence < 0.8 ? '≈ ' : ''}{qty(m.value)} m²</text>}
       </g>;
     })}
 
@@ -103,7 +103,7 @@ export function TakeoffTab({ project: p }: { project: Project }) {
         <div className="sm-plan-top"><span><i />{p.drawing.fileName.toUpperCase()}</span><span>AI ANALİZİ · {dateAz(p.drawing.uploadedAt).toUpperCase()}</span></div>
         <div className="sm-plan"><FloorPlan drawing={p.drawing} measurements={p.measurements} selectedRoom={selectedRoom} onSelect={selectRoom} /></div>
         <div className="sm-plan-legend">
-          <span>{p.drawing.rooms.length} otaq · {num(roomArea)} m²</span>
+          <span>{p.drawing.rooms.length} otaq · {qty(roomArea)} m²</span>
           <span><i style={{ background: '#d9c69b' }} />{p.drawing.openings.filter(o => o.kind === 'door').length} qapı</span>
           <span><i style={{ background: '#9ec4d0' }} />{p.drawing.openings.filter(o => o.kind === 'window').length} pəncərə</span>
           <span><i style={{ background: 'repeating-linear-gradient(90deg,#c9a76f 0 3px,transparent 3px 5px)' }} />Ştrixli zona — ölçü yoxlanmalıdır</span>
@@ -138,17 +138,17 @@ function MeasurementRow({ p, m, selected, onSelect }: { p: Project; m: Measureme
     if (!valid) return;
     smeta.updateMeasurement(p.id, m.id, { value: parsed!, status: 'edited' });
     setEdit(null);
-    toast(`${m.name}: ${num(parsed!)} ${m.unit} kimi düzəldildi`);
+    toast(`${m.name}: ${qty(parsed!)} ${m.unit} kimi düzəldildi`);
   };
   const statusText = m.status === 'approved' ? 'Təsdiqlənib' : m.status === 'edited' ? 'Əl ilə düzəldilib' : `AI təklifi · ${Math.round(m.confidence * 100)}%`;
   return <div className={`sm-measure ${selected ? 'selected' : ''}`} data-mid={m.id} onClick={onSelect}>
     <button type="button" className="sm-measure-name" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }} onClick={e => { e.stopPropagation(); onSelect(); }} aria-pressed={selected}>{m.name}{m.status === 'suggested' && <ConfidenceChip confidence={m.confidence} />}</button>
     <div className="sm-measure-value">{edit !== null
       ? <input autoFocus aria-label={`${m.name}, yeni dəyər (${m.unit})`} aria-invalid={!valid || undefined} value={edit} onClick={e => e.stopPropagation()} onChange={e => setEdit(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEdit(null); }} />
-      : <span className="num">{num(m.value)} {m.unit}</span>}</div>
-    <div className="sm-measure-src"><Info size={11} aria-hidden style={{ verticalAlign: -1, marginRight: 4 }} />{m.source}</div>
+      : <span className="num">{qty(m.value)} {m.unit}</span>}</div>
+    <div className="sm-measure-src"><Info size={11} aria-hidden className="sm-ii" style={{ marginRight: 4 }} />{m.source}</div>
     <div className="sm-measure-foot" onClick={e => e.stopPropagation()}>
-      <span style={{ fontSize: 12, fontWeight: 700, color: m.status === 'suggested' ? '#8a6a35' : '#3d725a' }}>{m.status !== 'suggested' && <Check size={12} aria-hidden style={{ verticalAlign: -2, marginRight: 3 }} />}{statusText}</span>
+      <span style={{ fontSize: 12, fontWeight: 700, color: m.status === 'suggested' ? '#8a6a35' : '#3d725a' }}>{m.status !== 'suggested' && <Check size={12} aria-hidden className="sm-ii" style={{ marginRight: 3 }} />}{statusText}</span>
       <span className="sm-spacer" />
       {edit !== null ? <>
         <Button variant="secondary" onClick={() => setEdit(null)}><X size={13} />Ləğv et</Button>
