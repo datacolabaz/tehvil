@@ -24,6 +24,8 @@ tags:
     description: Audit timeline, invitations, and passport
   - name: storage
     description: Private project evidence and document storage
+  - name: smeta
+    description: AI Smeta estimates, budget control and client approval
 paths:
   /healthz:
     get:
@@ -716,6 +718,173 @@ paths:
               schema:
                 type: string
                 format: binary
+  /smeta/projects:
+    get:
+      operationId: listSmetaProjects
+      tags: [smeta]
+      summary: List the signed-in contractor's AI Smeta projects
+      responses:
+        "200":
+          description: Projects owned by the signed-in user
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SmetaProject" }
+    post:
+      operationId: createSmetaProject
+      tags: [smeta]
+      summary: Create an estimate project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SmetaProjectInput" }
+      responses:
+        "201":
+          description: Project created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmetaProject" }
+  /smeta/projects/{projectId}:
+    get:
+      operationId: getSmetaProject
+      tags: [smeta]
+      parameters:
+        - $ref: "#/components/parameters/SmetaProjectId"
+      responses:
+        "200":
+          description: Full project for its owner
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmetaProject" }
+    put:
+      operationId: updateSmetaProject
+      tags: [smeta]
+      summary: Save the contractor-editable part of a project
+      description: Replaces estimate lines, measurements, change orders, expenses, photos and payments. Status, client decisions and sent versions are server-controlled and ignored.
+      parameters:
+        - $ref: "#/components/parameters/SmetaProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SmetaProjectInput" }
+      responses:
+        "200":
+          description: Saved project
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmetaProject" }
+    delete:
+      operationId: deleteSmetaProject
+      tags: [smeta]
+      parameters:
+        - $ref: "#/components/parameters/SmetaProjectId"
+      responses:
+        "200":
+          description: Project deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /smeta/projects/{projectId}/share:
+    post:
+      operationId: shareSmetaEstimate
+      tags: [smeta]
+      summary: Freeze the current estimate as the client-visible version and (re)send the stable client link
+      parameters:
+        - $ref: "#/components/parameters/SmetaProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SmetaShareInput" }
+      responses:
+        "200":
+          description: Project with the active share
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmetaProject" }
+    delete:
+      operationId: revokeSmetaShare
+      tags: [smeta]
+      summary: Revoke the client link
+      parameters:
+        - $ref: "#/components/parameters/SmetaProjectId"
+      responses:
+        "200":
+          description: Project without an active share
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SmetaProject" }
+  /shared-estimates/{token}:
+    get:
+      operationId: getSharedEstimate
+      tags: [smeta]
+      summary: Public client view of the last sent estimate version
+      parameters:
+        - $ref: "#/components/parameters/SharedEstimateToken"
+      responses:
+        "200":
+          description: Sanitized estimate with all-in line prices; no margins, waste or internal costs
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SharedEstimate" }
+  /shared-estimates/{token}/approve:
+    post:
+      operationId: approveSharedEstimate
+      tags: [smeta]
+      parameters:
+        - $ref: "#/components/parameters/SharedEstimateToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SharedEstimateApprovalInput" }
+      responses:
+        "200":
+          description: Approval recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SharedEstimate" }
+  /shared-estimates/{token}/revision:
+    post:
+      operationId: requestSharedEstimateRevision
+      tags: [smeta]
+      parameters:
+        - $ref: "#/components/parameters/SharedEstimateToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SharedEstimateRevisionInput" }
+      responses:
+        "200":
+          description: Revision request recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SharedEstimate" }
+  /shared-estimates/{token}/change-orders/{changeOrderId}/decision:
+    post:
+      operationId: decideSharedChangeOrder
+      tags: [smeta]
+      parameters:
+        - $ref: "#/components/parameters/SharedEstimateToken"
+        - name: changeOrderId
+          in: path
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SharedChangeOrderDecisionInput" }
+      responses:
+        "200":
+          description: Client decision recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SharedEstimate" }
 components:
   parameters:
     ProjectId:
@@ -724,6 +893,16 @@ components:
       required: true
       schema:
         type: string
+    SmetaProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    SharedEstimateToken:
+      name: token
+      in: path
+      required: true
+      schema: { type: string, minLength: 20, maxLength: 64, pattern: "^[A-Za-z0-9_-]+$" }
   schemas:
     HealthStatus:
       type: object
@@ -1097,4 +1276,542 @@ components:
         objectPath: { type: string }
         metadata: { $ref: "#/components/schemas/UploadUrlRequest" }
       required: [uploadURL, objectPath, metadata]
+    SmetaWorkCategory:
+      type: string
+      enum: [sokuntu, elektrik, santexnika, divar, boya, dosheme, kafel, tavan, qapi, isiqlandirma, metbex, sanitar, temizlik]
+    SmetaParty:
+      type: object
+      properties:
+        name: { type: string, maxLength: 120 }
+        phone: { type: string, maxLength: 32 }
+        email: { type: string, maxLength: 254 }
+      required: [name, phone]
+    SmetaContractorProfile:
+      type: object
+      properties:
+        name: { type: string, maxLength: 120 }
+        phone: { type: string, maxLength: 32 }
+        email: { type: string, maxLength: 254 }
+        company: { type: string, maxLength: 160 }
+        experienceYears: { type: number, minimum: 0, maximum: 100 }
+        completedProjects: { type: number, minimum: 0, maximum: 100000 }
+        rating: { type: number, minimum: 0, maximum: 5 }
+      required: [name, phone, company, experienceYears, completedProjects, rating]
+    SmetaPriceSource:
+      type: object
+      properties:
+        kind: { type: string, enum: [market, contractor, manual] }
+        reference: { type: string, maxLength: 160 }
+        updatedAt: { type: string, maxLength: 40 }
+      required: [kind, updatedAt]
+    SmetaQuantitySource:
+      type: object
+      properties:
+        kind: { type: string, enum: [drawing, manual, template, formula] }
+        label: { type: string, maxLength: 250 }
+        measurementIds:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 64 }
+        factor: { type: number }
+      required: [kind, label]
+    SmetaLineItem:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        name: { type: string, maxLength: 200 }
+        zone: { type: string, maxLength: 120 }
+        unit: { type: string, maxLength: 16 }
+        quantity: { type: number, minimum: 0, maximum: 100000000 }
+        materialUnitPrice: { type: number, minimum: 0, maximum: 100000000 }
+        laborUnitPrice: { type: number, minimum: 0, maximum: 100000000 }
+        additionalCost: { type: number, minimum: -100000000, maximum: 100000000 }
+        wastePercentage: { type: number, minimum: 0, maximum: 1 }
+        marginPercentage: { type: ["number", "null"], minimum: 0, maximum: 1 }
+        priceSource: { $ref: "#/components/schemas/SmetaPriceSource" }
+        quantitySource: { $ref: "#/components/schemas/SmetaQuantitySource" }
+        status: { type: string, enum: [ai, draft, approved, changed] }
+        materialId: { type: string, maxLength: 64 }
+        laborRateId: { type: string, maxLength: 64 }
+      required: [id, name, zone, unit, quantity, materialUnitPrice, laborUnitPrice, additionalCost, wastePercentage, marginPercentage, priceSource, quantitySource, status]
+    SmetaEstimateSection:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        category: { $ref: "#/components/schemas/SmetaWorkCategory" }
+        title: { type: string, maxLength: 120 }
+        items:
+          type: array
+          maxItems: 400
+          items: { $ref: "#/components/schemas/SmetaLineItem" }
+      required: [id, category, title, items]
+    SmetaEstimate:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        version: { type: integer, minimum: 1 }
+        createdAt: { type: string, maxLength: 40 }
+        validUntil: { type: string, format: date }
+        sections:
+          type: array
+          maxItems: 60
+          items: { $ref: "#/components/schemas/SmetaEstimateSection" }
+      required: [id, version, createdAt, validUntil, sections]
+    SmetaProjectCost:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        label: { type: string, maxLength: 160 }
+        amount: { type: number, minimum: -100000000, maximum: 100000000 }
+      required: [id, label, amount]
+    SmetaMeasurement:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        kind: { type: string, enum: [area, length, count, height] }
+        name: { type: string, maxLength: 160 }
+        value: { type: number, minimum: 0, maximum: 100000000 }
+        unit: { type: string, maxLength: 8 }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        source: { type: string, maxLength: 250 }
+        status: { type: string, enum: [suggested, edited, approved] }
+        roomId: { type: string, maxLength: 64 }
+      required: [id, kind, name, value, unit, confidence, source, status]
+    SmetaDrawing:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        fileName: { type: string, maxLength: 255 }
+        fileType: { type: string, enum: [pdf, jpg, png] }
+        uploadedAt: { type: string, maxLength: 40 }
+        scale: { type: string, maxLength: 40 }
+        width: { type: number }
+        height: { type: number }
+        status: { type: string, enum: [processing, analyzed, failed] }
+        rooms:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            properties:
+              id: { type: string, maxLength: 64 }
+              name: { type: string, maxLength: 120 }
+              x: { type: number }
+              y: { type: number }
+              w: { type: number }
+              h: { type: number }
+            required: [id, name, x, y, w, h]
+        openings:
+          type: array
+          maxItems: 500
+          items:
+            type: object
+            properties:
+              id: { type: string, maxLength: 64 }
+              kind: { type: string, enum: [door, window] }
+              x1: { type: number }
+              y1: { type: number }
+              x2: { type: number }
+              y2: { type: number }
+            required: [id, kind, x1, y1, x2, y2]
+      required: [id, fileName, fileType, uploadedAt, scale, width, height, status, rooms, openings]
+    SmetaChangeOrder:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        number: { type: integer, minimum: 1 }
+        title: { type: string, maxLength: 160 }
+        reason: { type: string, maxLength: 1000 }
+        date: { type: string, format: date }
+        requestedBy: { type: string, enum: [client, contractor] }
+        requestedByName: { type: string, maxLength: 120 }
+        category: { $ref: "#/components/schemas/SmetaWorkCategory" }
+        materialDelta: { type: number, minimum: -100000000, maximum: 100000000 }
+        laborDelta: { type: number, minimum: -100000000, maximum: 100000000 }
+        additionalCost: { type: number, minimum: -100000000, maximum: 100000000 }
+        status: { type: string, enum: [draft, pending, approved, rejected] }
+        photoIds:
+          type: array
+          maxItems: 50
+          items: { type: string, maxLength: 64 }
+        lineItemIds:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 64 }
+        decidedAt: { type: string, maxLength: 40 }
+        decisionNote: { type: string, maxLength: 1000 }
+      required: [id, number, title, reason, date, requestedBy, requestedByName, category, materialDelta, laborDelta, additionalCost, status, photoIds, lineItemIds]
+    SmetaReceiptSuggestion:
+      type: object
+      properties:
+        merchant: { type: string, maxLength: 160 }
+        date: { type: string, maxLength: 40 }
+        total: { type: number }
+        category: { $ref: "#/components/schemas/SmetaWorkCategory" }
+        kind: { type: string, enum: [material, labor, other] }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+      required: [merchant, date, total, category, kind, confidence]
+    SmetaReceipt:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        fileName: { type: string, maxLength: 255 }
+        fileType: { type: string, enum: [image, pdf] }
+        uploadedAt: { type: string, maxLength: 40 }
+        aiSuggestion: { $ref: "#/components/schemas/SmetaReceiptSuggestion" }
+      required: [id, fileName, fileType, uploadedAt]
+    SmetaExpense:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        date: { type: string, format: date }
+        kind: { type: string, enum: [material, labor, other] }
+        category: { $ref: "#/components/schemas/SmetaWorkCategory" }
+        description: { type: string, maxLength: 300 }
+        vendor: { type: string, maxLength: 160 }
+        amount: { type: number, minimum: 0, maximum: 100000000 }
+        paymentStatus: { type: string, enum: [paid, partial, unpaid] }
+        receiptId: { type: string, maxLength: 64 }
+        lineItemId: { type: string, maxLength: 64 }
+      required: [id, date, kind, category, description, vendor, amount, paymentStatus]
+    SmetaPhoto:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        phase: { type: string, enum: [before, during, after] }
+        date: { type: string, format: date }
+        uploadedBy: { type: string, maxLength: 120 }
+        note: { type: string, maxLength: 500 }
+        room: { type: string, maxLength: 120 }
+        category: { $ref: "#/components/schemas/SmetaWorkCategory" }
+        lineItemId: { type: string, maxLength: 64 }
+        clientVisible: { type: boolean }
+      required: [id, phase, date, uploadedBy, note, room, category, clientVisible]
+    SmetaPaymentMilestone:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        title: { type: string, maxLength: 160 }
+        share: { type: number, minimum: 0, maximum: 1 }
+        condition: { type: string, maxLength: 250 }
+        status: { type: string, enum: [paid, due, planned] }
+      required: [id, title, share, condition, status]
+    SmetaExportJob:
+      type: object
+      properties:
+        id: { type: string, minLength: 1, maxLength: 64 }
+        kind: { type: string, enum: [xlsx, pdf] }
+        status: { type: string, enum: [processing, ready, failed] }
+        createdAt: { type: string, maxLength: 40 }
+        fileName: { type: string, maxLength: 255 }
+      required: [id, kind, status, createdAt, fileName]
+    SmetaClientApproval:
+      type: object
+      properties:
+        id: { type: string }
+        estimateVersion: { type: integer }
+        approvedAt: { type: string, format: date-time }
+        name: { type: string }
+        phone: { type: string }
+        confirmedScope: { type: boolean }
+        total: { type: number }
+      required: [id, estimateVersion, approvedAt, name, phone, confirmedScope, total]
+    SmetaRevisionRequest:
+      type: object
+      properties:
+        id: { type: string }
+        estimateVersion: { type: integer }
+        createdAt: { type: string, format: date-time }
+        name: { type: string }
+        message: { type: string }
+      required: [id, estimateVersion, createdAt, name, message]
+    SmetaShare:
+      type: object
+      description: Owner-only view of the client link, including the frozen internal snapshot.
+      properties:
+        token: { type: string }
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+        clientName: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        message: { type: string }
+        notifyOnApprove: { type: boolean }
+        attachPdf: { type: boolean }
+        snapshot: { $ref: "#/components/schemas/SmetaEstimate" }
+        snapshotProjectCosts:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaProjectCost" }
+        snapshotMargin: { type: number }
+      required: [token, createdAt, expiresAt, clientName, phone, message, notifyOnApprove, attachPdf, snapshot, snapshotProjectCosts, snapshotMargin]
+    SmetaProjectInput:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        district: { type: string, maxLength: 100 }
+        address: { type: string, maxLength: 250 }
+        propertyKind: { type: string, enum: [menzil, villa, ofis, magaza, diger] }
+        renovationKind: { type: string, enum: [kosmetik, standart, kapital, premium] }
+        quality: { type: string, enum: [ekonom, standart, premium] }
+        areaM2: { type: number, minimum: 0, maximum: 100000 }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        client: { $ref: "#/components/schemas/SmetaParty" }
+        contractor: { $ref: "#/components/schemas/SmetaContractorProfile" }
+        completion: { type: integer, minimum: 0, maximum: 100 }
+        defaultMarginPercentage: { type: number, minimum: 0, maximum: 1 }
+        projectCosts:
+          type: array
+          maxItems: 50
+          items: { $ref: "#/components/schemas/SmetaProjectCost" }
+        estimate: { $ref: "#/components/schemas/SmetaEstimate" }
+        changeOrders:
+          type: array
+          maxItems: 300
+          items: { $ref: "#/components/schemas/SmetaChangeOrder" }
+        expenses:
+          type: array
+          maxItems: 2000
+          items: { $ref: "#/components/schemas/SmetaExpense" }
+        receipts:
+          type: array
+          maxItems: 2000
+          items: { $ref: "#/components/schemas/SmetaReceipt" }
+        photos:
+          type: array
+          maxItems: 2000
+          items: { $ref: "#/components/schemas/SmetaPhoto" }
+        drawing: { $ref: "#/components/schemas/SmetaDrawing" }
+        measurements:
+          type: array
+          maxItems: 500
+          items: { $ref: "#/components/schemas/SmetaMeasurement" }
+        payments:
+          type: array
+          maxItems: 20
+          items: { $ref: "#/components/schemas/SmetaPaymentMilestone" }
+        included:
+          type: array
+          maxItems: 60
+          items: { type: string, maxLength: 200 }
+        excluded:
+          type: array
+          maxItems: 60
+          items: { type: string, maxLength: 200 }
+        exports:
+          type: array
+          maxItems: 50
+          items: { $ref: "#/components/schemas/SmetaExportJob" }
+      required: [name, district, address, propertyKind, renovationKind, quality, areaM2, startDate, endDate, client, contractor, completion, defaultMarginPercentage, projectCosts, estimate, changeOrders, expenses, receipts, photos, measurements, payments, included, excluded, exports]
+    SmetaProject:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        district: { type: string }
+        address: { type: string }
+        propertyKind: { type: string, enum: [menzil, villa, ofis, magaza, diger] }
+        renovationKind: { type: string, enum: [kosmetik, standart, kapital, premium] }
+        quality: { type: string, enum: [ekonom, standart, premium] }
+        areaM2: { type: number }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        client: { $ref: "#/components/schemas/SmetaParty" }
+        contractor: { $ref: "#/components/schemas/SmetaContractorProfile" }
+        completion: { type: integer }
+        defaultMarginPercentage: { type: number }
+        projectCosts:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaProjectCost" }
+        estimate: { $ref: "#/components/schemas/SmetaEstimate" }
+        status: { type: string, enum: [draft, sent, client_approved, revision_requested] }
+        changeOrders:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaChangeOrder" }
+        expenses:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaExpense" }
+        receipts:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaReceipt" }
+        photos:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaPhoto" }
+        drawing: { $ref: "#/components/schemas/SmetaDrawing" }
+        measurements:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaMeasurement" }
+        approvals:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaClientApproval" }
+        revisionRequests:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaRevisionRequest" }
+        payments:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaPaymentMilestone" }
+        included:
+          type: array
+          items: { type: string }
+        excluded:
+          type: array
+          items: { type: string }
+        share: { $ref: "#/components/schemas/SmetaShare" }
+        exports:
+          type: array
+          items: { $ref: "#/components/schemas/SmetaExportJob" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, district, address, propertyKind, renovationKind, quality, areaM2, startDate, endDate, client, contractor, completion, defaultMarginPercentage, projectCosts, estimate, status, changeOrders, expenses, receipts, photos, measurements, approvals, revisionRequests, payments, included, excluded, exports, createdAt, updatedAt]
+    SmetaShareInput:
+      type: object
+      properties:
+        clientName: { type: string, minLength: 1, maxLength: 120 }
+        phone: { type: string, minLength: 9, maxLength: 32 }
+        email: { type: string, maxLength: 254 }
+        message: { type: string, maxLength: 2000 }
+        notifyOnApprove: { type: boolean }
+        attachPdf: { type: boolean }
+      required: [clientName, phone, message, notifyOnApprove, attachPdf]
+    SharedEstimateLine:
+      type: object
+      description: All-in client prices; margin and waste are folded in and never exposed separately.
+      properties:
+        id: { type: string }
+        name: { type: string }
+        zone: { type: string }
+        unit: { type: string }
+        quantity: { type: number }
+        quantityLabel: { type: string }
+        total: { type: number }
+        materialTotal: { type: number }
+        laborTotal: { type: number }
+        additionalTotal: { type: number }
+      required: [id, name, zone, unit, quantity, quantityLabel, total, materialTotal, laborTotal, additionalTotal]
+    SharedEstimateSection:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        total: { type: number }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/SharedEstimateLine" }
+      required: [id, title, total, items]
+    SharedEstimateSnapshot:
+      type: object
+      properties:
+        version: { type: integer }
+        sentAt: { type: string }
+        validUntil: { type: string, format: date }
+        sections:
+          type: array
+          items: { $ref: "#/components/schemas/SharedEstimateSection" }
+        projectCosts:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              label: { type: string }
+              amount: { type: number }
+            required: [id, label, amount]
+        projectCostsTotal: { type: number }
+        total: { type: number }
+        split:
+          type: object
+          properties:
+            material: { type: number }
+            labor: { type: number }
+            other: { type: number }
+          required: [material, labor, other]
+      required: [version, sentAt, validUntil, sections, projectCosts, projectCostsTotal, total, split]
+    SharedEstimate:
+      type: object
+      properties:
+        project:
+          type: object
+          properties:
+            name: { type: string }
+            district: { type: string }
+            propertyKind: { type: string, enum: [menzil, villa, ofis, magaza, diger] }
+            renovationKind: { type: string, enum: [kosmetik, standart, kapital, premium] }
+            areaM2: { type: number }
+            included:
+              type: array
+              items: { type: string }
+            excluded:
+              type: array
+              items: { type: string }
+          required: [name, district, propertyKind, renovationKind, areaM2, included, excluded]
+        contractor:
+          type: object
+          properties:
+            name: { type: string }
+            company: { type: string }
+            phone: { type: string }
+            experienceYears: { type: number }
+            completedProjects: { type: number }
+            rating: { type: number }
+          required: [name, company, phone, experienceYears, completedProjects, rating]
+        client: { $ref: "#/components/schemas/SmetaParty" }
+        message: { type: string }
+        expiresAt: { type: string, format: date-time }
+        estimate: { $ref: "#/components/schemas/SharedEstimateSnapshot" }
+        changeOrders:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              number: { type: integer }
+              title: { type: string }
+              reason: { type: string }
+              date: { type: string, format: date }
+              status: { type: string, enum: [pending, approved, rejected] }
+              impact: { type: number }
+            required: [id, number, title, reason, date, status, impact]
+        approvedChangesTotal: { type: number }
+        finalTotal: { type: number }
+        payments:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              title: { type: string }
+              share: { type: number }
+              condition: { type: string }
+              amount: { type: number }
+            required: [id, title, share, condition, amount]
+        approval:
+          type: object
+          properties:
+            approvedAt: { type: string, format: date-time }
+            name: { type: string }
+          required: [approvedAt, name]
+        revisionRequestedAt: { type: string, format: date-time }
+      required: [project, contractor, client, message, expiresAt, estimate, changeOrders, approvedChangesTotal, finalTotal, payments]
+    SharedEstimateApprovalInput:
+      type: object
+      properties:
+        version: { type: integer, minimum: 1 }
+        name: { type: string, minLength: 2, maxLength: 120 }
+        phone: { type: string, minLength: 9, maxLength: 32, pattern: "^[+0-9 ()-]+$" }
+        consent: { type: boolean, description: "Must be true: the client confirms they reviewed the estimate and scope" }
+      required: [version, name, phone, consent]
+    SharedEstimateRevisionInput:
+      type: object
+      properties:
+        version: { type: integer, minimum: 1 }
+        name: { type: string, minLength: 2, maxLength: 120 }
+        message: { type: string, minLength: 5, maxLength: 1500 }
+      required: [version, name, message]
+    SharedChangeOrderDecisionInput:
+      type: object
+      properties:
+        decision: { type: string, enum: [approved, rejected] }
+        note: { type: string, maxLength: 500 }
+      required: [decision]
 

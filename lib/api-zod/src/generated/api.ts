@@ -1420,3 +1420,4444 @@ export const GetProjectMediaParams = zod.object({
 export const GetProjectMediaResponse = zod.unknown()
 
 
+/**
+ * @summary List the signed-in contractor's AI Smeta projects
+ */
+export const listSmetaProjectsResponseClientNameMax = 120;
+
+export const listSmetaProjectsResponseClientPhoneMax = 32;
+
+export const listSmetaProjectsResponseClientEmailMax = 254;
+
+export const listSmetaProjectsResponseContractorNameMax = 120;
+
+export const listSmetaProjectsResponseContractorPhoneMax = 32;
+
+export const listSmetaProjectsResponseContractorEmailMax = 254;
+
+export const listSmetaProjectsResponseContractorCompanyMax = 160;
+
+export const listSmetaProjectsResponseContractorExperienceYearsMin = 0;
+export const listSmetaProjectsResponseContractorExperienceYearsMax = 100;
+
+export const listSmetaProjectsResponseContractorCompletedProjectsMin = 0;
+export const listSmetaProjectsResponseContractorCompletedProjectsMax = 100000;
+
+export const listSmetaProjectsResponseContractorRatingMin = 0;
+export const listSmetaProjectsResponseContractorRatingMax = 5;
+
+export const listSmetaProjectsResponseProjectCostsItemIdMax = 64;
+
+export const listSmetaProjectsResponseProjectCostsItemLabelMax = 160;
+
+export const listSmetaProjectsResponseProjectCostsItemAmountMin = -100000000;
+export const listSmetaProjectsResponseProjectCostsItemAmountMax = 100000000;
+
+export const listSmetaProjectsResponseEstimateIdMax = 64;
+
+
+export const listSmetaProjectsResponseEstimateCreatedAtMax = 40;
+
+export const listSmetaProjectsResponseEstimateSectionsItemIdMax = 64;
+
+export const listSmetaProjectsResponseEstimateSectionsItemTitleMax = 120;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemIdMax = 64;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemNameMax = 200;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemZoneMax = 120;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemUnitMax = 16;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantityMin = 0;
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantityMax = 100000000;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemWastePercentageMin = 0;
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemWastePercentageMax = 1;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemMarginPercentageMin = 0;
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemMaterialIdMax = 64;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const listSmetaProjectsResponseEstimateSectionsItemItemsMax = 400;
+
+export const listSmetaProjectsResponseEstimateSectionsMax = 60;
+
+export const listSmetaProjectsResponseChangeOrdersItemIdMax = 64;
+
+
+export const listSmetaProjectsResponseChangeOrdersItemTitleMax = 160;
+
+export const listSmetaProjectsResponseChangeOrdersItemReasonMax = 1000;
+
+export const listSmetaProjectsResponseChangeOrdersItemRequestedByNameMax = 120;
+
+export const listSmetaProjectsResponseChangeOrdersItemMaterialDeltaMin = -100000000;
+export const listSmetaProjectsResponseChangeOrdersItemMaterialDeltaMax = 100000000;
+
+export const listSmetaProjectsResponseChangeOrdersItemLaborDeltaMin = -100000000;
+export const listSmetaProjectsResponseChangeOrdersItemLaborDeltaMax = 100000000;
+
+export const listSmetaProjectsResponseChangeOrdersItemAdditionalCostMin = -100000000;
+export const listSmetaProjectsResponseChangeOrdersItemAdditionalCostMax = 100000000;
+
+export const listSmetaProjectsResponseChangeOrdersItemPhotoIdsItemMax = 64;
+
+export const listSmetaProjectsResponseChangeOrdersItemPhotoIdsMax = 50;
+
+export const listSmetaProjectsResponseChangeOrdersItemLineItemIdsItemMax = 64;
+
+export const listSmetaProjectsResponseChangeOrdersItemLineItemIdsMax = 100;
+
+export const listSmetaProjectsResponseChangeOrdersItemDecidedAtMax = 40;
+
+export const listSmetaProjectsResponseChangeOrdersItemDecisionNoteMax = 1000;
+
+export const listSmetaProjectsResponseExpensesItemIdMax = 64;
+
+export const listSmetaProjectsResponseExpensesItemDescriptionMax = 300;
+
+export const listSmetaProjectsResponseExpensesItemVendorMax = 160;
+
+export const listSmetaProjectsResponseExpensesItemAmountMin = 0;
+export const listSmetaProjectsResponseExpensesItemAmountMax = 100000000;
+
+export const listSmetaProjectsResponseExpensesItemReceiptIdMax = 64;
+
+export const listSmetaProjectsResponseExpensesItemLineItemIdMax = 64;
+
+export const listSmetaProjectsResponseReceiptsItemIdMax = 64;
+
+export const listSmetaProjectsResponseReceiptsItemFileNameMax = 255;
+
+export const listSmetaProjectsResponseReceiptsItemUploadedAtMax = 40;
+
+export const listSmetaProjectsResponseReceiptsItemAiSuggestionMerchantMax = 160;
+
+export const listSmetaProjectsResponseReceiptsItemAiSuggestionDateMax = 40;
+
+export const listSmetaProjectsResponseReceiptsItemAiSuggestionConfidenceMin = 0;
+export const listSmetaProjectsResponseReceiptsItemAiSuggestionConfidenceMax = 1;
+
+export const listSmetaProjectsResponsePhotosItemIdMax = 64;
+
+export const listSmetaProjectsResponsePhotosItemUploadedByMax = 120;
+
+export const listSmetaProjectsResponsePhotosItemNoteMax = 500;
+
+export const listSmetaProjectsResponsePhotosItemRoomMax = 120;
+
+export const listSmetaProjectsResponsePhotosItemLineItemIdMax = 64;
+
+export const listSmetaProjectsResponseDrawingIdMax = 64;
+
+export const listSmetaProjectsResponseDrawingFileNameMax = 255;
+
+export const listSmetaProjectsResponseDrawingUploadedAtMax = 40;
+
+export const listSmetaProjectsResponseDrawingScaleMax = 40;
+
+export const listSmetaProjectsResponseDrawingRoomsItemIdMax = 64;
+
+export const listSmetaProjectsResponseDrawingRoomsItemNameMax = 120;
+
+export const listSmetaProjectsResponseDrawingRoomsMax = 200;
+
+export const listSmetaProjectsResponseDrawingOpeningsItemIdMax = 64;
+
+export const listSmetaProjectsResponseDrawingOpeningsMax = 500;
+
+export const listSmetaProjectsResponseMeasurementsItemIdMax = 64;
+
+export const listSmetaProjectsResponseMeasurementsItemNameMax = 160;
+
+export const listSmetaProjectsResponseMeasurementsItemValueMin = 0;
+export const listSmetaProjectsResponseMeasurementsItemValueMax = 100000000;
+
+export const listSmetaProjectsResponseMeasurementsItemUnitMax = 8;
+
+export const listSmetaProjectsResponseMeasurementsItemConfidenceMin = 0;
+export const listSmetaProjectsResponseMeasurementsItemConfidenceMax = 1;
+
+export const listSmetaProjectsResponseMeasurementsItemSourceMax = 250;
+
+export const listSmetaProjectsResponseMeasurementsItemRoomIdMax = 64;
+
+export const listSmetaProjectsResponsePaymentsItemIdMax = 64;
+
+export const listSmetaProjectsResponsePaymentsItemTitleMax = 160;
+
+export const listSmetaProjectsResponsePaymentsItemShareMin = 0;
+export const listSmetaProjectsResponsePaymentsItemShareMax = 1;
+
+export const listSmetaProjectsResponsePaymentsItemConditionMax = 250;
+
+export const listSmetaProjectsResponseShareSnapshotIdMax = 64;
+
+
+export const listSmetaProjectsResponseShareSnapshotCreatedAtMax = 40;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemIdMax = 64;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemTitleMax = 120;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemIdMax = 64;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemNameMax = 200;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemZoneMax = 120;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemUnitMax = 16;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantityMin = 0;
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantityMax = 100000000;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemWastePercentageMin = 0;
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemWastePercentageMax = 1;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin = 0;
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMaterialIdMax = 64;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsItemItemsMax = 400;
+
+export const listSmetaProjectsResponseShareSnapshotSectionsMax = 60;
+
+export const listSmetaProjectsResponseShareSnapshotProjectCostsItemIdMax = 64;
+
+export const listSmetaProjectsResponseShareSnapshotProjectCostsItemLabelMax = 160;
+
+export const listSmetaProjectsResponseShareSnapshotProjectCostsItemAmountMin = -100000000;
+export const listSmetaProjectsResponseShareSnapshotProjectCostsItemAmountMax = 100000000;
+
+export const listSmetaProjectsResponseExportsItemIdMax = 64;
+
+export const listSmetaProjectsResponseExportsItemCreatedAtMax = 40;
+
+export const listSmetaProjectsResponseExportsItemFileNameMax = 255;
+
+
+
+export const ListSmetaProjectsResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "quality": zod.enum(['ekonom', 'standart', 'premium']),
+  "areaM2": zod.number(),
+  "startDate": zod.string().date(),
+  "endDate": zod.string().date(),
+  "client": zod.object({
+  "name": zod.string().max(listSmetaProjectsResponseClientNameMax),
+  "phone": zod.string().max(listSmetaProjectsResponseClientPhoneMax),
+  "email": zod.string().max(listSmetaProjectsResponseClientEmailMax).optional()
+}),
+  "contractor": zod.object({
+  "name": zod.string().max(listSmetaProjectsResponseContractorNameMax),
+  "phone": zod.string().max(listSmetaProjectsResponseContractorPhoneMax),
+  "email": zod.string().max(listSmetaProjectsResponseContractorEmailMax).optional(),
+  "company": zod.string().max(listSmetaProjectsResponseContractorCompanyMax),
+  "experienceYears": zod.number().min(listSmetaProjectsResponseContractorExperienceYearsMin).max(listSmetaProjectsResponseContractorExperienceYearsMax),
+  "completedProjects": zod.number().min(listSmetaProjectsResponseContractorCompletedProjectsMin).max(listSmetaProjectsResponseContractorCompletedProjectsMax),
+  "rating": zod.number().min(listSmetaProjectsResponseContractorRatingMin).max(listSmetaProjectsResponseContractorRatingMax)
+}),
+  "completion": zod.number().int(),
+  "defaultMarginPercentage": zod.number(),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseProjectCostsItemIdMax),
+  "label": zod.string().max(listSmetaProjectsResponseProjectCostsItemLabelMax),
+  "amount": zod.number().min(listSmetaProjectsResponseProjectCostsItemAmountMin).max(listSmetaProjectsResponseProjectCostsItemAmountMax)
+})),
+  "estimate": zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseEstimateIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(listSmetaProjectsResponseEstimateCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseEstimateSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseEstimateSectionsItemItemsItemIdMax),
+  "name": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantityMin).max(listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(listSmetaProjectsResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin).max(listSmetaProjectsResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(listSmetaProjectsResponseEstimateSectionsItemItemsItemLaborUnitPriceMin).max(listSmetaProjectsResponseEstimateSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(listSmetaProjectsResponseEstimateSectionsItemItemsItemAdditionalCostMin).max(listSmetaProjectsResponseEstimateSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(listSmetaProjectsResponseEstimateSectionsItemItemsItemWastePercentageMin).max(listSmetaProjectsResponseEstimateSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(listSmetaProjectsResponseEstimateSectionsItemItemsItemMarginPercentageMin).max(listSmetaProjectsResponseEstimateSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(listSmetaProjectsResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(listSmetaProjectsResponseEstimateSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(listSmetaProjectsResponseEstimateSectionsItemItemsMax)
+})).max(listSmetaProjectsResponseEstimateSectionsMax)
+}),
+  "status": zod.enum(['draft', 'sent', 'client_approved', 'revision_requested']),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseChangeOrdersItemIdMax),
+  "number": zod.number().int().min(1),
+  "title": zod.string().max(listSmetaProjectsResponseChangeOrdersItemTitleMax),
+  "reason": zod.string().max(listSmetaProjectsResponseChangeOrdersItemReasonMax),
+  "date": zod.string().date(),
+  "requestedBy": zod.enum(['client', 'contractor']),
+  "requestedByName": zod.string().max(listSmetaProjectsResponseChangeOrdersItemRequestedByNameMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "materialDelta": zod.number().min(listSmetaProjectsResponseChangeOrdersItemMaterialDeltaMin).max(listSmetaProjectsResponseChangeOrdersItemMaterialDeltaMax),
+  "laborDelta": zod.number().min(listSmetaProjectsResponseChangeOrdersItemLaborDeltaMin).max(listSmetaProjectsResponseChangeOrdersItemLaborDeltaMax),
+  "additionalCost": zod.number().min(listSmetaProjectsResponseChangeOrdersItemAdditionalCostMin).max(listSmetaProjectsResponseChangeOrdersItemAdditionalCostMax),
+  "status": zod.enum(['draft', 'pending', 'approved', 'rejected']),
+  "photoIds": zod.array(zod.string().max(listSmetaProjectsResponseChangeOrdersItemPhotoIdsItemMax)).max(listSmetaProjectsResponseChangeOrdersItemPhotoIdsMax),
+  "lineItemIds": zod.array(zod.string().max(listSmetaProjectsResponseChangeOrdersItemLineItemIdsItemMax)).max(listSmetaProjectsResponseChangeOrdersItemLineItemIdsMax),
+  "decidedAt": zod.string().max(listSmetaProjectsResponseChangeOrdersItemDecidedAtMax).optional(),
+  "decisionNote": zod.string().max(listSmetaProjectsResponseChangeOrdersItemDecisionNoteMax).optional()
+})),
+  "expenses": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseExpensesItemIdMax),
+  "date": zod.string().date(),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "description": zod.string().max(listSmetaProjectsResponseExpensesItemDescriptionMax),
+  "vendor": zod.string().max(listSmetaProjectsResponseExpensesItemVendorMax),
+  "amount": zod.number().min(listSmetaProjectsResponseExpensesItemAmountMin).max(listSmetaProjectsResponseExpensesItemAmountMax),
+  "paymentStatus": zod.enum(['paid', 'partial', 'unpaid']),
+  "receiptId": zod.string().max(listSmetaProjectsResponseExpensesItemReceiptIdMax).optional(),
+  "lineItemId": zod.string().max(listSmetaProjectsResponseExpensesItemLineItemIdMax).optional()
+})),
+  "receipts": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseReceiptsItemIdMax),
+  "fileName": zod.string().max(listSmetaProjectsResponseReceiptsItemFileNameMax),
+  "fileType": zod.enum(['image', 'pdf']),
+  "uploadedAt": zod.string().max(listSmetaProjectsResponseReceiptsItemUploadedAtMax),
+  "aiSuggestion": zod.object({
+  "merchant": zod.string().max(listSmetaProjectsResponseReceiptsItemAiSuggestionMerchantMax),
+  "date": zod.string().max(listSmetaProjectsResponseReceiptsItemAiSuggestionDateMax),
+  "total": zod.number(),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "confidence": zod.number().min(listSmetaProjectsResponseReceiptsItemAiSuggestionConfidenceMin).max(listSmetaProjectsResponseReceiptsItemAiSuggestionConfidenceMax)
+}).optional()
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponsePhotosItemIdMax),
+  "phase": zod.enum(['before', 'during', 'after']),
+  "date": zod.string().date(),
+  "uploadedBy": zod.string().max(listSmetaProjectsResponsePhotosItemUploadedByMax),
+  "note": zod.string().max(listSmetaProjectsResponsePhotosItemNoteMax),
+  "room": zod.string().max(listSmetaProjectsResponsePhotosItemRoomMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "lineItemId": zod.string().max(listSmetaProjectsResponsePhotosItemLineItemIdMax).optional(),
+  "clientVisible": zod.boolean()
+})),
+  "drawing": zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseDrawingIdMax),
+  "fileName": zod.string().max(listSmetaProjectsResponseDrawingFileNameMax),
+  "fileType": zod.enum(['pdf', 'jpg', 'png']),
+  "uploadedAt": zod.string().max(listSmetaProjectsResponseDrawingUploadedAtMax),
+  "scale": zod.string().max(listSmetaProjectsResponseDrawingScaleMax),
+  "width": zod.number(),
+  "height": zod.number(),
+  "status": zod.enum(['processing', 'analyzed', 'failed']),
+  "rooms": zod.array(zod.object({
+  "id": zod.string().max(listSmetaProjectsResponseDrawingRoomsItemIdMax),
+  "name": zod.string().max(listSmetaProjectsResponseDrawingRoomsItemNameMax),
+  "x": zod.number(),
+  "y": zod.number(),
+  "w": zod.number(),
+  "h": zod.number()
+})).max(listSmetaProjectsResponseDrawingRoomsMax),
+  "openings": zod.array(zod.object({
+  "id": zod.string().max(listSmetaProjectsResponseDrawingOpeningsItemIdMax),
+  "kind": zod.enum(['door', 'window']),
+  "x1": zod.number(),
+  "y1": zod.number(),
+  "x2": zod.number(),
+  "y2": zod.number()
+})).max(listSmetaProjectsResponseDrawingOpeningsMax)
+}).optional(),
+  "measurements": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseMeasurementsItemIdMax),
+  "kind": zod.enum(['area', 'length', 'count', 'height']),
+  "name": zod.string().max(listSmetaProjectsResponseMeasurementsItemNameMax),
+  "value": zod.number().min(listSmetaProjectsResponseMeasurementsItemValueMin).max(listSmetaProjectsResponseMeasurementsItemValueMax),
+  "unit": zod.string().max(listSmetaProjectsResponseMeasurementsItemUnitMax),
+  "confidence": zod.number().min(listSmetaProjectsResponseMeasurementsItemConfidenceMin).max(listSmetaProjectsResponseMeasurementsItemConfidenceMax),
+  "source": zod.string().max(listSmetaProjectsResponseMeasurementsItemSourceMax),
+  "status": zod.enum(['suggested', 'edited', 'approved']),
+  "roomId": zod.string().max(listSmetaProjectsResponseMeasurementsItemRoomIdMax).optional()
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "confirmedScope": zod.boolean(),
+  "total": zod.number()
+})),
+  "revisionRequests": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "message": zod.string()
+})),
+  "payments": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponsePaymentsItemIdMax),
+  "title": zod.string().max(listSmetaProjectsResponsePaymentsItemTitleMax),
+  "share": zod.number().min(listSmetaProjectsResponsePaymentsItemShareMin).max(listSmetaProjectsResponsePaymentsItemShareMax),
+  "condition": zod.string().max(listSmetaProjectsResponsePaymentsItemConditionMax),
+  "status": zod.enum(['paid', 'due', 'planned'])
+})),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string()),
+  "share": zod.object({
+  "token": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "clientName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().optional(),
+  "message": zod.string(),
+  "notifyOnApprove": zod.boolean(),
+  "attachPdf": zod.boolean(),
+  "snapshot": zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseShareSnapshotIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(listSmetaProjectsResponseShareSnapshotCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseShareSnapshotSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemIdMax),
+  "name": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantityMin).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemWastePercentageMin).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(listSmetaProjectsResponseShareSnapshotSectionsItemItemsMax)
+})).max(listSmetaProjectsResponseShareSnapshotSectionsMax)
+}),
+  "snapshotProjectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseShareSnapshotProjectCostsItemIdMax),
+  "label": zod.string().max(listSmetaProjectsResponseShareSnapshotProjectCostsItemLabelMax),
+  "amount": zod.number().min(listSmetaProjectsResponseShareSnapshotProjectCostsItemAmountMin).max(listSmetaProjectsResponseShareSnapshotProjectCostsItemAmountMax)
+})),
+  "snapshotMargin": zod.number()
+}).optional().describe('Owner-only view of the client link, including the frozen internal snapshot.'),
+  "exports": zod.array(zod.object({
+  "id": zod.string().min(1).max(listSmetaProjectsResponseExportsItemIdMax),
+  "kind": zod.enum(['xlsx', 'pdf']),
+  "status": zod.enum(['processing', 'ready', 'failed']),
+  "createdAt": zod.string().max(listSmetaProjectsResponseExportsItemCreatedAtMax),
+  "fileName": zod.string().max(listSmetaProjectsResponseExportsItemFileNameMax)
+})),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListSmetaProjectsResponse = zod.array(ListSmetaProjectsResponseItem)
+
+
+/**
+ * @summary Create an estimate project
+ */
+export const createSmetaProjectBodyNameMax = 120;
+
+export const createSmetaProjectBodyDistrictMax = 100;
+
+export const createSmetaProjectBodyAddressMax = 250;
+
+export const createSmetaProjectBodyAreaM2Min = 0;
+export const createSmetaProjectBodyAreaM2Max = 100000;
+
+export const createSmetaProjectBodyClientNameMax = 120;
+
+export const createSmetaProjectBodyClientPhoneMax = 32;
+
+export const createSmetaProjectBodyClientEmailMax = 254;
+
+export const createSmetaProjectBodyContractorNameMax = 120;
+
+export const createSmetaProjectBodyContractorPhoneMax = 32;
+
+export const createSmetaProjectBodyContractorEmailMax = 254;
+
+export const createSmetaProjectBodyContractorCompanyMax = 160;
+
+export const createSmetaProjectBodyContractorExperienceYearsMin = 0;
+export const createSmetaProjectBodyContractorExperienceYearsMax = 100;
+
+export const createSmetaProjectBodyContractorCompletedProjectsMin = 0;
+export const createSmetaProjectBodyContractorCompletedProjectsMax = 100000;
+
+export const createSmetaProjectBodyContractorRatingMin = 0;
+export const createSmetaProjectBodyContractorRatingMax = 5;
+
+export const createSmetaProjectBodyCompletionMin = 0;
+export const createSmetaProjectBodyCompletionMax = 100;
+
+export const createSmetaProjectBodyDefaultMarginPercentageMin = 0;
+export const createSmetaProjectBodyDefaultMarginPercentageMax = 1;
+
+export const createSmetaProjectBodyProjectCostsItemIdMax = 64;
+
+export const createSmetaProjectBodyProjectCostsItemLabelMax = 160;
+
+export const createSmetaProjectBodyProjectCostsItemAmountMin = -100000000;
+export const createSmetaProjectBodyProjectCostsItemAmountMax = 100000000;
+
+export const createSmetaProjectBodyProjectCostsMax = 50;
+
+export const createSmetaProjectBodyEstimateIdMax = 64;
+
+
+export const createSmetaProjectBodyEstimateCreatedAtMax = 40;
+
+export const createSmetaProjectBodyEstimateSectionsItemIdMax = 64;
+
+export const createSmetaProjectBodyEstimateSectionsItemTitleMax = 120;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemIdMax = 64;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemNameMax = 200;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemZoneMax = 120;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemUnitMax = 16;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemQuantityMin = 0;
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemQuantityMax = 100000000;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemWastePercentageMin = 0;
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemWastePercentageMax = 1;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemMarginPercentageMin = 0;
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemMaterialIdMax = 64;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const createSmetaProjectBodyEstimateSectionsItemItemsMax = 400;
+
+export const createSmetaProjectBodyEstimateSectionsMax = 60;
+
+export const createSmetaProjectBodyChangeOrdersItemIdMax = 64;
+
+
+export const createSmetaProjectBodyChangeOrdersItemTitleMax = 160;
+
+export const createSmetaProjectBodyChangeOrdersItemReasonMax = 1000;
+
+export const createSmetaProjectBodyChangeOrdersItemRequestedByNameMax = 120;
+
+export const createSmetaProjectBodyChangeOrdersItemMaterialDeltaMin = -100000000;
+export const createSmetaProjectBodyChangeOrdersItemMaterialDeltaMax = 100000000;
+
+export const createSmetaProjectBodyChangeOrdersItemLaborDeltaMin = -100000000;
+export const createSmetaProjectBodyChangeOrdersItemLaborDeltaMax = 100000000;
+
+export const createSmetaProjectBodyChangeOrdersItemAdditionalCostMin = -100000000;
+export const createSmetaProjectBodyChangeOrdersItemAdditionalCostMax = 100000000;
+
+export const createSmetaProjectBodyChangeOrdersItemPhotoIdsItemMax = 64;
+
+export const createSmetaProjectBodyChangeOrdersItemPhotoIdsMax = 50;
+
+export const createSmetaProjectBodyChangeOrdersItemLineItemIdsItemMax = 64;
+
+export const createSmetaProjectBodyChangeOrdersItemLineItemIdsMax = 100;
+
+export const createSmetaProjectBodyChangeOrdersItemDecidedAtMax = 40;
+
+export const createSmetaProjectBodyChangeOrdersItemDecisionNoteMax = 1000;
+
+export const createSmetaProjectBodyChangeOrdersMax = 300;
+
+export const createSmetaProjectBodyExpensesItemIdMax = 64;
+
+export const createSmetaProjectBodyExpensesItemDescriptionMax = 300;
+
+export const createSmetaProjectBodyExpensesItemVendorMax = 160;
+
+export const createSmetaProjectBodyExpensesItemAmountMin = 0;
+export const createSmetaProjectBodyExpensesItemAmountMax = 100000000;
+
+export const createSmetaProjectBodyExpensesItemReceiptIdMax = 64;
+
+export const createSmetaProjectBodyExpensesItemLineItemIdMax = 64;
+
+export const createSmetaProjectBodyExpensesMax = 2000;
+
+export const createSmetaProjectBodyReceiptsItemIdMax = 64;
+
+export const createSmetaProjectBodyReceiptsItemFileNameMax = 255;
+
+export const createSmetaProjectBodyReceiptsItemUploadedAtMax = 40;
+
+export const createSmetaProjectBodyReceiptsItemAiSuggestionMerchantMax = 160;
+
+export const createSmetaProjectBodyReceiptsItemAiSuggestionDateMax = 40;
+
+export const createSmetaProjectBodyReceiptsItemAiSuggestionConfidenceMin = 0;
+export const createSmetaProjectBodyReceiptsItemAiSuggestionConfidenceMax = 1;
+
+export const createSmetaProjectBodyReceiptsMax = 2000;
+
+export const createSmetaProjectBodyPhotosItemIdMax = 64;
+
+export const createSmetaProjectBodyPhotosItemUploadedByMax = 120;
+
+export const createSmetaProjectBodyPhotosItemNoteMax = 500;
+
+export const createSmetaProjectBodyPhotosItemRoomMax = 120;
+
+export const createSmetaProjectBodyPhotosItemLineItemIdMax = 64;
+
+export const createSmetaProjectBodyPhotosMax = 2000;
+
+export const createSmetaProjectBodyDrawingIdMax = 64;
+
+export const createSmetaProjectBodyDrawingFileNameMax = 255;
+
+export const createSmetaProjectBodyDrawingUploadedAtMax = 40;
+
+export const createSmetaProjectBodyDrawingScaleMax = 40;
+
+export const createSmetaProjectBodyDrawingRoomsItemIdMax = 64;
+
+export const createSmetaProjectBodyDrawingRoomsItemNameMax = 120;
+
+export const createSmetaProjectBodyDrawingRoomsMax = 200;
+
+export const createSmetaProjectBodyDrawingOpeningsItemIdMax = 64;
+
+export const createSmetaProjectBodyDrawingOpeningsMax = 500;
+
+export const createSmetaProjectBodyMeasurementsItemIdMax = 64;
+
+export const createSmetaProjectBodyMeasurementsItemNameMax = 160;
+
+export const createSmetaProjectBodyMeasurementsItemValueMin = 0;
+export const createSmetaProjectBodyMeasurementsItemValueMax = 100000000;
+
+export const createSmetaProjectBodyMeasurementsItemUnitMax = 8;
+
+export const createSmetaProjectBodyMeasurementsItemConfidenceMin = 0;
+export const createSmetaProjectBodyMeasurementsItemConfidenceMax = 1;
+
+export const createSmetaProjectBodyMeasurementsItemSourceMax = 250;
+
+export const createSmetaProjectBodyMeasurementsItemRoomIdMax = 64;
+
+export const createSmetaProjectBodyMeasurementsMax = 500;
+
+export const createSmetaProjectBodyPaymentsItemIdMax = 64;
+
+export const createSmetaProjectBodyPaymentsItemTitleMax = 160;
+
+export const createSmetaProjectBodyPaymentsItemShareMin = 0;
+export const createSmetaProjectBodyPaymentsItemShareMax = 1;
+
+export const createSmetaProjectBodyPaymentsItemConditionMax = 250;
+
+export const createSmetaProjectBodyPaymentsMax = 20;
+
+export const createSmetaProjectBodyIncludedItemMax = 200;
+
+export const createSmetaProjectBodyIncludedMax = 60;
+
+export const createSmetaProjectBodyExcludedItemMax = 200;
+
+export const createSmetaProjectBodyExcludedMax = 60;
+
+export const createSmetaProjectBodyExportsItemIdMax = 64;
+
+export const createSmetaProjectBodyExportsItemCreatedAtMax = 40;
+
+export const createSmetaProjectBodyExportsItemFileNameMax = 255;
+
+export const createSmetaProjectBodyExportsMax = 50;
+
+
+
+export const CreateSmetaProjectBody = zod.object({
+  "id": zod.string().uuid().optional(),
+  "name": zod.string().min(1).max(createSmetaProjectBodyNameMax),
+  "district": zod.string().max(createSmetaProjectBodyDistrictMax),
+  "address": zod.string().max(createSmetaProjectBodyAddressMax),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "quality": zod.enum(['ekonom', 'standart', 'premium']),
+  "areaM2": zod.number().min(createSmetaProjectBodyAreaM2Min).max(createSmetaProjectBodyAreaM2Max),
+  "startDate": zod.string().date(),
+  "endDate": zod.string().date(),
+  "client": zod.object({
+  "name": zod.string().max(createSmetaProjectBodyClientNameMax),
+  "phone": zod.string().max(createSmetaProjectBodyClientPhoneMax),
+  "email": zod.string().max(createSmetaProjectBodyClientEmailMax).optional()
+}),
+  "contractor": zod.object({
+  "name": zod.string().max(createSmetaProjectBodyContractorNameMax),
+  "phone": zod.string().max(createSmetaProjectBodyContractorPhoneMax),
+  "email": zod.string().max(createSmetaProjectBodyContractorEmailMax).optional(),
+  "company": zod.string().max(createSmetaProjectBodyContractorCompanyMax),
+  "experienceYears": zod.number().min(createSmetaProjectBodyContractorExperienceYearsMin).max(createSmetaProjectBodyContractorExperienceYearsMax),
+  "completedProjects": zod.number().min(createSmetaProjectBodyContractorCompletedProjectsMin).max(createSmetaProjectBodyContractorCompletedProjectsMax),
+  "rating": zod.number().min(createSmetaProjectBodyContractorRatingMin).max(createSmetaProjectBodyContractorRatingMax)
+}),
+  "completion": zod.number().int().min(createSmetaProjectBodyCompletionMin).max(createSmetaProjectBodyCompletionMax),
+  "defaultMarginPercentage": zod.number().min(createSmetaProjectBodyDefaultMarginPercentageMin).max(createSmetaProjectBodyDefaultMarginPercentageMax),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyProjectCostsItemIdMax),
+  "label": zod.string().max(createSmetaProjectBodyProjectCostsItemLabelMax),
+  "amount": zod.number().min(createSmetaProjectBodyProjectCostsItemAmountMin).max(createSmetaProjectBodyProjectCostsItemAmountMax)
+})).max(createSmetaProjectBodyProjectCostsMax),
+  "estimate": zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyEstimateIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(createSmetaProjectBodyEstimateCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyEstimateSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(createSmetaProjectBodyEstimateSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyEstimateSectionsItemItemsItemIdMax),
+  "name": zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(createSmetaProjectBodyEstimateSectionsItemItemsItemQuantityMin).max(createSmetaProjectBodyEstimateSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(createSmetaProjectBodyEstimateSectionsItemItemsItemMaterialUnitPriceMin).max(createSmetaProjectBodyEstimateSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(createSmetaProjectBodyEstimateSectionsItemItemsItemLaborUnitPriceMin).max(createSmetaProjectBodyEstimateSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(createSmetaProjectBodyEstimateSectionsItemItemsItemAdditionalCostMin).max(createSmetaProjectBodyEstimateSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(createSmetaProjectBodyEstimateSectionsItemItemsItemWastePercentageMin).max(createSmetaProjectBodyEstimateSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(createSmetaProjectBodyEstimateSectionsItemItemsItemMarginPercentageMin).max(createSmetaProjectBodyEstimateSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(createSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(createSmetaProjectBodyEstimateSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(createSmetaProjectBodyEstimateSectionsItemItemsMax)
+})).max(createSmetaProjectBodyEstimateSectionsMax)
+}),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyChangeOrdersItemIdMax),
+  "number": zod.number().int().min(1),
+  "title": zod.string().max(createSmetaProjectBodyChangeOrdersItemTitleMax),
+  "reason": zod.string().max(createSmetaProjectBodyChangeOrdersItemReasonMax),
+  "date": zod.string().date(),
+  "requestedBy": zod.enum(['client', 'contractor']),
+  "requestedByName": zod.string().max(createSmetaProjectBodyChangeOrdersItemRequestedByNameMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "materialDelta": zod.number().min(createSmetaProjectBodyChangeOrdersItemMaterialDeltaMin).max(createSmetaProjectBodyChangeOrdersItemMaterialDeltaMax),
+  "laborDelta": zod.number().min(createSmetaProjectBodyChangeOrdersItemLaborDeltaMin).max(createSmetaProjectBodyChangeOrdersItemLaborDeltaMax),
+  "additionalCost": zod.number().min(createSmetaProjectBodyChangeOrdersItemAdditionalCostMin).max(createSmetaProjectBodyChangeOrdersItemAdditionalCostMax),
+  "status": zod.enum(['draft', 'pending', 'approved', 'rejected']),
+  "photoIds": zod.array(zod.string().max(createSmetaProjectBodyChangeOrdersItemPhotoIdsItemMax)).max(createSmetaProjectBodyChangeOrdersItemPhotoIdsMax),
+  "lineItemIds": zod.array(zod.string().max(createSmetaProjectBodyChangeOrdersItemLineItemIdsItemMax)).max(createSmetaProjectBodyChangeOrdersItemLineItemIdsMax),
+  "decidedAt": zod.string().max(createSmetaProjectBodyChangeOrdersItemDecidedAtMax).optional(),
+  "decisionNote": zod.string().max(createSmetaProjectBodyChangeOrdersItemDecisionNoteMax).optional()
+})).max(createSmetaProjectBodyChangeOrdersMax),
+  "expenses": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyExpensesItemIdMax),
+  "date": zod.string().date(),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "description": zod.string().max(createSmetaProjectBodyExpensesItemDescriptionMax),
+  "vendor": zod.string().max(createSmetaProjectBodyExpensesItemVendorMax),
+  "amount": zod.number().min(createSmetaProjectBodyExpensesItemAmountMin).max(createSmetaProjectBodyExpensesItemAmountMax),
+  "paymentStatus": zod.enum(['paid', 'partial', 'unpaid']),
+  "receiptId": zod.string().max(createSmetaProjectBodyExpensesItemReceiptIdMax).optional(),
+  "lineItemId": zod.string().max(createSmetaProjectBodyExpensesItemLineItemIdMax).optional()
+})).max(createSmetaProjectBodyExpensesMax),
+  "receipts": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyReceiptsItemIdMax),
+  "fileName": zod.string().max(createSmetaProjectBodyReceiptsItemFileNameMax),
+  "fileType": zod.enum(['image', 'pdf']),
+  "uploadedAt": zod.string().max(createSmetaProjectBodyReceiptsItemUploadedAtMax),
+  "aiSuggestion": zod.object({
+  "merchant": zod.string().max(createSmetaProjectBodyReceiptsItemAiSuggestionMerchantMax),
+  "date": zod.string().max(createSmetaProjectBodyReceiptsItemAiSuggestionDateMax),
+  "total": zod.number(),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "confidence": zod.number().min(createSmetaProjectBodyReceiptsItemAiSuggestionConfidenceMin).max(createSmetaProjectBodyReceiptsItemAiSuggestionConfidenceMax)
+}).optional()
+})).max(createSmetaProjectBodyReceiptsMax),
+  "photos": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyPhotosItemIdMax),
+  "phase": zod.enum(['before', 'during', 'after']),
+  "date": zod.string().date(),
+  "uploadedBy": zod.string().max(createSmetaProjectBodyPhotosItemUploadedByMax),
+  "note": zod.string().max(createSmetaProjectBodyPhotosItemNoteMax),
+  "room": zod.string().max(createSmetaProjectBodyPhotosItemRoomMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "lineItemId": zod.string().max(createSmetaProjectBodyPhotosItemLineItemIdMax).optional(),
+  "clientVisible": zod.boolean()
+})).max(createSmetaProjectBodyPhotosMax),
+  "drawing": zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyDrawingIdMax),
+  "fileName": zod.string().max(createSmetaProjectBodyDrawingFileNameMax),
+  "fileType": zod.enum(['pdf', 'jpg', 'png']),
+  "uploadedAt": zod.string().max(createSmetaProjectBodyDrawingUploadedAtMax),
+  "scale": zod.string().max(createSmetaProjectBodyDrawingScaleMax),
+  "width": zod.number(),
+  "height": zod.number(),
+  "status": zod.enum(['processing', 'analyzed', 'failed']),
+  "rooms": zod.array(zod.object({
+  "id": zod.string().max(createSmetaProjectBodyDrawingRoomsItemIdMax),
+  "name": zod.string().max(createSmetaProjectBodyDrawingRoomsItemNameMax),
+  "x": zod.number(),
+  "y": zod.number(),
+  "w": zod.number(),
+  "h": zod.number()
+})).max(createSmetaProjectBodyDrawingRoomsMax),
+  "openings": zod.array(zod.object({
+  "id": zod.string().max(createSmetaProjectBodyDrawingOpeningsItemIdMax),
+  "kind": zod.enum(['door', 'window']),
+  "x1": zod.number(),
+  "y1": zod.number(),
+  "x2": zod.number(),
+  "y2": zod.number()
+})).max(createSmetaProjectBodyDrawingOpeningsMax)
+}).optional(),
+  "measurements": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyMeasurementsItemIdMax),
+  "kind": zod.enum(['area', 'length', 'count', 'height']),
+  "name": zod.string().max(createSmetaProjectBodyMeasurementsItemNameMax),
+  "value": zod.number().min(createSmetaProjectBodyMeasurementsItemValueMin).max(createSmetaProjectBodyMeasurementsItemValueMax),
+  "unit": zod.string().max(createSmetaProjectBodyMeasurementsItemUnitMax),
+  "confidence": zod.number().min(createSmetaProjectBodyMeasurementsItemConfidenceMin).max(createSmetaProjectBodyMeasurementsItemConfidenceMax),
+  "source": zod.string().max(createSmetaProjectBodyMeasurementsItemSourceMax),
+  "status": zod.enum(['suggested', 'edited', 'approved']),
+  "roomId": zod.string().max(createSmetaProjectBodyMeasurementsItemRoomIdMax).optional()
+})).max(createSmetaProjectBodyMeasurementsMax),
+  "payments": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyPaymentsItemIdMax),
+  "title": zod.string().max(createSmetaProjectBodyPaymentsItemTitleMax),
+  "share": zod.number().min(createSmetaProjectBodyPaymentsItemShareMin).max(createSmetaProjectBodyPaymentsItemShareMax),
+  "condition": zod.string().max(createSmetaProjectBodyPaymentsItemConditionMax),
+  "status": zod.enum(['paid', 'due', 'planned'])
+})).max(createSmetaProjectBodyPaymentsMax),
+  "included": zod.array(zod.string().max(createSmetaProjectBodyIncludedItemMax)).max(createSmetaProjectBodyIncludedMax),
+  "excluded": zod.array(zod.string().max(createSmetaProjectBodyExcludedItemMax)).max(createSmetaProjectBodyExcludedMax),
+  "exports": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectBodyExportsItemIdMax),
+  "kind": zod.enum(['xlsx', 'pdf']),
+  "status": zod.enum(['processing', 'ready', 'failed']),
+  "createdAt": zod.string().max(createSmetaProjectBodyExportsItemCreatedAtMax),
+  "fileName": zod.string().max(createSmetaProjectBodyExportsItemFileNameMax)
+})).max(createSmetaProjectBodyExportsMax)
+})
+
+export const createSmetaProjectResponseClientNameMax = 120;
+
+export const createSmetaProjectResponseClientPhoneMax = 32;
+
+export const createSmetaProjectResponseClientEmailMax = 254;
+
+export const createSmetaProjectResponseContractorNameMax = 120;
+
+export const createSmetaProjectResponseContractorPhoneMax = 32;
+
+export const createSmetaProjectResponseContractorEmailMax = 254;
+
+export const createSmetaProjectResponseContractorCompanyMax = 160;
+
+export const createSmetaProjectResponseContractorExperienceYearsMin = 0;
+export const createSmetaProjectResponseContractorExperienceYearsMax = 100;
+
+export const createSmetaProjectResponseContractorCompletedProjectsMin = 0;
+export const createSmetaProjectResponseContractorCompletedProjectsMax = 100000;
+
+export const createSmetaProjectResponseContractorRatingMin = 0;
+export const createSmetaProjectResponseContractorRatingMax = 5;
+
+export const createSmetaProjectResponseProjectCostsItemIdMax = 64;
+
+export const createSmetaProjectResponseProjectCostsItemLabelMax = 160;
+
+export const createSmetaProjectResponseProjectCostsItemAmountMin = -100000000;
+export const createSmetaProjectResponseProjectCostsItemAmountMax = 100000000;
+
+export const createSmetaProjectResponseEstimateIdMax = 64;
+
+
+export const createSmetaProjectResponseEstimateCreatedAtMax = 40;
+
+export const createSmetaProjectResponseEstimateSectionsItemIdMax = 64;
+
+export const createSmetaProjectResponseEstimateSectionsItemTitleMax = 120;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemIdMax = 64;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemNameMax = 200;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemZoneMax = 120;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemUnitMax = 16;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMin = 0;
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMax = 100000000;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMin = 0;
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMax = 1;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMin = 0;
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemMaterialIdMax = 64;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const createSmetaProjectResponseEstimateSectionsItemItemsMax = 400;
+
+export const createSmetaProjectResponseEstimateSectionsMax = 60;
+
+export const createSmetaProjectResponseChangeOrdersItemIdMax = 64;
+
+
+export const createSmetaProjectResponseChangeOrdersItemTitleMax = 160;
+
+export const createSmetaProjectResponseChangeOrdersItemReasonMax = 1000;
+
+export const createSmetaProjectResponseChangeOrdersItemRequestedByNameMax = 120;
+
+export const createSmetaProjectResponseChangeOrdersItemMaterialDeltaMin = -100000000;
+export const createSmetaProjectResponseChangeOrdersItemMaterialDeltaMax = 100000000;
+
+export const createSmetaProjectResponseChangeOrdersItemLaborDeltaMin = -100000000;
+export const createSmetaProjectResponseChangeOrdersItemLaborDeltaMax = 100000000;
+
+export const createSmetaProjectResponseChangeOrdersItemAdditionalCostMin = -100000000;
+export const createSmetaProjectResponseChangeOrdersItemAdditionalCostMax = 100000000;
+
+export const createSmetaProjectResponseChangeOrdersItemPhotoIdsItemMax = 64;
+
+export const createSmetaProjectResponseChangeOrdersItemPhotoIdsMax = 50;
+
+export const createSmetaProjectResponseChangeOrdersItemLineItemIdsItemMax = 64;
+
+export const createSmetaProjectResponseChangeOrdersItemLineItemIdsMax = 100;
+
+export const createSmetaProjectResponseChangeOrdersItemDecidedAtMax = 40;
+
+export const createSmetaProjectResponseChangeOrdersItemDecisionNoteMax = 1000;
+
+export const createSmetaProjectResponseExpensesItemIdMax = 64;
+
+export const createSmetaProjectResponseExpensesItemDescriptionMax = 300;
+
+export const createSmetaProjectResponseExpensesItemVendorMax = 160;
+
+export const createSmetaProjectResponseExpensesItemAmountMin = 0;
+export const createSmetaProjectResponseExpensesItemAmountMax = 100000000;
+
+export const createSmetaProjectResponseExpensesItemReceiptIdMax = 64;
+
+export const createSmetaProjectResponseExpensesItemLineItemIdMax = 64;
+
+export const createSmetaProjectResponseReceiptsItemIdMax = 64;
+
+export const createSmetaProjectResponseReceiptsItemFileNameMax = 255;
+
+export const createSmetaProjectResponseReceiptsItemUploadedAtMax = 40;
+
+export const createSmetaProjectResponseReceiptsItemAiSuggestionMerchantMax = 160;
+
+export const createSmetaProjectResponseReceiptsItemAiSuggestionDateMax = 40;
+
+export const createSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMin = 0;
+export const createSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMax = 1;
+
+export const createSmetaProjectResponsePhotosItemIdMax = 64;
+
+export const createSmetaProjectResponsePhotosItemUploadedByMax = 120;
+
+export const createSmetaProjectResponsePhotosItemNoteMax = 500;
+
+export const createSmetaProjectResponsePhotosItemRoomMax = 120;
+
+export const createSmetaProjectResponsePhotosItemLineItemIdMax = 64;
+
+export const createSmetaProjectResponseDrawingIdMax = 64;
+
+export const createSmetaProjectResponseDrawingFileNameMax = 255;
+
+export const createSmetaProjectResponseDrawingUploadedAtMax = 40;
+
+export const createSmetaProjectResponseDrawingScaleMax = 40;
+
+export const createSmetaProjectResponseDrawingRoomsItemIdMax = 64;
+
+export const createSmetaProjectResponseDrawingRoomsItemNameMax = 120;
+
+export const createSmetaProjectResponseDrawingRoomsMax = 200;
+
+export const createSmetaProjectResponseDrawingOpeningsItemIdMax = 64;
+
+export const createSmetaProjectResponseDrawingOpeningsMax = 500;
+
+export const createSmetaProjectResponseMeasurementsItemIdMax = 64;
+
+export const createSmetaProjectResponseMeasurementsItemNameMax = 160;
+
+export const createSmetaProjectResponseMeasurementsItemValueMin = 0;
+export const createSmetaProjectResponseMeasurementsItemValueMax = 100000000;
+
+export const createSmetaProjectResponseMeasurementsItemUnitMax = 8;
+
+export const createSmetaProjectResponseMeasurementsItemConfidenceMin = 0;
+export const createSmetaProjectResponseMeasurementsItemConfidenceMax = 1;
+
+export const createSmetaProjectResponseMeasurementsItemSourceMax = 250;
+
+export const createSmetaProjectResponseMeasurementsItemRoomIdMax = 64;
+
+export const createSmetaProjectResponsePaymentsItemIdMax = 64;
+
+export const createSmetaProjectResponsePaymentsItemTitleMax = 160;
+
+export const createSmetaProjectResponsePaymentsItemShareMin = 0;
+export const createSmetaProjectResponsePaymentsItemShareMax = 1;
+
+export const createSmetaProjectResponsePaymentsItemConditionMax = 250;
+
+export const createSmetaProjectResponseShareSnapshotIdMax = 64;
+
+
+export const createSmetaProjectResponseShareSnapshotCreatedAtMax = 40;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemIdMax = 64;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemTitleMax = 120;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemIdMax = 64;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemNameMax = 200;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemZoneMax = 120;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemUnitMax = 16;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMin = 0;
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMax = 100000000;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMin = 0;
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMax = 1;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin = 0;
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialIdMax = 64;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const createSmetaProjectResponseShareSnapshotSectionsItemItemsMax = 400;
+
+export const createSmetaProjectResponseShareSnapshotSectionsMax = 60;
+
+export const createSmetaProjectResponseShareSnapshotProjectCostsItemIdMax = 64;
+
+export const createSmetaProjectResponseShareSnapshotProjectCostsItemLabelMax = 160;
+
+export const createSmetaProjectResponseShareSnapshotProjectCostsItemAmountMin = -100000000;
+export const createSmetaProjectResponseShareSnapshotProjectCostsItemAmountMax = 100000000;
+
+export const createSmetaProjectResponseExportsItemIdMax = 64;
+
+export const createSmetaProjectResponseExportsItemCreatedAtMax = 40;
+
+export const createSmetaProjectResponseExportsItemFileNameMax = 255;
+
+
+
+export const CreateSmetaProjectResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "quality": zod.enum(['ekonom', 'standart', 'premium']),
+  "areaM2": zod.number(),
+  "startDate": zod.string().date(),
+  "endDate": zod.string().date(),
+  "client": zod.object({
+  "name": zod.string().max(createSmetaProjectResponseClientNameMax),
+  "phone": zod.string().max(createSmetaProjectResponseClientPhoneMax),
+  "email": zod.string().max(createSmetaProjectResponseClientEmailMax).optional()
+}),
+  "contractor": zod.object({
+  "name": zod.string().max(createSmetaProjectResponseContractorNameMax),
+  "phone": zod.string().max(createSmetaProjectResponseContractorPhoneMax),
+  "email": zod.string().max(createSmetaProjectResponseContractorEmailMax).optional(),
+  "company": zod.string().max(createSmetaProjectResponseContractorCompanyMax),
+  "experienceYears": zod.number().min(createSmetaProjectResponseContractorExperienceYearsMin).max(createSmetaProjectResponseContractorExperienceYearsMax),
+  "completedProjects": zod.number().min(createSmetaProjectResponseContractorCompletedProjectsMin).max(createSmetaProjectResponseContractorCompletedProjectsMax),
+  "rating": zod.number().min(createSmetaProjectResponseContractorRatingMin).max(createSmetaProjectResponseContractorRatingMax)
+}),
+  "completion": zod.number().int(),
+  "defaultMarginPercentage": zod.number(),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseProjectCostsItemIdMax),
+  "label": zod.string().max(createSmetaProjectResponseProjectCostsItemLabelMax),
+  "amount": zod.number().min(createSmetaProjectResponseProjectCostsItemAmountMin).max(createSmetaProjectResponseProjectCostsItemAmountMax)
+})),
+  "estimate": zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseEstimateIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(createSmetaProjectResponseEstimateCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseEstimateSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(createSmetaProjectResponseEstimateSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseEstimateSectionsItemItemsItemIdMax),
+  "name": zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(createSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMin).max(createSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(createSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin).max(createSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(createSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMin).max(createSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(createSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMin).max(createSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(createSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMin).max(createSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(createSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMin).max(createSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(createSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(createSmetaProjectResponseEstimateSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(createSmetaProjectResponseEstimateSectionsItemItemsMax)
+})).max(createSmetaProjectResponseEstimateSectionsMax)
+}),
+  "status": zod.enum(['draft', 'sent', 'client_approved', 'revision_requested']),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseChangeOrdersItemIdMax),
+  "number": zod.number().int().min(1),
+  "title": zod.string().max(createSmetaProjectResponseChangeOrdersItemTitleMax),
+  "reason": zod.string().max(createSmetaProjectResponseChangeOrdersItemReasonMax),
+  "date": zod.string().date(),
+  "requestedBy": zod.enum(['client', 'contractor']),
+  "requestedByName": zod.string().max(createSmetaProjectResponseChangeOrdersItemRequestedByNameMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "materialDelta": zod.number().min(createSmetaProjectResponseChangeOrdersItemMaterialDeltaMin).max(createSmetaProjectResponseChangeOrdersItemMaterialDeltaMax),
+  "laborDelta": zod.number().min(createSmetaProjectResponseChangeOrdersItemLaborDeltaMin).max(createSmetaProjectResponseChangeOrdersItemLaborDeltaMax),
+  "additionalCost": zod.number().min(createSmetaProjectResponseChangeOrdersItemAdditionalCostMin).max(createSmetaProjectResponseChangeOrdersItemAdditionalCostMax),
+  "status": zod.enum(['draft', 'pending', 'approved', 'rejected']),
+  "photoIds": zod.array(zod.string().max(createSmetaProjectResponseChangeOrdersItemPhotoIdsItemMax)).max(createSmetaProjectResponseChangeOrdersItemPhotoIdsMax),
+  "lineItemIds": zod.array(zod.string().max(createSmetaProjectResponseChangeOrdersItemLineItemIdsItemMax)).max(createSmetaProjectResponseChangeOrdersItemLineItemIdsMax),
+  "decidedAt": zod.string().max(createSmetaProjectResponseChangeOrdersItemDecidedAtMax).optional(),
+  "decisionNote": zod.string().max(createSmetaProjectResponseChangeOrdersItemDecisionNoteMax).optional()
+})),
+  "expenses": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseExpensesItemIdMax),
+  "date": zod.string().date(),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "description": zod.string().max(createSmetaProjectResponseExpensesItemDescriptionMax),
+  "vendor": zod.string().max(createSmetaProjectResponseExpensesItemVendorMax),
+  "amount": zod.number().min(createSmetaProjectResponseExpensesItemAmountMin).max(createSmetaProjectResponseExpensesItemAmountMax),
+  "paymentStatus": zod.enum(['paid', 'partial', 'unpaid']),
+  "receiptId": zod.string().max(createSmetaProjectResponseExpensesItemReceiptIdMax).optional(),
+  "lineItemId": zod.string().max(createSmetaProjectResponseExpensesItemLineItemIdMax).optional()
+})),
+  "receipts": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseReceiptsItemIdMax),
+  "fileName": zod.string().max(createSmetaProjectResponseReceiptsItemFileNameMax),
+  "fileType": zod.enum(['image', 'pdf']),
+  "uploadedAt": zod.string().max(createSmetaProjectResponseReceiptsItemUploadedAtMax),
+  "aiSuggestion": zod.object({
+  "merchant": zod.string().max(createSmetaProjectResponseReceiptsItemAiSuggestionMerchantMax),
+  "date": zod.string().max(createSmetaProjectResponseReceiptsItemAiSuggestionDateMax),
+  "total": zod.number(),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "confidence": zod.number().min(createSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMin).max(createSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMax)
+}).optional()
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponsePhotosItemIdMax),
+  "phase": zod.enum(['before', 'during', 'after']),
+  "date": zod.string().date(),
+  "uploadedBy": zod.string().max(createSmetaProjectResponsePhotosItemUploadedByMax),
+  "note": zod.string().max(createSmetaProjectResponsePhotosItemNoteMax),
+  "room": zod.string().max(createSmetaProjectResponsePhotosItemRoomMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "lineItemId": zod.string().max(createSmetaProjectResponsePhotosItemLineItemIdMax).optional(),
+  "clientVisible": zod.boolean()
+})),
+  "drawing": zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseDrawingIdMax),
+  "fileName": zod.string().max(createSmetaProjectResponseDrawingFileNameMax),
+  "fileType": zod.enum(['pdf', 'jpg', 'png']),
+  "uploadedAt": zod.string().max(createSmetaProjectResponseDrawingUploadedAtMax),
+  "scale": zod.string().max(createSmetaProjectResponseDrawingScaleMax),
+  "width": zod.number(),
+  "height": zod.number(),
+  "status": zod.enum(['processing', 'analyzed', 'failed']),
+  "rooms": zod.array(zod.object({
+  "id": zod.string().max(createSmetaProjectResponseDrawingRoomsItemIdMax),
+  "name": zod.string().max(createSmetaProjectResponseDrawingRoomsItemNameMax),
+  "x": zod.number(),
+  "y": zod.number(),
+  "w": zod.number(),
+  "h": zod.number()
+})).max(createSmetaProjectResponseDrawingRoomsMax),
+  "openings": zod.array(zod.object({
+  "id": zod.string().max(createSmetaProjectResponseDrawingOpeningsItemIdMax),
+  "kind": zod.enum(['door', 'window']),
+  "x1": zod.number(),
+  "y1": zod.number(),
+  "x2": zod.number(),
+  "y2": zod.number()
+})).max(createSmetaProjectResponseDrawingOpeningsMax)
+}).optional(),
+  "measurements": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseMeasurementsItemIdMax),
+  "kind": zod.enum(['area', 'length', 'count', 'height']),
+  "name": zod.string().max(createSmetaProjectResponseMeasurementsItemNameMax),
+  "value": zod.number().min(createSmetaProjectResponseMeasurementsItemValueMin).max(createSmetaProjectResponseMeasurementsItemValueMax),
+  "unit": zod.string().max(createSmetaProjectResponseMeasurementsItemUnitMax),
+  "confidence": zod.number().min(createSmetaProjectResponseMeasurementsItemConfidenceMin).max(createSmetaProjectResponseMeasurementsItemConfidenceMax),
+  "source": zod.string().max(createSmetaProjectResponseMeasurementsItemSourceMax),
+  "status": zod.enum(['suggested', 'edited', 'approved']),
+  "roomId": zod.string().max(createSmetaProjectResponseMeasurementsItemRoomIdMax).optional()
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "confirmedScope": zod.boolean(),
+  "total": zod.number()
+})),
+  "revisionRequests": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "message": zod.string()
+})),
+  "payments": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponsePaymentsItemIdMax),
+  "title": zod.string().max(createSmetaProjectResponsePaymentsItemTitleMax),
+  "share": zod.number().min(createSmetaProjectResponsePaymentsItemShareMin).max(createSmetaProjectResponsePaymentsItemShareMax),
+  "condition": zod.string().max(createSmetaProjectResponsePaymentsItemConditionMax),
+  "status": zod.enum(['paid', 'due', 'planned'])
+})),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string()),
+  "share": zod.object({
+  "token": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "clientName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().optional(),
+  "message": zod.string(),
+  "notifyOnApprove": zod.boolean(),
+  "attachPdf": zod.boolean(),
+  "snapshot": zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseShareSnapshotIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(createSmetaProjectResponseShareSnapshotCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseShareSnapshotSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemIdMax),
+  "name": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMin).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMin).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(createSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(createSmetaProjectResponseShareSnapshotSectionsItemItemsMax)
+})).max(createSmetaProjectResponseShareSnapshotSectionsMax)
+}),
+  "snapshotProjectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseShareSnapshotProjectCostsItemIdMax),
+  "label": zod.string().max(createSmetaProjectResponseShareSnapshotProjectCostsItemLabelMax),
+  "amount": zod.number().min(createSmetaProjectResponseShareSnapshotProjectCostsItemAmountMin).max(createSmetaProjectResponseShareSnapshotProjectCostsItemAmountMax)
+})),
+  "snapshotMargin": zod.number()
+}).optional().describe('Owner-only view of the client link, including the frozen internal snapshot.'),
+  "exports": zod.array(zod.object({
+  "id": zod.string().min(1).max(createSmetaProjectResponseExportsItemIdMax),
+  "kind": zod.enum(['xlsx', 'pdf']),
+  "status": zod.enum(['processing', 'ready', 'failed']),
+  "createdAt": zod.string().max(createSmetaProjectResponseExportsItemCreatedAtMax),
+  "fileName": zod.string().max(createSmetaProjectResponseExportsItemFileNameMax)
+})),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const GetSmetaProjectParams = zod.object({
+  "projectId": zod.coerce.string().uuid()
+})
+
+export const getSmetaProjectResponseClientNameMax = 120;
+
+export const getSmetaProjectResponseClientPhoneMax = 32;
+
+export const getSmetaProjectResponseClientEmailMax = 254;
+
+export const getSmetaProjectResponseContractorNameMax = 120;
+
+export const getSmetaProjectResponseContractorPhoneMax = 32;
+
+export const getSmetaProjectResponseContractorEmailMax = 254;
+
+export const getSmetaProjectResponseContractorCompanyMax = 160;
+
+export const getSmetaProjectResponseContractorExperienceYearsMin = 0;
+export const getSmetaProjectResponseContractorExperienceYearsMax = 100;
+
+export const getSmetaProjectResponseContractorCompletedProjectsMin = 0;
+export const getSmetaProjectResponseContractorCompletedProjectsMax = 100000;
+
+export const getSmetaProjectResponseContractorRatingMin = 0;
+export const getSmetaProjectResponseContractorRatingMax = 5;
+
+export const getSmetaProjectResponseProjectCostsItemIdMax = 64;
+
+export const getSmetaProjectResponseProjectCostsItemLabelMax = 160;
+
+export const getSmetaProjectResponseProjectCostsItemAmountMin = -100000000;
+export const getSmetaProjectResponseProjectCostsItemAmountMax = 100000000;
+
+export const getSmetaProjectResponseEstimateIdMax = 64;
+
+
+export const getSmetaProjectResponseEstimateCreatedAtMax = 40;
+
+export const getSmetaProjectResponseEstimateSectionsItemIdMax = 64;
+
+export const getSmetaProjectResponseEstimateSectionsItemTitleMax = 120;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemIdMax = 64;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemNameMax = 200;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemZoneMax = 120;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemUnitMax = 16;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMin = 0;
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMax = 100000000;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMin = 0;
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMax = 1;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMin = 0;
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemMaterialIdMax = 64;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const getSmetaProjectResponseEstimateSectionsItemItemsMax = 400;
+
+export const getSmetaProjectResponseEstimateSectionsMax = 60;
+
+export const getSmetaProjectResponseChangeOrdersItemIdMax = 64;
+
+
+export const getSmetaProjectResponseChangeOrdersItemTitleMax = 160;
+
+export const getSmetaProjectResponseChangeOrdersItemReasonMax = 1000;
+
+export const getSmetaProjectResponseChangeOrdersItemRequestedByNameMax = 120;
+
+export const getSmetaProjectResponseChangeOrdersItemMaterialDeltaMin = -100000000;
+export const getSmetaProjectResponseChangeOrdersItemMaterialDeltaMax = 100000000;
+
+export const getSmetaProjectResponseChangeOrdersItemLaborDeltaMin = -100000000;
+export const getSmetaProjectResponseChangeOrdersItemLaborDeltaMax = 100000000;
+
+export const getSmetaProjectResponseChangeOrdersItemAdditionalCostMin = -100000000;
+export const getSmetaProjectResponseChangeOrdersItemAdditionalCostMax = 100000000;
+
+export const getSmetaProjectResponseChangeOrdersItemPhotoIdsItemMax = 64;
+
+export const getSmetaProjectResponseChangeOrdersItemPhotoIdsMax = 50;
+
+export const getSmetaProjectResponseChangeOrdersItemLineItemIdsItemMax = 64;
+
+export const getSmetaProjectResponseChangeOrdersItemLineItemIdsMax = 100;
+
+export const getSmetaProjectResponseChangeOrdersItemDecidedAtMax = 40;
+
+export const getSmetaProjectResponseChangeOrdersItemDecisionNoteMax = 1000;
+
+export const getSmetaProjectResponseExpensesItemIdMax = 64;
+
+export const getSmetaProjectResponseExpensesItemDescriptionMax = 300;
+
+export const getSmetaProjectResponseExpensesItemVendorMax = 160;
+
+export const getSmetaProjectResponseExpensesItemAmountMin = 0;
+export const getSmetaProjectResponseExpensesItemAmountMax = 100000000;
+
+export const getSmetaProjectResponseExpensesItemReceiptIdMax = 64;
+
+export const getSmetaProjectResponseExpensesItemLineItemIdMax = 64;
+
+export const getSmetaProjectResponseReceiptsItemIdMax = 64;
+
+export const getSmetaProjectResponseReceiptsItemFileNameMax = 255;
+
+export const getSmetaProjectResponseReceiptsItemUploadedAtMax = 40;
+
+export const getSmetaProjectResponseReceiptsItemAiSuggestionMerchantMax = 160;
+
+export const getSmetaProjectResponseReceiptsItemAiSuggestionDateMax = 40;
+
+export const getSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMin = 0;
+export const getSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMax = 1;
+
+export const getSmetaProjectResponsePhotosItemIdMax = 64;
+
+export const getSmetaProjectResponsePhotosItemUploadedByMax = 120;
+
+export const getSmetaProjectResponsePhotosItemNoteMax = 500;
+
+export const getSmetaProjectResponsePhotosItemRoomMax = 120;
+
+export const getSmetaProjectResponsePhotosItemLineItemIdMax = 64;
+
+export const getSmetaProjectResponseDrawingIdMax = 64;
+
+export const getSmetaProjectResponseDrawingFileNameMax = 255;
+
+export const getSmetaProjectResponseDrawingUploadedAtMax = 40;
+
+export const getSmetaProjectResponseDrawingScaleMax = 40;
+
+export const getSmetaProjectResponseDrawingRoomsItemIdMax = 64;
+
+export const getSmetaProjectResponseDrawingRoomsItemNameMax = 120;
+
+export const getSmetaProjectResponseDrawingRoomsMax = 200;
+
+export const getSmetaProjectResponseDrawingOpeningsItemIdMax = 64;
+
+export const getSmetaProjectResponseDrawingOpeningsMax = 500;
+
+export const getSmetaProjectResponseMeasurementsItemIdMax = 64;
+
+export const getSmetaProjectResponseMeasurementsItemNameMax = 160;
+
+export const getSmetaProjectResponseMeasurementsItemValueMin = 0;
+export const getSmetaProjectResponseMeasurementsItemValueMax = 100000000;
+
+export const getSmetaProjectResponseMeasurementsItemUnitMax = 8;
+
+export const getSmetaProjectResponseMeasurementsItemConfidenceMin = 0;
+export const getSmetaProjectResponseMeasurementsItemConfidenceMax = 1;
+
+export const getSmetaProjectResponseMeasurementsItemSourceMax = 250;
+
+export const getSmetaProjectResponseMeasurementsItemRoomIdMax = 64;
+
+export const getSmetaProjectResponsePaymentsItemIdMax = 64;
+
+export const getSmetaProjectResponsePaymentsItemTitleMax = 160;
+
+export const getSmetaProjectResponsePaymentsItemShareMin = 0;
+export const getSmetaProjectResponsePaymentsItemShareMax = 1;
+
+export const getSmetaProjectResponsePaymentsItemConditionMax = 250;
+
+export const getSmetaProjectResponseShareSnapshotIdMax = 64;
+
+
+export const getSmetaProjectResponseShareSnapshotCreatedAtMax = 40;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemIdMax = 64;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemTitleMax = 120;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemIdMax = 64;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemNameMax = 200;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemZoneMax = 120;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemUnitMax = 16;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMin = 0;
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMax = 100000000;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMin = 0;
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMax = 1;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin = 0;
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialIdMax = 64;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const getSmetaProjectResponseShareSnapshotSectionsItemItemsMax = 400;
+
+export const getSmetaProjectResponseShareSnapshotSectionsMax = 60;
+
+export const getSmetaProjectResponseShareSnapshotProjectCostsItemIdMax = 64;
+
+export const getSmetaProjectResponseShareSnapshotProjectCostsItemLabelMax = 160;
+
+export const getSmetaProjectResponseShareSnapshotProjectCostsItemAmountMin = -100000000;
+export const getSmetaProjectResponseShareSnapshotProjectCostsItemAmountMax = 100000000;
+
+export const getSmetaProjectResponseExportsItemIdMax = 64;
+
+export const getSmetaProjectResponseExportsItemCreatedAtMax = 40;
+
+export const getSmetaProjectResponseExportsItemFileNameMax = 255;
+
+
+
+export const GetSmetaProjectResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "quality": zod.enum(['ekonom', 'standart', 'premium']),
+  "areaM2": zod.number(),
+  "startDate": zod.string().date(),
+  "endDate": zod.string().date(),
+  "client": zod.object({
+  "name": zod.string().max(getSmetaProjectResponseClientNameMax),
+  "phone": zod.string().max(getSmetaProjectResponseClientPhoneMax),
+  "email": zod.string().max(getSmetaProjectResponseClientEmailMax).optional()
+}),
+  "contractor": zod.object({
+  "name": zod.string().max(getSmetaProjectResponseContractorNameMax),
+  "phone": zod.string().max(getSmetaProjectResponseContractorPhoneMax),
+  "email": zod.string().max(getSmetaProjectResponseContractorEmailMax).optional(),
+  "company": zod.string().max(getSmetaProjectResponseContractorCompanyMax),
+  "experienceYears": zod.number().min(getSmetaProjectResponseContractorExperienceYearsMin).max(getSmetaProjectResponseContractorExperienceYearsMax),
+  "completedProjects": zod.number().min(getSmetaProjectResponseContractorCompletedProjectsMin).max(getSmetaProjectResponseContractorCompletedProjectsMax),
+  "rating": zod.number().min(getSmetaProjectResponseContractorRatingMin).max(getSmetaProjectResponseContractorRatingMax)
+}),
+  "completion": zod.number().int(),
+  "defaultMarginPercentage": zod.number(),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseProjectCostsItemIdMax),
+  "label": zod.string().max(getSmetaProjectResponseProjectCostsItemLabelMax),
+  "amount": zod.number().min(getSmetaProjectResponseProjectCostsItemAmountMin).max(getSmetaProjectResponseProjectCostsItemAmountMax)
+})),
+  "estimate": zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseEstimateIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(getSmetaProjectResponseEstimateCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseEstimateSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(getSmetaProjectResponseEstimateSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseEstimateSectionsItemItemsItemIdMax),
+  "name": zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(getSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMin).max(getSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(getSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin).max(getSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(getSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMin).max(getSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(getSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMin).max(getSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(getSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMin).max(getSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(getSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMin).max(getSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(getSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(getSmetaProjectResponseEstimateSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(getSmetaProjectResponseEstimateSectionsItemItemsMax)
+})).max(getSmetaProjectResponseEstimateSectionsMax)
+}),
+  "status": zod.enum(['draft', 'sent', 'client_approved', 'revision_requested']),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseChangeOrdersItemIdMax),
+  "number": zod.number().int().min(1),
+  "title": zod.string().max(getSmetaProjectResponseChangeOrdersItemTitleMax),
+  "reason": zod.string().max(getSmetaProjectResponseChangeOrdersItemReasonMax),
+  "date": zod.string().date(),
+  "requestedBy": zod.enum(['client', 'contractor']),
+  "requestedByName": zod.string().max(getSmetaProjectResponseChangeOrdersItemRequestedByNameMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "materialDelta": zod.number().min(getSmetaProjectResponseChangeOrdersItemMaterialDeltaMin).max(getSmetaProjectResponseChangeOrdersItemMaterialDeltaMax),
+  "laborDelta": zod.number().min(getSmetaProjectResponseChangeOrdersItemLaborDeltaMin).max(getSmetaProjectResponseChangeOrdersItemLaborDeltaMax),
+  "additionalCost": zod.number().min(getSmetaProjectResponseChangeOrdersItemAdditionalCostMin).max(getSmetaProjectResponseChangeOrdersItemAdditionalCostMax),
+  "status": zod.enum(['draft', 'pending', 'approved', 'rejected']),
+  "photoIds": zod.array(zod.string().max(getSmetaProjectResponseChangeOrdersItemPhotoIdsItemMax)).max(getSmetaProjectResponseChangeOrdersItemPhotoIdsMax),
+  "lineItemIds": zod.array(zod.string().max(getSmetaProjectResponseChangeOrdersItemLineItemIdsItemMax)).max(getSmetaProjectResponseChangeOrdersItemLineItemIdsMax),
+  "decidedAt": zod.string().max(getSmetaProjectResponseChangeOrdersItemDecidedAtMax).optional(),
+  "decisionNote": zod.string().max(getSmetaProjectResponseChangeOrdersItemDecisionNoteMax).optional()
+})),
+  "expenses": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseExpensesItemIdMax),
+  "date": zod.string().date(),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "description": zod.string().max(getSmetaProjectResponseExpensesItemDescriptionMax),
+  "vendor": zod.string().max(getSmetaProjectResponseExpensesItemVendorMax),
+  "amount": zod.number().min(getSmetaProjectResponseExpensesItemAmountMin).max(getSmetaProjectResponseExpensesItemAmountMax),
+  "paymentStatus": zod.enum(['paid', 'partial', 'unpaid']),
+  "receiptId": zod.string().max(getSmetaProjectResponseExpensesItemReceiptIdMax).optional(),
+  "lineItemId": zod.string().max(getSmetaProjectResponseExpensesItemLineItemIdMax).optional()
+})),
+  "receipts": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseReceiptsItemIdMax),
+  "fileName": zod.string().max(getSmetaProjectResponseReceiptsItemFileNameMax),
+  "fileType": zod.enum(['image', 'pdf']),
+  "uploadedAt": zod.string().max(getSmetaProjectResponseReceiptsItemUploadedAtMax),
+  "aiSuggestion": zod.object({
+  "merchant": zod.string().max(getSmetaProjectResponseReceiptsItemAiSuggestionMerchantMax),
+  "date": zod.string().max(getSmetaProjectResponseReceiptsItemAiSuggestionDateMax),
+  "total": zod.number(),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "confidence": zod.number().min(getSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMin).max(getSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMax)
+}).optional()
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponsePhotosItemIdMax),
+  "phase": zod.enum(['before', 'during', 'after']),
+  "date": zod.string().date(),
+  "uploadedBy": zod.string().max(getSmetaProjectResponsePhotosItemUploadedByMax),
+  "note": zod.string().max(getSmetaProjectResponsePhotosItemNoteMax),
+  "room": zod.string().max(getSmetaProjectResponsePhotosItemRoomMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "lineItemId": zod.string().max(getSmetaProjectResponsePhotosItemLineItemIdMax).optional(),
+  "clientVisible": zod.boolean()
+})),
+  "drawing": zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseDrawingIdMax),
+  "fileName": zod.string().max(getSmetaProjectResponseDrawingFileNameMax),
+  "fileType": zod.enum(['pdf', 'jpg', 'png']),
+  "uploadedAt": zod.string().max(getSmetaProjectResponseDrawingUploadedAtMax),
+  "scale": zod.string().max(getSmetaProjectResponseDrawingScaleMax),
+  "width": zod.number(),
+  "height": zod.number(),
+  "status": zod.enum(['processing', 'analyzed', 'failed']),
+  "rooms": zod.array(zod.object({
+  "id": zod.string().max(getSmetaProjectResponseDrawingRoomsItemIdMax),
+  "name": zod.string().max(getSmetaProjectResponseDrawingRoomsItemNameMax),
+  "x": zod.number(),
+  "y": zod.number(),
+  "w": zod.number(),
+  "h": zod.number()
+})).max(getSmetaProjectResponseDrawingRoomsMax),
+  "openings": zod.array(zod.object({
+  "id": zod.string().max(getSmetaProjectResponseDrawingOpeningsItemIdMax),
+  "kind": zod.enum(['door', 'window']),
+  "x1": zod.number(),
+  "y1": zod.number(),
+  "x2": zod.number(),
+  "y2": zod.number()
+})).max(getSmetaProjectResponseDrawingOpeningsMax)
+}).optional(),
+  "measurements": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseMeasurementsItemIdMax),
+  "kind": zod.enum(['area', 'length', 'count', 'height']),
+  "name": zod.string().max(getSmetaProjectResponseMeasurementsItemNameMax),
+  "value": zod.number().min(getSmetaProjectResponseMeasurementsItemValueMin).max(getSmetaProjectResponseMeasurementsItemValueMax),
+  "unit": zod.string().max(getSmetaProjectResponseMeasurementsItemUnitMax),
+  "confidence": zod.number().min(getSmetaProjectResponseMeasurementsItemConfidenceMin).max(getSmetaProjectResponseMeasurementsItemConfidenceMax),
+  "source": zod.string().max(getSmetaProjectResponseMeasurementsItemSourceMax),
+  "status": zod.enum(['suggested', 'edited', 'approved']),
+  "roomId": zod.string().max(getSmetaProjectResponseMeasurementsItemRoomIdMax).optional()
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "confirmedScope": zod.boolean(),
+  "total": zod.number()
+})),
+  "revisionRequests": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "message": zod.string()
+})),
+  "payments": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponsePaymentsItemIdMax),
+  "title": zod.string().max(getSmetaProjectResponsePaymentsItemTitleMax),
+  "share": zod.number().min(getSmetaProjectResponsePaymentsItemShareMin).max(getSmetaProjectResponsePaymentsItemShareMax),
+  "condition": zod.string().max(getSmetaProjectResponsePaymentsItemConditionMax),
+  "status": zod.enum(['paid', 'due', 'planned'])
+})),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string()),
+  "share": zod.object({
+  "token": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "clientName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().optional(),
+  "message": zod.string(),
+  "notifyOnApprove": zod.boolean(),
+  "attachPdf": zod.boolean(),
+  "snapshot": zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseShareSnapshotIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(getSmetaProjectResponseShareSnapshotCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseShareSnapshotSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemIdMax),
+  "name": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMin).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMin).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(getSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(getSmetaProjectResponseShareSnapshotSectionsItemItemsMax)
+})).max(getSmetaProjectResponseShareSnapshotSectionsMax)
+}),
+  "snapshotProjectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseShareSnapshotProjectCostsItemIdMax),
+  "label": zod.string().max(getSmetaProjectResponseShareSnapshotProjectCostsItemLabelMax),
+  "amount": zod.number().min(getSmetaProjectResponseShareSnapshotProjectCostsItemAmountMin).max(getSmetaProjectResponseShareSnapshotProjectCostsItemAmountMax)
+})),
+  "snapshotMargin": zod.number()
+}).optional().describe('Owner-only view of the client link, including the frozen internal snapshot.'),
+  "exports": zod.array(zod.object({
+  "id": zod.string().min(1).max(getSmetaProjectResponseExportsItemIdMax),
+  "kind": zod.enum(['xlsx', 'pdf']),
+  "status": zod.enum(['processing', 'ready', 'failed']),
+  "createdAt": zod.string().max(getSmetaProjectResponseExportsItemCreatedAtMax),
+  "fileName": zod.string().max(getSmetaProjectResponseExportsItemFileNameMax)
+})),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * Replaces estimate lines, measurements, change orders, expenses, photos and payments. Status, client decisions and sent versions are server-controlled and ignored.
+ * @summary Save the contractor-editable part of a project
+ */
+export const UpdateSmetaProjectParams = zod.object({
+  "projectId": zod.coerce.string().uuid()
+})
+
+export const updateSmetaProjectBodyNameMax = 120;
+
+export const updateSmetaProjectBodyDistrictMax = 100;
+
+export const updateSmetaProjectBodyAddressMax = 250;
+
+export const updateSmetaProjectBodyAreaM2Min = 0;
+export const updateSmetaProjectBodyAreaM2Max = 100000;
+
+export const updateSmetaProjectBodyClientNameMax = 120;
+
+export const updateSmetaProjectBodyClientPhoneMax = 32;
+
+export const updateSmetaProjectBodyClientEmailMax = 254;
+
+export const updateSmetaProjectBodyContractorNameMax = 120;
+
+export const updateSmetaProjectBodyContractorPhoneMax = 32;
+
+export const updateSmetaProjectBodyContractorEmailMax = 254;
+
+export const updateSmetaProjectBodyContractorCompanyMax = 160;
+
+export const updateSmetaProjectBodyContractorExperienceYearsMin = 0;
+export const updateSmetaProjectBodyContractorExperienceYearsMax = 100;
+
+export const updateSmetaProjectBodyContractorCompletedProjectsMin = 0;
+export const updateSmetaProjectBodyContractorCompletedProjectsMax = 100000;
+
+export const updateSmetaProjectBodyContractorRatingMin = 0;
+export const updateSmetaProjectBodyContractorRatingMax = 5;
+
+export const updateSmetaProjectBodyCompletionMin = 0;
+export const updateSmetaProjectBodyCompletionMax = 100;
+
+export const updateSmetaProjectBodyDefaultMarginPercentageMin = 0;
+export const updateSmetaProjectBodyDefaultMarginPercentageMax = 1;
+
+export const updateSmetaProjectBodyProjectCostsItemIdMax = 64;
+
+export const updateSmetaProjectBodyProjectCostsItemLabelMax = 160;
+
+export const updateSmetaProjectBodyProjectCostsItemAmountMin = -100000000;
+export const updateSmetaProjectBodyProjectCostsItemAmountMax = 100000000;
+
+export const updateSmetaProjectBodyProjectCostsMax = 50;
+
+export const updateSmetaProjectBodyEstimateIdMax = 64;
+
+
+export const updateSmetaProjectBodyEstimateCreatedAtMax = 40;
+
+export const updateSmetaProjectBodyEstimateSectionsItemIdMax = 64;
+
+export const updateSmetaProjectBodyEstimateSectionsItemTitleMax = 120;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemIdMax = 64;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemNameMax = 200;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemZoneMax = 120;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemUnitMax = 16;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantityMin = 0;
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantityMax = 100000000;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemWastePercentageMin = 0;
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemWastePercentageMax = 1;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemMarginPercentageMin = 0;
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemMaterialIdMax = 64;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const updateSmetaProjectBodyEstimateSectionsItemItemsMax = 400;
+
+export const updateSmetaProjectBodyEstimateSectionsMax = 60;
+
+export const updateSmetaProjectBodyChangeOrdersItemIdMax = 64;
+
+
+export const updateSmetaProjectBodyChangeOrdersItemTitleMax = 160;
+
+export const updateSmetaProjectBodyChangeOrdersItemReasonMax = 1000;
+
+export const updateSmetaProjectBodyChangeOrdersItemRequestedByNameMax = 120;
+
+export const updateSmetaProjectBodyChangeOrdersItemMaterialDeltaMin = -100000000;
+export const updateSmetaProjectBodyChangeOrdersItemMaterialDeltaMax = 100000000;
+
+export const updateSmetaProjectBodyChangeOrdersItemLaborDeltaMin = -100000000;
+export const updateSmetaProjectBodyChangeOrdersItemLaborDeltaMax = 100000000;
+
+export const updateSmetaProjectBodyChangeOrdersItemAdditionalCostMin = -100000000;
+export const updateSmetaProjectBodyChangeOrdersItemAdditionalCostMax = 100000000;
+
+export const updateSmetaProjectBodyChangeOrdersItemPhotoIdsItemMax = 64;
+
+export const updateSmetaProjectBodyChangeOrdersItemPhotoIdsMax = 50;
+
+export const updateSmetaProjectBodyChangeOrdersItemLineItemIdsItemMax = 64;
+
+export const updateSmetaProjectBodyChangeOrdersItemLineItemIdsMax = 100;
+
+export const updateSmetaProjectBodyChangeOrdersItemDecidedAtMax = 40;
+
+export const updateSmetaProjectBodyChangeOrdersItemDecisionNoteMax = 1000;
+
+export const updateSmetaProjectBodyChangeOrdersMax = 300;
+
+export const updateSmetaProjectBodyExpensesItemIdMax = 64;
+
+export const updateSmetaProjectBodyExpensesItemDescriptionMax = 300;
+
+export const updateSmetaProjectBodyExpensesItemVendorMax = 160;
+
+export const updateSmetaProjectBodyExpensesItemAmountMin = 0;
+export const updateSmetaProjectBodyExpensesItemAmountMax = 100000000;
+
+export const updateSmetaProjectBodyExpensesItemReceiptIdMax = 64;
+
+export const updateSmetaProjectBodyExpensesItemLineItemIdMax = 64;
+
+export const updateSmetaProjectBodyExpensesMax = 2000;
+
+export const updateSmetaProjectBodyReceiptsItemIdMax = 64;
+
+export const updateSmetaProjectBodyReceiptsItemFileNameMax = 255;
+
+export const updateSmetaProjectBodyReceiptsItemUploadedAtMax = 40;
+
+export const updateSmetaProjectBodyReceiptsItemAiSuggestionMerchantMax = 160;
+
+export const updateSmetaProjectBodyReceiptsItemAiSuggestionDateMax = 40;
+
+export const updateSmetaProjectBodyReceiptsItemAiSuggestionConfidenceMin = 0;
+export const updateSmetaProjectBodyReceiptsItemAiSuggestionConfidenceMax = 1;
+
+export const updateSmetaProjectBodyReceiptsMax = 2000;
+
+export const updateSmetaProjectBodyPhotosItemIdMax = 64;
+
+export const updateSmetaProjectBodyPhotosItemUploadedByMax = 120;
+
+export const updateSmetaProjectBodyPhotosItemNoteMax = 500;
+
+export const updateSmetaProjectBodyPhotosItemRoomMax = 120;
+
+export const updateSmetaProjectBodyPhotosItemLineItemIdMax = 64;
+
+export const updateSmetaProjectBodyPhotosMax = 2000;
+
+export const updateSmetaProjectBodyDrawingIdMax = 64;
+
+export const updateSmetaProjectBodyDrawingFileNameMax = 255;
+
+export const updateSmetaProjectBodyDrawingUploadedAtMax = 40;
+
+export const updateSmetaProjectBodyDrawingScaleMax = 40;
+
+export const updateSmetaProjectBodyDrawingRoomsItemIdMax = 64;
+
+export const updateSmetaProjectBodyDrawingRoomsItemNameMax = 120;
+
+export const updateSmetaProjectBodyDrawingRoomsMax = 200;
+
+export const updateSmetaProjectBodyDrawingOpeningsItemIdMax = 64;
+
+export const updateSmetaProjectBodyDrawingOpeningsMax = 500;
+
+export const updateSmetaProjectBodyMeasurementsItemIdMax = 64;
+
+export const updateSmetaProjectBodyMeasurementsItemNameMax = 160;
+
+export const updateSmetaProjectBodyMeasurementsItemValueMin = 0;
+export const updateSmetaProjectBodyMeasurementsItemValueMax = 100000000;
+
+export const updateSmetaProjectBodyMeasurementsItemUnitMax = 8;
+
+export const updateSmetaProjectBodyMeasurementsItemConfidenceMin = 0;
+export const updateSmetaProjectBodyMeasurementsItemConfidenceMax = 1;
+
+export const updateSmetaProjectBodyMeasurementsItemSourceMax = 250;
+
+export const updateSmetaProjectBodyMeasurementsItemRoomIdMax = 64;
+
+export const updateSmetaProjectBodyMeasurementsMax = 500;
+
+export const updateSmetaProjectBodyPaymentsItemIdMax = 64;
+
+export const updateSmetaProjectBodyPaymentsItemTitleMax = 160;
+
+export const updateSmetaProjectBodyPaymentsItemShareMin = 0;
+export const updateSmetaProjectBodyPaymentsItemShareMax = 1;
+
+export const updateSmetaProjectBodyPaymentsItemConditionMax = 250;
+
+export const updateSmetaProjectBodyPaymentsMax = 20;
+
+export const updateSmetaProjectBodyIncludedItemMax = 200;
+
+export const updateSmetaProjectBodyIncludedMax = 60;
+
+export const updateSmetaProjectBodyExcludedItemMax = 200;
+
+export const updateSmetaProjectBodyExcludedMax = 60;
+
+export const updateSmetaProjectBodyExportsItemIdMax = 64;
+
+export const updateSmetaProjectBodyExportsItemCreatedAtMax = 40;
+
+export const updateSmetaProjectBodyExportsItemFileNameMax = 255;
+
+export const updateSmetaProjectBodyExportsMax = 50;
+
+
+
+export const UpdateSmetaProjectBody = zod.object({
+  "id": zod.string().uuid().optional(),
+  "name": zod.string().min(1).max(updateSmetaProjectBodyNameMax),
+  "district": zod.string().max(updateSmetaProjectBodyDistrictMax),
+  "address": zod.string().max(updateSmetaProjectBodyAddressMax),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "quality": zod.enum(['ekonom', 'standart', 'premium']),
+  "areaM2": zod.number().min(updateSmetaProjectBodyAreaM2Min).max(updateSmetaProjectBodyAreaM2Max),
+  "startDate": zod.string().date(),
+  "endDate": zod.string().date(),
+  "client": zod.object({
+  "name": zod.string().max(updateSmetaProjectBodyClientNameMax),
+  "phone": zod.string().max(updateSmetaProjectBodyClientPhoneMax),
+  "email": zod.string().max(updateSmetaProjectBodyClientEmailMax).optional()
+}),
+  "contractor": zod.object({
+  "name": zod.string().max(updateSmetaProjectBodyContractorNameMax),
+  "phone": zod.string().max(updateSmetaProjectBodyContractorPhoneMax),
+  "email": zod.string().max(updateSmetaProjectBodyContractorEmailMax).optional(),
+  "company": zod.string().max(updateSmetaProjectBodyContractorCompanyMax),
+  "experienceYears": zod.number().min(updateSmetaProjectBodyContractorExperienceYearsMin).max(updateSmetaProjectBodyContractorExperienceYearsMax),
+  "completedProjects": zod.number().min(updateSmetaProjectBodyContractorCompletedProjectsMin).max(updateSmetaProjectBodyContractorCompletedProjectsMax),
+  "rating": zod.number().min(updateSmetaProjectBodyContractorRatingMin).max(updateSmetaProjectBodyContractorRatingMax)
+}),
+  "completion": zod.number().int().min(updateSmetaProjectBodyCompletionMin).max(updateSmetaProjectBodyCompletionMax),
+  "defaultMarginPercentage": zod.number().min(updateSmetaProjectBodyDefaultMarginPercentageMin).max(updateSmetaProjectBodyDefaultMarginPercentageMax),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyProjectCostsItemIdMax),
+  "label": zod.string().max(updateSmetaProjectBodyProjectCostsItemLabelMax),
+  "amount": zod.number().min(updateSmetaProjectBodyProjectCostsItemAmountMin).max(updateSmetaProjectBodyProjectCostsItemAmountMax)
+})).max(updateSmetaProjectBodyProjectCostsMax),
+  "estimate": zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyEstimateIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(updateSmetaProjectBodyEstimateCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyEstimateSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyEstimateSectionsItemItemsItemIdMax),
+  "name": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantityMin).max(updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(updateSmetaProjectBodyEstimateSectionsItemItemsItemMaterialUnitPriceMin).max(updateSmetaProjectBodyEstimateSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(updateSmetaProjectBodyEstimateSectionsItemItemsItemLaborUnitPriceMin).max(updateSmetaProjectBodyEstimateSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(updateSmetaProjectBodyEstimateSectionsItemItemsItemAdditionalCostMin).max(updateSmetaProjectBodyEstimateSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(updateSmetaProjectBodyEstimateSectionsItemItemsItemWastePercentageMin).max(updateSmetaProjectBodyEstimateSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(updateSmetaProjectBodyEstimateSectionsItemItemsItemMarginPercentageMin).max(updateSmetaProjectBodyEstimateSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(updateSmetaProjectBodyEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(updateSmetaProjectBodyEstimateSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(updateSmetaProjectBodyEstimateSectionsItemItemsMax)
+})).max(updateSmetaProjectBodyEstimateSectionsMax)
+}),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyChangeOrdersItemIdMax),
+  "number": zod.number().int().min(1),
+  "title": zod.string().max(updateSmetaProjectBodyChangeOrdersItemTitleMax),
+  "reason": zod.string().max(updateSmetaProjectBodyChangeOrdersItemReasonMax),
+  "date": zod.string().date(),
+  "requestedBy": zod.enum(['client', 'contractor']),
+  "requestedByName": zod.string().max(updateSmetaProjectBodyChangeOrdersItemRequestedByNameMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "materialDelta": zod.number().min(updateSmetaProjectBodyChangeOrdersItemMaterialDeltaMin).max(updateSmetaProjectBodyChangeOrdersItemMaterialDeltaMax),
+  "laborDelta": zod.number().min(updateSmetaProjectBodyChangeOrdersItemLaborDeltaMin).max(updateSmetaProjectBodyChangeOrdersItemLaborDeltaMax),
+  "additionalCost": zod.number().min(updateSmetaProjectBodyChangeOrdersItemAdditionalCostMin).max(updateSmetaProjectBodyChangeOrdersItemAdditionalCostMax),
+  "status": zod.enum(['draft', 'pending', 'approved', 'rejected']),
+  "photoIds": zod.array(zod.string().max(updateSmetaProjectBodyChangeOrdersItemPhotoIdsItemMax)).max(updateSmetaProjectBodyChangeOrdersItemPhotoIdsMax),
+  "lineItemIds": zod.array(zod.string().max(updateSmetaProjectBodyChangeOrdersItemLineItemIdsItemMax)).max(updateSmetaProjectBodyChangeOrdersItemLineItemIdsMax),
+  "decidedAt": zod.string().max(updateSmetaProjectBodyChangeOrdersItemDecidedAtMax).optional(),
+  "decisionNote": zod.string().max(updateSmetaProjectBodyChangeOrdersItemDecisionNoteMax).optional()
+})).max(updateSmetaProjectBodyChangeOrdersMax),
+  "expenses": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyExpensesItemIdMax),
+  "date": zod.string().date(),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "description": zod.string().max(updateSmetaProjectBodyExpensesItemDescriptionMax),
+  "vendor": zod.string().max(updateSmetaProjectBodyExpensesItemVendorMax),
+  "amount": zod.number().min(updateSmetaProjectBodyExpensesItemAmountMin).max(updateSmetaProjectBodyExpensesItemAmountMax),
+  "paymentStatus": zod.enum(['paid', 'partial', 'unpaid']),
+  "receiptId": zod.string().max(updateSmetaProjectBodyExpensesItemReceiptIdMax).optional(),
+  "lineItemId": zod.string().max(updateSmetaProjectBodyExpensesItemLineItemIdMax).optional()
+})).max(updateSmetaProjectBodyExpensesMax),
+  "receipts": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyReceiptsItemIdMax),
+  "fileName": zod.string().max(updateSmetaProjectBodyReceiptsItemFileNameMax),
+  "fileType": zod.enum(['image', 'pdf']),
+  "uploadedAt": zod.string().max(updateSmetaProjectBodyReceiptsItemUploadedAtMax),
+  "aiSuggestion": zod.object({
+  "merchant": zod.string().max(updateSmetaProjectBodyReceiptsItemAiSuggestionMerchantMax),
+  "date": zod.string().max(updateSmetaProjectBodyReceiptsItemAiSuggestionDateMax),
+  "total": zod.number(),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "confidence": zod.number().min(updateSmetaProjectBodyReceiptsItemAiSuggestionConfidenceMin).max(updateSmetaProjectBodyReceiptsItemAiSuggestionConfidenceMax)
+}).optional()
+})).max(updateSmetaProjectBodyReceiptsMax),
+  "photos": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyPhotosItemIdMax),
+  "phase": zod.enum(['before', 'during', 'after']),
+  "date": zod.string().date(),
+  "uploadedBy": zod.string().max(updateSmetaProjectBodyPhotosItemUploadedByMax),
+  "note": zod.string().max(updateSmetaProjectBodyPhotosItemNoteMax),
+  "room": zod.string().max(updateSmetaProjectBodyPhotosItemRoomMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "lineItemId": zod.string().max(updateSmetaProjectBodyPhotosItemLineItemIdMax).optional(),
+  "clientVisible": zod.boolean()
+})).max(updateSmetaProjectBodyPhotosMax),
+  "drawing": zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyDrawingIdMax),
+  "fileName": zod.string().max(updateSmetaProjectBodyDrawingFileNameMax),
+  "fileType": zod.enum(['pdf', 'jpg', 'png']),
+  "uploadedAt": zod.string().max(updateSmetaProjectBodyDrawingUploadedAtMax),
+  "scale": zod.string().max(updateSmetaProjectBodyDrawingScaleMax),
+  "width": zod.number(),
+  "height": zod.number(),
+  "status": zod.enum(['processing', 'analyzed', 'failed']),
+  "rooms": zod.array(zod.object({
+  "id": zod.string().max(updateSmetaProjectBodyDrawingRoomsItemIdMax),
+  "name": zod.string().max(updateSmetaProjectBodyDrawingRoomsItemNameMax),
+  "x": zod.number(),
+  "y": zod.number(),
+  "w": zod.number(),
+  "h": zod.number()
+})).max(updateSmetaProjectBodyDrawingRoomsMax),
+  "openings": zod.array(zod.object({
+  "id": zod.string().max(updateSmetaProjectBodyDrawingOpeningsItemIdMax),
+  "kind": zod.enum(['door', 'window']),
+  "x1": zod.number(),
+  "y1": zod.number(),
+  "x2": zod.number(),
+  "y2": zod.number()
+})).max(updateSmetaProjectBodyDrawingOpeningsMax)
+}).optional(),
+  "measurements": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyMeasurementsItemIdMax),
+  "kind": zod.enum(['area', 'length', 'count', 'height']),
+  "name": zod.string().max(updateSmetaProjectBodyMeasurementsItemNameMax),
+  "value": zod.number().min(updateSmetaProjectBodyMeasurementsItemValueMin).max(updateSmetaProjectBodyMeasurementsItemValueMax),
+  "unit": zod.string().max(updateSmetaProjectBodyMeasurementsItemUnitMax),
+  "confidence": zod.number().min(updateSmetaProjectBodyMeasurementsItemConfidenceMin).max(updateSmetaProjectBodyMeasurementsItemConfidenceMax),
+  "source": zod.string().max(updateSmetaProjectBodyMeasurementsItemSourceMax),
+  "status": zod.enum(['suggested', 'edited', 'approved']),
+  "roomId": zod.string().max(updateSmetaProjectBodyMeasurementsItemRoomIdMax).optional()
+})).max(updateSmetaProjectBodyMeasurementsMax),
+  "payments": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyPaymentsItemIdMax),
+  "title": zod.string().max(updateSmetaProjectBodyPaymentsItemTitleMax),
+  "share": zod.number().min(updateSmetaProjectBodyPaymentsItemShareMin).max(updateSmetaProjectBodyPaymentsItemShareMax),
+  "condition": zod.string().max(updateSmetaProjectBodyPaymentsItemConditionMax),
+  "status": zod.enum(['paid', 'due', 'planned'])
+})).max(updateSmetaProjectBodyPaymentsMax),
+  "included": zod.array(zod.string().max(updateSmetaProjectBodyIncludedItemMax)).max(updateSmetaProjectBodyIncludedMax),
+  "excluded": zod.array(zod.string().max(updateSmetaProjectBodyExcludedItemMax)).max(updateSmetaProjectBodyExcludedMax),
+  "exports": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectBodyExportsItemIdMax),
+  "kind": zod.enum(['xlsx', 'pdf']),
+  "status": zod.enum(['processing', 'ready', 'failed']),
+  "createdAt": zod.string().max(updateSmetaProjectBodyExportsItemCreatedAtMax),
+  "fileName": zod.string().max(updateSmetaProjectBodyExportsItemFileNameMax)
+})).max(updateSmetaProjectBodyExportsMax)
+})
+
+export const updateSmetaProjectResponseClientNameMax = 120;
+
+export const updateSmetaProjectResponseClientPhoneMax = 32;
+
+export const updateSmetaProjectResponseClientEmailMax = 254;
+
+export const updateSmetaProjectResponseContractorNameMax = 120;
+
+export const updateSmetaProjectResponseContractorPhoneMax = 32;
+
+export const updateSmetaProjectResponseContractorEmailMax = 254;
+
+export const updateSmetaProjectResponseContractorCompanyMax = 160;
+
+export const updateSmetaProjectResponseContractorExperienceYearsMin = 0;
+export const updateSmetaProjectResponseContractorExperienceYearsMax = 100;
+
+export const updateSmetaProjectResponseContractorCompletedProjectsMin = 0;
+export const updateSmetaProjectResponseContractorCompletedProjectsMax = 100000;
+
+export const updateSmetaProjectResponseContractorRatingMin = 0;
+export const updateSmetaProjectResponseContractorRatingMax = 5;
+
+export const updateSmetaProjectResponseProjectCostsItemIdMax = 64;
+
+export const updateSmetaProjectResponseProjectCostsItemLabelMax = 160;
+
+export const updateSmetaProjectResponseProjectCostsItemAmountMin = -100000000;
+export const updateSmetaProjectResponseProjectCostsItemAmountMax = 100000000;
+
+export const updateSmetaProjectResponseEstimateIdMax = 64;
+
+
+export const updateSmetaProjectResponseEstimateCreatedAtMax = 40;
+
+export const updateSmetaProjectResponseEstimateSectionsItemIdMax = 64;
+
+export const updateSmetaProjectResponseEstimateSectionsItemTitleMax = 120;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemIdMax = 64;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemNameMax = 200;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemZoneMax = 120;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemUnitMax = 16;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMin = 0;
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMax = 100000000;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMin = 0;
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMax = 1;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMin = 0;
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemMaterialIdMax = 64;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const updateSmetaProjectResponseEstimateSectionsItemItemsMax = 400;
+
+export const updateSmetaProjectResponseEstimateSectionsMax = 60;
+
+export const updateSmetaProjectResponseChangeOrdersItemIdMax = 64;
+
+
+export const updateSmetaProjectResponseChangeOrdersItemTitleMax = 160;
+
+export const updateSmetaProjectResponseChangeOrdersItemReasonMax = 1000;
+
+export const updateSmetaProjectResponseChangeOrdersItemRequestedByNameMax = 120;
+
+export const updateSmetaProjectResponseChangeOrdersItemMaterialDeltaMin = -100000000;
+export const updateSmetaProjectResponseChangeOrdersItemMaterialDeltaMax = 100000000;
+
+export const updateSmetaProjectResponseChangeOrdersItemLaborDeltaMin = -100000000;
+export const updateSmetaProjectResponseChangeOrdersItemLaborDeltaMax = 100000000;
+
+export const updateSmetaProjectResponseChangeOrdersItemAdditionalCostMin = -100000000;
+export const updateSmetaProjectResponseChangeOrdersItemAdditionalCostMax = 100000000;
+
+export const updateSmetaProjectResponseChangeOrdersItemPhotoIdsItemMax = 64;
+
+export const updateSmetaProjectResponseChangeOrdersItemPhotoIdsMax = 50;
+
+export const updateSmetaProjectResponseChangeOrdersItemLineItemIdsItemMax = 64;
+
+export const updateSmetaProjectResponseChangeOrdersItemLineItemIdsMax = 100;
+
+export const updateSmetaProjectResponseChangeOrdersItemDecidedAtMax = 40;
+
+export const updateSmetaProjectResponseChangeOrdersItemDecisionNoteMax = 1000;
+
+export const updateSmetaProjectResponseExpensesItemIdMax = 64;
+
+export const updateSmetaProjectResponseExpensesItemDescriptionMax = 300;
+
+export const updateSmetaProjectResponseExpensesItemVendorMax = 160;
+
+export const updateSmetaProjectResponseExpensesItemAmountMin = 0;
+export const updateSmetaProjectResponseExpensesItemAmountMax = 100000000;
+
+export const updateSmetaProjectResponseExpensesItemReceiptIdMax = 64;
+
+export const updateSmetaProjectResponseExpensesItemLineItemIdMax = 64;
+
+export const updateSmetaProjectResponseReceiptsItemIdMax = 64;
+
+export const updateSmetaProjectResponseReceiptsItemFileNameMax = 255;
+
+export const updateSmetaProjectResponseReceiptsItemUploadedAtMax = 40;
+
+export const updateSmetaProjectResponseReceiptsItemAiSuggestionMerchantMax = 160;
+
+export const updateSmetaProjectResponseReceiptsItemAiSuggestionDateMax = 40;
+
+export const updateSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMin = 0;
+export const updateSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMax = 1;
+
+export const updateSmetaProjectResponsePhotosItemIdMax = 64;
+
+export const updateSmetaProjectResponsePhotosItemUploadedByMax = 120;
+
+export const updateSmetaProjectResponsePhotosItemNoteMax = 500;
+
+export const updateSmetaProjectResponsePhotosItemRoomMax = 120;
+
+export const updateSmetaProjectResponsePhotosItemLineItemIdMax = 64;
+
+export const updateSmetaProjectResponseDrawingIdMax = 64;
+
+export const updateSmetaProjectResponseDrawingFileNameMax = 255;
+
+export const updateSmetaProjectResponseDrawingUploadedAtMax = 40;
+
+export const updateSmetaProjectResponseDrawingScaleMax = 40;
+
+export const updateSmetaProjectResponseDrawingRoomsItemIdMax = 64;
+
+export const updateSmetaProjectResponseDrawingRoomsItemNameMax = 120;
+
+export const updateSmetaProjectResponseDrawingRoomsMax = 200;
+
+export const updateSmetaProjectResponseDrawingOpeningsItemIdMax = 64;
+
+export const updateSmetaProjectResponseDrawingOpeningsMax = 500;
+
+export const updateSmetaProjectResponseMeasurementsItemIdMax = 64;
+
+export const updateSmetaProjectResponseMeasurementsItemNameMax = 160;
+
+export const updateSmetaProjectResponseMeasurementsItemValueMin = 0;
+export const updateSmetaProjectResponseMeasurementsItemValueMax = 100000000;
+
+export const updateSmetaProjectResponseMeasurementsItemUnitMax = 8;
+
+export const updateSmetaProjectResponseMeasurementsItemConfidenceMin = 0;
+export const updateSmetaProjectResponseMeasurementsItemConfidenceMax = 1;
+
+export const updateSmetaProjectResponseMeasurementsItemSourceMax = 250;
+
+export const updateSmetaProjectResponseMeasurementsItemRoomIdMax = 64;
+
+export const updateSmetaProjectResponsePaymentsItemIdMax = 64;
+
+export const updateSmetaProjectResponsePaymentsItemTitleMax = 160;
+
+export const updateSmetaProjectResponsePaymentsItemShareMin = 0;
+export const updateSmetaProjectResponsePaymentsItemShareMax = 1;
+
+export const updateSmetaProjectResponsePaymentsItemConditionMax = 250;
+
+export const updateSmetaProjectResponseShareSnapshotIdMax = 64;
+
+
+export const updateSmetaProjectResponseShareSnapshotCreatedAtMax = 40;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemIdMax = 64;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemTitleMax = 120;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemIdMax = 64;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemNameMax = 200;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemZoneMax = 120;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemUnitMax = 16;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMin = 0;
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMax = 100000000;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMin = 0;
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMax = 1;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin = 0;
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialIdMax = 64;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsItemItemsMax = 400;
+
+export const updateSmetaProjectResponseShareSnapshotSectionsMax = 60;
+
+export const updateSmetaProjectResponseShareSnapshotProjectCostsItemIdMax = 64;
+
+export const updateSmetaProjectResponseShareSnapshotProjectCostsItemLabelMax = 160;
+
+export const updateSmetaProjectResponseShareSnapshotProjectCostsItemAmountMin = -100000000;
+export const updateSmetaProjectResponseShareSnapshotProjectCostsItemAmountMax = 100000000;
+
+export const updateSmetaProjectResponseExportsItemIdMax = 64;
+
+export const updateSmetaProjectResponseExportsItemCreatedAtMax = 40;
+
+export const updateSmetaProjectResponseExportsItemFileNameMax = 255;
+
+
+
+export const UpdateSmetaProjectResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "quality": zod.enum(['ekonom', 'standart', 'premium']),
+  "areaM2": zod.number(),
+  "startDate": zod.string().date(),
+  "endDate": zod.string().date(),
+  "client": zod.object({
+  "name": zod.string().max(updateSmetaProjectResponseClientNameMax),
+  "phone": zod.string().max(updateSmetaProjectResponseClientPhoneMax),
+  "email": zod.string().max(updateSmetaProjectResponseClientEmailMax).optional()
+}),
+  "contractor": zod.object({
+  "name": zod.string().max(updateSmetaProjectResponseContractorNameMax),
+  "phone": zod.string().max(updateSmetaProjectResponseContractorPhoneMax),
+  "email": zod.string().max(updateSmetaProjectResponseContractorEmailMax).optional(),
+  "company": zod.string().max(updateSmetaProjectResponseContractorCompanyMax),
+  "experienceYears": zod.number().min(updateSmetaProjectResponseContractorExperienceYearsMin).max(updateSmetaProjectResponseContractorExperienceYearsMax),
+  "completedProjects": zod.number().min(updateSmetaProjectResponseContractorCompletedProjectsMin).max(updateSmetaProjectResponseContractorCompletedProjectsMax),
+  "rating": zod.number().min(updateSmetaProjectResponseContractorRatingMin).max(updateSmetaProjectResponseContractorRatingMax)
+}),
+  "completion": zod.number().int(),
+  "defaultMarginPercentage": zod.number(),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseProjectCostsItemIdMax),
+  "label": zod.string().max(updateSmetaProjectResponseProjectCostsItemLabelMax),
+  "amount": zod.number().min(updateSmetaProjectResponseProjectCostsItemAmountMin).max(updateSmetaProjectResponseProjectCostsItemAmountMax)
+})),
+  "estimate": zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseEstimateIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(updateSmetaProjectResponseEstimateCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseEstimateSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseEstimateSectionsItemItemsItemIdMax),
+  "name": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMin).max(updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(updateSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin).max(updateSmetaProjectResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(updateSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMin).max(updateSmetaProjectResponseEstimateSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(updateSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMin).max(updateSmetaProjectResponseEstimateSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(updateSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMin).max(updateSmetaProjectResponseEstimateSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(updateSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMin).max(updateSmetaProjectResponseEstimateSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(updateSmetaProjectResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(updateSmetaProjectResponseEstimateSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(updateSmetaProjectResponseEstimateSectionsItemItemsMax)
+})).max(updateSmetaProjectResponseEstimateSectionsMax)
+}),
+  "status": zod.enum(['draft', 'sent', 'client_approved', 'revision_requested']),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseChangeOrdersItemIdMax),
+  "number": zod.number().int().min(1),
+  "title": zod.string().max(updateSmetaProjectResponseChangeOrdersItemTitleMax),
+  "reason": zod.string().max(updateSmetaProjectResponseChangeOrdersItemReasonMax),
+  "date": zod.string().date(),
+  "requestedBy": zod.enum(['client', 'contractor']),
+  "requestedByName": zod.string().max(updateSmetaProjectResponseChangeOrdersItemRequestedByNameMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "materialDelta": zod.number().min(updateSmetaProjectResponseChangeOrdersItemMaterialDeltaMin).max(updateSmetaProjectResponseChangeOrdersItemMaterialDeltaMax),
+  "laborDelta": zod.number().min(updateSmetaProjectResponseChangeOrdersItemLaborDeltaMin).max(updateSmetaProjectResponseChangeOrdersItemLaborDeltaMax),
+  "additionalCost": zod.number().min(updateSmetaProjectResponseChangeOrdersItemAdditionalCostMin).max(updateSmetaProjectResponseChangeOrdersItemAdditionalCostMax),
+  "status": zod.enum(['draft', 'pending', 'approved', 'rejected']),
+  "photoIds": zod.array(zod.string().max(updateSmetaProjectResponseChangeOrdersItemPhotoIdsItemMax)).max(updateSmetaProjectResponseChangeOrdersItemPhotoIdsMax),
+  "lineItemIds": zod.array(zod.string().max(updateSmetaProjectResponseChangeOrdersItemLineItemIdsItemMax)).max(updateSmetaProjectResponseChangeOrdersItemLineItemIdsMax),
+  "decidedAt": zod.string().max(updateSmetaProjectResponseChangeOrdersItemDecidedAtMax).optional(),
+  "decisionNote": zod.string().max(updateSmetaProjectResponseChangeOrdersItemDecisionNoteMax).optional()
+})),
+  "expenses": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseExpensesItemIdMax),
+  "date": zod.string().date(),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "description": zod.string().max(updateSmetaProjectResponseExpensesItemDescriptionMax),
+  "vendor": zod.string().max(updateSmetaProjectResponseExpensesItemVendorMax),
+  "amount": zod.number().min(updateSmetaProjectResponseExpensesItemAmountMin).max(updateSmetaProjectResponseExpensesItemAmountMax),
+  "paymentStatus": zod.enum(['paid', 'partial', 'unpaid']),
+  "receiptId": zod.string().max(updateSmetaProjectResponseExpensesItemReceiptIdMax).optional(),
+  "lineItemId": zod.string().max(updateSmetaProjectResponseExpensesItemLineItemIdMax).optional()
+})),
+  "receipts": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseReceiptsItemIdMax),
+  "fileName": zod.string().max(updateSmetaProjectResponseReceiptsItemFileNameMax),
+  "fileType": zod.enum(['image', 'pdf']),
+  "uploadedAt": zod.string().max(updateSmetaProjectResponseReceiptsItemUploadedAtMax),
+  "aiSuggestion": zod.object({
+  "merchant": zod.string().max(updateSmetaProjectResponseReceiptsItemAiSuggestionMerchantMax),
+  "date": zod.string().max(updateSmetaProjectResponseReceiptsItemAiSuggestionDateMax),
+  "total": zod.number(),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "confidence": zod.number().min(updateSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMin).max(updateSmetaProjectResponseReceiptsItemAiSuggestionConfidenceMax)
+}).optional()
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponsePhotosItemIdMax),
+  "phase": zod.enum(['before', 'during', 'after']),
+  "date": zod.string().date(),
+  "uploadedBy": zod.string().max(updateSmetaProjectResponsePhotosItemUploadedByMax),
+  "note": zod.string().max(updateSmetaProjectResponsePhotosItemNoteMax),
+  "room": zod.string().max(updateSmetaProjectResponsePhotosItemRoomMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "lineItemId": zod.string().max(updateSmetaProjectResponsePhotosItemLineItemIdMax).optional(),
+  "clientVisible": zod.boolean()
+})),
+  "drawing": zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseDrawingIdMax),
+  "fileName": zod.string().max(updateSmetaProjectResponseDrawingFileNameMax),
+  "fileType": zod.enum(['pdf', 'jpg', 'png']),
+  "uploadedAt": zod.string().max(updateSmetaProjectResponseDrawingUploadedAtMax),
+  "scale": zod.string().max(updateSmetaProjectResponseDrawingScaleMax),
+  "width": zod.number(),
+  "height": zod.number(),
+  "status": zod.enum(['processing', 'analyzed', 'failed']),
+  "rooms": zod.array(zod.object({
+  "id": zod.string().max(updateSmetaProjectResponseDrawingRoomsItemIdMax),
+  "name": zod.string().max(updateSmetaProjectResponseDrawingRoomsItemNameMax),
+  "x": zod.number(),
+  "y": zod.number(),
+  "w": zod.number(),
+  "h": zod.number()
+})).max(updateSmetaProjectResponseDrawingRoomsMax),
+  "openings": zod.array(zod.object({
+  "id": zod.string().max(updateSmetaProjectResponseDrawingOpeningsItemIdMax),
+  "kind": zod.enum(['door', 'window']),
+  "x1": zod.number(),
+  "y1": zod.number(),
+  "x2": zod.number(),
+  "y2": zod.number()
+})).max(updateSmetaProjectResponseDrawingOpeningsMax)
+}).optional(),
+  "measurements": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseMeasurementsItemIdMax),
+  "kind": zod.enum(['area', 'length', 'count', 'height']),
+  "name": zod.string().max(updateSmetaProjectResponseMeasurementsItemNameMax),
+  "value": zod.number().min(updateSmetaProjectResponseMeasurementsItemValueMin).max(updateSmetaProjectResponseMeasurementsItemValueMax),
+  "unit": zod.string().max(updateSmetaProjectResponseMeasurementsItemUnitMax),
+  "confidence": zod.number().min(updateSmetaProjectResponseMeasurementsItemConfidenceMin).max(updateSmetaProjectResponseMeasurementsItemConfidenceMax),
+  "source": zod.string().max(updateSmetaProjectResponseMeasurementsItemSourceMax),
+  "status": zod.enum(['suggested', 'edited', 'approved']),
+  "roomId": zod.string().max(updateSmetaProjectResponseMeasurementsItemRoomIdMax).optional()
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "confirmedScope": zod.boolean(),
+  "total": zod.number()
+})),
+  "revisionRequests": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "message": zod.string()
+})),
+  "payments": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponsePaymentsItemIdMax),
+  "title": zod.string().max(updateSmetaProjectResponsePaymentsItemTitleMax),
+  "share": zod.number().min(updateSmetaProjectResponsePaymentsItemShareMin).max(updateSmetaProjectResponsePaymentsItemShareMax),
+  "condition": zod.string().max(updateSmetaProjectResponsePaymentsItemConditionMax),
+  "status": zod.enum(['paid', 'due', 'planned'])
+})),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string()),
+  "share": zod.object({
+  "token": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "clientName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().optional(),
+  "message": zod.string(),
+  "notifyOnApprove": zod.boolean(),
+  "attachPdf": zod.boolean(),
+  "snapshot": zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseShareSnapshotIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(updateSmetaProjectResponseShareSnapshotCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseShareSnapshotSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemIdMax),
+  "name": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMin).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMin).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(updateSmetaProjectResponseShareSnapshotSectionsItemItemsMax)
+})).max(updateSmetaProjectResponseShareSnapshotSectionsMax)
+}),
+  "snapshotProjectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseShareSnapshotProjectCostsItemIdMax),
+  "label": zod.string().max(updateSmetaProjectResponseShareSnapshotProjectCostsItemLabelMax),
+  "amount": zod.number().min(updateSmetaProjectResponseShareSnapshotProjectCostsItemAmountMin).max(updateSmetaProjectResponseShareSnapshotProjectCostsItemAmountMax)
+})),
+  "snapshotMargin": zod.number()
+}).optional().describe('Owner-only view of the client link, including the frozen internal snapshot.'),
+  "exports": zod.array(zod.object({
+  "id": zod.string().min(1).max(updateSmetaProjectResponseExportsItemIdMax),
+  "kind": zod.enum(['xlsx', 'pdf']),
+  "status": zod.enum(['processing', 'ready', 'failed']),
+  "createdAt": zod.string().max(updateSmetaProjectResponseExportsItemCreatedAtMax),
+  "fileName": zod.string().max(updateSmetaProjectResponseExportsItemFileNameMax)
+})),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const DeleteSmetaProjectParams = zod.object({
+  "projectId": zod.coerce.string().uuid()
+})
+
+export const DeleteSmetaProjectResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Freeze the current estimate as the client-visible version and (re)send the stable client link
+ */
+export const ShareSmetaEstimateParams = zod.object({
+  "projectId": zod.coerce.string().uuid()
+})
+
+export const shareSmetaEstimateBodyClientNameMax = 120;
+
+export const shareSmetaEstimateBodyPhoneMin = 9;
+export const shareSmetaEstimateBodyPhoneMax = 32;
+
+export const shareSmetaEstimateBodyEmailMax = 254;
+
+export const shareSmetaEstimateBodyMessageMax = 2000;
+
+
+
+export const ShareSmetaEstimateBody = zod.object({
+  "clientName": zod.string().min(1).max(shareSmetaEstimateBodyClientNameMax),
+  "phone": zod.string().min(shareSmetaEstimateBodyPhoneMin).max(shareSmetaEstimateBodyPhoneMax),
+  "email": zod.string().max(shareSmetaEstimateBodyEmailMax).optional(),
+  "message": zod.string().max(shareSmetaEstimateBodyMessageMax),
+  "notifyOnApprove": zod.boolean(),
+  "attachPdf": zod.boolean()
+})
+
+export const shareSmetaEstimateResponseClientNameMax = 120;
+
+export const shareSmetaEstimateResponseClientPhoneMax = 32;
+
+export const shareSmetaEstimateResponseClientEmailMax = 254;
+
+export const shareSmetaEstimateResponseContractorNameMax = 120;
+
+export const shareSmetaEstimateResponseContractorPhoneMax = 32;
+
+export const shareSmetaEstimateResponseContractorEmailMax = 254;
+
+export const shareSmetaEstimateResponseContractorCompanyMax = 160;
+
+export const shareSmetaEstimateResponseContractorExperienceYearsMin = 0;
+export const shareSmetaEstimateResponseContractorExperienceYearsMax = 100;
+
+export const shareSmetaEstimateResponseContractorCompletedProjectsMin = 0;
+export const shareSmetaEstimateResponseContractorCompletedProjectsMax = 100000;
+
+export const shareSmetaEstimateResponseContractorRatingMin = 0;
+export const shareSmetaEstimateResponseContractorRatingMax = 5;
+
+export const shareSmetaEstimateResponseProjectCostsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseProjectCostsItemLabelMax = 160;
+
+export const shareSmetaEstimateResponseProjectCostsItemAmountMin = -100000000;
+export const shareSmetaEstimateResponseProjectCostsItemAmountMax = 100000000;
+
+export const shareSmetaEstimateResponseEstimateIdMax = 64;
+
+
+export const shareSmetaEstimateResponseEstimateCreatedAtMax = 40;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemTitleMax = 120;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemNameMax = 200;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemZoneMax = 120;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemUnitMax = 16;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantityMin = 0;
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantityMax = 100000000;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemWastePercentageMin = 0;
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemWastePercentageMax = 1;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemMarginPercentageMin = 0;
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemMaterialIdMax = 64;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const shareSmetaEstimateResponseEstimateSectionsItemItemsMax = 400;
+
+export const shareSmetaEstimateResponseEstimateSectionsMax = 60;
+
+export const shareSmetaEstimateResponseChangeOrdersItemIdMax = 64;
+
+
+export const shareSmetaEstimateResponseChangeOrdersItemTitleMax = 160;
+
+export const shareSmetaEstimateResponseChangeOrdersItemReasonMax = 1000;
+
+export const shareSmetaEstimateResponseChangeOrdersItemRequestedByNameMax = 120;
+
+export const shareSmetaEstimateResponseChangeOrdersItemMaterialDeltaMin = -100000000;
+export const shareSmetaEstimateResponseChangeOrdersItemMaterialDeltaMax = 100000000;
+
+export const shareSmetaEstimateResponseChangeOrdersItemLaborDeltaMin = -100000000;
+export const shareSmetaEstimateResponseChangeOrdersItemLaborDeltaMax = 100000000;
+
+export const shareSmetaEstimateResponseChangeOrdersItemAdditionalCostMin = -100000000;
+export const shareSmetaEstimateResponseChangeOrdersItemAdditionalCostMax = 100000000;
+
+export const shareSmetaEstimateResponseChangeOrdersItemPhotoIdsItemMax = 64;
+
+export const shareSmetaEstimateResponseChangeOrdersItemPhotoIdsMax = 50;
+
+export const shareSmetaEstimateResponseChangeOrdersItemLineItemIdsItemMax = 64;
+
+export const shareSmetaEstimateResponseChangeOrdersItemLineItemIdsMax = 100;
+
+export const shareSmetaEstimateResponseChangeOrdersItemDecidedAtMax = 40;
+
+export const shareSmetaEstimateResponseChangeOrdersItemDecisionNoteMax = 1000;
+
+export const shareSmetaEstimateResponseExpensesItemIdMax = 64;
+
+export const shareSmetaEstimateResponseExpensesItemDescriptionMax = 300;
+
+export const shareSmetaEstimateResponseExpensesItemVendorMax = 160;
+
+export const shareSmetaEstimateResponseExpensesItemAmountMin = 0;
+export const shareSmetaEstimateResponseExpensesItemAmountMax = 100000000;
+
+export const shareSmetaEstimateResponseExpensesItemReceiptIdMax = 64;
+
+export const shareSmetaEstimateResponseExpensesItemLineItemIdMax = 64;
+
+export const shareSmetaEstimateResponseReceiptsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseReceiptsItemFileNameMax = 255;
+
+export const shareSmetaEstimateResponseReceiptsItemUploadedAtMax = 40;
+
+export const shareSmetaEstimateResponseReceiptsItemAiSuggestionMerchantMax = 160;
+
+export const shareSmetaEstimateResponseReceiptsItemAiSuggestionDateMax = 40;
+
+export const shareSmetaEstimateResponseReceiptsItemAiSuggestionConfidenceMin = 0;
+export const shareSmetaEstimateResponseReceiptsItemAiSuggestionConfidenceMax = 1;
+
+export const shareSmetaEstimateResponsePhotosItemIdMax = 64;
+
+export const shareSmetaEstimateResponsePhotosItemUploadedByMax = 120;
+
+export const shareSmetaEstimateResponsePhotosItemNoteMax = 500;
+
+export const shareSmetaEstimateResponsePhotosItemRoomMax = 120;
+
+export const shareSmetaEstimateResponsePhotosItemLineItemIdMax = 64;
+
+export const shareSmetaEstimateResponseDrawingIdMax = 64;
+
+export const shareSmetaEstimateResponseDrawingFileNameMax = 255;
+
+export const shareSmetaEstimateResponseDrawingUploadedAtMax = 40;
+
+export const shareSmetaEstimateResponseDrawingScaleMax = 40;
+
+export const shareSmetaEstimateResponseDrawingRoomsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseDrawingRoomsItemNameMax = 120;
+
+export const shareSmetaEstimateResponseDrawingRoomsMax = 200;
+
+export const shareSmetaEstimateResponseDrawingOpeningsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseDrawingOpeningsMax = 500;
+
+export const shareSmetaEstimateResponseMeasurementsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseMeasurementsItemNameMax = 160;
+
+export const shareSmetaEstimateResponseMeasurementsItemValueMin = 0;
+export const shareSmetaEstimateResponseMeasurementsItemValueMax = 100000000;
+
+export const shareSmetaEstimateResponseMeasurementsItemUnitMax = 8;
+
+export const shareSmetaEstimateResponseMeasurementsItemConfidenceMin = 0;
+export const shareSmetaEstimateResponseMeasurementsItemConfidenceMax = 1;
+
+export const shareSmetaEstimateResponseMeasurementsItemSourceMax = 250;
+
+export const shareSmetaEstimateResponseMeasurementsItemRoomIdMax = 64;
+
+export const shareSmetaEstimateResponsePaymentsItemIdMax = 64;
+
+export const shareSmetaEstimateResponsePaymentsItemTitleMax = 160;
+
+export const shareSmetaEstimateResponsePaymentsItemShareMin = 0;
+export const shareSmetaEstimateResponsePaymentsItemShareMax = 1;
+
+export const shareSmetaEstimateResponsePaymentsItemConditionMax = 250;
+
+export const shareSmetaEstimateResponseShareSnapshotIdMax = 64;
+
+
+export const shareSmetaEstimateResponseShareSnapshotCreatedAtMax = 40;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemTitleMax = 120;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemNameMax = 200;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemZoneMax = 120;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemUnitMax = 16;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantityMin = 0;
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantityMax = 100000000;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemWastePercentageMin = 0;
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemWastePercentageMax = 1;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin = 0;
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMaterialIdMax = 64;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsItemItemsMax = 400;
+
+export const shareSmetaEstimateResponseShareSnapshotSectionsMax = 60;
+
+export const shareSmetaEstimateResponseShareSnapshotProjectCostsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseShareSnapshotProjectCostsItemLabelMax = 160;
+
+export const shareSmetaEstimateResponseShareSnapshotProjectCostsItemAmountMin = -100000000;
+export const shareSmetaEstimateResponseShareSnapshotProjectCostsItemAmountMax = 100000000;
+
+export const shareSmetaEstimateResponseExportsItemIdMax = 64;
+
+export const shareSmetaEstimateResponseExportsItemCreatedAtMax = 40;
+
+export const shareSmetaEstimateResponseExportsItemFileNameMax = 255;
+
+
+
+export const ShareSmetaEstimateResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "quality": zod.enum(['ekonom', 'standart', 'premium']),
+  "areaM2": zod.number(),
+  "startDate": zod.string().date(),
+  "endDate": zod.string().date(),
+  "client": zod.object({
+  "name": zod.string().max(shareSmetaEstimateResponseClientNameMax),
+  "phone": zod.string().max(shareSmetaEstimateResponseClientPhoneMax),
+  "email": zod.string().max(shareSmetaEstimateResponseClientEmailMax).optional()
+}),
+  "contractor": zod.object({
+  "name": zod.string().max(shareSmetaEstimateResponseContractorNameMax),
+  "phone": zod.string().max(shareSmetaEstimateResponseContractorPhoneMax),
+  "email": zod.string().max(shareSmetaEstimateResponseContractorEmailMax).optional(),
+  "company": zod.string().max(shareSmetaEstimateResponseContractorCompanyMax),
+  "experienceYears": zod.number().min(shareSmetaEstimateResponseContractorExperienceYearsMin).max(shareSmetaEstimateResponseContractorExperienceYearsMax),
+  "completedProjects": zod.number().min(shareSmetaEstimateResponseContractorCompletedProjectsMin).max(shareSmetaEstimateResponseContractorCompletedProjectsMax),
+  "rating": zod.number().min(shareSmetaEstimateResponseContractorRatingMin).max(shareSmetaEstimateResponseContractorRatingMax)
+}),
+  "completion": zod.number().int(),
+  "defaultMarginPercentage": zod.number(),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseProjectCostsItemIdMax),
+  "label": zod.string().max(shareSmetaEstimateResponseProjectCostsItemLabelMax),
+  "amount": zod.number().min(shareSmetaEstimateResponseProjectCostsItemAmountMin).max(shareSmetaEstimateResponseProjectCostsItemAmountMax)
+})),
+  "estimate": zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseEstimateIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(shareSmetaEstimateResponseEstimateCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseEstimateSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemIdMax),
+  "name": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantityMin).max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(shareSmetaEstimateResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin).max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(shareSmetaEstimateResponseEstimateSectionsItemItemsItemLaborUnitPriceMin).max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(shareSmetaEstimateResponseEstimateSectionsItemItemsItemAdditionalCostMin).max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(shareSmetaEstimateResponseEstimateSectionsItemItemsItemWastePercentageMin).max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(shareSmetaEstimateResponseEstimateSectionsItemItemsItemMarginPercentageMin).max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(shareSmetaEstimateResponseEstimateSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(shareSmetaEstimateResponseEstimateSectionsItemItemsMax)
+})).max(shareSmetaEstimateResponseEstimateSectionsMax)
+}),
+  "status": zod.enum(['draft', 'sent', 'client_approved', 'revision_requested']),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseChangeOrdersItemIdMax),
+  "number": zod.number().int().min(1),
+  "title": zod.string().max(shareSmetaEstimateResponseChangeOrdersItemTitleMax),
+  "reason": zod.string().max(shareSmetaEstimateResponseChangeOrdersItemReasonMax),
+  "date": zod.string().date(),
+  "requestedBy": zod.enum(['client', 'contractor']),
+  "requestedByName": zod.string().max(shareSmetaEstimateResponseChangeOrdersItemRequestedByNameMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "materialDelta": zod.number().min(shareSmetaEstimateResponseChangeOrdersItemMaterialDeltaMin).max(shareSmetaEstimateResponseChangeOrdersItemMaterialDeltaMax),
+  "laborDelta": zod.number().min(shareSmetaEstimateResponseChangeOrdersItemLaborDeltaMin).max(shareSmetaEstimateResponseChangeOrdersItemLaborDeltaMax),
+  "additionalCost": zod.number().min(shareSmetaEstimateResponseChangeOrdersItemAdditionalCostMin).max(shareSmetaEstimateResponseChangeOrdersItemAdditionalCostMax),
+  "status": zod.enum(['draft', 'pending', 'approved', 'rejected']),
+  "photoIds": zod.array(zod.string().max(shareSmetaEstimateResponseChangeOrdersItemPhotoIdsItemMax)).max(shareSmetaEstimateResponseChangeOrdersItemPhotoIdsMax),
+  "lineItemIds": zod.array(zod.string().max(shareSmetaEstimateResponseChangeOrdersItemLineItemIdsItemMax)).max(shareSmetaEstimateResponseChangeOrdersItemLineItemIdsMax),
+  "decidedAt": zod.string().max(shareSmetaEstimateResponseChangeOrdersItemDecidedAtMax).optional(),
+  "decisionNote": zod.string().max(shareSmetaEstimateResponseChangeOrdersItemDecisionNoteMax).optional()
+})),
+  "expenses": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseExpensesItemIdMax),
+  "date": zod.string().date(),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "description": zod.string().max(shareSmetaEstimateResponseExpensesItemDescriptionMax),
+  "vendor": zod.string().max(shareSmetaEstimateResponseExpensesItemVendorMax),
+  "amount": zod.number().min(shareSmetaEstimateResponseExpensesItemAmountMin).max(shareSmetaEstimateResponseExpensesItemAmountMax),
+  "paymentStatus": zod.enum(['paid', 'partial', 'unpaid']),
+  "receiptId": zod.string().max(shareSmetaEstimateResponseExpensesItemReceiptIdMax).optional(),
+  "lineItemId": zod.string().max(shareSmetaEstimateResponseExpensesItemLineItemIdMax).optional()
+})),
+  "receipts": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseReceiptsItemIdMax),
+  "fileName": zod.string().max(shareSmetaEstimateResponseReceiptsItemFileNameMax),
+  "fileType": zod.enum(['image', 'pdf']),
+  "uploadedAt": zod.string().max(shareSmetaEstimateResponseReceiptsItemUploadedAtMax),
+  "aiSuggestion": zod.object({
+  "merchant": zod.string().max(shareSmetaEstimateResponseReceiptsItemAiSuggestionMerchantMax),
+  "date": zod.string().max(shareSmetaEstimateResponseReceiptsItemAiSuggestionDateMax),
+  "total": zod.number(),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "confidence": zod.number().min(shareSmetaEstimateResponseReceiptsItemAiSuggestionConfidenceMin).max(shareSmetaEstimateResponseReceiptsItemAiSuggestionConfidenceMax)
+}).optional()
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponsePhotosItemIdMax),
+  "phase": zod.enum(['before', 'during', 'after']),
+  "date": zod.string().date(),
+  "uploadedBy": zod.string().max(shareSmetaEstimateResponsePhotosItemUploadedByMax),
+  "note": zod.string().max(shareSmetaEstimateResponsePhotosItemNoteMax),
+  "room": zod.string().max(shareSmetaEstimateResponsePhotosItemRoomMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "lineItemId": zod.string().max(shareSmetaEstimateResponsePhotosItemLineItemIdMax).optional(),
+  "clientVisible": zod.boolean()
+})),
+  "drawing": zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseDrawingIdMax),
+  "fileName": zod.string().max(shareSmetaEstimateResponseDrawingFileNameMax),
+  "fileType": zod.enum(['pdf', 'jpg', 'png']),
+  "uploadedAt": zod.string().max(shareSmetaEstimateResponseDrawingUploadedAtMax),
+  "scale": zod.string().max(shareSmetaEstimateResponseDrawingScaleMax),
+  "width": zod.number(),
+  "height": zod.number(),
+  "status": zod.enum(['processing', 'analyzed', 'failed']),
+  "rooms": zod.array(zod.object({
+  "id": zod.string().max(shareSmetaEstimateResponseDrawingRoomsItemIdMax),
+  "name": zod.string().max(shareSmetaEstimateResponseDrawingRoomsItemNameMax),
+  "x": zod.number(),
+  "y": zod.number(),
+  "w": zod.number(),
+  "h": zod.number()
+})).max(shareSmetaEstimateResponseDrawingRoomsMax),
+  "openings": zod.array(zod.object({
+  "id": zod.string().max(shareSmetaEstimateResponseDrawingOpeningsItemIdMax),
+  "kind": zod.enum(['door', 'window']),
+  "x1": zod.number(),
+  "y1": zod.number(),
+  "x2": zod.number(),
+  "y2": zod.number()
+})).max(shareSmetaEstimateResponseDrawingOpeningsMax)
+}).optional(),
+  "measurements": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseMeasurementsItemIdMax),
+  "kind": zod.enum(['area', 'length', 'count', 'height']),
+  "name": zod.string().max(shareSmetaEstimateResponseMeasurementsItemNameMax),
+  "value": zod.number().min(shareSmetaEstimateResponseMeasurementsItemValueMin).max(shareSmetaEstimateResponseMeasurementsItemValueMax),
+  "unit": zod.string().max(shareSmetaEstimateResponseMeasurementsItemUnitMax),
+  "confidence": zod.number().min(shareSmetaEstimateResponseMeasurementsItemConfidenceMin).max(shareSmetaEstimateResponseMeasurementsItemConfidenceMax),
+  "source": zod.string().max(shareSmetaEstimateResponseMeasurementsItemSourceMax),
+  "status": zod.enum(['suggested', 'edited', 'approved']),
+  "roomId": zod.string().max(shareSmetaEstimateResponseMeasurementsItemRoomIdMax).optional()
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "confirmedScope": zod.boolean(),
+  "total": zod.number()
+})),
+  "revisionRequests": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "message": zod.string()
+})),
+  "payments": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponsePaymentsItemIdMax),
+  "title": zod.string().max(shareSmetaEstimateResponsePaymentsItemTitleMax),
+  "share": zod.number().min(shareSmetaEstimateResponsePaymentsItemShareMin).max(shareSmetaEstimateResponsePaymentsItemShareMax),
+  "condition": zod.string().max(shareSmetaEstimateResponsePaymentsItemConditionMax),
+  "status": zod.enum(['paid', 'due', 'planned'])
+})),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string()),
+  "share": zod.object({
+  "token": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "clientName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().optional(),
+  "message": zod.string(),
+  "notifyOnApprove": zod.boolean(),
+  "attachPdf": zod.boolean(),
+  "snapshot": zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseShareSnapshotIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(shareSmetaEstimateResponseShareSnapshotCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseShareSnapshotSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemIdMax),
+  "name": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantityMin).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemWastePercentageMin).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(shareSmetaEstimateResponseShareSnapshotSectionsItemItemsMax)
+})).max(shareSmetaEstimateResponseShareSnapshotSectionsMax)
+}),
+  "snapshotProjectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseShareSnapshotProjectCostsItemIdMax),
+  "label": zod.string().max(shareSmetaEstimateResponseShareSnapshotProjectCostsItemLabelMax),
+  "amount": zod.number().min(shareSmetaEstimateResponseShareSnapshotProjectCostsItemAmountMin).max(shareSmetaEstimateResponseShareSnapshotProjectCostsItemAmountMax)
+})),
+  "snapshotMargin": zod.number()
+}).optional().describe('Owner-only view of the client link, including the frozen internal snapshot.'),
+  "exports": zod.array(zod.object({
+  "id": zod.string().min(1).max(shareSmetaEstimateResponseExportsItemIdMax),
+  "kind": zod.enum(['xlsx', 'pdf']),
+  "status": zod.enum(['processing', 'ready', 'failed']),
+  "createdAt": zod.string().max(shareSmetaEstimateResponseExportsItemCreatedAtMax),
+  "fileName": zod.string().max(shareSmetaEstimateResponseExportsItemFileNameMax)
+})),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Revoke the client link
+ */
+export const RevokeSmetaShareParams = zod.object({
+  "projectId": zod.coerce.string().uuid()
+})
+
+export const revokeSmetaShareResponseClientNameMax = 120;
+
+export const revokeSmetaShareResponseClientPhoneMax = 32;
+
+export const revokeSmetaShareResponseClientEmailMax = 254;
+
+export const revokeSmetaShareResponseContractorNameMax = 120;
+
+export const revokeSmetaShareResponseContractorPhoneMax = 32;
+
+export const revokeSmetaShareResponseContractorEmailMax = 254;
+
+export const revokeSmetaShareResponseContractorCompanyMax = 160;
+
+export const revokeSmetaShareResponseContractorExperienceYearsMin = 0;
+export const revokeSmetaShareResponseContractorExperienceYearsMax = 100;
+
+export const revokeSmetaShareResponseContractorCompletedProjectsMin = 0;
+export const revokeSmetaShareResponseContractorCompletedProjectsMax = 100000;
+
+export const revokeSmetaShareResponseContractorRatingMin = 0;
+export const revokeSmetaShareResponseContractorRatingMax = 5;
+
+export const revokeSmetaShareResponseProjectCostsItemIdMax = 64;
+
+export const revokeSmetaShareResponseProjectCostsItemLabelMax = 160;
+
+export const revokeSmetaShareResponseProjectCostsItemAmountMin = -100000000;
+export const revokeSmetaShareResponseProjectCostsItemAmountMax = 100000000;
+
+export const revokeSmetaShareResponseEstimateIdMax = 64;
+
+
+export const revokeSmetaShareResponseEstimateCreatedAtMax = 40;
+
+export const revokeSmetaShareResponseEstimateSectionsItemIdMax = 64;
+
+export const revokeSmetaShareResponseEstimateSectionsItemTitleMax = 120;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemIdMax = 64;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemNameMax = 200;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemZoneMax = 120;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemUnitMax = 16;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantityMin = 0;
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantityMax = 100000000;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemWastePercentageMin = 0;
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemWastePercentageMax = 1;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemMarginPercentageMin = 0;
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemMaterialIdMax = 64;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const revokeSmetaShareResponseEstimateSectionsItemItemsMax = 400;
+
+export const revokeSmetaShareResponseEstimateSectionsMax = 60;
+
+export const revokeSmetaShareResponseChangeOrdersItemIdMax = 64;
+
+
+export const revokeSmetaShareResponseChangeOrdersItemTitleMax = 160;
+
+export const revokeSmetaShareResponseChangeOrdersItemReasonMax = 1000;
+
+export const revokeSmetaShareResponseChangeOrdersItemRequestedByNameMax = 120;
+
+export const revokeSmetaShareResponseChangeOrdersItemMaterialDeltaMin = -100000000;
+export const revokeSmetaShareResponseChangeOrdersItemMaterialDeltaMax = 100000000;
+
+export const revokeSmetaShareResponseChangeOrdersItemLaborDeltaMin = -100000000;
+export const revokeSmetaShareResponseChangeOrdersItemLaborDeltaMax = 100000000;
+
+export const revokeSmetaShareResponseChangeOrdersItemAdditionalCostMin = -100000000;
+export const revokeSmetaShareResponseChangeOrdersItemAdditionalCostMax = 100000000;
+
+export const revokeSmetaShareResponseChangeOrdersItemPhotoIdsItemMax = 64;
+
+export const revokeSmetaShareResponseChangeOrdersItemPhotoIdsMax = 50;
+
+export const revokeSmetaShareResponseChangeOrdersItemLineItemIdsItemMax = 64;
+
+export const revokeSmetaShareResponseChangeOrdersItemLineItemIdsMax = 100;
+
+export const revokeSmetaShareResponseChangeOrdersItemDecidedAtMax = 40;
+
+export const revokeSmetaShareResponseChangeOrdersItemDecisionNoteMax = 1000;
+
+export const revokeSmetaShareResponseExpensesItemIdMax = 64;
+
+export const revokeSmetaShareResponseExpensesItemDescriptionMax = 300;
+
+export const revokeSmetaShareResponseExpensesItemVendorMax = 160;
+
+export const revokeSmetaShareResponseExpensesItemAmountMin = 0;
+export const revokeSmetaShareResponseExpensesItemAmountMax = 100000000;
+
+export const revokeSmetaShareResponseExpensesItemReceiptIdMax = 64;
+
+export const revokeSmetaShareResponseExpensesItemLineItemIdMax = 64;
+
+export const revokeSmetaShareResponseReceiptsItemIdMax = 64;
+
+export const revokeSmetaShareResponseReceiptsItemFileNameMax = 255;
+
+export const revokeSmetaShareResponseReceiptsItemUploadedAtMax = 40;
+
+export const revokeSmetaShareResponseReceiptsItemAiSuggestionMerchantMax = 160;
+
+export const revokeSmetaShareResponseReceiptsItemAiSuggestionDateMax = 40;
+
+export const revokeSmetaShareResponseReceiptsItemAiSuggestionConfidenceMin = 0;
+export const revokeSmetaShareResponseReceiptsItemAiSuggestionConfidenceMax = 1;
+
+export const revokeSmetaShareResponsePhotosItemIdMax = 64;
+
+export const revokeSmetaShareResponsePhotosItemUploadedByMax = 120;
+
+export const revokeSmetaShareResponsePhotosItemNoteMax = 500;
+
+export const revokeSmetaShareResponsePhotosItemRoomMax = 120;
+
+export const revokeSmetaShareResponsePhotosItemLineItemIdMax = 64;
+
+export const revokeSmetaShareResponseDrawingIdMax = 64;
+
+export const revokeSmetaShareResponseDrawingFileNameMax = 255;
+
+export const revokeSmetaShareResponseDrawingUploadedAtMax = 40;
+
+export const revokeSmetaShareResponseDrawingScaleMax = 40;
+
+export const revokeSmetaShareResponseDrawingRoomsItemIdMax = 64;
+
+export const revokeSmetaShareResponseDrawingRoomsItemNameMax = 120;
+
+export const revokeSmetaShareResponseDrawingRoomsMax = 200;
+
+export const revokeSmetaShareResponseDrawingOpeningsItemIdMax = 64;
+
+export const revokeSmetaShareResponseDrawingOpeningsMax = 500;
+
+export const revokeSmetaShareResponseMeasurementsItemIdMax = 64;
+
+export const revokeSmetaShareResponseMeasurementsItemNameMax = 160;
+
+export const revokeSmetaShareResponseMeasurementsItemValueMin = 0;
+export const revokeSmetaShareResponseMeasurementsItemValueMax = 100000000;
+
+export const revokeSmetaShareResponseMeasurementsItemUnitMax = 8;
+
+export const revokeSmetaShareResponseMeasurementsItemConfidenceMin = 0;
+export const revokeSmetaShareResponseMeasurementsItemConfidenceMax = 1;
+
+export const revokeSmetaShareResponseMeasurementsItemSourceMax = 250;
+
+export const revokeSmetaShareResponseMeasurementsItemRoomIdMax = 64;
+
+export const revokeSmetaShareResponsePaymentsItemIdMax = 64;
+
+export const revokeSmetaShareResponsePaymentsItemTitleMax = 160;
+
+export const revokeSmetaShareResponsePaymentsItemShareMin = 0;
+export const revokeSmetaShareResponsePaymentsItemShareMax = 1;
+
+export const revokeSmetaShareResponsePaymentsItemConditionMax = 250;
+
+export const revokeSmetaShareResponseShareSnapshotIdMax = 64;
+
+
+export const revokeSmetaShareResponseShareSnapshotCreatedAtMax = 40;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemIdMax = 64;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemTitleMax = 120;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemIdMax = 64;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemNameMax = 200;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemZoneMax = 120;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemUnitMax = 16;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantityMin = 0;
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantityMax = 100000000;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin = 0;
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax = 100000000;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin = 0;
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax = 100000000;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin = -100000000;
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax = 100000000;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemWastePercentageMin = 0;
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemWastePercentageMax = 1;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin = 0;
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax = 1;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax = 160;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax = 40;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax = 250;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax = 64;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax = 100;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMaterialIdMax = 64;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax = 64;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsItemItemsMax = 400;
+
+export const revokeSmetaShareResponseShareSnapshotSectionsMax = 60;
+
+export const revokeSmetaShareResponseShareSnapshotProjectCostsItemIdMax = 64;
+
+export const revokeSmetaShareResponseShareSnapshotProjectCostsItemLabelMax = 160;
+
+export const revokeSmetaShareResponseShareSnapshotProjectCostsItemAmountMin = -100000000;
+export const revokeSmetaShareResponseShareSnapshotProjectCostsItemAmountMax = 100000000;
+
+export const revokeSmetaShareResponseExportsItemIdMax = 64;
+
+export const revokeSmetaShareResponseExportsItemCreatedAtMax = 40;
+
+export const revokeSmetaShareResponseExportsItemFileNameMax = 255;
+
+
+
+export const RevokeSmetaShareResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "quality": zod.enum(['ekonom', 'standart', 'premium']),
+  "areaM2": zod.number(),
+  "startDate": zod.string().date(),
+  "endDate": zod.string().date(),
+  "client": zod.object({
+  "name": zod.string().max(revokeSmetaShareResponseClientNameMax),
+  "phone": zod.string().max(revokeSmetaShareResponseClientPhoneMax),
+  "email": zod.string().max(revokeSmetaShareResponseClientEmailMax).optional()
+}),
+  "contractor": zod.object({
+  "name": zod.string().max(revokeSmetaShareResponseContractorNameMax),
+  "phone": zod.string().max(revokeSmetaShareResponseContractorPhoneMax),
+  "email": zod.string().max(revokeSmetaShareResponseContractorEmailMax).optional(),
+  "company": zod.string().max(revokeSmetaShareResponseContractorCompanyMax),
+  "experienceYears": zod.number().min(revokeSmetaShareResponseContractorExperienceYearsMin).max(revokeSmetaShareResponseContractorExperienceYearsMax),
+  "completedProjects": zod.number().min(revokeSmetaShareResponseContractorCompletedProjectsMin).max(revokeSmetaShareResponseContractorCompletedProjectsMax),
+  "rating": zod.number().min(revokeSmetaShareResponseContractorRatingMin).max(revokeSmetaShareResponseContractorRatingMax)
+}),
+  "completion": zod.number().int(),
+  "defaultMarginPercentage": zod.number(),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseProjectCostsItemIdMax),
+  "label": zod.string().max(revokeSmetaShareResponseProjectCostsItemLabelMax),
+  "amount": zod.number().min(revokeSmetaShareResponseProjectCostsItemAmountMin).max(revokeSmetaShareResponseProjectCostsItemAmountMax)
+})),
+  "estimate": zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseEstimateIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(revokeSmetaShareResponseEstimateCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseEstimateSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseEstimateSectionsItemItemsItemIdMax),
+  "name": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantityMin).max(revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(revokeSmetaShareResponseEstimateSectionsItemItemsItemMaterialUnitPriceMin).max(revokeSmetaShareResponseEstimateSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(revokeSmetaShareResponseEstimateSectionsItemItemsItemLaborUnitPriceMin).max(revokeSmetaShareResponseEstimateSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(revokeSmetaShareResponseEstimateSectionsItemItemsItemAdditionalCostMin).max(revokeSmetaShareResponseEstimateSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(revokeSmetaShareResponseEstimateSectionsItemItemsItemWastePercentageMin).max(revokeSmetaShareResponseEstimateSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(revokeSmetaShareResponseEstimateSectionsItemItemsItemMarginPercentageMin).max(revokeSmetaShareResponseEstimateSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(revokeSmetaShareResponseEstimateSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(revokeSmetaShareResponseEstimateSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(revokeSmetaShareResponseEstimateSectionsItemItemsMax)
+})).max(revokeSmetaShareResponseEstimateSectionsMax)
+}),
+  "status": zod.enum(['draft', 'sent', 'client_approved', 'revision_requested']),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseChangeOrdersItemIdMax),
+  "number": zod.number().int().min(1),
+  "title": zod.string().max(revokeSmetaShareResponseChangeOrdersItemTitleMax),
+  "reason": zod.string().max(revokeSmetaShareResponseChangeOrdersItemReasonMax),
+  "date": zod.string().date(),
+  "requestedBy": zod.enum(['client', 'contractor']),
+  "requestedByName": zod.string().max(revokeSmetaShareResponseChangeOrdersItemRequestedByNameMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "materialDelta": zod.number().min(revokeSmetaShareResponseChangeOrdersItemMaterialDeltaMin).max(revokeSmetaShareResponseChangeOrdersItemMaterialDeltaMax),
+  "laborDelta": zod.number().min(revokeSmetaShareResponseChangeOrdersItemLaborDeltaMin).max(revokeSmetaShareResponseChangeOrdersItemLaborDeltaMax),
+  "additionalCost": zod.number().min(revokeSmetaShareResponseChangeOrdersItemAdditionalCostMin).max(revokeSmetaShareResponseChangeOrdersItemAdditionalCostMax),
+  "status": zod.enum(['draft', 'pending', 'approved', 'rejected']),
+  "photoIds": zod.array(zod.string().max(revokeSmetaShareResponseChangeOrdersItemPhotoIdsItemMax)).max(revokeSmetaShareResponseChangeOrdersItemPhotoIdsMax),
+  "lineItemIds": zod.array(zod.string().max(revokeSmetaShareResponseChangeOrdersItemLineItemIdsItemMax)).max(revokeSmetaShareResponseChangeOrdersItemLineItemIdsMax),
+  "decidedAt": zod.string().max(revokeSmetaShareResponseChangeOrdersItemDecidedAtMax).optional(),
+  "decisionNote": zod.string().max(revokeSmetaShareResponseChangeOrdersItemDecisionNoteMax).optional()
+})),
+  "expenses": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseExpensesItemIdMax),
+  "date": zod.string().date(),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "description": zod.string().max(revokeSmetaShareResponseExpensesItemDescriptionMax),
+  "vendor": zod.string().max(revokeSmetaShareResponseExpensesItemVendorMax),
+  "amount": zod.number().min(revokeSmetaShareResponseExpensesItemAmountMin).max(revokeSmetaShareResponseExpensesItemAmountMax),
+  "paymentStatus": zod.enum(['paid', 'partial', 'unpaid']),
+  "receiptId": zod.string().max(revokeSmetaShareResponseExpensesItemReceiptIdMax).optional(),
+  "lineItemId": zod.string().max(revokeSmetaShareResponseExpensesItemLineItemIdMax).optional()
+})),
+  "receipts": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseReceiptsItemIdMax),
+  "fileName": zod.string().max(revokeSmetaShareResponseReceiptsItemFileNameMax),
+  "fileType": zod.enum(['image', 'pdf']),
+  "uploadedAt": zod.string().max(revokeSmetaShareResponseReceiptsItemUploadedAtMax),
+  "aiSuggestion": zod.object({
+  "merchant": zod.string().max(revokeSmetaShareResponseReceiptsItemAiSuggestionMerchantMax),
+  "date": zod.string().max(revokeSmetaShareResponseReceiptsItemAiSuggestionDateMax),
+  "total": zod.number(),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "kind": zod.enum(['material', 'labor', 'other']),
+  "confidence": zod.number().min(revokeSmetaShareResponseReceiptsItemAiSuggestionConfidenceMin).max(revokeSmetaShareResponseReceiptsItemAiSuggestionConfidenceMax)
+}).optional()
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponsePhotosItemIdMax),
+  "phase": zod.enum(['before', 'during', 'after']),
+  "date": zod.string().date(),
+  "uploadedBy": zod.string().max(revokeSmetaShareResponsePhotosItemUploadedByMax),
+  "note": zod.string().max(revokeSmetaShareResponsePhotosItemNoteMax),
+  "room": zod.string().max(revokeSmetaShareResponsePhotosItemRoomMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "lineItemId": zod.string().max(revokeSmetaShareResponsePhotosItemLineItemIdMax).optional(),
+  "clientVisible": zod.boolean()
+})),
+  "drawing": zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseDrawingIdMax),
+  "fileName": zod.string().max(revokeSmetaShareResponseDrawingFileNameMax),
+  "fileType": zod.enum(['pdf', 'jpg', 'png']),
+  "uploadedAt": zod.string().max(revokeSmetaShareResponseDrawingUploadedAtMax),
+  "scale": zod.string().max(revokeSmetaShareResponseDrawingScaleMax),
+  "width": zod.number(),
+  "height": zod.number(),
+  "status": zod.enum(['processing', 'analyzed', 'failed']),
+  "rooms": zod.array(zod.object({
+  "id": zod.string().max(revokeSmetaShareResponseDrawingRoomsItemIdMax),
+  "name": zod.string().max(revokeSmetaShareResponseDrawingRoomsItemNameMax),
+  "x": zod.number(),
+  "y": zod.number(),
+  "w": zod.number(),
+  "h": zod.number()
+})).max(revokeSmetaShareResponseDrawingRoomsMax),
+  "openings": zod.array(zod.object({
+  "id": zod.string().max(revokeSmetaShareResponseDrawingOpeningsItemIdMax),
+  "kind": zod.enum(['door', 'window']),
+  "x1": zod.number(),
+  "y1": zod.number(),
+  "x2": zod.number(),
+  "y2": zod.number()
+})).max(revokeSmetaShareResponseDrawingOpeningsMax)
+}).optional(),
+  "measurements": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseMeasurementsItemIdMax),
+  "kind": zod.enum(['area', 'length', 'count', 'height']),
+  "name": zod.string().max(revokeSmetaShareResponseMeasurementsItemNameMax),
+  "value": zod.number().min(revokeSmetaShareResponseMeasurementsItemValueMin).max(revokeSmetaShareResponseMeasurementsItemValueMax),
+  "unit": zod.string().max(revokeSmetaShareResponseMeasurementsItemUnitMax),
+  "confidence": zod.number().min(revokeSmetaShareResponseMeasurementsItemConfidenceMin).max(revokeSmetaShareResponseMeasurementsItemConfidenceMax),
+  "source": zod.string().max(revokeSmetaShareResponseMeasurementsItemSourceMax),
+  "status": zod.enum(['suggested', 'edited', 'approved']),
+  "roomId": zod.string().max(revokeSmetaShareResponseMeasurementsItemRoomIdMax).optional()
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "confirmedScope": zod.boolean(),
+  "total": zod.number()
+})),
+  "revisionRequests": zod.array(zod.object({
+  "id": zod.string(),
+  "estimateVersion": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "name": zod.string(),
+  "message": zod.string()
+})),
+  "payments": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponsePaymentsItemIdMax),
+  "title": zod.string().max(revokeSmetaShareResponsePaymentsItemTitleMax),
+  "share": zod.number().min(revokeSmetaShareResponsePaymentsItemShareMin).max(revokeSmetaShareResponsePaymentsItemShareMax),
+  "condition": zod.string().max(revokeSmetaShareResponsePaymentsItemConditionMax),
+  "status": zod.enum(['paid', 'due', 'planned'])
+})),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string()),
+  "share": zod.object({
+  "token": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "clientName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string().optional(),
+  "message": zod.string(),
+  "notifyOnApprove": zod.boolean(),
+  "attachPdf": zod.boolean(),
+  "snapshot": zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseShareSnapshotIdMax),
+  "version": zod.number().int().min(1),
+  "createdAt": zod.string().max(revokeSmetaShareResponseShareSnapshotCreatedAtMax),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseShareSnapshotSectionsItemIdMax),
+  "category": zod.enum(['sokuntu', 'elektrik', 'santexnika', 'divar', 'boya', 'dosheme', 'kafel', 'tavan', 'qapi', 'isiqlandirma', 'metbex', 'sanitar', 'temizlik']),
+  "title": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemTitleMax),
+  "items": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemIdMax),
+  "name": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemNameMax),
+  "zone": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemZoneMax),
+  "unit": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemUnitMax),
+  "quantity": zod.number().min(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantityMin).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantityMax),
+  "materialUnitPrice": zod.number().min(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMin).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMaterialUnitPriceMax),
+  "laborUnitPrice": zod.number().min(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMin).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemLaborUnitPriceMax),
+  "additionalCost": zod.number().min(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemAdditionalCostMin).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemAdditionalCostMax),
+  "wastePercentage": zod.number().min(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemWastePercentageMin).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemWastePercentageMax),
+  "marginPercentage": zod.number().min(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMarginPercentageMin).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMarginPercentageMax).nullable(),
+  "priceSource": zod.object({
+  "kind": zod.enum(['market', 'contractor', 'manual']),
+  "reference": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemPriceSourceReferenceMax).optional(),
+  "updatedAt": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemPriceSourceUpdatedAtMax)
+}),
+  "quantitySource": zod.object({
+  "kind": zod.enum(['drawing', 'manual', 'template', 'formula']),
+  "label": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantitySourceLabelMax),
+  "measurementIds": zod.array(zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsItemMax)).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemQuantitySourceMeasurementIdsMax).optional(),
+  "factor": zod.number().optional()
+}),
+  "status": zod.enum(['ai', 'draft', 'approved', 'changed']),
+  "materialId": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemMaterialIdMax).optional(),
+  "laborRateId": zod.string().max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsItemLaborRateIdMax).optional()
+})).max(revokeSmetaShareResponseShareSnapshotSectionsItemItemsMax)
+})).max(revokeSmetaShareResponseShareSnapshotSectionsMax)
+}),
+  "snapshotProjectCosts": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseShareSnapshotProjectCostsItemIdMax),
+  "label": zod.string().max(revokeSmetaShareResponseShareSnapshotProjectCostsItemLabelMax),
+  "amount": zod.number().min(revokeSmetaShareResponseShareSnapshotProjectCostsItemAmountMin).max(revokeSmetaShareResponseShareSnapshotProjectCostsItemAmountMax)
+})),
+  "snapshotMargin": zod.number()
+}).optional().describe('Owner-only view of the client link, including the frozen internal snapshot.'),
+  "exports": zod.array(zod.object({
+  "id": zod.string().min(1).max(revokeSmetaShareResponseExportsItemIdMax),
+  "kind": zod.enum(['xlsx', 'pdf']),
+  "status": zod.enum(['processing', 'ready', 'failed']),
+  "createdAt": zod.string().max(revokeSmetaShareResponseExportsItemCreatedAtMax),
+  "fileName": zod.string().max(revokeSmetaShareResponseExportsItemFileNameMax)
+})),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Public client view of the last sent estimate version
+ */
+export const getSharedEstimatePathTokenMin = 20;
+export const getSharedEstimatePathTokenMax = 64;
+
+
+export const getSharedEstimatePathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const GetSharedEstimateParams = zod.object({
+  "token": zod.coerce.string().min(getSharedEstimatePathTokenMin).max(getSharedEstimatePathTokenMax).regex(getSharedEstimatePathTokenRegExp)
+})
+
+export const getSharedEstimateResponseClientNameMax = 120;
+
+export const getSharedEstimateResponseClientPhoneMax = 32;
+
+export const getSharedEstimateResponseClientEmailMax = 254;
+
+
+
+export const GetSharedEstimateResponse = zod.object({
+  "project": zod.object({
+  "name": zod.string(),
+  "district": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "areaM2": zod.number(),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string())
+}),
+  "contractor": zod.object({
+  "name": zod.string(),
+  "company": zod.string(),
+  "phone": zod.string(),
+  "experienceYears": zod.number(),
+  "completedProjects": zod.number(),
+  "rating": zod.number()
+}),
+  "client": zod.object({
+  "name": zod.string().max(getSharedEstimateResponseClientNameMax),
+  "phone": zod.string().max(getSharedEstimateResponseClientPhoneMax),
+  "email": zod.string().max(getSharedEstimateResponseClientEmailMax).optional()
+}),
+  "message": zod.string(),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "estimate": zod.object({
+  "version": zod.number().int(),
+  "sentAt": zod.string(),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "total": zod.number(),
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "zone": zod.string(),
+  "unit": zod.string(),
+  "quantity": zod.number(),
+  "quantityLabel": zod.string(),
+  "total": zod.number(),
+  "materialTotal": zod.number(),
+  "laborTotal": zod.number(),
+  "additionalTotal": zod.number()
+}).describe('All-in client prices; margin and waste are folded in and never exposed separately.'))
+})),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "amount": zod.number()
+})),
+  "projectCostsTotal": zod.number(),
+  "total": zod.number(),
+  "split": zod.object({
+  "material": zod.number(),
+  "labor": zod.number(),
+  "other": zod.number()
+})
+}),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.number().int(),
+  "title": zod.string(),
+  "reason": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "impact": zod.number()
+})),
+  "approvedChangesTotal": zod.number(),
+  "finalTotal": zod.number(),
+  "payments": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "share": zod.number(),
+  "condition": zod.string(),
+  "amount": zod.number()
+})),
+  "approval": zod.object({
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string()
+}).optional(),
+  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional()
+})
+
+
+export const approveSharedEstimatePathTokenMin = 20;
+export const approveSharedEstimatePathTokenMax = 64;
+
+
+export const approveSharedEstimatePathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const ApproveSharedEstimateParams = zod.object({
+  "token": zod.coerce.string().min(approveSharedEstimatePathTokenMin).max(approveSharedEstimatePathTokenMax).regex(approveSharedEstimatePathTokenRegExp)
+})
+
+
+export const approveSharedEstimateBodyNameMin = 2;
+export const approveSharedEstimateBodyNameMax = 120;
+
+export const approveSharedEstimateBodyPhoneMin = 9;
+export const approveSharedEstimateBodyPhoneMax = 32;
+
+
+export const approveSharedEstimateBodyPhoneRegExp = new RegExp('^[+0-9 ()-]+$');
+
+
+export const ApproveSharedEstimateBody = zod.object({
+  "version": zod.number().int().min(1),
+  "name": zod.string().min(approveSharedEstimateBodyNameMin).max(approveSharedEstimateBodyNameMax),
+  "phone": zod.string().min(approveSharedEstimateBodyPhoneMin).max(approveSharedEstimateBodyPhoneMax).regex(approveSharedEstimateBodyPhoneRegExp),
+  "consent": zod.boolean().describe('Must be true: the client confirms they reviewed the estimate and scope')
+})
+
+export const approveSharedEstimateResponseClientNameMax = 120;
+
+export const approveSharedEstimateResponseClientPhoneMax = 32;
+
+export const approveSharedEstimateResponseClientEmailMax = 254;
+
+
+
+export const ApproveSharedEstimateResponse = zod.object({
+  "project": zod.object({
+  "name": zod.string(),
+  "district": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "areaM2": zod.number(),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string())
+}),
+  "contractor": zod.object({
+  "name": zod.string(),
+  "company": zod.string(),
+  "phone": zod.string(),
+  "experienceYears": zod.number(),
+  "completedProjects": zod.number(),
+  "rating": zod.number()
+}),
+  "client": zod.object({
+  "name": zod.string().max(approveSharedEstimateResponseClientNameMax),
+  "phone": zod.string().max(approveSharedEstimateResponseClientPhoneMax),
+  "email": zod.string().max(approveSharedEstimateResponseClientEmailMax).optional()
+}),
+  "message": zod.string(),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "estimate": zod.object({
+  "version": zod.number().int(),
+  "sentAt": zod.string(),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "total": zod.number(),
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "zone": zod.string(),
+  "unit": zod.string(),
+  "quantity": zod.number(),
+  "quantityLabel": zod.string(),
+  "total": zod.number(),
+  "materialTotal": zod.number(),
+  "laborTotal": zod.number(),
+  "additionalTotal": zod.number()
+}).describe('All-in client prices; margin and waste are folded in and never exposed separately.'))
+})),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "amount": zod.number()
+})),
+  "projectCostsTotal": zod.number(),
+  "total": zod.number(),
+  "split": zod.object({
+  "material": zod.number(),
+  "labor": zod.number(),
+  "other": zod.number()
+})
+}),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.number().int(),
+  "title": zod.string(),
+  "reason": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "impact": zod.number()
+})),
+  "approvedChangesTotal": zod.number(),
+  "finalTotal": zod.number(),
+  "payments": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "share": zod.number(),
+  "condition": zod.string(),
+  "amount": zod.number()
+})),
+  "approval": zod.object({
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string()
+}).optional(),
+  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional()
+})
+
+
+export const requestSharedEstimateRevisionPathTokenMin = 20;
+export const requestSharedEstimateRevisionPathTokenMax = 64;
+
+
+export const requestSharedEstimateRevisionPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const RequestSharedEstimateRevisionParams = zod.object({
+  "token": zod.coerce.string().min(requestSharedEstimateRevisionPathTokenMin).max(requestSharedEstimateRevisionPathTokenMax).regex(requestSharedEstimateRevisionPathTokenRegExp)
+})
+
+
+export const requestSharedEstimateRevisionBodyNameMin = 2;
+export const requestSharedEstimateRevisionBodyNameMax = 120;
+
+export const requestSharedEstimateRevisionBodyMessageMin = 5;
+export const requestSharedEstimateRevisionBodyMessageMax = 1500;
+
+
+
+export const RequestSharedEstimateRevisionBody = zod.object({
+  "version": zod.number().int().min(1),
+  "name": zod.string().min(requestSharedEstimateRevisionBodyNameMin).max(requestSharedEstimateRevisionBodyNameMax),
+  "message": zod.string().min(requestSharedEstimateRevisionBodyMessageMin).max(requestSharedEstimateRevisionBodyMessageMax)
+})
+
+export const requestSharedEstimateRevisionResponseClientNameMax = 120;
+
+export const requestSharedEstimateRevisionResponseClientPhoneMax = 32;
+
+export const requestSharedEstimateRevisionResponseClientEmailMax = 254;
+
+
+
+export const RequestSharedEstimateRevisionResponse = zod.object({
+  "project": zod.object({
+  "name": zod.string(),
+  "district": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "areaM2": zod.number(),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string())
+}),
+  "contractor": zod.object({
+  "name": zod.string(),
+  "company": zod.string(),
+  "phone": zod.string(),
+  "experienceYears": zod.number(),
+  "completedProjects": zod.number(),
+  "rating": zod.number()
+}),
+  "client": zod.object({
+  "name": zod.string().max(requestSharedEstimateRevisionResponseClientNameMax),
+  "phone": zod.string().max(requestSharedEstimateRevisionResponseClientPhoneMax),
+  "email": zod.string().max(requestSharedEstimateRevisionResponseClientEmailMax).optional()
+}),
+  "message": zod.string(),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "estimate": zod.object({
+  "version": zod.number().int(),
+  "sentAt": zod.string(),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "total": zod.number(),
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "zone": zod.string(),
+  "unit": zod.string(),
+  "quantity": zod.number(),
+  "quantityLabel": zod.string(),
+  "total": zod.number(),
+  "materialTotal": zod.number(),
+  "laborTotal": zod.number(),
+  "additionalTotal": zod.number()
+}).describe('All-in client prices; margin and waste are folded in and never exposed separately.'))
+})),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "amount": zod.number()
+})),
+  "projectCostsTotal": zod.number(),
+  "total": zod.number(),
+  "split": zod.object({
+  "material": zod.number(),
+  "labor": zod.number(),
+  "other": zod.number()
+})
+}),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.number().int(),
+  "title": zod.string(),
+  "reason": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "impact": zod.number()
+})),
+  "approvedChangesTotal": zod.number(),
+  "finalTotal": zod.number(),
+  "payments": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "share": zod.number(),
+  "condition": zod.string(),
+  "amount": zod.number()
+})),
+  "approval": zod.object({
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string()
+}).optional(),
+  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional()
+})
+
+
+export const decideSharedChangeOrderPathTokenMin = 20;
+export const decideSharedChangeOrderPathTokenMax = 64;
+
+
+export const decideSharedChangeOrderPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+export const decideSharedChangeOrderPathChangeOrderIdMax = 64;
+
+
+
+export const DecideSharedChangeOrderParams = zod.object({
+  "token": zod.coerce.string().min(decideSharedChangeOrderPathTokenMin).max(decideSharedChangeOrderPathTokenMax).regex(decideSharedChangeOrderPathTokenRegExp),
+  "changeOrderId": zod.coerce.string().min(1).max(decideSharedChangeOrderPathChangeOrderIdMax)
+})
+
+export const decideSharedChangeOrderBodyNoteMax = 500;
+
+
+
+export const DecideSharedChangeOrderBody = zod.object({
+  "decision": zod.enum(['approved', 'rejected']),
+  "note": zod.string().max(decideSharedChangeOrderBodyNoteMax).optional()
+})
+
+export const decideSharedChangeOrderResponseClientNameMax = 120;
+
+export const decideSharedChangeOrderResponseClientPhoneMax = 32;
+
+export const decideSharedChangeOrderResponseClientEmailMax = 254;
+
+
+
+export const DecideSharedChangeOrderResponse = zod.object({
+  "project": zod.object({
+  "name": zod.string(),
+  "district": zod.string(),
+  "propertyKind": zod.enum(['menzil', 'villa', 'ofis', 'magaza', 'diger']),
+  "renovationKind": zod.enum(['kosmetik', 'standart', 'kapital', 'premium']),
+  "areaM2": zod.number(),
+  "included": zod.array(zod.string()),
+  "excluded": zod.array(zod.string())
+}),
+  "contractor": zod.object({
+  "name": zod.string(),
+  "company": zod.string(),
+  "phone": zod.string(),
+  "experienceYears": zod.number(),
+  "completedProjects": zod.number(),
+  "rating": zod.number()
+}),
+  "client": zod.object({
+  "name": zod.string().max(decideSharedChangeOrderResponseClientNameMax),
+  "phone": zod.string().max(decideSharedChangeOrderResponseClientPhoneMax),
+  "email": zod.string().max(decideSharedChangeOrderResponseClientEmailMax).optional()
+}),
+  "message": zod.string(),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "estimate": zod.object({
+  "version": zod.number().int(),
+  "sentAt": zod.string(),
+  "validUntil": zod.string().date(),
+  "sections": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "total": zod.number(),
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "zone": zod.string(),
+  "unit": zod.string(),
+  "quantity": zod.number(),
+  "quantityLabel": zod.string(),
+  "total": zod.number(),
+  "materialTotal": zod.number(),
+  "laborTotal": zod.number(),
+  "additionalTotal": zod.number()
+}).describe('All-in client prices; margin and waste are folded in and never exposed separately.'))
+})),
+  "projectCosts": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "amount": zod.number()
+})),
+  "projectCostsTotal": zod.number(),
+  "total": zod.number(),
+  "split": zod.object({
+  "material": zod.number(),
+  "labor": zod.number(),
+  "other": zod.number()
+})
+}),
+  "changeOrders": zod.array(zod.object({
+  "id": zod.string(),
+  "number": zod.number().int(),
+  "title": zod.string(),
+  "reason": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "impact": zod.number()
+})),
+  "approvedChangesTotal": zod.number(),
+  "finalTotal": zod.number(),
+  "payments": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "share": zod.number(),
+  "condition": zod.string(),
+  "amount": zod.number()
+})),
+  "approval": zod.object({
+  "approvedAt": zod.string().datetime({"offset":true}),
+  "name": zod.string()
+}).optional(),
+  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional()
+})
+
+

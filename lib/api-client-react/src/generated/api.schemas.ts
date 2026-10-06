@@ -690,6 +690,966 @@ export interface UploadUrlResponse {
   metadata: UploadUrlRequest;
 }
 
+export type SmetaWorkCategory = typeof SmetaWorkCategory[keyof typeof SmetaWorkCategory];
+
+
+export const SmetaWorkCategory = {
+  sokuntu: 'sokuntu',
+  elektrik: 'elektrik',
+  santexnika: 'santexnika',
+  divar: 'divar',
+  boya: 'boya',
+  dosheme: 'dosheme',
+  kafel: 'kafel',
+  tavan: 'tavan',
+  qapi: 'qapi',
+  isiqlandirma: 'isiqlandirma',
+  metbex: 'metbex',
+  sanitar: 'sanitar',
+  temizlik: 'temizlik',
+} as const;
+
+export interface SmetaParty {
+  /** @maxLength 120 */
+  name: string;
+  /** @maxLength 32 */
+  phone: string;
+  /** @maxLength 254 */
+  email?: string;
+}
+
+export interface SmetaContractorProfile {
+  /** @maxLength 120 */
+  name: string;
+  /** @maxLength 32 */
+  phone: string;
+  /** @maxLength 254 */
+  email?: string;
+  /** @maxLength 160 */
+  company: string;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  experienceYears: number;
+  /**
+     * @minimum 0
+     * @maximum 100000
+     */
+  completedProjects: number;
+  /**
+     * @minimum 0
+     * @maximum 5
+     */
+  rating: number;
+}
+
+export type SmetaPriceSourceKind = typeof SmetaPriceSourceKind[keyof typeof SmetaPriceSourceKind];
+
+
+export const SmetaPriceSourceKind = {
+  market: 'market',
+  contractor: 'contractor',
+  manual: 'manual',
+} as const;
+
+export interface SmetaPriceSource {
+  kind: SmetaPriceSourceKind;
+  /** @maxLength 160 */
+  reference?: string;
+  /** @maxLength 40 */
+  updatedAt: string;
+}
+
+export type SmetaQuantitySourceKind = typeof SmetaQuantitySourceKind[keyof typeof SmetaQuantitySourceKind];
+
+
+export const SmetaQuantitySourceKind = {
+  drawing: 'drawing',
+  manual: 'manual',
+  template: 'template',
+  formula: 'formula',
+} as const;
+
+export interface SmetaQuantitySource {
+  kind: SmetaQuantitySourceKind;
+  /** @maxLength 250 */
+  label: string;
+  /**
+     * @maxItems 100
+     * @items.maxLength 64
+     */
+  measurementIds?: string[];
+  factor?: number;
+}
+
+export type SmetaLineItemStatus = typeof SmetaLineItemStatus[keyof typeof SmetaLineItemStatus];
+
+
+export const SmetaLineItemStatus = {
+  ai: 'ai',
+  draft: 'draft',
+  approved: 'approved',
+  changed: 'changed',
+} as const;
+
+export interface SmetaLineItem {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  /** @maxLength 200 */
+  name: string;
+  /** @maxLength 120 */
+  zone: string;
+  /** @maxLength 16 */
+  unit: string;
+  /**
+     * @minimum 0
+     * @maximum 100000000
+     */
+  quantity: number;
+  /**
+     * @minimum 0
+     * @maximum 100000000
+     */
+  materialUnitPrice: number;
+  /**
+     * @minimum 0
+     * @maximum 100000000
+     */
+  laborUnitPrice: number;
+  /**
+     * @minimum -100000000
+     * @maximum 100000000
+     */
+  additionalCost: number;
+  /**
+     * @minimum 0
+     * @maximum 1
+     */
+  wastePercentage: number;
+  /**
+     * @minimum 0
+     * @maximum 1
+     * @nullable
+     */
+  marginPercentage: number | null;
+  priceSource: SmetaPriceSource;
+  quantitySource: SmetaQuantitySource;
+  status: SmetaLineItemStatus;
+  /** @maxLength 64 */
+  materialId?: string;
+  /** @maxLength 64 */
+  laborRateId?: string;
+}
+
+export interface SmetaEstimateSection {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  category: SmetaWorkCategory;
+  /** @maxLength 120 */
+  title: string;
+  /** @maxItems 400 */
+  items: SmetaLineItem[];
+}
+
+export interface SmetaEstimate {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  /** @minimum 1 */
+  version: number;
+  /** @maxLength 40 */
+  createdAt: string;
+  validUntil: string;
+  /** @maxItems 60 */
+  sections: SmetaEstimateSection[];
+}
+
+export interface SmetaProjectCost {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  /** @maxLength 160 */
+  label: string;
+  /**
+     * @minimum -100000000
+     * @maximum 100000000
+     */
+  amount: number;
+}
+
+export type SmetaMeasurementKind = typeof SmetaMeasurementKind[keyof typeof SmetaMeasurementKind];
+
+
+export const SmetaMeasurementKind = {
+  area: 'area',
+  length: 'length',
+  count: 'count',
+  height: 'height',
+} as const;
+
+export type SmetaMeasurementStatus = typeof SmetaMeasurementStatus[keyof typeof SmetaMeasurementStatus];
+
+
+export const SmetaMeasurementStatus = {
+  suggested: 'suggested',
+  edited: 'edited',
+  approved: 'approved',
+} as const;
+
+export interface SmetaMeasurement {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  kind: SmetaMeasurementKind;
+  /** @maxLength 160 */
+  name: string;
+  /**
+     * @minimum 0
+     * @maximum 100000000
+     */
+  value: number;
+  /** @maxLength 8 */
+  unit: string;
+  /**
+     * @minimum 0
+     * @maximum 1
+     */
+  confidence: number;
+  /** @maxLength 250 */
+  source: string;
+  status: SmetaMeasurementStatus;
+  /** @maxLength 64 */
+  roomId?: string;
+}
+
+export type SmetaDrawingFileType = typeof SmetaDrawingFileType[keyof typeof SmetaDrawingFileType];
+
+
+export const SmetaDrawingFileType = {
+  pdf: 'pdf',
+  jpg: 'jpg',
+  png: 'png',
+} as const;
+
+export type SmetaDrawingStatus = typeof SmetaDrawingStatus[keyof typeof SmetaDrawingStatus];
+
+
+export const SmetaDrawingStatus = {
+  processing: 'processing',
+  analyzed: 'analyzed',
+  failed: 'failed',
+} as const;
+
+export type SmetaDrawingRoomsItem = {
+  /** @maxLength 64 */
+  id: string;
+  /** @maxLength 120 */
+  name: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+export type SmetaDrawingOpeningsItemKind = typeof SmetaDrawingOpeningsItemKind[keyof typeof SmetaDrawingOpeningsItemKind];
+
+
+export const SmetaDrawingOpeningsItemKind = {
+  door: 'door',
+  window: 'window',
+} as const;
+
+export type SmetaDrawingOpeningsItem = {
+  /** @maxLength 64 */
+  id: string;
+  kind: SmetaDrawingOpeningsItemKind;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+
+export interface SmetaDrawing {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  /** @maxLength 255 */
+  fileName: string;
+  fileType: SmetaDrawingFileType;
+  /** @maxLength 40 */
+  uploadedAt: string;
+  /** @maxLength 40 */
+  scale: string;
+  width: number;
+  height: number;
+  status: SmetaDrawingStatus;
+  /** @maxItems 200 */
+  rooms: SmetaDrawingRoomsItem[];
+  /** @maxItems 500 */
+  openings: SmetaDrawingOpeningsItem[];
+}
+
+export type SmetaChangeOrderRequestedBy = typeof SmetaChangeOrderRequestedBy[keyof typeof SmetaChangeOrderRequestedBy];
+
+
+export const SmetaChangeOrderRequestedBy = {
+  client: 'client',
+  contractor: 'contractor',
+} as const;
+
+export type SmetaChangeOrderStatus = typeof SmetaChangeOrderStatus[keyof typeof SmetaChangeOrderStatus];
+
+
+export const SmetaChangeOrderStatus = {
+  draft: 'draft',
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface SmetaChangeOrder {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  /** @minimum 1 */
+  number: number;
+  /** @maxLength 160 */
+  title: string;
+  /** @maxLength 1000 */
+  reason: string;
+  date: string;
+  requestedBy: SmetaChangeOrderRequestedBy;
+  /** @maxLength 120 */
+  requestedByName: string;
+  category: SmetaWorkCategory;
+  /**
+     * @minimum -100000000
+     * @maximum 100000000
+     */
+  materialDelta: number;
+  /**
+     * @minimum -100000000
+     * @maximum 100000000
+     */
+  laborDelta: number;
+  /**
+     * @minimum -100000000
+     * @maximum 100000000
+     */
+  additionalCost: number;
+  status: SmetaChangeOrderStatus;
+  /**
+     * @maxItems 50
+     * @items.maxLength 64
+     */
+  photoIds: string[];
+  /**
+     * @maxItems 100
+     * @items.maxLength 64
+     */
+  lineItemIds: string[];
+  /** @maxLength 40 */
+  decidedAt?: string;
+  /** @maxLength 1000 */
+  decisionNote?: string;
+}
+
+export type SmetaReceiptSuggestionKind = typeof SmetaReceiptSuggestionKind[keyof typeof SmetaReceiptSuggestionKind];
+
+
+export const SmetaReceiptSuggestionKind = {
+  material: 'material',
+  labor: 'labor',
+  other: 'other',
+} as const;
+
+export interface SmetaReceiptSuggestion {
+  /** @maxLength 160 */
+  merchant: string;
+  /** @maxLength 40 */
+  date: string;
+  total: number;
+  category: SmetaWorkCategory;
+  kind: SmetaReceiptSuggestionKind;
+  /**
+     * @minimum 0
+     * @maximum 1
+     */
+  confidence: number;
+}
+
+export type SmetaReceiptFileType = typeof SmetaReceiptFileType[keyof typeof SmetaReceiptFileType];
+
+
+export const SmetaReceiptFileType = {
+  image: 'image',
+  pdf: 'pdf',
+} as const;
+
+export interface SmetaReceipt {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  /** @maxLength 255 */
+  fileName: string;
+  fileType: SmetaReceiptFileType;
+  /** @maxLength 40 */
+  uploadedAt: string;
+  aiSuggestion?: SmetaReceiptSuggestion;
+}
+
+export type SmetaExpenseKind = typeof SmetaExpenseKind[keyof typeof SmetaExpenseKind];
+
+
+export const SmetaExpenseKind = {
+  material: 'material',
+  labor: 'labor',
+  other: 'other',
+} as const;
+
+export type SmetaExpensePaymentStatus = typeof SmetaExpensePaymentStatus[keyof typeof SmetaExpensePaymentStatus];
+
+
+export const SmetaExpensePaymentStatus = {
+  paid: 'paid',
+  partial: 'partial',
+  unpaid: 'unpaid',
+} as const;
+
+export interface SmetaExpense {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  date: string;
+  kind: SmetaExpenseKind;
+  category: SmetaWorkCategory;
+  /** @maxLength 300 */
+  description: string;
+  /** @maxLength 160 */
+  vendor: string;
+  /**
+     * @minimum 0
+     * @maximum 100000000
+     */
+  amount: number;
+  paymentStatus: SmetaExpensePaymentStatus;
+  /** @maxLength 64 */
+  receiptId?: string;
+  /** @maxLength 64 */
+  lineItemId?: string;
+}
+
+export type SmetaPhotoPhase = typeof SmetaPhotoPhase[keyof typeof SmetaPhotoPhase];
+
+
+export const SmetaPhotoPhase = {
+  before: 'before',
+  during: 'during',
+  after: 'after',
+} as const;
+
+export interface SmetaPhoto {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  phase: SmetaPhotoPhase;
+  date: string;
+  /** @maxLength 120 */
+  uploadedBy: string;
+  /** @maxLength 500 */
+  note: string;
+  /** @maxLength 120 */
+  room: string;
+  category: SmetaWorkCategory;
+  /** @maxLength 64 */
+  lineItemId?: string;
+  clientVisible: boolean;
+}
+
+export type SmetaPaymentMilestoneStatus = typeof SmetaPaymentMilestoneStatus[keyof typeof SmetaPaymentMilestoneStatus];
+
+
+export const SmetaPaymentMilestoneStatus = {
+  paid: 'paid',
+  due: 'due',
+  planned: 'planned',
+} as const;
+
+export interface SmetaPaymentMilestone {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  /** @maxLength 160 */
+  title: string;
+  /**
+     * @minimum 0
+     * @maximum 1
+     */
+  share: number;
+  /** @maxLength 250 */
+  condition: string;
+  status: SmetaPaymentMilestoneStatus;
+}
+
+export type SmetaExportJobKind = typeof SmetaExportJobKind[keyof typeof SmetaExportJobKind];
+
+
+export const SmetaExportJobKind = {
+  xlsx: 'xlsx',
+  pdf: 'pdf',
+} as const;
+
+export type SmetaExportJobStatus = typeof SmetaExportJobStatus[keyof typeof SmetaExportJobStatus];
+
+
+export const SmetaExportJobStatus = {
+  processing: 'processing',
+  ready: 'ready',
+  failed: 'failed',
+} as const;
+
+export interface SmetaExportJob {
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  id: string;
+  kind: SmetaExportJobKind;
+  status: SmetaExportJobStatus;
+  /** @maxLength 40 */
+  createdAt: string;
+  /** @maxLength 255 */
+  fileName: string;
+}
+
+export interface SmetaClientApproval {
+  id: string;
+  estimateVersion: number;
+  approvedAt: string;
+  name: string;
+  phone: string;
+  confirmedScope: boolean;
+  total: number;
+}
+
+export interface SmetaRevisionRequest {
+  id: string;
+  estimateVersion: number;
+  createdAt: string;
+  name: string;
+  message: string;
+}
+
+/**
+ * Owner-only view of the client link, including the frozen internal snapshot.
+ */
+export interface SmetaShare {
+  token: string;
+  createdAt: string;
+  expiresAt: string;
+  clientName: string;
+  phone: string;
+  email?: string;
+  message: string;
+  notifyOnApprove: boolean;
+  attachPdf: boolean;
+  snapshot: SmetaEstimate;
+  snapshotProjectCosts: SmetaProjectCost[];
+  snapshotMargin: number;
+}
+
+export type SmetaProjectInputPropertyKind = typeof SmetaProjectInputPropertyKind[keyof typeof SmetaProjectInputPropertyKind];
+
+
+export const SmetaProjectInputPropertyKind = {
+  menzil: 'menzil',
+  villa: 'villa',
+  ofis: 'ofis',
+  magaza: 'magaza',
+  diger: 'diger',
+} as const;
+
+export type SmetaProjectInputRenovationKind = typeof SmetaProjectInputRenovationKind[keyof typeof SmetaProjectInputRenovationKind];
+
+
+export const SmetaProjectInputRenovationKind = {
+  kosmetik: 'kosmetik',
+  standart: 'standart',
+  kapital: 'kapital',
+  premium: 'premium',
+} as const;
+
+export type SmetaProjectInputQuality = typeof SmetaProjectInputQuality[keyof typeof SmetaProjectInputQuality];
+
+
+export const SmetaProjectInputQuality = {
+  ekonom: 'ekonom',
+  standart: 'standart',
+  premium: 'premium',
+} as const;
+
+export interface SmetaProjectInput {
+  id?: string;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+  /** @maxLength 100 */
+  district: string;
+  /** @maxLength 250 */
+  address: string;
+  propertyKind: SmetaProjectInputPropertyKind;
+  renovationKind: SmetaProjectInputRenovationKind;
+  quality: SmetaProjectInputQuality;
+  /**
+     * @minimum 0
+     * @maximum 100000
+     */
+  areaM2: number;
+  startDate: string;
+  endDate: string;
+  client: SmetaParty;
+  contractor: SmetaContractorProfile;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  completion: number;
+  /**
+     * @minimum 0
+     * @maximum 1
+     */
+  defaultMarginPercentage: number;
+  /** @maxItems 50 */
+  projectCosts: SmetaProjectCost[];
+  estimate: SmetaEstimate;
+  /** @maxItems 300 */
+  changeOrders: SmetaChangeOrder[];
+  /** @maxItems 2000 */
+  expenses: SmetaExpense[];
+  /** @maxItems 2000 */
+  receipts: SmetaReceipt[];
+  /** @maxItems 2000 */
+  photos: SmetaPhoto[];
+  drawing?: SmetaDrawing;
+  /** @maxItems 500 */
+  measurements: SmetaMeasurement[];
+  /** @maxItems 20 */
+  payments: SmetaPaymentMilestone[];
+  /**
+     * @maxItems 60
+     * @items.maxLength 200
+     */
+  included: string[];
+  /**
+     * @maxItems 60
+     * @items.maxLength 200
+     */
+  excluded: string[];
+  /** @maxItems 50 */
+  exports: SmetaExportJob[];
+}
+
+export type SmetaProjectPropertyKind = typeof SmetaProjectPropertyKind[keyof typeof SmetaProjectPropertyKind];
+
+
+export const SmetaProjectPropertyKind = {
+  menzil: 'menzil',
+  villa: 'villa',
+  ofis: 'ofis',
+  magaza: 'magaza',
+  diger: 'diger',
+} as const;
+
+export type SmetaProjectRenovationKind = typeof SmetaProjectRenovationKind[keyof typeof SmetaProjectRenovationKind];
+
+
+export const SmetaProjectRenovationKind = {
+  kosmetik: 'kosmetik',
+  standart: 'standart',
+  kapital: 'kapital',
+  premium: 'premium',
+} as const;
+
+export type SmetaProjectQuality = typeof SmetaProjectQuality[keyof typeof SmetaProjectQuality];
+
+
+export const SmetaProjectQuality = {
+  ekonom: 'ekonom',
+  standart: 'standart',
+  premium: 'premium',
+} as const;
+
+export type SmetaProjectStatus = typeof SmetaProjectStatus[keyof typeof SmetaProjectStatus];
+
+
+export const SmetaProjectStatus = {
+  draft: 'draft',
+  sent: 'sent',
+  client_approved: 'client_approved',
+  revision_requested: 'revision_requested',
+} as const;
+
+export interface SmetaProject {
+  id: string;
+  name: string;
+  district: string;
+  address: string;
+  propertyKind: SmetaProjectPropertyKind;
+  renovationKind: SmetaProjectRenovationKind;
+  quality: SmetaProjectQuality;
+  areaM2: number;
+  startDate: string;
+  endDate: string;
+  client: SmetaParty;
+  contractor: SmetaContractorProfile;
+  completion: number;
+  defaultMarginPercentage: number;
+  projectCosts: SmetaProjectCost[];
+  estimate: SmetaEstimate;
+  status: SmetaProjectStatus;
+  changeOrders: SmetaChangeOrder[];
+  expenses: SmetaExpense[];
+  receipts: SmetaReceipt[];
+  photos: SmetaPhoto[];
+  drawing?: SmetaDrawing;
+  measurements: SmetaMeasurement[];
+  approvals: SmetaClientApproval[];
+  revisionRequests: SmetaRevisionRequest[];
+  payments: SmetaPaymentMilestone[];
+  included: string[];
+  excluded: string[];
+  share?: SmetaShare;
+  exports: SmetaExportJob[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SmetaShareInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  clientName: string;
+  /**
+     * @minLength 9
+     * @maxLength 32
+     */
+  phone: string;
+  /** @maxLength 254 */
+  email?: string;
+  /** @maxLength 2000 */
+  message: string;
+  notifyOnApprove: boolean;
+  attachPdf: boolean;
+}
+
+/**
+ * All-in client prices; margin and waste are folded in and never exposed separately.
+ */
+export interface SharedEstimateLine {
+  id: string;
+  name: string;
+  zone: string;
+  unit: string;
+  quantity: number;
+  quantityLabel: string;
+  total: number;
+  materialTotal: number;
+  laborTotal: number;
+  additionalTotal: number;
+}
+
+export interface SharedEstimateSection {
+  id: string;
+  title: string;
+  total: number;
+  items: SharedEstimateLine[];
+}
+
+export type SharedEstimateSnapshotProjectCostsItem = {
+  id: string;
+  label: string;
+  amount: number;
+};
+
+export type SharedEstimateSnapshotSplit = {
+  material: number;
+  labor: number;
+  other: number;
+};
+
+export interface SharedEstimateSnapshot {
+  version: number;
+  sentAt: string;
+  validUntil: string;
+  sections: SharedEstimateSection[];
+  projectCosts: SharedEstimateSnapshotProjectCostsItem[];
+  projectCostsTotal: number;
+  total: number;
+  split: SharedEstimateSnapshotSplit;
+}
+
+export type SharedEstimateProjectPropertyKind = typeof SharedEstimateProjectPropertyKind[keyof typeof SharedEstimateProjectPropertyKind];
+
+
+export const SharedEstimateProjectPropertyKind = {
+  menzil: 'menzil',
+  villa: 'villa',
+  ofis: 'ofis',
+  magaza: 'magaza',
+  diger: 'diger',
+} as const;
+
+export type SharedEstimateProjectRenovationKind = typeof SharedEstimateProjectRenovationKind[keyof typeof SharedEstimateProjectRenovationKind];
+
+
+export const SharedEstimateProjectRenovationKind = {
+  kosmetik: 'kosmetik',
+  standart: 'standart',
+  kapital: 'kapital',
+  premium: 'premium',
+} as const;
+
+export type SharedEstimateProject = {
+  name: string;
+  district: string;
+  propertyKind: SharedEstimateProjectPropertyKind;
+  renovationKind: SharedEstimateProjectRenovationKind;
+  areaM2: number;
+  included: string[];
+  excluded: string[];
+};
+
+export type SharedEstimateContractor = {
+  name: string;
+  company: string;
+  phone: string;
+  experienceYears: number;
+  completedProjects: number;
+  rating: number;
+};
+
+export type SharedEstimateChangeOrdersItemStatus = typeof SharedEstimateChangeOrdersItemStatus[keyof typeof SharedEstimateChangeOrdersItemStatus];
+
+
+export const SharedEstimateChangeOrdersItemStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type SharedEstimateChangeOrdersItem = {
+  id: string;
+  number: number;
+  title: string;
+  reason: string;
+  date: string;
+  status: SharedEstimateChangeOrdersItemStatus;
+  impact: number;
+};
+
+export type SharedEstimatePaymentsItem = {
+  id: string;
+  title: string;
+  share: number;
+  condition: string;
+  amount: number;
+};
+
+export type SharedEstimateApproval = {
+  approvedAt: string;
+  name: string;
+};
+
+export interface SharedEstimate {
+  project: SharedEstimateProject;
+  contractor: SharedEstimateContractor;
+  client: SmetaParty;
+  message: string;
+  expiresAt: string;
+  estimate: SharedEstimateSnapshot;
+  changeOrders: SharedEstimateChangeOrdersItem[];
+  approvedChangesTotal: number;
+  finalTotal: number;
+  payments: SharedEstimatePaymentsItem[];
+  approval?: SharedEstimateApproval;
+  revisionRequestedAt?: string;
+}
+
+export interface SharedEstimateApprovalInput {
+  /** @minimum 1 */
+  version: number;
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  /**
+     * @minLength 9
+     * @maxLength 32
+     * @pattern ^[+0-9 ()-]+$
+     */
+  phone: string;
+  /** Must be true: the client confirms they reviewed the estimate and scope */
+  consent: boolean;
+}
+
+export interface SharedEstimateRevisionInput {
+  /** @minimum 1 */
+  version: number;
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  /**
+     * @minLength 5
+     * @maxLength 1500
+     */
+  message: string;
+}
+
+export type SharedChangeOrderDecisionInputDecision = typeof SharedChangeOrderDecisionInputDecision[keyof typeof SharedChangeOrderDecisionInputDecision];
+
+
+export const SharedChangeOrderDecisionInputDecision = {
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface SharedChangeOrderDecisionInput {
+  decision: SharedChangeOrderDecisionInputDecision;
+  /** @maxLength 500 */
+  note?: string;
+}
+
 export type GetSharedPassport200 = {
   passport: Passport;
   includeFinancial: boolean;
