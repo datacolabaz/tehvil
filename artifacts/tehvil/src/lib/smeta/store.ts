@@ -255,7 +255,8 @@ export const smeta = {
       if (d.share && changed) d.estimate.version = d.share.snapshot.version + 1;
       d.estimate.sections.forEach(s => s.items.forEach(i => { if (i.status !== 'approved') i.status = 'approved'; }));
       d.estimate.validUntil = addDaysISO(todayISO(), 30);
-      const token = d.share && !changed ? d.share.token : `${d.id.slice(0, 3)}-${Math.random().toString(36).slice(2, 10)}`;
+      // The link stays stable across versions so a client's saved link always shows the latest sent version.
+      const token = d.share?.token ?? `${d.id.slice(0, 3)}-${Math.random().toString(36).slice(2, 10)}`;
       d.share = {
         token, createdAt: nowISO(), expiresAt: new Date(Date.now() + 30 * 864e5).toISOString(),
         ...details, snapshot: structuredClone(d.estimate), snapshotProjectCosts: structuredClone(d.projectCosts), snapshotMargin: d.defaultMarginPercentage,
