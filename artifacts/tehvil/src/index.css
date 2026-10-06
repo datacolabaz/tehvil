@@ -159,3 +159,8 @@
 @media (max-width: 760px) { .partners { padding-block:8px 48px; } .partners-grid { grid-template-columns:repeat(2,1fr);gap:12px; } .partners-head h2 { font-size:25px; } .partner-tile { border-radius:20px; } }
 @media (prefers-reduced-motion: reduce) { .partner-tile { animation:none; } .partner-tile,.partner-tile * { transition-duration:.01s !important; } }
 @media print { .partners { display:none; } }
+
+/* Landing footer legal links */
+.landing-legal { order:4;width:100%;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px; }
+.landing-legal a { color:#66766f;text-decoration:underline;text-underline-offset:3px; }
+.landing-legal a:hover { color:#1d4339; }
