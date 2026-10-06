@@ -15,6 +15,8 @@ import {
   createSmetaProject, deleteSmetaProject, listSmetaProjects, shareSmetaEstimate, updateSmetaProject,
   type SmetaProject, type SmetaProjectInput,
 } from '@workspace/api-client-react';
+import { track } from '@/lib/analytics';
+import { gateFeature } from '@/lib/contractor/upgrade';
 import { budgetSummary, changeTotals, quantityFromMeasurements, projectTotals } from './calc';
 import { CATEGORY_LABEL } from './catalog';
 import { addDaysISO, todayISO, uid } from './format';
@@ -82,6 +84,7 @@ function set(patch: Partial<Omit<State, 'all' | 'visible'>>) {
 }
 function subscribe(l: () => void) { listeners.add(l); return () => { listeners.delete(l); }; }
 const findProject = (id: string) => state.all.find(p => p.id === id);
+const isDemo = (id: string) => state.demo.some(p => p.id === id);
 
 /* ---------------------------------------------------------------- API mapping */
 
@@ -249,9 +252,13 @@ export type ShareDetails = { clientName: string; phone: string; email?: string; 
 
 export const smeta = {
   /** Saves a new project on the server and returns the stored copy (with its server id). */
-  async createProject(p: Project): Promise<Project> {
+  async createProject(p: Project, opts: { guided?: boolean } = {}): Promise<Project> {
     const saved = fromApi(await createSmetaProject(toInput(p)), p);
     replaceServerProject(saved);
+    track('estimate_created', {
+      projectId: saved.id, total: Math.round(projectTotals(saved).total), sections: saved.estimate.sections.length,
+      guided: Boolean(opts.guided), demo: false,
+    });
     return saved;
   },
 
@@ -382,22 +389,29 @@ export const smeta = {
   },
 
   addChangeOrder(id: string, co: Omit<ChangeOrder, 'id' | 'number'>) {
+    if (!gateFeature('changeOrders', { demo: isDemo(id) })) return;
     mutate(id, d => { d.changeOrders.push({ ...co, id: uid('co'), number: Math.max(0, ...d.changeOrders.map(c => c.number)) + 1 }); });
+    track('change_order_created', { projectId: id, impact: Math.round(co.materialDelta + co.laborDelta + co.additionalCost), demo: isDemo(id) });
   },
-  setChangeStatus(id: string, coId: string, status: ChangeOrder['status'], note?: string) {
+  setChangeStatus(id: string, coId: string, status: ChangeOrder['status'], note?: string, by: 'contractor' | 'client' = 'contractor') {
+    let approved = false;
     mutate(id, d => {
       const c = d.changeOrders.find(x => x.id === coId);
       if (!c) return;
+      approved = status === 'approved' && c.status !== 'approved';
       c.status = status;
       if (status === 'approved' || status === 'rejected') { c.decidedAt = nowISO(); c.decisionNote = note; }
     });
+    if (approved) track('change_order_approved', { projectId: id, by, demo: isDemo(id) });
   },
 
   addExpense(id: string, e: Omit<Expense, 'id'>, receipt?: Receipt) {
+    if (!gateFeature('expenseTracking', { demo: isDemo(id) })) return;
     mutate(id, d => {
       if (receipt) d.receipts.push(receipt);
       d.expenses.push({ ...e, id: uid('ex'), receiptId: receipt?.id ?? e.receiptId });
     });
+    track('expense_added', { projectId: id, amount: Math.round(e.amount), category: e.category, demo: isDemo(id) });
   },
   setExpenseStatus(id: string, expenseId: string, paymentStatus: Expense['paymentStatus']) {
     mutate(id, d => { const e = d.expenses.find(x => x.id === expenseId); if (e) e.paymentStatus = paymentStatus; });
@@ -405,7 +419,9 @@ export const smeta = {
 
   addPhoto(id: string, photo: Omit<PhotoEvidence, 'id'>): string {
     const photoId = uid('ph');
+    if (!gateFeature('photoEvidence', { demo: isDemo(id) })) return '';
     mutate(id, d => { d.photos.unshift({ ...photo, id: photoId }); });
+    track('photo_evidence_added', { projectId: id, phase: photo.phase, demo: isDemo(id) });
     return photoId;
   },
   togglePhotoVisibility(id: string, photoId: string) {
@@ -417,10 +433,16 @@ export const smeta = {
    * For saved projects the server creates the token, stores the snapshot and sends the notification.
    */
   async shareEstimate(id: string, details: ShareDetails): Promise<EstimateShare | undefined> {
-    if (state.demo.some(p => p.id === id)) return shareDemo(id, details);
+    const first = !findProject(id)?.share;
+    if (isDemo(id)) {
+      const share = shareDemo(id, details);
+      if (share) track('estimate_shared', { projectId: id, version: share.snapshot.version, demo: true, first });
+      return share;
+    }
     if (!(await flush(id))) throw new Error('Unsaved changes could not be stored');
     const saved = fromApi(await shareSmetaEstimate(id, { ...details, email: details.email || undefined }), findProject(id));
     replaceServerProject(saved);
+    track('estimate_shared', { projectId: id, version: saved.share?.snapshot.version ?? saved.estimate.version, demo: false, first });
     return saved.share;
   },
 
@@ -433,6 +455,7 @@ export const smeta = {
     const total = projectTotals({ ...p, estimate: share.snapshot, projectCosts: share.snapshotProjectCosts, defaultMarginPercentage: share.snapshotMargin }).total;
     const approval: ClientApproval = { id: uid('ap'), estimateVersion: share.snapshot.version, approvedAt: nowISO(), name: who.name, phone: who.phone, confirmedScope: true, total };
     mutate(p.id, d => { d.approvals.push(approval); d.status = 'client_approved'; });
+    track('estimate_client_approved', { version: approval.estimateVersion, total: Math.round(total), demo: true });
   },
 
   requestRevision(token: string, who: { name: string; message: string }) {
@@ -445,7 +468,7 @@ export const smeta = {
   decideChangeByClient(token: string, coId: string, decision: 'approved' | 'rejected', note?: string) {
     const p = state.demo.find(x => x.share?.token === token);
     if (!p) return;
-    smeta.setChangeStatus(p.id, coId, decision, note);
+    smeta.setChangeStatus(p.id, coId, decision, note, 'client');
   },
 
   addExport(id: string, job: ExportJob) {

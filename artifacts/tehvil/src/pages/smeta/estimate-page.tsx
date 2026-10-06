@@ -12,6 +12,7 @@ import { SendModal, copyText, publicEstimateUrl } from '@/components/smeta/send-
 import { SummaryTab } from '@/components/smeta/summary-tab';
 import { TakeoffTab } from '@/components/smeta/takeoff-tab';
 import { runExport } from '@/components/smeta/export-actions';
+import { FirstProjectGuide, isGuided } from '@/components/contractor/first-project-guide';
 import { DropItem, DropMenu, DropSep, SmetaToaster, StatusBadge } from '@/components/smeta/ui';
 import { projectTotals } from '@/lib/smeta/calc';
 import { PROPERTY_LABEL, RENOVATION_LABEL } from '@/lib/smeta/catalog';
@@ -39,7 +40,8 @@ export function EstimateDetailPage({ projectId }: { projectId: string }) {
   const p = useSmetaProject(projectId);
   const loading = useSmetaLoading();
   const [tab, setTabState] = useState<TabId>(initialTab);
-  const [sendOpen, setSendOpen] = useState(false);
+  const [sendOpen, setSendOpen] = useState(() => new URLSearchParams(window.location.search).get('send') === '1');
+  const [guided] = useState(isGuided);
   const [assistantOpen, setAssistantOpen] = useState(false);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -77,6 +79,7 @@ export function EstimateDetailPage({ projectId }: { projectId: string }) {
   };
 
   return <>
+    {guided && !p.demo && <FirstProjectGuide done={[true, true, !!p.share]} action={!p.share && <Button onClick={() => setSendOpen(true)} testId="button-guide-send"><Send size={14} />Sifarişçiyə göndər</Button>} />}
     <header className="sm-detail-head">
       <div className="sm-detail-title">
         <div className="eyebrow">{PROPERTY_LABEL[p.propertyKind]} · {RENOVATION_LABEL[p.renovationKind]} təmir · Smeta v{p.estimate.version}</div>

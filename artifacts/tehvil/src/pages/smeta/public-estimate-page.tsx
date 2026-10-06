@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
-import { CheckCircle2, ChevronRight, CircleMinus, CirclePlus, FileWarning, Info, MessageSquareText, Printer, RotateCcw, ShieldCheck, Star } from 'lucide-react';
+import { CheckCircle2, ChevronRight, CircleMinus, CirclePlus, FileWarning, Info, MessageSquareText, Printer, RotateCcw, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/kit';
+import { CompanyHeader } from '@/components/contractor/company-header';
 import { PROPERTY_LABEL, RENOVATION_LABEL } from '@/lib/smeta/catalog';
 import { azn, dateAz, num, signedAzn, qty } from '@/lib/smeta/format';
 import { useSharedEstimate, type SharedEstimate } from '@/lib/smeta/shared';
@@ -32,13 +33,14 @@ export function PublicEstimatePage({ token }: { token: string }) {
     {shared.status === 'loading' ? <div className="sm-public-wrap" aria-busy="true" aria-label="Smeta yüklənir"><div className="sm-skel-card" style={{ height: 160, marginBottom: 16 }} /><div className="sm-skel-card tall" /></div>
       : d ? <PublicEstimate data={d} shared={shared} />
       : shared.status === 'error' ? <div className="sm-public-wrap"><div className="sm-empty surface"><div className="empty-illustration"><FileWarning size={28} /></div><h3>Smetanı yükləmək alınmadı</h3><p>İnternet bağlantısını yoxlayıb yenidən cəhd edin.</p><Button variant="secondary" onClick={() => { void shared.retry(); }}><RotateCcw size={15} />Yenidən cəhd et</Button></div></div>
-      : <div className="sm-public-wrap"><div className="sm-empty surface"><div className="empty-illustration"><FileWarning size={28} /></div><h3>Link etibarsızdır və ya müddəti bitib</h3><p>Paylaşım linkləri 30 gün aktiv olur. Yeni link üçün podratçınızla əlaqə saxlayın.</p></div></div>}
+      : <div className="sm-public-wrap"><div className="sm-empty surface"><div className="empty-illustration"><FileWarning size={28} /></div><h3>Link etibarsızdır və ya müddəti bitib</h3><p>Paylaşım linkləri məhdud müddət aktiv olur. Yeni link üçün podratçınızla əlaqə saxlayın.</p></div></div>}
     <SmetaToaster />
   </div>;
 }
 
 function PublicEstimate({ data: d, shared }: { data: SharedEstimate; shared: Shared }) {
   const snap = d.estimate;
+  const company = d.company ?? { name: d.contractor.company || d.contractor.name, phone: d.contractor.phone || undefined, services: [] };
   const [approveOpen, setApproveOpen] = useState(false);
   const [reviseOpen, setReviseOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
@@ -58,7 +60,8 @@ function PublicEstimate({ data: d, shared }: { data: SharedEstimate; shared: Sha
 
     <section className="sm-public-hero">
       <div className="surface" style={{ padding: 22 }}>
-        <div className="eyebrow">Təmir smetası · {d.project.district}</div>
+        <CompanyHeader company={company} />
+        <div className="eyebrow" style={{ marginTop: 18 }}>Təmir smetası · {d.project.district}</div>
         <h1>{d.project.name}</h1>
         <p>{d.message}</p>
         <div className="sm-doc-meta">
@@ -153,12 +156,9 @@ function PublicEstimate({ data: d, shared }: { data: SharedEstimate; shared: Sha
 
         <div className="surface sm-panel">
           <div className="eyebrow" style={{ marginBottom: 10 }}>Podratçı</div>
-          <div className="sm-contractor"><span className="sm-avatar">{d.contractor.name.split(' ').map(w => w[0]).join('').slice(0, 2)}</span><div><strong>{d.contractor.name}</strong><small>{d.contractor.company} · {d.contractor.phone}</small></div></div>
-          <div className="sm-contractor-stats">
-            <div><b>{d.contractor.experienceYears}</b><small>il təcrübə</small></div>
-            <div><b>{d.contractor.completedProjects}</b><small>layihə</small></div>
-            <div><b><Star size={13} aria-hidden className="sm-ii" style={{ color: '#c28e68' }} /> {num(d.contractor.rating, 1)}</b><small>reytinq</small></div>
-          </div>
+          <div className="sm-contractor"><span className="sm-avatar">{d.contractor.name.split(' ').map(w => w[0]).join('').slice(0, 2)}</span><div><strong>{d.contractor.name}</strong><small>{[company.name !== d.contractor.name ? company.name : '', company.phone ?? d.contractor.phone].filter(Boolean).join(' · ')}</small></div></div>
+          {company.services.length > 0 && <div className="ct-chips" style={{ marginTop: 12 }} aria-label="Xidmətlər">{company.services.map(s => <span key={s} className="sm-tag">{s}</span>)}</div>}
+          {company.paymentTermsNote && <p className="sm-muted" style={{ margin: '12px 0 0', fontSize: 12, lineHeight: 1.55 }}>{company.paymentTermsNote}</p>}
         </div>
 
         <div className="surface sm-panel">

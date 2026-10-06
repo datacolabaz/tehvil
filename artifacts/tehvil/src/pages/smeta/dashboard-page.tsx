@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'wouter';
 import { AlertTriangle, ArrowUpRight, Calculator, Clock3, Eye, EyeOff, FilePlus2, FileSpreadsheet, Info, LayoutTemplate, MapPin, MessageSquareText, Plus, RotateCcw, Ruler, Sparkles, Upload, WalletCards } from 'lucide-react';
 import { PageHeading } from '@/components/kit';
+import { ActivationChecklist } from '@/components/contractor/activation-checklist';
 import { HealthLabel, SkeletonDashboard, SmetaToaster, StatusBadge, toast } from '@/components/smeta/ui';
 import { portfolioInsight } from '@/lib/smeta/ai';
 import { budgetSummary, changeTotals, round2 } from '@/lib/smeta/calc';
@@ -38,6 +39,7 @@ export function SmetaDashboardPage() {
 
   return <>
     {heading}
+    <ActivationChecklist />
     {remote === 'error' && <div className="sm-unsent" role="alert"><AlertTriangle size={16} aria-hidden /><span>Saxlanmış smetalarınızı yükləmək alınmadı. Yalnız demo layihələr göstərilir.</span><button type="button" className="sm-link-btn" onClick={() => window.location.reload()}>Yenidən cəhd et</button></div>}
     <section className="sm-stats" aria-label="Qısa xülasə">
       <div className="sm-stat"><FileSpreadsheet size={17} className="sm-stat-icon" aria-hidden /><span className="eyebrow">Aktiv layihələr</span><strong className="num">{stats.active}</strong><span>{stats.inProgress} icrada · {stats.drafts} qaralama</span></div>

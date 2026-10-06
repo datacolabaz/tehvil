@@ -5,8 +5,8 @@ import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { Route, Switch, Link, Redirect, Router as WouterRouter, useLocation } from 'wouter';
 import {
-  ArrowDownLeft, ArrowRight, ArrowUpRight, Calculator, Check, CheckCircle2, ChevronDown, ChevronRight,
-  ClipboardCheck, Clock3, DoorOpen, FileCheck2, FilePlus2, FileText, Home, ImagePlus,
+  ArrowDownLeft, ArrowRight, ArrowUpRight, Building2, Calculator, Check, CheckCircle2, ChevronDown, ChevronRight,
+  ClipboardCheck, Clock3, CreditCard, DoorOpen, FileCheck2, FilePlus2, FileText, Home, ImagePlus,
   LayoutDashboard, ListChecks, LoaderCircle, LogOut, Menu, Plus, ShieldCheck,
   WalletCards, X,
 } from 'lucide-react';
@@ -36,18 +36,27 @@ import { TimelinePage, ActivityItem } from '@/pages/timeline-page';
 import { PassportPage } from '@/pages/passport-page';
 import { SharedPassportPage } from '@/pages/shared-passport-page';
 import { resetSmetaSession, useSmetaProject } from '@/lib/smeta/store';
+import { resetContractorSession } from '@/lib/contractor/account';
+import { UpgradeHost } from '@/components/contractor/upgrade-host';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import './index.css';
 import './smeta.css';
+import './contractor.css';
 
 const SmetaDashboardPage = lazy(() => import('@/pages/smeta/dashboard-page').then(m => ({ default: m.SmetaDashboardPage })));
 const NewEstimatePage = lazy(() => import('@/pages/smeta/new-estimate-page').then(m => ({ default: m.NewEstimatePage })));
 const EstimateDetailPage = lazy(() => import('@/pages/smeta/estimate-page').then(m => ({ default: m.EstimateDetailPage })));
 const PublicEstimatePage = lazy(() => import('@/pages/smeta/public-estimate-page').then(m => ({ default: m.PublicEstimatePage })));
 const EstimatePrintPage = lazy(() => import('@/pages/smeta/print-page').then(m => ({ default: m.EstimatePrintPage })));
+const ContractorLandingPage = lazy(() => import('@/pages/contractors/landing-page').then(m => ({ default: m.ContractorLandingPage })));
+const ContractorSignupPage = lazy(() => import('@/pages/contractors/signup-page').then(m => ({ default: m.ContractorSignupPage })));
+const ContractorSsoCallbackPage = lazy(() => import('@/pages/contractors/signup-page').then(m => ({ default: m.ContractorSsoCallbackPage })));
+const OnboardingPage = lazy(() => import('@/pages/contractors/onboarding-page').then(m => ({ default: m.OnboardingPage })));
+const CompanyProfilePage = lazy(() => import('@/pages/settings/company-profile-page').then(m => ({ default: m.CompanyProfilePage })));
+const PlanPage = lazy(() => import('@/pages/settings/plan-page').then(m => ({ default: m.PlanPage })));
 
 const queryClient = new QueryClient({ mutationCache: new MutationCache({ onError: e => emitFeedback(errorToMsg(e)) }), defaultOptions: { queries: { retry: 1, staleTime: 20_000, refetchOnWindowFocus: true } } });
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -86,7 +95,10 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
       { href: `/projects/${projectId}/payments`, icon: WalletCards, key: 'payments' as const },
       { href: `/projects/${projectId}/timeline`, icon: Clock3, key: 'timeline' as const },
       { href: `/projects/${projectId}/passport`, icon: FileText, key: 'passport' as const },
-    ] : []),
+    ] : [
+      { href: '/settings/company-profile', icon: Building2, key: 'companyProfile' as const },
+      { href: '/settings/plan', icon: CreditCard, key: 'planNav' as const },
+    ]),
   ];
   return <div className="workspace">
     <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}><div className="sidebar-head"><Brand inverse/><button className="mobile-close" onClick={() => setOpen(false)} aria-label={t('close')}><X size={18}/></button></div>
@@ -97,21 +109,21 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
     </aside>
     <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs"><Link href="/dashboard">{t('dashboard')}</Link>{project && <><ChevronRight size={13}/><span>{project.name}</span></>}{crumbs?.map((c, i) => <Fragment key={i}><ChevronRight size={13}/>{c.href ? <Link href={c.href}>{c.label}</Link> : <span>{c.label}</span>}</Fragment>)}</div><div className="topbar-tools"><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
       <main className="page-content">{children}</main>
-    </div>{open && <button className="scrim" aria-label={t('close')} onClick={() => setOpen(false)}/>}
+    </div>{open && <button className="scrim" aria-label={t('close')} onClick={() => setOpen(false)}/>}<UpgradeHost/>
   </div>;
 }
 function Landing({ lang, change, t }: { lang: Lang; change: (v: Lang)=>void; t: (k:TKey)=>string }) {
   const [, setLocation] = useLocation();
   const stages = copy[lang].stages;
   const descriptions = copy[lang].stageDescs;
-  return <div className="landing"><header className="landing-nav wrap"><Brand/><nav><a href="#how">{t('learn')}</a><Link href="/dashboard">{t('dashboard')}</Link></nav><div className="landing-actions"><LanguagePicker lang={lang} change={change}/><Link href="/sign-in" className="text-link">{t('signIn')}</Link><Link href="/sign-up" className="button button-primary">{t('signUp')}<ArrowUpRight size={16}/></Link></div></header>
+  return <div className="landing"><header className="landing-nav wrap"><Brand/><nav><a href="#how">{t('learn')}</a><Link href="/podratcilar-ucun" data-testid="link-for-contractors">{t('forContractors')}</Link><Link href="/dashboard">{t('dashboard')}</Link></nav><div className="landing-actions"><LanguagePicker lang={lang} change={change}/><Link href="/sign-in" className="text-link">{t('signIn')}</Link><Link href="/sign-up" className="button button-primary">{t('signUp')}<ArrowUpRight size={16}/></Link></div></header>
     <section className="hero wrap"><div className="hero-copy appear"><div className="eyebrow"><span className="eyebrow-dot"/>{t('tagline')}</div><h1 className="font-display">{t('hero')}</h1><p>{t('lead')}</p><div className="hero-cta"><Button onClick={() => setLocation('/sign-up')}>{t('start')}<ArrowRight size={17}/></Button><a href="#how" className="quiet-link">{t('learn')}<ArrowDownLeft size={16}/></a></div><div className="hero-proof"><ShieldCheck size={17}/><span>{t('disclaimer')}</span></div></div>
       <div className="hero-art appear-delay"><div className="art-topline"><span><i/> {t('artTop')}</span><span>01 — 03</span></div><div className="blueprint"><div className="blueprint-label">BAKI · RESIDENTIAL / 02</div><div className="blueprint-plan"><div className="plan-room room-living"><span>{t('planLiving')}</span><small>01</small></div><div className="plan-room room-kitchen"><span>{t('planKitchen')}</span><small>02</small></div><div className="plan-room room-bed"><span>{t('planBed')}</span><small>03</small></div><div className="plan-room room-bath"><span>{t('planBath')}</span><small>04</small></div><div className="plan-door"/></div><div className="plan-dim">6.40 m <span>3.80 m</span></div><div className="plan-status"><div className="status-check"><Check size={15}/></div><div><strong>{t('planApproved')}</strong><small>{t('planParties')}</small></div><div className="status-mini">{t('planRecorded')}</div></div></div><div className="art-foot"><span>{t('artOne')}</span><span>40°22' N / 49°50' E</span></div></div>
     </section><div className="trust-strip"><div className="wrap trust-items"><span>{t('trust')}</span><i/><span>{t('clarity')}</span><i/><span>{t('history')}</span></div></div>
     <section className="workflow wrap" id="how"><div className="workflow-intro"><div className="eyebrow">{t('eyCertain')}</div><h2 className="font-display">{t('workflow')}</h2><p>{t('workflowLead')}</p></div><div className="workflow-list">{stages.map((stage, i) => { const Icons=[FileCheck2, ArrowRight, ImagePlus]; const Icon=Icons[i]; return <article className="workflow-row" key={stage}><div className="workflow-number">0{i+1}</div><div className="workflow-icon"><Icon size={20}/></div><div><h3>{stage}</h3><p>{descriptions[i]}</p></div><ChevronRight className="workflow-chevron" size={18}/></article>; })}</div></section>
     <section className="closing wrap"><div className="closing-inner"><div className="closing-mark">t.</div><div><div className="eyebrow">{t('tagline')}</div><h2 className="font-display">{t('start')}</h2><p>{t('lead')}</p></div><Link href="/sign-up" className="button button-primary">{t('createFirst')}<ArrowRight size={16}/></Link></div></section>
     <Partners lang={lang}/>
-    <footer className="landing-footer wrap"><Brand/><p>{t('disclaimer')}</p><LanguagePicker lang={lang} change={change}/><nav className="landing-legal" aria-label="Bələdçilər"><a href="/temir-tehvil-akti.html">Təhvil-təslim aktı</a><a href="/temir-islerinin-qebulu.html">Təmir işlərinin qəbulu</a><a href="/podratci-ile-razilasma.html">Podratçı ilə razılaşma</a><a href="/temir-elave-isler.html">Əlavə işlər və dəyişikliklər</a></nav><nav className="landing-legal"><a href="/privacy.html">{lang==='az'?'Məxfilik siyasəti':lang==='ru'?'Политика конфиденциальности':'Privacy policy'}</a><a href="/terms.html">{lang==='az'?'İstifadə şərtləri':lang==='ru'?'Условия использования':'Terms of use'}</a></nav><address className="landing-contact"><a href="mailto:support@tehvil.az">support@tehvil.az</a><a href="tel:+994503066626">+994 50 306 66 26</a><a href="https://wa.me/994503066626" target="_blank" rel="noopener noreferrer">WhatsApp</a><span>Bakı, Səbail rayonu, Badamdar qəsəbəsi, 26-cı küçə, 20</span></address></footer>
+    <footer className="landing-footer wrap"><Brand/><p>{t('disclaimer')}</p><LanguagePicker lang={lang} change={change}/><nav className="landing-legal" aria-label="Bələdçilər"><Link href="/podratcilar-ucun">{t('forContractors')}</Link><a href="/temir-tehvil-akti.html">Təhvil-təslim aktı</a><a href="/temir-islerinin-qebulu.html">Təmir işlərinin qəbulu</a><a href="/podratci-ile-razilasma.html">Podratçı ilə razılaşma</a><a href="/temir-elave-isler.html">Əlavə işlər və dəyişikliklər</a></nav><nav className="landing-legal"><a href="/privacy.html">{lang==='az'?'Məxfilik siyasəti':lang==='ru'?'Политика конфиденциальности':'Privacy policy'}</a><a href="/terms.html">{lang==='az'?'İstifadə şərtləri':lang==='ru'?'Условия использования':'Terms of use'}</a></nav><address className="landing-contact"><a href="mailto:support@tehvil.az">support@tehvil.az</a><a href="tel:+994503066626">+994 50 306 66 26</a><a href="https://wa.me/994503066626" target="_blank" rel="noopener noreferrer">WhatsApp</a><span>Bakı, Səbail rayonu, Badamdar qəsəbəsi, 26-cı küçə, 20</span></address></footer>
   </div>;
 }
 function Protected({ children, t }: { children: ReactNode; t: (k:TKey)=>string }) {
@@ -234,6 +246,9 @@ type ShellProps = { lang: Lang; change: (v: Lang) => void; t: (k: TKey) => strin
 function SmetaShell({ crumbs, children, ...shell }: ShellProps & { crumbs?: Crumb[]; children: ReactNode }) {
   return <Protected t={shell.t}><AppShell {...shell} active="smeta" crumbs={[{ label: 'AI Smeta', href: crumbs?.length ? '/smeta' : undefined }, ...(crumbs || [])]}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
 }
+function SettingsShell({ active, label, children, ...shell }: ShellProps & { active: TKey; label: string; children: ReactNode }) {
+  return <Protected t={shell.t}><AppShell {...shell} active={active} crumbs={[{ label }]}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
+}
 function SmetaDetailRoute({ projectId, ...shell }: ShellProps & { projectId: string }) {
   const project = useSmetaProject(projectId);
   return <SmetaShell {...shell} crumbs={project ? [{ label: project.name }] : []}><EstimateDetailPage projectId={projectId}/></SmetaShell>;
@@ -265,7 +280,7 @@ function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
 }
 function ClerkCacheInvalidator() {
   const {addListener}=useClerk();const qc=useQueryClient();
-  useEffect(()=>{let previous:string|null|undefined;return addListener(({user})=>{const current=user?.id??null;if(previous!==undefined&&previous!==current){qc.clear();resetSmetaSession();}previous=current;});},[addListener,qc]);
+  useEffect(()=>{let previous:string|null|undefined;return addListener(({user})=>{const current=user?.id??null;if(previous!==undefined&&previous!==current){qc.clear();resetSmetaSession();resetContractorSession();}previous=current;});},[addListener,qc]);
   return null;
 }
 function ClerkRoutes() {
@@ -295,6 +310,12 @@ function ClerkRoutes() {
       <Route path="/smeta/new">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Yeni smeta' }]}><NewEstimatePage/></SmetaShell>}</Route>
       <Route path="/smeta/:projectId/print">{params => <Protected t={t}><Suspense fallback={<Loading t={t}/>}><EstimatePrintPage projectId={params.projectId}/></Suspense></Protected>}</Route>
       <Route path="/smeta/:projectId">{params => <SmetaDetailRoute projectId={params.projectId} lang={lang} change={changeLang} t={t}/>}</Route>
+      <Route path="/podratcilar-ucun">{() => <Suspense fallback={<Loading t={t}/>}><ContractorLandingPage/></Suspense>}</Route>
+      <Route path="/podratcilar-ucun/qeydiyyat/sso-callback">{() => <Suspense fallback={<Loading t={t}/>}><ContractorSsoCallbackPage/></Suspense>}</Route>
+      <Route path="/podratcilar-ucun/qeydiyyat">{() => <Suspense fallback={<Loading t={t}/>}><ContractorSignupPage/></Suspense>}</Route>
+      <Route path="/onboarding">{() => <Protected t={t}><Suspense fallback={<Loading t={t}/>}><OnboardingPage/></Suspense></Protected>}</Route>
+      <Route path="/settings/company-profile">{() => <SettingsShell lang={lang} change={changeLang} t={t} active="companyProfile" label={t('companyProfile')}><CompanyProfilePage/></SettingsShell>}</Route>
+      <Route path="/settings/plan">{() => <SettingsShell lang={lang} change={changeLang} t={t} active="planNav" label={t('planNav')}><PlanPage/></SettingsShell>}</Route>
       <Route component={NotFound}/>
     </Switch><Toaster/><FeedbackBanner t={t}/></QueryClientProvider>
   </ClerkProvider>;

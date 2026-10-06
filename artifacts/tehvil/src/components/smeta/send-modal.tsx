@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Copy, ExternalLink, Send } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Copy, ExternalLink, Send, Sparkles } from 'lucide-react';
 import { Button } from '@/components/kit';
+import { track } from '@/lib/analytics';
+import { refreshContractorAccount } from '@/lib/contractor/account';
+import { markValueNudgeShown, openUpgradeLead, valueNudgeDue } from '@/lib/contractor/upgrade';
 import { projectTotals } from '@/lib/smeta/calc';
 import { azn, dateAz } from '@/lib/smeta/format';
 import { hasUnsentChanges, smeta } from '@/lib/smeta/store';
 import type { EstimateShare, Project } from '@/lib/smeta/types';
 import { Modal, toast } from './ui';
 
+export const VALUE_NUDGE_TEXT = 'İlk smetanız hazırdır. Excel export və dəyişiklik idarəetməsini açmaq üçün Peşəkar plana keçin.';
 const DEFAULT_MESSAGE = 'Salam, təmir layihəniz üzrə smeta hazırdır. İş həcmini, material və işçilik xərclərini nəzərdən keçirib təsdiqləyə bilərsiniz.';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 export const publicEstimateUrl = (token: string) => `${window.location.origin}${base}/estimate/${token}`;
@@ -29,11 +33,12 @@ export function SendModal({ project: p, open, onClose }: { project: Project; ope
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState<EstimateShare | null>(null);
+  const [showValueNudge, setShowValueNudge] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setName(p.client.name); setPhone(p.client.phone); setEmail(p.client.email ?? ''); setMessage(p.share?.message ?? DEFAULT_MESSAGE);
-    setNotify(p.share?.notifyOnApprove ?? true); setAttachPdf(p.share?.attachPdf ?? false); setTried(false); setSent(null); setBusy(false);
+    setNotify(p.share?.notifyOnApprove ?? true); setAttachPdf(p.share?.attachPdf ?? false); setTried(false); setSent(null); setBusy(false); setShowValueNudge(false);
   }, [open]);
 
   const aiLines = p.estimate.sections.flatMap(s => s.items).filter(i => i.status === 'ai' || i.status === 'draft').length;
@@ -46,7 +51,11 @@ export function SendModal({ project: p, open, onClose }: { project: Project; ope
     setBusy(true);
     try {
       const share = await smeta.shareEstimate(p.id, { clientName: name.trim(), phone: phone.trim(), email: email.trim() || undefined, message: message.trim(), notifyOnApprove: notify, attachPdf });
-      if (share) setSent(share);
+      if (share) {
+        setSent(share);
+        if (!p.demo && valueNudgeDue()) { markValueNudgeShown(); setShowValueNudge(true); }
+        void refreshContractorAccount();
+      }
     } catch {
       toast('Smeta göndərilmədi. İnternet bağlantısını yoxlayıb yenidən cəhd edin.');
     } finally { setBusy(false); }
@@ -55,14 +64,22 @@ export function SendModal({ project: p, open, onClose }: { project: Project; ope
 
   if (sent) {
     const url = publicEstimateUrl(sent.token);
+    const days = Math.max(1, Math.round((new Date(sent.expiresAt).getTime() - new Date(sent.createdAt).getTime()) / 864e5));
     return <Modal open={open} onClose={onClose} title="Smeta göndərildi" footer={<Button onClick={onClose}>Bağla</Button>}>
       <div className="sm-success" role="status">
         <span className="sm-success-icon"><CheckCircle2 size={26} /></span>
         <h3>Smeta sifarişçi ilə paylaşıldı</h3>
-        <p>Paylaşım linki 30 gün aktivdir · {dateAz(sent.expiresAt)} tarixinədək</p>
+        <p>Paylaşım linki {days} gün aktivdir · {dateAz(sent.expiresAt)} tarixinədək</p>
         <p>Versiya {sent.snapshot.version} · {azn(projectTotals({ ...p, estimate: sent.snapshot, projectCosts: sent.snapshotProjectCosts, defaultMarginPercentage: sent.snapshotMargin }).total)}</p>
         <div className="sm-copy-row"><input readOnly value={url} aria-label="Paylaşım linki" onFocus={e => e.target.select()} /><Button variant="secondary" onClick={() => { void copyText(url); }}><Copy size={15} />Kopyala</Button></div>
         <a className="sm-link-btn" href={url} target="_blank" rel="noreferrer" style={{ marginTop: 8 }}><ExternalLink size={14} />Sifarişçi görünüşünü aç</a>
+        {showValueNudge && <div className="ct-value-nudge" data-testid="value-nudge">
+          <Sparkles size={18} aria-hidden />
+          <div>
+            <p>{VALUE_NUDGE_TEXT}</p>
+            <Button variant="secondary" onClick={() => { track('upgrade_clicked', { plan: 'pesekar', source: 'estimate' }); onClose(); openUpgradeLead('pesekar', 'upgrade'); }} testId="button-value-upgrade">Peşəkar plan haqqında</Button>
+          </div>
+        </div>}
       </div>
     </Modal>;
   }

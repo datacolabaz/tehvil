@@ -8,8 +8,12 @@ import { TAKEOFF_STEPS, analyzeDrawing } from '@/lib/smeta/ai';
 import { estimateTotals, round2, sectionTotals } from '@/lib/smeta/calc';
 import { CATEGORY_HINT, CATEGORY_LABEL, CATEGORY_ORDER, DEFAULT_PACKAGES, PROPERTY_LABEL, QUALITY_LABEL, RENOVATION_LABEL, TEMPLATES, forecastDays, generateSections, guessRoomKind, roomMeasurements, type GeneratorContext, type RoomInput, type RoomKind } from '@/lib/smeta/catalog';
 import { addDaysISO, azn, num, parseNumber, todayISO, uid, qty } from '@/lib/smeta/format';
-import { DEFAULT_CONTRACTOR } from '@/lib/smeta/mock-data';
-import { smeta } from '@/lib/smeta/store';
+import { useUser } from '@clerk/react';
+import { FirstProjectGuide, isGuided } from '@/components/contractor/first-project-guide';
+import { useContractorAccount } from '@/lib/contractor/account';
+import { contractorFromProfile, estimateDefaults, validUntilFor } from '@/lib/contractor/options';
+import { gateNewProject } from '@/lib/contractor/upgrade';
+import { smeta, useSmetaProjects } from '@/lib/smeta/store';
 import type { Drawing, Measurement, Project, PropertyKind, QualityLevel, RenovationKind, WorkCategory } from '@/lib/smeta/types';
 
 type Source = 'drawing' | 'manual' | 'template';
@@ -40,7 +44,13 @@ export function NewEstimatePage() {
   const [drawing, setDrawing] = useState<{ drawing: Drawing; measurements: Measurement[] } | null>(null);
   const [packages, setPackages] = useState<Set<WorkCategory>>(() => new Set(init.tpl?.packages ?? DEFAULT_PACKAGES.standart));
   const [packagesTouched, setPackagesTouched] = useState(!!init.tpl);
-  const [margin, setMargin] = useState(15);
+  const { account } = useContractorAccount();
+  const { user } = useUser();
+  const ownProjects = useSmetaProjects().filter(p => !p.demo).length;
+  const guided = useMemo(isGuided, []);
+  const defaults = useMemo(() => estimateDefaults(account?.profile), [account?.profile]);
+  const [marginOverride, setMargin] = useState<number | null>(null);
+  const margin = marginOverride ?? defaults.marginPercent;
   const [tried, setTried] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -61,7 +71,12 @@ export function NewEstimatePage() {
     };
   }, [rooms, info.quality, source, drawing]);
   const preview = useMemo(() => new Map(generateSections(CATEGORY_ORDER, ctx).map(s => [s.category, s])), [ctx]);
-  const sections = useMemo(() => generateSections(CATEGORY_ORDER.filter(c => packages.has(c)), ctx), [ctx, packages]);
+  const sections = useMemo(() => {
+    const generated = generateSections(CATEGORY_ORDER.filter(c => packages.has(c)), ctx);
+    const waste = defaults.wastePercentage;
+    // The company waste % replaces the per-category default only on lines that carry waste (materials).
+    return waste === null ? generated : generated.map(s => ({ ...s, items: s.items.map(it => (it.wastePercentage > 0 ? { ...it, wastePercentage: waste } : it)) }));
+  }, [ctx, packages, defaults.wastePercentage]);
   const projectCosts = useMemo(() => {
     const t = estimateTotals({ id: 'x', version: 1, createdAt: '', validUntil: '', sections }, [], margin / 100);
     return [
@@ -69,7 +84,7 @@ export function NewEstimatePage() {
       { id: uid('pc'), label: 'Layihə koordinasiyası', amount: Math.round((t.material + t.labor) * 0.02 / 10) * 10 },
     ].filter(c => c.amount > 0);
   }, [sections, margin]);
-  const estimate = useMemo(() => ({ id: uid('est'), version: 1, createdAt: new Date().toISOString(), validUntil: addDaysISO(todayISO(), 30), sections }), [sections]);
+  const estimate = useMemo(() => ({ id: uid('est'), version: 1, createdAt: new Date().toISOString(), validUntil: validUntilFor(defaults.validityDays), sections }), [sections, defaults.validityDays]);
   const totals = estimateTotals(estimate, projectCosts, margin / 100);
 
   const errors = {
@@ -103,32 +118,28 @@ export function NewEstimatePage() {
   };
 
   const create = async () => {
-    if (creating) return;
+    if (creating || !gateNewProject(ownProjects)) return;
     const now = new Date().toISOString();
     const district = info.address.split(',').map(s => s.trim()).find(s => s && !/^bakı$/i.test(s))?.replace(/\s+r-nu$/i, '') ?? 'Bakı';
     const fromDrawing = source === 'drawing' && drawing;
     const p: Project = {
       id: uid('sm'), name: info.name.trim(), district, address: info.address.trim() || 'Ünvan qeyd edilməyib', propertyKind: info.propertyKind, renovationKind: info.renovationKind, quality: info.quality,
       areaM2: area, startDate: info.startDate, endDate: info.endDate, client: { name: info.clientName.trim() || 'Sifarişçi', phone: info.clientPhone.trim() },
-      contractor: DEFAULT_CONTRACTOR, completion: 0, defaultMarginPercentage: margin / 100, projectCosts, estimate, status: 'draft',
+      contractor: contractorFromProfile(account?.profile, { fullName: user?.fullName, email: user?.primaryEmailAddress?.emailAddress }), completion: 0, defaultMarginPercentage: margin / 100, projectCosts, estimate, status: 'draft',
       changeOrders: [], expenses: [], receipts: [], photos: [],
       drawing: fromDrawing ? drawing.drawing : undefined,
       measurements: fromDrawing ? drawing.measurements : roomMeasurements(validRooms, 'manual'),
       approvals: [], revisionRequests: [],
-      payments: [
-        { id: uid('pm'), title: 'Avans', share: 0.3, condition: 'Smeta təsdiqləndikdə və işə başlamazdan əvvəl', status: 'planned' },
-        { id: uid('pm'), title: 'Kobud işlər', share: 0.4, condition: 'Gizli işlər foto ilə təhvil verildikdə', status: 'planned' },
-        { id: uid('pm'), title: 'Yekun təhvil', share: 0.3, condition: 'Yekun təhvil aktı təsdiqləndikdə', status: 'planned' },
-      ],
+      payments: defaults.payments,
       included: CATEGORY_ORDER.filter(c => packages.has(c)).map(c => CATEGORY_LABEL[c]),
       excluded: ['Mebel və məişət texnikası', 'Dekor elementləri', 'Bina idarəsinin icazə rüsumları'].concat(packages.has('metbex') ? [] : ['Mətbəx mebeli']),
       exports: [], createdAt: now, updatedAt: now,
     };
     setCreating(true);
     try {
-      const saved = await smeta.createProject(p);
+      const saved = await smeta.createProject(p, { guided });
       toast('Smeta yaradıldı — sətirləri yoxlayın');
-      navigate(`/smeta/${saved.id}?tab=${fromDrawing ? 'drawing' : 'estimate'}`);
+      navigate(`/smeta/${saved.id}?tab=${fromDrawing ? 'drawing' : 'estimate'}${guided ? '&guide=1' : ''}`);
     } catch {
       toast('Smeta saxlanılmadı. İnternet bağlantısını yoxlayıb yenidən cəhd edin.');
       setCreating(false);
@@ -140,6 +151,7 @@ export function NewEstimatePage() {
 
   return <>
     <PageHeading eyebrow="AI Smeta" title="Yeni smeta yarat" description="AI ilkin ölçü və smeta təklif edir — siz yoxlayır, düzəldir və təsdiqləyirsiniz. Sifarişçi yalnız təsdiqlənmiş versiyanı görür." />
+    {guided && <FirstProjectGuide done={[reached >= 1, reached >= 3, false]} />}
     <nav className="sm-stepper" aria-label="Addımlar">
       {STEPS.map((s, i) => <button key={s} type="button" className={`sm-step ${step === i ? 'active' : ''} ${i < step || (i <= reached && i !== step) ? 'done' : ''}`} aria-current={step === i ? 'step' : undefined} disabled={i > reached} onClick={() => go(i)}>
         <span>{i < reached && i !== step ? <Check size={13} /> : `0${i + 1}`}</span>{s}

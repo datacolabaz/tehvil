@@ -5,7 +5,8 @@
  * returns the last sent version with all-in line prices. Demo links are built
  * locally into the same shape so both render through one page.
  */
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { track } from '@/lib/analytics';
 import {
   approveSharedEstimate, decideSharedChangeOrder, getSharedEstimate, requestSharedEstimateRevision,
   type SharedEstimate,
@@ -62,6 +63,7 @@ export function sharedEstimateFromProject(p: Project): SharedEstimate | null {
     payments: p.payments.map(m => ({ id: m.id, title: m.title, share: m.share, condition: m.condition, amount: round2(finalTotal * m.share) })),
     approval: approval ? { approvedAt: approval.approvedAt, name: approval.name } : undefined,
     revisionRequestedAt: revision?.createdAt,
+    company: { name: p.contractor.company || p.contractor.name, phone: p.contractor.phone || undefined, services: [] },
   };
 }
 
@@ -89,6 +91,13 @@ export function useSharedEstimate(token: string) {
   const status: SharedEstimateState = demo ? (demoData ? 'ready' : 'missing') : remote.status;
   const version = data?.estimate.version ?? 0;
 
+  const viewed = useRef('');
+  useEffect(() => {
+    if (status !== 'ready' || !version || viewed.current === `${token}:${version}`) return;
+    viewed.current = `${token}:${version}`;
+    track('estimate_client_viewed', { version, demo: Boolean(demo) });
+  }, [status, token, version, demo]);
+
   return {
     status,
     data,
@@ -96,6 +105,7 @@ export function useSharedEstimate(token: string) {
     approve: async (who: { name: string; phone: string }) => {
       if (demo) { smeta.approveByClient(token, who); return; }
       await run(() => approveSharedEstimate(token, { version, name: who.name, phone: who.phone, consent: true }));
+      track('estimate_client_approved', { version, total: Math.round(data?.estimate.total ?? 0), demo: false });
     },
     requestRevision: async (who: { name: string; message: string }) => {
       if (demo) { smeta.requestRevision(token, who); return; }
@@ -104,6 +114,7 @@ export function useSharedEstimate(token: string) {
     decideChange: async (changeOrderId: string, decision: 'approved' | 'rejected') => {
       if (demo) { smeta.decideChangeByClient(token, changeOrderId, decision); return; }
       await run(() => decideSharedChangeOrder(token, changeOrderId, { decision }));
+      if (decision === 'approved') track('change_order_approved', { by: 'client', demo: false });
     },
   };
 }
