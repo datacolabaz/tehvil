@@ -1,18 +1,20 @@
 import { useMemo } from 'react';
 import { Link } from 'wouter';
-import { AlertTriangle, ArrowUpRight, Calculator, Clock3, FilePlus2, FileSpreadsheet, Info, LayoutTemplate, MapPin, MessageSquareText, Plus, RotateCcw, Ruler, Sparkles, Upload, WalletCards } from 'lucide-react';
+import { AlertTriangle, ArrowUpRight, Calculator, Clock3, Eye, EyeOff, FilePlus2, FileSpreadsheet, Info, LayoutTemplate, MapPin, MessageSquareText, Plus, RotateCcw, Ruler, Sparkles, Upload, WalletCards } from 'lucide-react';
 import { PageHeading } from '@/components/kit';
 import { HealthLabel, SkeletonDashboard, SmetaToaster, StatusBadge, toast } from '@/components/smeta/ui';
 import { portfolioInsight } from '@/lib/smeta/ai';
 import { budgetSummary, changeTotals, round2 } from '@/lib/smeta/calc';
 import { PROPERTY_LABEL, RENOVATION_LABEL, TEMPLATES } from '@/lib/smeta/catalog';
 import { azn, dateAz, num, qty } from '@/lib/smeta/format';
-import { displayStatus, smeta, useFirstLoad, useSmetaProjects } from '@/lib/smeta/store';
+import { displayStatus, smeta, useDemoVisible, useSmetaLoading, useSmetaProjects, useSmetaRemoteStatus } from '@/lib/smeta/store';
 import type { Project } from '@/lib/smeta/types';
 
 export function SmetaDashboardPage() {
   const projects = useSmetaProjects();
-  const loading = useFirstLoad('smeta-dashboard');
+  const loading = useSmetaLoading();
+  const remote = useSmetaRemoteStatus();
+  const demoVisible = useDemoVisible();
   const sorted = useMemo(() => [...projects].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)), [projects]);
   const stats = useMemo(() => {
     const summaries = projects.map(p => ({ p, b: budgetSummary(p), c: changeTotals(p.changeOrders) }));
@@ -36,6 +38,7 @@ export function SmetaDashboardPage() {
 
   return <>
     {heading}
+    {remote === 'error' && <div className="sm-unsent" role="alert"><AlertTriangle size={16} aria-hidden /><span>Saxlanmış smetalarınızı yükləmək alınmadı. Yalnız demo layihələr göstərilir.</span><button type="button" className="sm-link-btn" onClick={() => window.location.reload()}>Yenidən cəhd et</button></div>}
     <section className="sm-stats" aria-label="Qısa xülasə">
       <div className="sm-stat"><FileSpreadsheet size={17} className="sm-stat-icon" aria-hidden /><span className="eyebrow">Aktiv layihələr</span><strong className="num">{stats.active}</strong><span>{stats.inProgress} icrada · {stats.drafts} qaralama</span></div>
       <div className="sm-stat dark"><WalletCards size={17} className="sm-stat-icon" aria-hidden /><span className="eyebrow">Ümumi plan büdcəsi</span><strong className="num">{num(stats.plan, 0)} <small>AZN</small></strong><span>Bütün aktiv smetalar üzrə</span></div>
@@ -71,7 +74,10 @@ export function SmetaDashboardPage() {
           <div className="sm-aside-list">{TEMPLATES.slice(0, 4).map(t => <Link key={t.id} href={`/smeta/new?template=${t.id}`}><span className="action-icon"><LayoutTemplate size={15} /></span><span><strong>{t.title}</strong><small>{t.description}</small></span><ArrowUpRight size={14} /></Link>)}</div>
         </div>
 
-        <button type="button" className="sm-link-btn" style={{ alignSelf: 'flex-start', color: '#7c8980' }} onClick={() => { smeta.resetDemo(); toast('Demo məlumatları ilkin vəziyyətə qaytarıldı'); }}><RotateCcw size={13} />Demo məlumatlarını sıfırla</button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
+          <button type="button" className="sm-link-btn" style={{ color: '#7c8980' }} onClick={() => smeta.setDemoVisible(!demoVisible)}>{demoVisible ? <EyeOff size={13} /> : <Eye size={13} />}{demoVisible ? 'Demo layihələri gizlət' : 'Demo layihələri göstər'}</button>
+          {demoVisible && <button type="button" className="sm-link-btn" style={{ color: '#7c8980' }} onClick={() => { smeta.resetDemo(); toast('Demo məlumatları ilkin vəziyyətə qaytarıldı'); }}><RotateCcw size={13} />Demo məlumatlarını sıfırla</button>}
+        </div>
       </aside>
     </div>
     <SmetaToaster />
@@ -99,7 +105,7 @@ function ProjectCard({ project: p, index }: { project: Project; index: number })
   const used = b.agreedBudget > 0 ? b.actualSpending / b.agreedBudget : 0;
   return <Link href={`/smeta/${p.id}`} className="sm-card appear" style={{ animationDelay: `${index * 40}ms` }} data-testid={`card-smeta-${p.id}`}>
     <div className="sm-card-top"><div className="project-card-symbol">{p.propertyKind === 'ofis' ? 'O' : p.propertyKind === 'villa' ? 'V' : 'M'}</div><StatusBadge status={displayStatus(p)} /><ArrowUpRight size={16} className="card-arrow" /></div>
-    <div className="eyebrow">{PROPERTY_LABEL[p.propertyKind]} · {RENOVATION_LABEL[p.renovationKind]} təmir</div>
+    <div className="eyebrow">{PROPERTY_LABEL[p.propertyKind]} · {RENOVATION_LABEL[p.renovationKind]} təmir{p.demo ? ' · Demo' : ''}</div>
     <h3>{p.name}</h3>
     <div className="sm-card-meta"><span><MapPin size={12} aria-hidden />{p.district}</span><span>{qty(p.areaM2)} m²</span></div>
     <div className="sm-money-row"><div><small>Plan büdcəsi</small><b className="num">{azn(b.plannedBudget)}</b></div><div><small>Faktiki xərc</small><b className="num">{azn(b.actualSpending)}</b></div></div>

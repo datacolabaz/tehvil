@@ -21,7 +21,7 @@ app.use(
         return {
           id: req.id,
           method: req.method,
-          url: req.url?.split("?")[0]?.replace(/(\/shared-passports\/)[^/]+/, "$1[redacted]"),
+          url: req.url?.split("?")[0]?.replace(/(\/shared-(?:passports|estimates)\/)[^/]+/, "$1[redacted]"),
         };
       },
       res(res) {
@@ -35,6 +35,8 @@ app.use(
 app.set("trust proxy", 1);
 if (process.env.CLERK_AUTH_MODE !== "external") app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 app.use(cors({ credentials: true, origin: process.env.PUBLIC_APP_URL || true }));
+// Estimate saves send the whole project document.
+app.use("/api/smeta", express.json({ limit: "2mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(

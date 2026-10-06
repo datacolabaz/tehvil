@@ -35,7 +35,7 @@ import { PaymentsPage } from '@/pages/payments-page';
 import { TimelinePage, ActivityItem } from '@/pages/timeline-page';
 import { PassportPage } from '@/pages/passport-page';
 import { SharedPassportPage } from '@/pages/shared-passport-page';
-import { useSmetaProject } from '@/lib/smeta/store';
+import { resetSmetaSession, useSmetaProject } from '@/lib/smeta/store';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -265,7 +265,7 @@ function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
 }
 function ClerkCacheInvalidator() {
   const {addListener}=useClerk();const qc=useQueryClient();
-  useEffect(()=>{let previous:string|null|undefined;return addListener(({user})=>{const current=user?.id??null;if(previous!==undefined&&previous!==current)qc.clear();previous=current;});},[addListener,qc]);
+  useEffect(()=>{let previous:string|null|undefined;return addListener(({user})=>{const current=user?.id??null;if(previous!==undefined&&previous!==current){qc.clear();resetSmetaSession();}previous=current;});},[addListener,qc]);
   return null;
 }
 function ClerkRoutes() {

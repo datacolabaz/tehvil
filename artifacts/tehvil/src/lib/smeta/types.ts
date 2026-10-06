@@ -1,9 +1,8 @@
 /**
  * AI Smeta domain models.
  *
- * These are client-side models. The API currently has no estimate endpoints,
- * so the shapes below are the proposed contract for a future
- * `lib/api-spec/openapi.yaml` extension (see docs/AI_SMETA.md).
+ * These mirror the `Smeta*` schemas in `lib/api-spec/openapi.yaml`; the store
+ * maps the generated API types onto them (see docs/AI_SMETA.md).
  */
 
 export type ID = string;
@@ -316,4 +315,6 @@ export interface Project {
   exports: ExportJob[];
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
+  /** Seeded sample project: kept in this browser only, never sent to the server. */
+  demo?: boolean;
 }

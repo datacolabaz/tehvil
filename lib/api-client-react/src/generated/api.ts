@@ -51,6 +51,13 @@ import type {
   RoomInput,
   ScopeItem,
   ScopeItemInput,
+  SharedChangeOrderDecisionInput,
+  SharedEstimate,
+  SharedEstimateApprovalInput,
+  SharedEstimateRevisionInput,
+  SmetaProject,
+  SmetaProjectInput,
+  SmetaShareInput,
   TimelineEvent,
   UploadUrlRequest,
   UploadUrlResponse
@@ -3187,4 +3194,889 @@ export function useGetProjectMedia<TData = Awaited<ReturnType<typeof getProjectM
 
 
 
+
+export const getListSmetaProjectsUrl = () => {
+
+
+
+
+  return `/api/smeta/projects`
+}
+
+/**
+ * @summary List the signed-in contractor's AI Smeta projects
+ */
+export const listSmetaProjects = async ( options?: Parameters<typeof customFetch>[1]): Promise<SmetaProject[]> => {
+
+  return customFetch<SmetaProject[]>(getListSmetaProjectsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSmetaProjectsQueryKey = () => {
+    return [
+    `/api/smeta/projects`
+    ] as const;
+    }
+
+
+export const getListSmetaProjectsQueryOptions = <TData = Awaited<ReturnType<typeof listSmetaProjects>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSmetaProjects>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSmetaProjectsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSmetaProjects>>> = ({ signal }) => listSmetaProjects({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSmetaProjects>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListSmetaProjectsQueryResult = NonNullable<Awaited<ReturnType<typeof listSmetaProjects>>>
+export type ListSmetaProjectsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List the signed-in contractor's AI Smeta projects
+ */
+
+export function useListSmetaProjects<TData = Awaited<ReturnType<typeof listSmetaProjects>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSmetaProjects>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListSmetaProjectsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateSmetaProjectUrl = () => {
+
+
+
+
+  return `/api/smeta/projects`
+}
+
+/**
+ * @summary Create an estimate project
+ */
+export const createSmetaProject = async (smetaProjectInput: SmetaProjectInput, options?: Parameters<typeof customFetch>[1]): Promise<SmetaProject> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SmetaProject>(getCreateSmetaProjectUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(smetaProjectInput)
+  }
+);}
+
+
+
+
+
+export const getCreateSmetaProjectMutationKey = () => ['createSmetaProject'] as const;
+
+export const getCreateSmetaProjectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSmetaProject>>, TError,CreateSmetaProjectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSmetaProject>>, TError,CreateSmetaProjectMutationVariables, TContext> => {
+
+const mutationKey = getCreateSmetaProjectMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSmetaProject>>, CreateSmetaProjectMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createSmetaProject(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateSmetaProjectMutationResult = NonNullable<Awaited<ReturnType<typeof createSmetaProject>>>
+    export type CreateSmetaProjectMutationBody = BodyType<SmetaProjectInput>
+    export type CreateSmetaProjectMutationError = ErrorType<unknown>
+    export type CreateSmetaProjectMutationVariables = {data: BodyType<SmetaProjectInput>}
+
+    /**
+ * @summary Create an estimate project
+ */
+export const useCreateSmetaProject = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSmetaProject>>, TError,CreateSmetaProjectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createSmetaProject>>,
+        TError,
+        CreateSmetaProjectMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateSmetaProjectMutationOptions(options));
+    }
+
+export const getGetSmetaProjectUrl = (projectId: string,) => {
+
+
+
+
+  return `/api/smeta/projects/${projectId}`
+}
+
+export const getSmetaProject = async (projectId: string, options?: Parameters<typeof customFetch>[1]): Promise<SmetaProject> => {
+
+  return customFetch<SmetaProject>(getGetSmetaProjectUrl(projectId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSmetaProjectQueryKey = (projectId: string,) => {
+    return [
+    `/api/smeta/projects/${projectId}`
+    ] as const;
+    }
+
+
+export const getGetSmetaProjectQueryOptions = <TData = Awaited<ReturnType<typeof getSmetaProject>>, TError = ErrorType<unknown>>(projectId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSmetaProject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSmetaProjectQueryKey(projectId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSmetaProject>>> = ({ signal }) => getSmetaProject(projectId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: projectId !== null && projectId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSmetaProject>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSmetaProjectQueryResult = NonNullable<Awaited<ReturnType<typeof getSmetaProject>>>
+export type GetSmetaProjectQueryError = ErrorType<unknown>
+
+
+
+export function useGetSmetaProject<TData = Awaited<ReturnType<typeof getSmetaProject>>, TError = ErrorType<unknown>>(
+ projectId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSmetaProject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSmetaProjectQueryOptions(projectId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateSmetaProjectUrl = (projectId: string,) => {
+
+
+
+
+  return `/api/smeta/projects/${projectId}`
+}
+
+/**
+ * Replaces estimate lines, measurements, change orders, expenses, photos and payments. Status, client decisions and sent versions are server-controlled and ignored.
+ * @summary Save the contractor-editable part of a project
+ */
+export const updateSmetaProject = async (projectId: string,
+    smetaProjectInput: SmetaProjectInput, options?: Parameters<typeof customFetch>[1]): Promise<SmetaProject> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SmetaProject>(getUpdateSmetaProjectUrl(projectId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(smetaProjectInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateSmetaProjectMutationKey = () => ['updateSmetaProject'] as const;
+
+export const getUpdateSmetaProjectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSmetaProject>>, TError,UpdateSmetaProjectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSmetaProject>>, TError,UpdateSmetaProjectMutationVariables, TContext> => {
+
+const mutationKey = getUpdateSmetaProjectMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSmetaProject>>, UpdateSmetaProjectMutationVariables> = (props) => {
+          const {projectId,data} = props ?? {};
+
+          return  updateSmetaProject(projectId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSmetaProjectMutationResult = NonNullable<Awaited<ReturnType<typeof updateSmetaProject>>>
+    export type UpdateSmetaProjectMutationBody = BodyType<SmetaProjectInput>
+    export type UpdateSmetaProjectMutationError = ErrorType<unknown>
+    export type UpdateSmetaProjectMutationVariables = {projectId: string;data: BodyType<SmetaProjectInput>}
+
+    /**
+ * @summary Save the contractor-editable part of a project
+ */
+export const useUpdateSmetaProject = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSmetaProject>>, TError,UpdateSmetaProjectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateSmetaProject>>,
+        TError,
+        UpdateSmetaProjectMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateSmetaProjectMutationOptions(options));
+    }
+
+export const getDeleteSmetaProjectUrl = (projectId: string,) => {
+
+
+
+
+  return `/api/smeta/projects/${projectId}`
+}
+
+export const deleteSmetaProject = async (projectId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getDeleteSmetaProjectUrl(projectId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteSmetaProjectMutationKey = () => ['deleteSmetaProject'] as const;
+
+export const getDeleteSmetaProjectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSmetaProject>>, TError,DeleteSmetaProjectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSmetaProject>>, TError,DeleteSmetaProjectMutationVariables, TContext> => {
+
+const mutationKey = getDeleteSmetaProjectMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSmetaProject>>, DeleteSmetaProjectMutationVariables> = (props) => {
+          const {projectId} = props ?? {};
+
+          return  deleteSmetaProject(projectId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSmetaProjectMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSmetaProject>>>
+
+    export type DeleteSmetaProjectMutationError = ErrorType<unknown>
+    export type DeleteSmetaProjectMutationVariables = {projectId: string}
+
+    export const useDeleteSmetaProject = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSmetaProject>>, TError,DeleteSmetaProjectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSmetaProject>>,
+        TError,
+        DeleteSmetaProjectMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteSmetaProjectMutationOptions(options));
+    }
+
+export const getShareSmetaEstimateUrl = (projectId: string,) => {
+
+
+
+
+  return `/api/smeta/projects/${projectId}/share`
+}
+
+/**
+ * @summary Freeze the current estimate as the client-visible version and (re)send the stable client link
+ */
+export const shareSmetaEstimate = async (projectId: string,
+    smetaShareInput: SmetaShareInput, options?: Parameters<typeof customFetch>[1]): Promise<SmetaProject> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SmetaProject>(getShareSmetaEstimateUrl(projectId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(smetaShareInput)
+  }
+);}
+
+
+
+
+
+export const getShareSmetaEstimateMutationKey = () => ['shareSmetaEstimate'] as const;
+
+export const getShareSmetaEstimateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shareSmetaEstimate>>, TError,ShareSmetaEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof shareSmetaEstimate>>, TError,ShareSmetaEstimateMutationVariables, TContext> => {
+
+const mutationKey = getShareSmetaEstimateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shareSmetaEstimate>>, ShareSmetaEstimateMutationVariables> = (props) => {
+          const {projectId,data} = props ?? {};
+
+          return  shareSmetaEstimate(projectId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShareSmetaEstimateMutationResult = NonNullable<Awaited<ReturnType<typeof shareSmetaEstimate>>>
+    export type ShareSmetaEstimateMutationBody = BodyType<SmetaShareInput>
+    export type ShareSmetaEstimateMutationError = ErrorType<unknown>
+    export type ShareSmetaEstimateMutationVariables = {projectId: string;data: BodyType<SmetaShareInput>}
+
+    /**
+ * @summary Freeze the current estimate as the client-visible version and (re)send the stable client link
+ */
+export const useShareSmetaEstimate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shareSmetaEstimate>>, TError,ShareSmetaEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof shareSmetaEstimate>>,
+        TError,
+        ShareSmetaEstimateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getShareSmetaEstimateMutationOptions(options));
+    }
+
+export const getRevokeSmetaShareUrl = (projectId: string,) => {
+
+
+
+
+  return `/api/smeta/projects/${projectId}/share`
+}
+
+/**
+ * @summary Revoke the client link
+ */
+export const revokeSmetaShare = async (projectId: string, options?: Parameters<typeof customFetch>[1]): Promise<SmetaProject> => {
+
+  return customFetch<SmetaProject>(getRevokeSmetaShareUrl(projectId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokeSmetaShareMutationKey = () => ['revokeSmetaShare'] as const;
+
+export const getRevokeSmetaShareMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeSmetaShare>>, TError,RevokeSmetaShareMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeSmetaShare>>, TError,RevokeSmetaShareMutationVariables, TContext> => {
+
+const mutationKey = getRevokeSmetaShareMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeSmetaShare>>, RevokeSmetaShareMutationVariables> = (props) => {
+          const {projectId} = props ?? {};
+
+          return  revokeSmetaShare(projectId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeSmetaShareMutationResult = NonNullable<Awaited<ReturnType<typeof revokeSmetaShare>>>
+
+    export type RevokeSmetaShareMutationError = ErrorType<unknown>
+    export type RevokeSmetaShareMutationVariables = {projectId: string}
+
+    /**
+ * @summary Revoke the client link
+ */
+export const useRevokeSmetaShare = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeSmetaShare>>, TError,RevokeSmetaShareMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof revokeSmetaShare>>,
+        TError,
+        RevokeSmetaShareMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevokeSmetaShareMutationOptions(options));
+    }
+
+export const getGetSharedEstimateUrl = (token: string,) => {
+
+
+
+
+  return `/api/shared-estimates/${token}`
+}
+
+/**
+ * @summary Public client view of the last sent estimate version
+ */
+export const getSharedEstimate = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<SharedEstimate> => {
+
+  return customFetch<SharedEstimate>(getGetSharedEstimateUrl(token),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSharedEstimateQueryKey = (token: string,) => {
+    return [
+    `/api/shared-estimates/${token}`
+    ] as const;
+    }
+
+
+export const getGetSharedEstimateQueryOptions = <TData = Awaited<ReturnType<typeof getSharedEstimate>>, TError = ErrorType<unknown>>(token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSharedEstimate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSharedEstimateQueryKey(token);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSharedEstimate>>> = ({ signal }) => getSharedEstimate(token, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: token !== null && token !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSharedEstimate>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSharedEstimateQueryResult = NonNullable<Awaited<ReturnType<typeof getSharedEstimate>>>
+export type GetSharedEstimateQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Public client view of the last sent estimate version
+ */
+
+export function useGetSharedEstimate<TData = Awaited<ReturnType<typeof getSharedEstimate>>, TError = ErrorType<unknown>>(
+ token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSharedEstimate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSharedEstimateQueryOptions(token,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getApproveSharedEstimateUrl = (token: string,) => {
+
+
+
+
+  return `/api/shared-estimates/${token}/approve`
+}
+
+export const approveSharedEstimate = async (token: string,
+    sharedEstimateApprovalInput: SharedEstimateApprovalInput, options?: Parameters<typeof customFetch>[1]): Promise<SharedEstimate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SharedEstimate>(getApproveSharedEstimateUrl(token),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(sharedEstimateApprovalInput)
+  }
+);}
+
+
+
+
+
+export const getApproveSharedEstimateMutationKey = () => ['approveSharedEstimate'] as const;
+
+export const getApproveSharedEstimateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveSharedEstimate>>, TError,ApproveSharedEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveSharedEstimate>>, TError,ApproveSharedEstimateMutationVariables, TContext> => {
+
+const mutationKey = getApproveSharedEstimateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveSharedEstimate>>, ApproveSharedEstimateMutationVariables> = (props) => {
+          const {token,data} = props ?? {};
+
+          return  approveSharedEstimate(token,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApproveSharedEstimateMutationResult = NonNullable<Awaited<ReturnType<typeof approveSharedEstimate>>>
+    export type ApproveSharedEstimateMutationBody = BodyType<SharedEstimateApprovalInput>
+    export type ApproveSharedEstimateMutationError = ErrorType<unknown>
+    export type ApproveSharedEstimateMutationVariables = {token: string;data: BodyType<SharedEstimateApprovalInput>}
+
+    export const useApproveSharedEstimate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveSharedEstimate>>, TError,ApproveSharedEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof approveSharedEstimate>>,
+        TError,
+        ApproveSharedEstimateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getApproveSharedEstimateMutationOptions(options));
+    }
+
+export const getRequestSharedEstimateRevisionUrl = (token: string,) => {
+
+
+
+
+  return `/api/shared-estimates/${token}/revision`
+}
+
+export const requestSharedEstimateRevision = async (token: string,
+    sharedEstimateRevisionInput: SharedEstimateRevisionInput, options?: Parameters<typeof customFetch>[1]): Promise<SharedEstimate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SharedEstimate>(getRequestSharedEstimateRevisionUrl(token),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(sharedEstimateRevisionInput)
+  }
+);}
+
+
+
+
+
+export const getRequestSharedEstimateRevisionMutationKey = () => ['requestSharedEstimateRevision'] as const;
+
+export const getRequestSharedEstimateRevisionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestSharedEstimateRevision>>, TError,RequestSharedEstimateRevisionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestSharedEstimateRevision>>, TError,RequestSharedEstimateRevisionMutationVariables, TContext> => {
+
+const mutationKey = getRequestSharedEstimateRevisionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestSharedEstimateRevision>>, RequestSharedEstimateRevisionMutationVariables> = (props) => {
+          const {token,data} = props ?? {};
+
+          return  requestSharedEstimateRevision(token,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestSharedEstimateRevisionMutationResult = NonNullable<Awaited<ReturnType<typeof requestSharedEstimateRevision>>>
+    export type RequestSharedEstimateRevisionMutationBody = BodyType<SharedEstimateRevisionInput>
+    export type RequestSharedEstimateRevisionMutationError = ErrorType<unknown>
+    export type RequestSharedEstimateRevisionMutationVariables = {token: string;data: BodyType<SharedEstimateRevisionInput>}
+
+    export const useRequestSharedEstimateRevision = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestSharedEstimateRevision>>, TError,RequestSharedEstimateRevisionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestSharedEstimateRevision>>,
+        TError,
+        RequestSharedEstimateRevisionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestSharedEstimateRevisionMutationOptions(options));
+    }
+
+export const getDecideSharedChangeOrderUrl = (token: string,
+    changeOrderId: string,) => {
+
+
+
+
+  return `/api/shared-estimates/${token}/change-orders/${changeOrderId}/decision`
+}
+
+export const decideSharedChangeOrder = async (token: string,
+    changeOrderId: string,
+    sharedChangeOrderDecisionInput: SharedChangeOrderDecisionInput, options?: Parameters<typeof customFetch>[1]): Promise<SharedEstimate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SharedEstimate>(getDecideSharedChangeOrderUrl(token,changeOrderId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(sharedChangeOrderDecisionInput)
+  }
+);}
+
+
+
+
+
+export const getDecideSharedChangeOrderMutationKey = () => ['decideSharedChangeOrder'] as const;
+
+export const getDecideSharedChangeOrderMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideSharedChangeOrder>>, TError,DecideSharedChangeOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideSharedChangeOrder>>, TError,DecideSharedChangeOrderMutationVariables, TContext> => {
+
+const mutationKey = getDecideSharedChangeOrderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideSharedChangeOrder>>, DecideSharedChangeOrderMutationVariables> = (props) => {
+          const {token,changeOrderId,data} = props ?? {};
+
+          return  decideSharedChangeOrder(token,changeOrderId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideSharedChangeOrderMutationResult = NonNullable<Awaited<ReturnType<typeof decideSharedChangeOrder>>>
+    export type DecideSharedChangeOrderMutationBody = BodyType<SharedChangeOrderDecisionInput>
+    export type DecideSharedChangeOrderMutationError = ErrorType<unknown>
+    export type DecideSharedChangeOrderMutationVariables = {token: string;changeOrderId: string;data: BodyType<SharedChangeOrderDecisionInput>}
+
+    export const useDecideSharedChangeOrder = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideSharedChangeOrder>>, TError,DecideSharedChangeOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideSharedChangeOrder>>,
+        TError,
+        DecideSharedChangeOrderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideSharedChangeOrderMutationOptions(options));
+    }
 

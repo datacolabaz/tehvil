@@ -9,14 +9,16 @@ corrects and approves, the client only sees the approved (sent) version.**
 AI output is always labelled as a proposal ("AI təklifi", "≈", "Yoxlanmalıdır")
 and never presented as an exact measurement.
 
-The module lives entirely in the web app (`artifacts/tehvil`). It reuses the
-existing design system (`index.css` tokens and classes such as `.surface`,
-`.button`, `.field`, `.eyebrow`, `.aside-panel`), the existing app shell,
-Wouter routing and Clerk auth. Module-specific styles are in `src/smeta.css`
-and are all prefixed `sm-`.
+The UI lives in the web app (`artifacts/tehvil`). It reuses the existing design
+system (`index.css` tokens and classes such as `.surface`, `.button`, `.field`,
+`.eyebrow`, `.aside-panel`), the existing app shell, Wouter routing and Clerk
+auth. Module-specific styles are in `src/smeta.css` and are all prefixed `sm-`.
 
-Everything currently runs on the client with mock data. The sections below list
-exactly where the backend, AI and export services plug in.
+Projects are stored in PostgreSQL through the API server (`artifacts/api-server`,
+`/api/smeta/*`), and client share links are served by public, token-keyed
+endpoints (`/api/shared-estimates/*`). See [Persistence and share links](#persistence-and-share-links).
+AI services and SMS/e-mail delivery are still mocked; the sections below list
+exactly where they plug in.
 
 ## Routes
 
@@ -39,7 +41,23 @@ The module pages are lazy-loaded so they are not part of the main bundle.
 Demo data: the seeded project `narimanov-2-otaq` ("Nərimanov, 2 otaqlı mənzil")
 has an estimate total of exactly **24 860 AZN**, actual spending of 8 940 AZN and
 1 240 AZN of approved changes. Its public link is `/estimate/nrm-7f3k2q9d`.
-"Demo məlumatlarını sıfırla" on the dashboard restores the seed data.
+
+Demo projects are **browser-only** and are never written to the database
+(localStorage `tehvil-smeta-demo-v1`, marked `demo: true`). They contain a
+fabricated client approval, fake phone numbers and a fixed, guessable share
+token, none of which should exist as real records or as a working public link
+on the server. Seeding them per user on the server would also put sample rows
+into every new contractor account and make "reset demo" a destructive server
+operation. Instead:
+
+- A contractor with no saved projects sees the demo projects, labelled
+  "· Demo", so the module is not empty on first visit.
+- Once they have their own projects the demos are hidden; "Demo layihələri
+  göstər / gizlət" on the dashboard toggles them (`tehvil-smeta-show-demo`).
+- Demo projects stay fully interactive. Edits, sending and the public page
+  (`/estimate/nrm-7f3k2q9d`, including approval) run locally through the same
+  code paths and response shape as server projects.
+- "Demo məlumatlarını sıfırla" restores the seed data and only touches demos.
 
 ## Files
 
@@ -51,7 +69,8 @@ has an estimate total of exactly **24 860 AZN**, actual spending of 8 940 AZN an
 | `calc.ts` | All money maths (see formulas below). Pure functions, rounded to 2 decimals |
 | `catalog.ts` | Work categories, labels, default waste %, quality factors, the line-item generator used by the wizard (`generateSections`), smart templates (`TEMPLATES`) |
 | `mock-data.ts` | Seed projects (`createSeedProjects`), the sample floor plan and its measurements, the default contractor profile |
-| `store.ts` | Client store (`useSyncExternalStore` + localStorage `tehvil-smeta-v1`) and all mutations (`smeta.*`). Contains the `SmetaRepository` seam |
+| `store.ts` | Client store (`useSyncExternalStore`) and all mutations (`smeta.*`). Loads and saves server projects through the generated API client; keeps demo projects in localStorage |
+| `shared.ts` | `useSharedEstimate(token)` for the public page: fetches `/api/shared-estimates/:token` (or builds the same shape locally for demo links) and exposes approve / revision / change-order actions |
 | `ai.ts` | Mock AI services: drawing takeoff, receipt extraction, market price refresh, budget insights, scenarios, assistant |
 | `export.ts` | Excel workbook definition (6 sheets) and print/PDF entry point |
 | `xlsx.ts` | Small zero-dependency `.xlsx` writer (stored zip + SpreadsheetML) |
@@ -109,13 +128,17 @@ is "Diqqət tələb edir".
 
 ## Versioning and the client view
 
-- The contractor always edits the live `project.estimate`.
-- `smeta.shareEstimate` freezes a snapshot (`share.snapshot`, plus project costs
-  and margin) and the public page renders **only** that snapshot. Unsent edits are
-  never visible to the client; the detail page shows a "hələ göndərilməyib" banner.
+- The contractor always edits the live `project.estimate`; edits are saved to the
+  server as drafts and are never visible to the client.
+- "Sifarişçiyə göndər" calls `POST /api/smeta/projects/:id/share`. The server
+  stores a row in `smeta_estimate_versions` with the internal snapshot (estimate,
+  project costs, margin) and a separately computed **public snapshot**, and the
+  public page renders only that public snapshot. The detail page shows a
+  "hələ göndərilməyib" banner while there are unsent edits.
 - Sending again after edits creates a new version (v2 → v3) and requires a new
-  client approval. The share token stays the same, so a saved link always shows
-  the latest sent version.
+  client approval. Sending again without edits keeps the version and only
+  refreshes the 30-day validity. The share token stays the same, so a saved link
+  always shows the latest sent version.
 - Editing an approved line after the client approved it marks it "Dəyişdirilib".
 - Change orders never modify the base estimate. They are added to the final total
   only when approved (by the contractor recording the decision, or by the client on
@@ -126,47 +149,170 @@ is "Diqqət tələb edir".
 | Area | Status |
 | --- | --- |
 | Calculations, totals, budget forecast, scenarios | Real (client-side, deterministic) |
-| Estimate editing, measurements, change orders, expenses, photos, versioning, approval flow | Real UI and logic. **Persisted only in this browser's localStorage** |
+| Estimate editing, measurements, change orders, expenses, payment schedule, versioning | Real. **Persisted in PostgreSQL** per contractor (Clerk user) |
+| Share links, client approval, revision requests, client change-order decisions | Real. Public token endpoints, 30-day validity enforced by the server, audit fields stored |
+| Demo projects (Nərimanov, …) | Browser-only by design (see Routes) |
 | Excel export | Real `.xlsx` generated in the browser (6 sheets) |
 | PDF export | Browser print of `/smeta/:id/print` ("PDF kimi saxla") |
 | Drawing takeoff (`analyzeDrawing`) | **Mock** – always returns the sample Nərimanov plan |
 | Receipt OCR (`extractReceipt`) | **Mock** – returns a plausible suggestion |
 | Market prices (`fetchMarketPrice`) | **Mock** – small deterministic drift |
 | AI assistant (`askAssistant`) | **Rule-based mock** over the project data |
-| Sending SMS / e-mail, share links across devices | **Not implemented** – the link only works in the same browser |
-| Uploaded photos / receipt images | Object URLs, kept for the current session only |
+| Sending SMS / e-mail | **Not implemented** – behind `SmetaNotifier`; the default logs the event. The contractor copies the link from the send dialog |
+| Uploaded photos / receipt images | Metadata is saved; the files are object URLs for the current session only (`objectPath` is reserved for App Storage / S3) |
 
 ## Integration points
 
-All are marked in code with `TODO(api)` or `TODO(ai)`.
+All are marked in code with `TODO(api)`, `TODO(ai)` or `TODO(notify)`.
 
-### Persistence – `store.ts`
+### Notifications – `artifacts/api-server/src/lib/smetaNotifications.ts`
 
-Replace `localRepository` with an HTTP repository. Components only use the hooks
-(`useSmetaProjects`, `useSmetaProject`, `useSharedProject`) and `smeta.*`
-actions, so the swap stays inside this file. Suggested endpoints, following the
-existing `lib/api-spec` (OpenAPI → Orval) and `lib/db` (Drizzle) setup:
+`SmetaNotifier` has three events: `estimateSent` (with the share URL, client
+phone and e-mail), `estimateApproved` (only when the contractor ticked "notify
+on approve") and `revisionRequested`. The default `logNotifier` writes a log line
+with the phone number masked. Register an SMS / e-mail implementation with
+`setSmetaNotifier(...)` at startup. Calls are fire-and-forget, so a failing
+provider never fails the HTTP request.
 
-```
-GET    /api/smeta/projects
-POST   /api/smeta/projects
-GET    /api/smeta/projects/:id
-PATCH  /api/smeta/projects/:id/estimate          line/section edits
-POST   /api/smeta/projects/:id/measurements/apply
-POST   /api/smeta/projects/:id/change-orders
-PATCH  /api/smeta/projects/:id/change-orders/:coId
-POST   /api/smeta/projects/:id/expenses          (multipart: receipt)
-POST   /api/smeta/projects/:id/photos            (multipart)
-POST   /api/smeta/projects/:id/share             creates token + snapshot, sends SMS/e-mail
-GET    /api/estimate/:token                      public, snapshot only
-POST   /api/estimate/:token/approve              public; store name, phone, IP, timestamp, version
-POST   /api/estimate/:token/revision             public
-POST   /api/estimate/:token/change-orders/:coId  public; client decision
-```
+### Files – receipts and photos
 
-The public endpoints must return only the frozen snapshot and client-visible
-change orders and photos – never internal costs, expenses or margins per line.
-`useFirstLoad` (an artificial skeleton delay) should be replaced by real query state.
+Only metadata is stored (`smeta_receipts`, `smeta_photos`, `object_path` is null).
+Upload through the existing presigned-URL flow (`/api/storage/uploads/request-url`)
+and save the returned path in `objectPath`.
+
+## Persistence and share links
+
+### Database – `lib/db/src/schema/smeta.ts`
+
+Core entities are relational; only versioned snapshots and small
+client-generated structures (drawing geometry, price/quantity source,
+included/excluded lists, export history) are JSON. Child tables use the
+composite key `(project_id, id)` because the client generates child ids, and
+they all cascade on project delete.
+
+| Table | Contents |
+| --- | --- |
+| `smeta_projects` | Project + estimate header: `owner_user_id` (Clerk user), address, client, contractor profile, default margin, `status`, `estimate_version`, `valid_until` |
+| `smeta_estimate_sections` | Sections (category, order) |
+| `smeta_line_items` | Line items: quantity, unit prices, waste/margin ratios, status, AI confidence, price/quantity source |
+| `smeta_project_costs` | Project-level costs (transport, debris removal, …) |
+| `smeta_measurements` | Takeoff measurements and their review status |
+| `smeta_change_orders` | Change orders with deltas, status and `decided_by` (`contractor` / `client`) |
+| `smeta_expenses`, `smeta_receipts` | Actual spending and receipt metadata (OCR suggestion as JSON) |
+| `smeta_photos` | Photo evidence metadata (phase, room, client visibility) |
+| `smeta_payment_milestones` | Payment schedule |
+| `smeta_estimate_versions` | One row per sent version: internal snapshot, public snapshot, total, sender, time |
+| `smeta_shares` | One link per project: unguessable `token`, sent version, client contact, message, `expires_at`, `revoked_at` |
+| `smeta_client_approvals` | Approvals: version, name, phone, consent, total, IP address, user agent, time (one per version) |
+| `smeta_revision_requests` | Client revision requests with IP address and user agent |
+
+Money is `numeric(14,2)`, quantities `numeric(14,3)`, unit prices
+`numeric(14,4)` and ratios `numeric(7,4)`, all returned as numbers by the API.
+
+### API – `lib/api-spec/openapi.yaml` (tag `smeta`)
+
+Authenticated (Clerk session; every route checks `owner_user_id`, other users
+get 404):
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/smeta/projects` | List the contractor's projects |
+| POST | `/api/smeta/projects` | Create (server assigns the id unless a new UUID is given) |
+| GET | `/api/smeta/projects/:projectId` | Read one |
+| PUT | `/api/smeta/projects/:projectId` | Save the whole project document |
+| DELETE | `/api/smeta/projects/:projectId` | Delete with all child rows |
+| POST | `/api/smeta/projects/:projectId/share` | Send: new version if changed, create or reuse the link, extend validity to 30 days |
+| DELETE | `/api/smeta/projects/:projectId/share` | Revoke the link (the next send issues a new token). No UI yet |
+
+Public (no auth, keyed by the share token, `Cache-Control: no-store`):
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/shared-estimates/:token` | Sent version only: public snapshot, live client-visible change orders, payment amounts, approval state |
+| POST | `/api/shared-estimates/:token/approve` | `{ version, name, phone, consent: true }`; stores IP and user agent |
+| POST | `/api/shared-estimates/:token/revision` | `{ version, name, message }` |
+| POST | `/api/shared-estimates/:token/change-orders/:changeOrderId/decision` | Client approves or rejects a pending change order |
+
+Rules enforced on the server:
+
+- **Ownership:** every contractor route loads the project with
+  `owner_user_id = getAuth(req).userId`.
+- **Server-controlled fields:** `PUT` replaces the editable document (sections,
+  lines, costs, measurements, change orders, expenses, photos, payments) in one
+  transaction. Status, version, validity, share, approvals and revision requests
+  are ignored in the body. Change orders decided by the client cannot be changed
+  or deleted by the contractor.
+- **No draft or margin leaks:** the public snapshot is built server-side when
+  sending (`smetaCalc.ts`). Each line carries only all-in amounts, with waste
+  folded into material and margin folded into material, labour and additional
+  cost. The internal snapshot, ratios, price sources, expenses, owner and audit
+  fields are never part of a public response, and responses are parsed through
+  the generated Zod schema.
+- **Validity:** a link resolves only while `revoked_at IS NULL AND expires_at > now()`
+  (30 days from the last send). Expired or revoked links return 404.
+- **Stale actions:** approval and revision requests must name the version the
+  client saw. Older versions get 409, approving twice is idempotent, and a
+  revision request after approval gets 409.
+- **Abuse limits:** reads are limited to 120/min per IP and writes to 10 per
+  10 minutes per IP and token (in memory, per API process). Bodies are validated
+  against the OpenAPI schemas.
+
+Tokens are 24 random bytes (base64url, 32 characters), stored in a unique column
+so the contractor can see and resend the same link. Request logs redact the
+token from `/shared-estimates/` URLs.
+
+### Frontend – `store.ts`
+
+The pages still only use the hooks (`useSmetaProjects`, `useSmetaProject`,
+`useSmetaLoading`, `useSmetaSyncStatus`, …) and `smeta.*` actions.
+
+- Projects load once per session; switching the Clerk user clears the store.
+- Every mutation updates local state immediately and schedules a debounced
+  (600 ms) `PUT` of the whole project. Saves are sequential per project, and a
+  response never overwrites newer local edits. Pending saves are flushed when
+  the tab is hidden, and the browser warns before closing with unsaved changes.
+- The estimate header shows "Saxlanılır… / Yadda saxlanılıb / Saxlanılmadı"
+  with a retry button.
+- `createProject` and `shareEstimate` are awaited; the wizard and send dialog
+  show progress and error toasts.
+- The public page uses `useSharedEstimate`, which handles loading, missing or
+  expired links (400/404), 409 (reloads to show the current state) and 429.
+
+### Setup
+
+1. `DATABASE_URL` must point at the PostgreSQL database (already required by the
+   API).
+2. Create the new tables once, from an environment connected to that database,
+   and review the plan before confirming:
+
+   ```sh
+   pnpm --filter @workspace/db run push
+   ```
+
+   The change only adds `smeta_*` tables, so drizzle-kit should not propose
+   dropping anything. If it does, stop and investigate. The schema was verified
+   with `drizzle-kit push` against an empty local PGlite database only.
+3. Optional: `PUBLIC_APP_URL` (already used for CORS and Clerk) is also used to
+   build share links. Without it the link uses the forwarded host of the request.
+4. Railway: no new variables or services. Deploy the API (`backend` branch) and
+   the frontend (`frontend` branch) as described in `deploy/RAILWAY.md`, and run
+   the push in step 2 **before** the new API version takes traffic. The frontend
+   proxy streams `/api` bodies (project saves allow up to 2 MB) and passes
+   Railway's `X-Forwarded-For` through, so the rate limit and the IP stored on
+   approvals use the client address.
+
+### Known limitations
+
+- Saves send the whole document (last write wins). Two tabs editing the same
+  project can overwrite each other's edits; add an `updatedAt` precondition if
+  that becomes a problem.
+- The rate limiter is in memory, so limits apply per API replica and reset on
+  restart.
+- Share tokens are stored in plain text (unlike passport share hashes) so the
+  link can be shown again. Anyone with database read access can open active
+  links.
+- No UI for revoking a link yet (the API exists).
+- Photos and receipt files are not uploaded yet (metadata only).
 
 ### AI – `ai.ts`
 
@@ -189,7 +335,8 @@ documents add `POST /api/smeta/:id/exports` that renders the PDF server-side
 
 - Whether the client view should show line-level prices or section totals only
   (currently each line shows its all-in total; margin and waste are never shown
-  separately).
+  separately and are not sent to the browser).
+- SMS / e-mail provider for sending links and approval notifications.
 - Payment schedule percentages (default 30/30/30/10) and the change-order policy text.
 - Default margin (15%) and waste percentages per category (`catalog.ts`).
 - Whether the module should be translated to Russian/English like the rest of the app.

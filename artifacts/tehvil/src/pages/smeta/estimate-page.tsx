@@ -1,6 +1,6 @@
 import { useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'wouter';
-import { AlertTriangle, ArrowLeft, CalendarDays, Check, Copy, ExternalLink, FileSpreadsheet, FileText, MapPin, MessageSquareText, MoreHorizontal, Ruler, Send, Sparkles, UserRound } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CalendarDays, Check, Cloud, CloudOff, Copy, ExternalLink, FileSpreadsheet, FileText, Info, MapPin, MessageSquareText, MoreHorizontal, Ruler, Send, Sparkles, UserRound } from 'lucide-react';
 import { Button } from '@/components/kit';
 import { AssistantDrawer } from '@/components/smeta/assistant-drawer';
 import { ChangesTab } from '@/components/smeta/changes-tab';
@@ -16,7 +16,8 @@ import { DropItem, DropMenu, DropSep, SmetaToaster, StatusBadge } from '@/compon
 import { projectTotals } from '@/lib/smeta/calc';
 import { PROPERTY_LABEL, RENOVATION_LABEL } from '@/lib/smeta/catalog';
 import { azn, dateAz, num, qty } from '@/lib/smeta/format';
-import { displayStatus, hasUnsentChanges, useFirstLoad, useSmetaProject } from '@/lib/smeta/store';
+import { displayStatus, hasUnsentChanges, smeta, useSmetaLoading, useSmetaProject, useSmetaSyncStatus } from '@/lib/smeta/store';
+import type { Project } from '@/lib/smeta/types';
 
 const TABS = [
   { id: 'summary', label: 'Xülasə' },
@@ -36,7 +37,7 @@ const initialTab = (): TabId => {
 
 export function EstimateDetailPage({ projectId }: { projectId: string }) {
   const p = useSmetaProject(projectId);
-  const loading = useFirstLoad(`smeta-detail-${projectId}`, 320);
+  const loading = useSmetaLoading();
   const [tab, setTabState] = useState<TabId>(initialTab);
   const [sendOpen, setSendOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
@@ -57,8 +58,8 @@ export function EstimateDetailPage({ projectId }: { projectId: string }) {
     tabRefs.current[n]?.focus();
   };
 
+  if (!p && loading) return <div aria-busy="true" aria-label="Smeta yüklənir"><div className="sm-skel-card" style={{ height: 120, marginBottom: 16 }} /><div className="sm-skel-grid">{[0, 1, 2, 3].map(i => <div className="sm-skel-card" key={i} />)}</div><div className="sm-skel-card tall" /></div>;
   if (!p) return <div className="sm-empty surface"><div className="empty-illustration"><FileSpreadsheet size={28} /></div><h3>Smeta tapılmadı</h3><p>Layihə silinib və ya link səhvdir.</p><Link href="/smeta" className="button button-primary"><ArrowLeft size={16} />AI Smeta siyahısına qayıt</Link></div>;
-  if (loading) return <div aria-busy="true" aria-label="Smeta yüklənir"><div className="sm-skel-card" style={{ height: 120, marginBottom: 16 }} /><div className="sm-skel-grid">{[0, 1, 2, 3].map(i => <div className="sm-skel-card" key={i} />)}</div><div className="sm-skel-card tall" /></div>;
 
   const t = projectTotals(p);
   const unsent = hasUnsentChanges(p);
@@ -85,6 +86,7 @@ export function EstimateDetailPage({ projectId }: { projectId: string }) {
           <span><CalendarDays size={13} aria-hidden />Son yenilənmə: {dateAz(p.updatedAt)}</span>
           <span><MapPin size={13} aria-hidden />{p.district} · {qty(p.areaM2)} m²</span>
           <span><UserRound size={13} aria-hidden />{p.client.name}</span>
+          <SaveState project={p} />
         </div>
       </div>
       <div className="sm-total-block" aria-live="polite">
@@ -137,4 +139,12 @@ export function EstimateDetailPage({ projectId }: { projectId: string }) {
     <AssistantDrawer project={p} open={assistantOpen} onClose={() => setAssistantOpen(false)} />
     <SmetaToaster />
   </>;
+}
+
+function SaveState({ project: p }: { project: Project }) {
+  const sync = useSmetaSyncStatus();
+  if (p.demo) return <span><Info size={13} aria-hidden />Demo layihə · yalnız bu brauzerdə saxlanılır</span>;
+  if (sync === 'saving') return <span aria-live="polite"><Cloud size={13} aria-hidden />Saxlanılır…</span>;
+  if (sync === 'error') return <span role="alert" style={{ color: '#a9433d' }}><CloudOff size={13} aria-hidden />Saxlanılmadı<button type="button" className="sm-link-btn" onClick={() => smeta.retrySync()}>Yenidən cəhd et</button></span>;
+  return <span aria-live="polite"><Cloud size={13} aria-hidden />Yadda saxlanılıb</span>;
 }
