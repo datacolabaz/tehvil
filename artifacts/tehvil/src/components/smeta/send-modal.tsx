@@ -27,24 +27,29 @@ export function SendModal({ project: p, open, onClose }: { project: Project; ope
   const [notify, setNotify] = useState(true);
   const [attachPdf, setAttachPdf] = useState(false);
   const [tried, setTried] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState<EstimateShare | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setName(p.client.name); setPhone(p.client.phone); setEmail(p.client.email ?? ''); setMessage(p.share?.message ?? DEFAULT_MESSAGE);
-    setNotify(p.share?.notifyOnApprove ?? true); setAttachPdf(p.share?.attachPdf ?? false); setTried(false); setSent(null);
+    setNotify(p.share?.notifyOnApprove ?? true); setAttachPdf(p.share?.attachPdf ?? false); setTried(false); setSent(null); setBusy(false);
   }, [open]);
 
   const aiLines = p.estimate.sections.flatMap(s => s.items).filter(i => i.status === 'ai' || i.status === 'draft').length;
   const pendingMeasures = p.measurements.filter(m => m.status === 'suggested').length;
   const resend = !!p.share && hasUnsentChanges(p);
   const errors = { name: !name.trim() ? 'Sifarişçinin adını daxil edin' : '', phone: !phoneOk(phone) ? 'Telefon nömrəsini tam daxil edin, məs.: +994 50 123 45 67' : '', email: !emailOk(email) ? 'E-poçt ünvanı düzgün deyil' : '' };
-  const submit = () => {
+  const submit = async () => {
     setTried(true);
-    if (errors.name || errors.phone || errors.email) return;
-    // TODO(api): POST /smeta/:id/share — backend creates the token, stores the snapshot and sends SMS / e-mail.
-    const share = smeta.shareEstimate(p.id, { clientName: name.trim(), phone: phone.trim(), email: email.trim() || undefined, message: message.trim(), notifyOnApprove: notify, attachPdf });
-    if (share) setSent(share);
+    if (errors.name || errors.phone || errors.email || busy) return;
+    setBusy(true);
+    try {
+      const share = await smeta.shareEstimate(p.id, { clientName: name.trim(), phone: phone.trim(), email: email.trim() || undefined, message: message.trim(), notifyOnApprove: notify, attachPdf });
+      if (share) setSent(share);
+    } catch {
+      toast('Smeta göndərilmədi. İnternet bağlantısını yoxlayıb yenidən cəhd edin.');
+    } finally { setBusy(false); }
   };
   const err = (k: keyof typeof errors) => tried && errors[k] ? <small role="alert" className="sm-field-error">{errors[k]}</small> : null;
 
@@ -64,7 +69,7 @@ export function SendModal({ project: p, open, onClose }: { project: Project; ope
 
   return <Modal open={open} onClose={onClose} eyebrow={resend ? `Yeni versiya: v${(p.share?.snapshot.version ?? 0) + 1}` : `Versiya ${p.estimate.version}`} title="Sifarişçiyə göndər" footer={<>
     <Button variant="secondary" onClick={onClose}>Ləğv et</Button>
-    <Button onClick={submit} testId="button-create-share"><Send size={15} />Smeta linkini yarat və göndər</Button>
+    <Button onClick={() => { void submit(); }} disabled={busy} testId="button-create-share"><Send size={15} />Smeta linkini yarat və göndər</Button>
   </>}>
     {(aiLines > 0 || pendingMeasures > 0) && <div className="sm-warn-box" role="note">
       <strong style={{ display: 'flex', alignItems: 'center', gap: 7 }}><AlertTriangle size={15} aria-hidden />Göndərməzdən əvvəl yoxlayın</strong>

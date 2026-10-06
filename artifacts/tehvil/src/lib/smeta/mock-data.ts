@@ -1,6 +1,6 @@
 /**
- * Demo data for the AI Smeta module.
- * TODO(api): replace with server data once estimate endpoints exist.
+ * Demo data for the AI Smeta module. Kept in the browser only (see store.ts);
+ * it is never written to the database.
  */
 import { round2, sectionTotals } from './calc';
 import { CATEGORY_LABEL, DEFAULT_WASTE, TEMPLATES, generateSections, roomMeasurements, type RoomInput } from './catalog';

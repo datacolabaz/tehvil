@@ -6,7 +6,7 @@ import { changeImpact, changeTotals, lineTotals, projectTotals, round2 } from '@
 import { PROPERTY_LABEL, QUALITY_LABEL, RENOVATION_LABEL } from '@/lib/smeta/catalog';
 import { CHANGE_STATUS_LABEL } from '@/lib/smeta/export';
 import { azn, dateAz, dateTimeAz, num, signedAzn, qty } from '@/lib/smeta/format';
-import { ESTIMATE_STATUS_LABEL, hasUnsentChanges, useSmetaProject } from '@/lib/smeta/store';
+import { ESTIMATE_STATUS_LABEL, hasUnsentChanges, useSmetaLoading, useSmetaProject } from '@/lib/smeta/store';
 
 /**
  * Print-optimised estimate. "PDF ixrac et" opens this route and the browser's
@@ -15,6 +15,7 @@ import { ESTIMATE_STATUS_LABEL, hasUnsentChanges, useSmetaProject } from '@/lib/
  */
 export function EstimatePrintPage({ projectId }: { projectId: string }) {
   const p = useSmetaProject(projectId);
+  const loading = useSmetaLoading();
   useEffect(() => {
     if (!p) return;
     document.title = `Smeta — ${p.name} — v${p.estimate.version}`;
@@ -22,6 +23,7 @@ export function EstimatePrintPage({ projectId }: { projectId: string }) {
     return () => window.clearTimeout(t);
   }, [p?.id]);
 
+  if (!p && loading) return <div className="sm-print-page" aria-busy="true" aria-label="Smeta yüklənir"><div className="sm-skel-card tall" /></div>;
   if (!p) return <div className="sm-print-page"><div className="sm-empty surface"><h3>Smeta tapılmadı</h3><Link href="/smeta" className="button button-primary"><ArrowLeft size={16} />AI Smeta</Link></div></div>;
 
   const t = projectTotals(p);

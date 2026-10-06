@@ -1,94 +1,237 @@
 /**
- * Client-side store for AI Smeta.
+ * Client store for AI Smeta.
  *
- * Projects live in memory and are persisted to localStorage so the demo keeps
- * edits between visits and the public estimate link works in the same browser.
+ * Signed-in contractors' projects are persisted through the API
+ * (`/api/smeta/*`, generated client in `@workspace/api-client-react`). Edits are
+ * applied locally first and saved in the background: one request per project
+ * at a time, debounced, always sending the latest state.
  *
- * TODO(api): swap `localRepository` for an HTTP repository backed by new
- * `/api/smeta/*` endpoints (see docs/AI_SMETA.md). Components only use the
- * hooks and `smeta.*` actions below, so the swap stays local to this file.
+ * The seeded demo projects (incl. Nərimanov, 24 860 AZN) are never sent to the
+ * server: they contain sample client approvals and fixed links. They live in
+ * this browser's localStorage and are marked `demo: true`.
  */
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
+import {
+  createSmetaProject, deleteSmetaProject, listSmetaProjects, shareSmetaEstimate, updateSmetaProject,
+  type SmetaProject, type SmetaProjectInput,
+} from '@workspace/api-client-react';
 import { budgetSummary, changeTotals, quantityFromMeasurements, projectTotals } from './calc';
 import { CATEGORY_LABEL } from './catalog';
 import { addDaysISO, todayISO, uid } from './format';
 import { createSeedProjects } from './mock-data';
-import type { ChangeOrder, ClientApproval, EstimateLineItem, ExportJob, Expense, Measurement, PhotoEvidence, Project, Receipt, WorkCategory } from './types';
+import type { ChangeOrder, ClientApproval, EstimateLineItem, EstimateShare, ExportJob, Expense, Measurement, PhotoEvidence, Project, Receipt, WorkCategory } from './types';
 
-const STORAGE_KEY = 'tehvil-smeta-v1';
+const DEMO_KEY = 'tehvil-smeta-demo-v1';
+const SHOW_DEMO_KEY = 'tehvil-smeta-show-demo';
+const SAVE_DELAY = 600;
 
-interface SmetaRepository {
-  load(): Project[] | null;
-  save(projects: Project[]): void;
+export type RemoteStatus = 'idle' | 'loading' | 'ready' | 'error';
+export type SyncStatus = 'idle' | 'saving' | 'saved' | 'error';
+
+interface State {
+  server: Project[];
+  demo: Project[];
+  remote: RemoteStatus;
+  sync: SyncStatus;
+  showDemo: boolean | null;
+  all: Project[];
+  visible: Project[];
 }
 
-const localRepository: SmetaRepository = {
-  load() {
+const demoRepository = {
+  load(): Project[] | null {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(DEMO_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw) as { version: number; projects: Project[] };
       return parsed.version === 1 && Array.isArray(parsed.projects) ? parsed.projects : null;
     } catch { return null; }
   },
-  save(projects) {
+  save(projects: Project[]) {
     try {
       // Object URLs only live for the current session.
       const clean = projects.map(p => ({ ...p, photos: p.photos.map(ph => ({ ...ph, url: undefined })), receipts: p.receipts.map(r => ({ ...r, previewUrl: undefined })) }));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, projects: clean }));
+      localStorage.setItem(DEMO_KEY, JSON.stringify({ version: 1, projects: clean }));
     } catch { /* storage full or unavailable: keep working in memory */ }
   },
 };
 
-const repository: SmetaRepository = localRepository;
+const seedDemo = () => createSeedProjects().map(p => ({ ...p, demo: true }));
+const readShowDemo = (): boolean | null => {
+  try { const v = localStorage.getItem(SHOW_DEMO_KEY); return v === null ? null : v === '1'; } catch { return null; }
+};
 
-let projects: Project[] = repository.load() ?? createSeedProjects();
+function derive(s: Omit<State, 'all' | 'visible'>): State {
+  // Demo projects are shown until the contractor has their own, unless they chose otherwise.
+  const showDemo = s.showDemo ?? !(s.remote === 'ready' && s.server.length > 0);
+  return { ...s, all: [...s.server, ...s.demo], visible: showDemo ? [...s.server, ...s.demo] : s.server };
+}
+
+let state: State = derive({ server: [], demo: demoRepository.load() ?? seedDemo(), remote: 'idle', sync: 'idle', showDemo: readShowDemo() });
 const listeners = new Set<() => void>();
-let saveTimer: number | undefined;
+let demoSaveTimer: number | undefined;
 
-function emit() {
+function set(patch: Partial<Omit<State, 'all' | 'visible'>>) {
+  const demoChanged = patch.demo !== undefined && patch.demo !== state.demo;
+  state = derive({ ...state, ...patch });
   listeners.forEach(l => l());
-  window.clearTimeout(saveTimer);
-  saveTimer = window.setTimeout(() => repository.save(projects), 250);
+  if (demoChanged) {
+    window.clearTimeout(demoSaveTimer);
+    demoSaveTimer = window.setTimeout(() => demoRepository.save(state.demo), 250);
+  }
 }
 function subscribe(l: () => void) { listeners.add(l); return () => { listeners.delete(l); }; }
-const snapshot = () => projects;
+const findProject = (id: string) => state.all.find(p => p.id === id);
 
-export function useSmetaProjects(): Project[] {
-  return useSyncExternalStore(subscribe, snapshot);
-}
-export function useSmetaProject(id: string): Project | undefined {
-  const list = useSmetaProjects();
-  return list.find(p => p.id === id);
-}
-export function useSharedProject(token: string): Project | undefined {
-  const list = useSmetaProjects();
-  return list.find(p => p.share?.token === token && new Date(p.share.expiresAt).getTime() > Date.now());
+/* ---------------------------------------------------------------- API mapping */
+
+function toInput(p: Project): SmetaProjectInput {
+  return {
+    name: p.name, district: p.district, address: p.address, propertyKind: p.propertyKind, renovationKind: p.renovationKind, quality: p.quality,
+    areaM2: p.areaM2, startDate: p.startDate, endDate: p.endDate, client: p.client, contractor: p.contractor, completion: p.completion,
+    defaultMarginPercentage: p.defaultMarginPercentage, projectCosts: p.projectCosts, estimate: p.estimate, changeOrders: p.changeOrders,
+    expenses: p.expenses,
+    // TODO(api): upload receipt and photo files to App Storage; only metadata is saved for now.
+    receipts: p.receipts.map(({ previewUrl: _url, ...r }) => r),
+    photos: p.photos.map(({ url: _url, ...ph }) => ph),
+    drawing: p.drawing, measurements: p.measurements, payments: p.payments, included: p.included, excluded: p.excluded, exports: p.exports,
+  };
 }
 
-const seenLoads = new Set<string>();
-/** Short skeleton on first visit to a screen, mirroring network latency. TODO(api): replace with query state. */
-export function useFirstLoad(key: string, ms = 420): boolean {
-  const [loading, setLoading] = useState(!seenLoads.has(key));
-  useEffect(() => {
-    if (!loading) return;
-    const t = window.setTimeout(() => { seenLoads.add(key); setLoading(false); }, ms);
-    return () => window.clearTimeout(t);
-  }, [key, loading, ms]);
+/** Server response → client model, keeping this session's object URLs for files picked locally. */
+function fromApi(dto: SmetaProject, local?: Project): Project {
+  const p = dto as unknown as Project;
+  if (!local) return p;
+  const photoUrls = new Map(local.photos.filter(ph => ph.url).map(ph => [ph.id, ph.url]));
+  const previews = new Map(local.receipts.filter(r => r.previewUrl).map(r => [r.id, r.previewUrl]));
+  return {
+    ...p,
+    photos: p.photos.map(ph => photoUrls.has(ph.id) ? { ...ph, url: photoUrls.get(ph.id) } : ph),
+    receipts: p.receipts.map(r => previews.has(r.id) ? { ...r, previewUrl: previews.get(r.id) } : r),
+  };
+}
+
+function replaceServerProject(next: Project) {
+  set({ server: state.server.some(p => p.id === next.id) ? state.server.map(p => p.id === next.id ? next : p) : [next, ...state.server] });
+}
+
+/* ------------------------------------------------------------- loading & sync */
+
+let loading: Promise<void> | null = null;
+const dirty = new Set<string>();
+const saveTimers = new Map<string, number>();
+const inflight = new Map<string, Promise<boolean>>();
+const editSeq = new Map<string, number>();
+
+function loadRemote(): Promise<void> {
+  if (loading) return loading;
+  if (state.remote !== 'ready') set({ remote: 'loading' });
+  loading = listSmetaProjects()
+    .then(list => {
+      // Unsaved local edits win over the fetched copy; they are saved next.
+      const local = new Map(state.server.map(p => [p.id, p]));
+      set({ server: list.map(dto => dirty.has(dto.id) && local.has(dto.id) ? local.get(dto.id)! : fromApi(dto, local.get(dto.id))), remote: 'ready' });
+    })
+    .catch(() => { set({ remote: state.remote === 'ready' ? 'ready' : 'error' }); })
+    .finally(() => { loading = null; });
   return loading;
 }
+
+function ensureLoaded() {
+  if (state.remote === 'idle' || state.remote === 'error') void loadRemote();
+}
+
+const busy = () => dirty.size > 0 || saveTimers.size > 0 || inflight.size > 0;
+
+if (typeof window !== 'undefined') {
+  // Picks up client approvals and decisions made on the public page.
+  window.addEventListener('focus', () => { if (state.remote === 'ready' && !busy()) void loadRemote(); });
+  window.addEventListener('beforeunload', e => { if (busy()) e.preventDefault(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') dirty.forEach(id => { void flush(id); }); });
+}
+
+function scheduleSave(id: string) {
+  dirty.add(id);
+  editSeq.set(id, (editSeq.get(id) ?? 0) + 1);
+  window.clearTimeout(saveTimers.get(id));
+  saveTimers.set(id, window.setTimeout(() => { saveTimers.delete(id); void flush(id); }, SAVE_DELAY));
+  if (state.sync !== 'saving') set({ sync: 'saving' });
+}
+
+/** Saves pending edits of one project. Resolves `false` when the save failed. */
+async function flush(id: string): Promise<boolean> {
+  window.clearTimeout(saveTimers.get(id));
+  saveTimers.delete(id);
+  const previous = inflight.get(id);
+  if (previous) await previous;
+  const p = state.server.find(x => x.id === id);
+  if (!p || !dirty.has(id)) return true;
+  dirty.delete(id);
+  const seq = editSeq.get(id);
+  set({ sync: 'saving' });
+  const run = updateSmetaProject(id, toInput(p)).then(saved => {
+    if (editSeq.get(id) === seq) replaceServerProject(fromApi(saved, state.server.find(x => x.id === id)));
+    if (!busyExcept(id)) set({ sync: 'saved' });
+    return true;
+  }, () => {
+    dirty.add(id);
+    set({ sync: 'error' });
+    return false;
+  }).finally(() => { inflight.delete(id); });
+  inflight.set(id, run);
+  return run;
+}
+const busyExcept = (id: string) => [...dirty].some(x => x !== id) || saveTimers.size > 0 || [...inflight.keys()].some(x => x !== id);
+
+/* ---------------------------------------------------------------------- hooks */
+
+export function useSmetaProjects(): Project[] {
+  useEffect(ensureLoaded, []);
+  return useSyncExternalStore(subscribe, () => state.visible);
+}
+export function useSmetaProject(id: string): Project | undefined {
+  useEffect(ensureLoaded, []);
+  return useSyncExternalStore(subscribe, () => state.all).find(p => p.id === id);
+}
+/** True until the contractor's projects have been fetched for the first time. */
+export function useSmetaLoading(): boolean {
+  useEffect(ensureLoaded, []);
+  const remote = useSyncExternalStore(subscribe, () => state.remote);
+  return remote === 'idle' || remote === 'loading';
+}
+export function useSmetaRemoteStatus(): RemoteStatus {
+  return useSyncExternalStore(subscribe, () => state.remote);
+}
+export function useSmetaSyncStatus(): SyncStatus {
+  return useSyncExternalStore(subscribe, () => state.sync);
+}
+export function useDemoVisible(): boolean {
+  return useSyncExternalStore(subscribe, () => state.visible !== state.server);
+}
+
+/** Clears everything cached for the previous Clerk user. */
+export function resetSmetaSession() {
+  saveTimers.forEach(t => window.clearTimeout(t));
+  saveTimers.clear(); dirty.clear(); editSeq.clear();
+  set({ server: [], remote: 'idle', sync: 'idle' });
+}
+
+/* ------------------------------------------------------------------ mutations */
 
 const nowISO = () => new Date().toISOString();
 
 function mutate(id: string, recipe: (draft: Project) => void) {
-  projects = projects.map(p => {
+  const apply = (list: Project[]) => list.map(p => {
     if (p.id !== id) return p;
     const draft = structuredClone(p);
     recipe(draft);
     draft.updatedAt = nowISO();
     return draft;
   });
-  emit();
+  if (state.demo.some(p => p.id === id)) { set({ demo: apply(state.demo) }); return; }
+  if (!state.server.some(p => p.id === id)) return;
+  set({ server: apply(state.server) });
+  scheduleSave(id);
 }
 
 function findLine(p: Project, lineId: string): { item: EstimateLineItem; index: number; sectionIndex: number } | null {
@@ -102,11 +245,32 @@ function findLine(p: Project, lineId: string): { item: EstimateLineItem; index: 
 const afterApproval = (p: Project) => p.status === 'client_approved' || p.status === 'sent';
 
 export type LinePatch = Partial<Pick<EstimateLineItem, 'name' | 'zone' | 'unit' | 'quantity' | 'materialUnitPrice' | 'laborUnitPrice' | 'additionalCost' | 'wastePercentage' | 'marginPercentage' | 'status'>>;
+export type ShareDetails = { clientName: string; phone: string; email?: string; message: string; notifyOnApprove: boolean; attachPdf: boolean };
 
 export const smeta = {
-  createProject(p: Project) { projects = [p, ...projects]; emit(); },
+  /** Saves a new project on the server and returns the stored copy (with its server id). */
+  async createProject(p: Project): Promise<Project> {
+    const saved = fromApi(await createSmetaProject(toInput(p)), p);
+    replaceServerProject(saved);
+    return saved;
+  },
 
-  resetDemo() { projects = createSeedProjects(); emit(); },
+  async deleteProject(id: string) {
+    if (state.demo.some(p => p.id === id)) { set({ demo: state.demo.filter(p => p.id !== id) }); return; }
+    await deleteSmetaProject(id);
+    dirty.delete(id);
+    set({ server: state.server.filter(p => p.id !== id) });
+  },
+
+  resetDemo() { set({ demo: seedDemo() }); },
+
+  setDemoVisible(visible: boolean) {
+    try { localStorage.setItem(SHOW_DEMO_KEY, visible ? '1' : '0'); } catch { /* preference stays in memory */ }
+    set({ showDemo: visible });
+  },
+
+  /** Retries failed background saves. */
+  retrySync() { [...dirty].forEach(id => { void flush(id); }); },
 
   updateProject(id: string, patch: Partial<Pick<Project, 'name' | 'completion' | 'defaultMarginPercentage' | 'client' | 'address'>>) {
     mutate(id, d => { Object.assign(d, patch); });
@@ -155,7 +319,7 @@ export const smeta = {
   },
 
   deleteLine(id: string, lineId: string): (() => void) | undefined {
-    const p = projects.find(x => x.id === id);
+    const p = findProject(id);
     const hit = p && findLine(p, lineId);
     if (!p || !hit) return undefined;
     const removed = structuredClone(hit.item);
@@ -248,27 +412,22 @@ export const smeta = {
     mutate(id, d => { const ph = d.photos.find(x => x.id === photoId); if (ph) ph.clientVisible = !ph.clientVisible; });
   },
 
-  /** Freezes the current estimate as the client-visible version and returns the share. */
-  shareEstimate(id: string, details: { clientName: string; phone: string; email?: string; message: string; notifyOnApprove: boolean; attachPdf: boolean }) {
-    mutate(id, d => {
-      const changed = !d.share || hasUnsentChanges(d);
-      if (d.share && changed) d.estimate.version = d.share.snapshot.version + 1;
-      d.estimate.sections.forEach(s => s.items.forEach(i => { if (i.status !== 'approved') i.status = 'approved'; }));
-      d.estimate.validUntil = addDaysISO(todayISO(), 30);
-      // The link stays stable across versions so a client's saved link always shows the latest sent version.
-      const token = d.share?.token ?? `${d.id.slice(0, 3)}-${Math.random().toString(36).slice(2, 10)}`;
-      d.share = {
-        token, createdAt: nowISO(), expiresAt: new Date(Date.now() + 30 * 864e5).toISOString(),
-        ...details, snapshot: structuredClone(d.estimate), snapshotProjectCosts: structuredClone(d.projectCosts), snapshotMargin: d.defaultMarginPercentage,
-      };
-      d.client = { name: details.clientName, phone: details.phone, email: details.email || d.client.email };
-      if (changed || d.status === 'draft' || d.status === 'revision_requested') d.status = 'sent';
-    });
-    return projects.find(p => p.id === id)?.share;
+  /**
+   * Freezes the current estimate as the client-visible version and returns the share.
+   * For saved projects the server creates the token, stores the snapshot and sends the notification.
+   */
+  async shareEstimate(id: string, details: ShareDetails): Promise<EstimateShare | undefined> {
+    if (state.demo.some(p => p.id === id)) return shareDemo(id, details);
+    if (!(await flush(id))) throw new Error('Unsaved changes could not be stored');
+    const saved = fromApi(await shareSmetaEstimate(id, { ...details, email: details.email || undefined }), findProject(id));
+    replaceServerProject(saved);
+    return saved.share;
   },
 
+  /* Demo-only client actions. Saved projects use the public API (see `shared.ts`). */
+
   approveByClient(token: string, who: { name: string; phone: string }) {
-    const p = projects.find(x => x.share?.token === token);
+    const p = state.demo.find(x => x.share?.token === token);
     if (!p?.share) return;
     const share = p.share;
     const total = projectTotals({ ...p, estimate: share.snapshot, projectCosts: share.snapshotProjectCosts, defaultMarginPercentage: share.snapshotMargin }).total;
@@ -277,14 +436,14 @@ export const smeta = {
   },
 
   requestRevision(token: string, who: { name: string; message: string }) {
-    const p = projects.find(x => x.share?.token === token);
+    const p = state.demo.find(x => x.share?.token === token);
     if (!p?.share) return;
     const version = p.share.snapshot.version;
     mutate(p.id, d => { d.revisionRequests.push({ id: uid('rv'), estimateVersion: version, createdAt: nowISO(), name: who.name, message: who.message }); d.status = 'revision_requested'; });
   },
 
   decideChangeByClient(token: string, coId: string, decision: 'approved' | 'rejected', note?: string) {
-    const p = projects.find(x => x.share?.token === token);
+    const p = state.demo.find(x => x.share?.token === token);
     if (!p) return;
     smeta.setChangeStatus(p.id, coId, decision, note);
   },
@@ -294,11 +453,46 @@ export const smeta = {
   },
 };
 
+function shareDemo(id: string, details: ShareDetails): EstimateShare | undefined {
+  mutate(id, d => {
+    const changed = !d.share || hasUnsentChanges(d);
+    if (d.share && changed) d.estimate.version = d.share.snapshot.version + 1;
+    d.estimate.sections.forEach(s => s.items.forEach(i => { if (i.status !== 'approved') i.status = 'approved'; }));
+    d.estimate.validUntil = addDaysISO(todayISO(), 30);
+    // The link stays stable across versions so a client's saved link always shows the latest sent version.
+    const token = d.share?.token ?? `${d.id.slice(0, 3)}-${Math.random().toString(36).slice(2, 10)}`;
+    d.share = {
+      token, createdAt: nowISO(), expiresAt: new Date(Date.now() + 30 * 864e5).toISOString(),
+      ...details, snapshot: structuredClone(d.estimate), snapshotProjectCosts: structuredClone(d.projectCosts), snapshotMargin: d.defaultMarginPercentage,
+    };
+    d.client = { name: details.clientName, phone: details.phone, email: details.email || d.client.email };
+    if (changed || d.status === 'draft' || d.status === 'revision_requested') d.status = 'sent';
+  });
+  return findProject(id)?.share;
+}
+
+/** Demo project shared under this token, if any (demo links only work in this browser). */
+export function findDemoShare(token: string): Project | undefined {
+  return state.demo.find(p => p.share?.token === token);
+}
+export function subscribeSmeta(listener: () => void) { return subscribe(listener); }
+
+/** JSON with sorted keys: snapshots read back from the database do not keep key order. */
+function stableJson(value: unknown, skip?: string): string {
+  if (Array.isArray(value)) return `[${value.map(v => stableJson(v, skip)).join(',')}]`;
+  if (value && typeof value === 'object') {
+    return `{${Object.entries(value as Record<string, unknown>)
+      .filter(([k, v]) => v !== undefined && k !== skip)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      .map(([k, v]) => `${JSON.stringify(k)}:${stableJson(v, skip)}`).join(',')}}`;
+  }
+  return JSON.stringify(value ?? null);
+}
+
 export function hasUnsentChanges(p: Project): boolean {
   if (!p.share) return false;
-  const strip = (x: unknown) => JSON.stringify(x, (k, v) => (k === 'status' ? undefined : v));
-  return strip(p.share.snapshot.sections) !== strip(p.estimate.sections)
-    || strip(p.share.snapshotProjectCosts) !== strip(p.projectCosts)
+  return stableJson(p.share.snapshot.sections, 'status') !== stableJson(p.estimate.sections, 'status')
+    || stableJson(p.share.snapshotProjectCosts) !== stableJson(p.projectCosts)
     || p.share.snapshotMargin !== p.defaultMarginPercentage;
 }
 

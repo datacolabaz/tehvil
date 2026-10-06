@@ -42,6 +42,7 @@ export function NewEstimatePage() {
   const [packagesTouched, setPackagesTouched] = useState(!!init.tpl);
   const [margin, setMargin] = useState(15);
   const [tried, setTried] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const set = <K extends keyof InfoForm>(k: K, v: InfoForm[K]) => {
     setInfo(i => ({ ...i, [k]: v }));
@@ -101,7 +102,8 @@ export function NewEstimatePage() {
     if (drawing && patch.area !== undefined) setDrawing(d => d && ({ ...d, measurements: d.measurements.map(m => m.roomId === id ? { ...m, value: patch.area!, status: 'edited' as const } : m) }));
   };
 
-  const create = () => {
+  const create = async () => {
+    if (creating) return;
     const now = new Date().toISOString();
     const district = info.address.split(',').map(s => s.trim()).find(s => s && !/^bakı$/i.test(s))?.replace(/\s+r-nu$/i, '') ?? 'Bakı';
     const fromDrawing = source === 'drawing' && drawing;
@@ -122,9 +124,15 @@ export function NewEstimatePage() {
       excluded: ['Mebel və məişət texnikası', 'Dekor elementləri', 'Bina idarəsinin icazə rüsumları'].concat(packages.has('metbex') ? [] : ['Mətbəx mebeli']),
       exports: [], createdAt: now, updatedAt: now,
     };
-    smeta.createProject(p);
-    toast('Smeta yaradıldı — sətirləri yoxlayın');
-    navigate(`/smeta/${p.id}?tab=${fromDrawing ? 'drawing' : 'estimate'}`);
+    setCreating(true);
+    try {
+      const saved = await smeta.createProject(p);
+      toast('Smeta yaradıldı — sətirləri yoxlayın');
+      navigate(`/smeta/${saved.id}?tab=${fromDrawing ? 'drawing' : 'estimate'}`);
+    } catch {
+      toast('Smeta saxlanılmadı. İnternet bağlantısını yoxlayıb yenidən cəhd edin.');
+      setCreating(false);
+    }
   };
 
   const days = area > 0 ? forecastDays(area, info.renovationKind, info.quality) : 0;
@@ -214,7 +222,7 @@ export function NewEstimatePage() {
 
         <div className="form-actions" style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 22, paddingTop: 16, borderTop: '1px solid #e8e5dc' }}>
           {step > 0 ? <Button variant="secondary" onClick={() => go(step - 1)}><ArrowLeft size={16} />Geri</Button> : <Button variant="quiet" onClick={() => navigate('/smeta')}>Ləğv et</Button>}
-          {step < 3 ? <Button onClick={next} testId="button-wizard-next">Davam et<ArrowRight size={16} /></Button> : <Button onClick={create} testId="button-create-estimate"><CheckCircle2 size={16} />Smeta yarat</Button>}
+          {step < 3 ? <Button onClick={next} testId="button-wizard-next">Davam et<ArrowRight size={16} /></Button> : <Button onClick={() => { void create(); }} disabled={creating} testId="button-create-estimate"><CheckCircle2 size={16} />Smeta yarat</Button>}
         </div>
       </section>
 
