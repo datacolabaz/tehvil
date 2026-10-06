@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { Fragment, Suspense, lazy, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
@@ -35,11 +35,6 @@ import { PaymentsPage } from '@/pages/payments-page';
 import { TimelinePage, ActivityItem } from '@/pages/timeline-page';
 import { PassportPage } from '@/pages/passport-page';
 import { SharedPassportPage } from '@/pages/shared-passport-page';
-import { SmetaDashboardPage } from '@/pages/smeta/dashboard-page';
-import { NewEstimatePage } from '@/pages/smeta/new-estimate-page';
-import { EstimateDetailPage } from '@/pages/smeta/estimate-page';
-import { PublicEstimatePage } from '@/pages/smeta/public-estimate-page';
-import { EstimatePrintPage } from '@/pages/smeta/print-page';
 import { useSmetaProject } from '@/lib/smeta/store';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -47,6 +42,12 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import './index.css';
 import './smeta.css';
+
+const SmetaDashboardPage = lazy(() => import('@/pages/smeta/dashboard-page').then(m => ({ default: m.SmetaDashboardPage })));
+const NewEstimatePage = lazy(() => import('@/pages/smeta/new-estimate-page').then(m => ({ default: m.NewEstimatePage })));
+const EstimateDetailPage = lazy(() => import('@/pages/smeta/estimate-page').then(m => ({ default: m.EstimateDetailPage })));
+const PublicEstimatePage = lazy(() => import('@/pages/smeta/public-estimate-page').then(m => ({ default: m.PublicEstimatePage })));
+const EstimatePrintPage = lazy(() => import('@/pages/smeta/print-page').then(m => ({ default: m.EstimatePrintPage })));
 
 const queryClient = new QueryClient({ mutationCache: new MutationCache({ onError: e => emitFeedback(errorToMsg(e)) }), defaultOptions: { queries: { retry: 1, staleTime: 20_000, refetchOnWindowFocus: true } } });
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -231,7 +232,7 @@ function Overview(p:any) {
 function NewRoute({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <CreateProjectPage lang={lang} change={change} t={t}/>; }
 type ShellProps = { lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string };
 function SmetaShell({ crumbs, children, ...shell }: ShellProps & { crumbs?: Crumb[]; children: ReactNode }) {
-  return <Protected t={shell.t}><AppShell {...shell} active="smeta" crumbs={[{ label: 'AI Smeta', href: crumbs?.length ? '/smeta' : undefined }, ...(crumbs || [])]}>{children}</AppShell></Protected>;
+  return <Protected t={shell.t}><AppShell {...shell} active="smeta" crumbs={[{ label: 'AI Smeta', href: crumbs?.length ? '/smeta' : undefined }, ...(crumbs || [])]}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
 }
 function SmetaDetailRoute({ projectId, ...shell }: ShellProps & { projectId: string }) {
   const project = useSmetaProject(projectId);
@@ -289,10 +290,10 @@ function ClerkRoutes() {
       <Route path="/projects/:projectId/passport" component={()=> <ProjectRoute section="passport" lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/projects/:projectId" component={()=> <ProjectRoute lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/invites/accept" component={()=> <InvitationPage lang={lang} change={changeLang} t={t}/>}/>
-      <Route path="/estimate/:publicToken">{params => <PublicEstimatePage token={params.publicToken}/>}</Route>
+      <Route path="/estimate/:publicToken">{params => <Suspense fallback={<Loading t={t}/>}><PublicEstimatePage token={params.publicToken}/></Suspense>}</Route>
       <Route path="/smeta">{() => <SmetaShell lang={lang} change={changeLang} t={t}><SmetaDashboardPage/></SmetaShell>}</Route>
       <Route path="/smeta/new">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Yeni smeta' }]}><NewEstimatePage/></SmetaShell>}</Route>
-      <Route path="/smeta/:projectId/print">{params => <Protected t={t}><EstimatePrintPage projectId={params.projectId}/></Protected>}</Route>
+      <Route path="/smeta/:projectId/print">{params => <Protected t={t}><Suspense fallback={<Loading t={t}/>}><EstimatePrintPage projectId={params.projectId}/></Suspense></Protected>}</Route>
       <Route path="/smeta/:projectId">{params => <SmetaDetailRoute projectId={params.projectId} lang={lang} change={changeLang} t={t}/>}</Route>
       <Route component={NotFound}/>
     </Switch><Toaster/><FeedbackBanner t={t}/></QueryClientProvider>
