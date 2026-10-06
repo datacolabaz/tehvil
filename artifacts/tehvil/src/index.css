@@ -164,3 +164,8 @@
 .landing-legal { order:4;width:100%;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px; }
 .landing-legal a { color:#66766f;text-decoration:underline;text-underline-offset:3px; }
 .landing-legal a:hover { color:#1d4339; }
+
+/* Landing footer contact */
+.landing-contact { order:5;width:100%;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;font-style:normal;color:#66766f; }
+.landing-contact a { color:#1d4339;font-weight:600;text-decoration:none; }
+.landing-contact a:hover { text-decoration:underline; }
