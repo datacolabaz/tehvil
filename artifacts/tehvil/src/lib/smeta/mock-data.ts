@@ -10,6 +10,8 @@ import type {
 } from './types';
 
 const CONTRACTOR = { name: 'Rəşad Hüseynov', company: 'RH Təmir Studiyası', phone: '+994 50 412 37 80', email: 'info@rhtemir.az', experienceYears: 9, completedProjects: 64, rating: 4.8 };
+/** Signed-in contractor profile used for new estimates. TODO(api): load from the company profile. */
+export const DEFAULT_CONTRACTOR = CONTRACTOR;
 
 const market = (updatedAt = '2026-10-04', reference = 'Bakı tikinti bazarları, orta qiymət'): PriceSource => ({ kind: 'market', reference, updatedAt });
 const contractor = (updatedAt = '2026-09-08'): PriceSource => ({ kind: 'contractor', reference: 'Podratçının qiymət cədvəli', updatedAt });

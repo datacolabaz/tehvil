@@ -239,8 +239,10 @@ export const smeta = {
     mutate(id, d => { const e = d.expenses.find(x => x.id === expenseId); if (e) e.paymentStatus = paymentStatus; });
   },
 
-  addPhoto(id: string, photo: Omit<PhotoEvidence, 'id'>) {
-    mutate(id, d => { d.photos.unshift({ ...photo, id: uid('ph') }); });
+  addPhoto(id: string, photo: Omit<PhotoEvidence, 'id'>): string {
+    const photoId = uid('ph');
+    mutate(id, d => { d.photos.unshift({ ...photo, id: photoId }); });
+    return photoId;
   },
   togglePhotoVisibility(id: string, photoId: string) {
     mutate(id, d => { const ph = d.photos.find(x => x.id === photoId); if (ph) ph.clientVisible = !ph.clientVisible; });
