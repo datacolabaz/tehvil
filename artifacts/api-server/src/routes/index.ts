@@ -9,10 +9,13 @@ import projectsRouter from "./projects";
 import scopeRouter from "./scope";
 import storageRouter from "./storage";
 import lifecycleRouter from "./projectLifecycle";
+import sharedEstimatesRouter from "./sharedEstimates";
+import smetaRouter from "./smeta";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(sharedEstimatesRouter);
 router.use(storageRouter);
 router.use(lifecycleRouter);
 router.use(requireAuth);
@@ -22,5 +25,6 @@ router.use(changesRouter);
 router.use(milestonesRouter);
 router.use(paymentsRouter);
 router.use(activityRouter);
+router.use(smetaRouter);
 
 export default router;
