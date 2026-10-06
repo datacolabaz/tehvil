@@ -1,11 +1,11 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { Fragment, Suspense, lazy, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { Route, Switch, Link, Redirect, Router as WouterRouter, useLocation } from 'wouter';
 import {
-  ArrowDownLeft, ArrowRight, ArrowUpRight, Check, CheckCircle2, ChevronDown, ChevronRight,
+  ArrowDownLeft, ArrowRight, ArrowUpRight, Calculator, Check, CheckCircle2, ChevronDown, ChevronRight,
   ClipboardCheck, Clock3, DoorOpen, FileCheck2, FilePlus2, FileText, Home, ImagePlus,
   LayoutDashboard, ListChecks, LoaderCircle, LogOut, Menu, Plus, ShieldCheck,
   WalletCards, X,
@@ -35,11 +35,19 @@ import { PaymentsPage } from '@/pages/payments-page';
 import { TimelinePage, ActivityItem } from '@/pages/timeline-page';
 import { PassportPage } from '@/pages/passport-page';
 import { SharedPassportPage } from '@/pages/shared-passport-page';
+import { useSmetaProject } from '@/lib/smeta/store';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import './index.css';
+import './smeta.css';
+
+const SmetaDashboardPage = lazy(() => import('@/pages/smeta/dashboard-page').then(m => ({ default: m.SmetaDashboardPage })));
+const NewEstimatePage = lazy(() => import('@/pages/smeta/new-estimate-page').then(m => ({ default: m.NewEstimatePage })));
+const EstimateDetailPage = lazy(() => import('@/pages/smeta/estimate-page').then(m => ({ default: m.EstimateDetailPage })));
+const PublicEstimatePage = lazy(() => import('@/pages/smeta/public-estimate-page').then(m => ({ default: m.PublicEstimatePage })));
+const EstimatePrintPage = lazy(() => import('@/pages/smeta/print-page').then(m => ({ default: m.EstimatePrintPage })));
 
 const queryClient = new QueryClient({ mutationCache: new MutationCache({ onError: e => emitFeedback(errorToMsg(e)) }), defaultOptions: { queries: { retry: 1, staleTime: 20_000, refetchOnWindowFocus: true } } });
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -63,11 +71,13 @@ function useLanguage() {
 function Brand({ inverse = false }: { inverse?: boolean }) {
   return <Link href="/" className={`brand ${inverse ? 'inverse' : ''}`} data-testid="link-brand"><span className="brand-mark">t.</span><span>Təhvil</span></Link>;
 }
-function AppShell({ children, project, projectId, active, lang, change, t }: { children: ReactNode; project?: Project; projectId?: string; active?: string; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string }) {
+type Crumb = { label: string; href?: string };
+function AppShell({ children, project, projectId, active, crumbs, lang, change, t }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string }) {
   const [open, setOpen] = useState(false);
   const { signOut } = useClerk(); const { user } = useUser();
-  const nav = [
+  const nav: { href: string; icon: typeof Home; key: TKey; badge?: boolean }[] = [
     { href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' as const },
+    { href: '/smeta', icon: Calculator, key: 'smeta' as const, badge: true },
     ...(projectId ? [
       { href: `/projects/${projectId}`, icon: Home, key: 'projects' as const },
       { href: `/projects/${projectId}/scope`, icon: ListChecks, key: 'scope' as const },
@@ -82,10 +92,10 @@ function AppShell({ children, project, projectId, active, lang, change, t }: { c
     <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}><div className="sidebar-head"><Brand inverse/><button className="mobile-close" onClick={() => setOpen(false)} aria-label={t('close')}><X size={18}/></button></div>
       {project && <div className="project-switcher"><span className="project-symbol">⌂</span><div><small>{t('projects')}</small><strong>{project.name}</strong></div><ChevronDown size={14}/></div>}
       <div className="sidebar-label">{projectId ? project?.name || t('projects') : t('dashboard')}</div>
-      <nav className="side-nav">{nav.map(({ href, icon: Icon, key }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${active === key || (!active && key === 'dashboard') ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{t(key)}</span>{active === key && <span className="nav-active-dot"/>}</Link>)}</nav>
+      <nav className="side-nav">{nav.map(({ href, icon: Icon, key, badge }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${active === key || (!active && key === 'dashboard') ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{t(key)}</span>{badge && <span className="nav-badge">{t('newBadge')}</span>}{active === key && <span className="nav-active-dot"/>}</Link>)}</nav>
       <div className="sidebar-bottom"><div className="privacy-note"><ShieldCheck size={17}/><p>{t('disclaimer')}</p></div><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
     </aside>
-    <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs"><Link href="/dashboard">{t('dashboard')}</Link>{project && <><ChevronRight size={13}/><span>{project.name}</span></>}</div><div className="topbar-tools"><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
+    <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs"><Link href="/dashboard">{t('dashboard')}</Link>{project && <><ChevronRight size={13}/><span>{project.name}</span></>}{crumbs?.map((c, i) => <Fragment key={i}><ChevronRight size={13}/>{c.href ? <Link href={c.href}>{c.label}</Link> : <span>{c.label}</span>}</Fragment>)}</div><div className="topbar-tools"><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
       <main className="page-content">{children}</main>
     </div>{open && <button className="scrim" aria-label={t('close')} onClick={() => setOpen(false)}/>}
   </div>;
@@ -127,7 +137,7 @@ function DashboardContent({ lang, change, t }: { lang: Lang; change:(v:Lang)=>vo
   if (isLoading) return <AppShell lang={lang} change={change} t={t}><Loading t={t}/></AppShell>;
   return <AppShell lang={lang} change={change} t={t}><PageHeading eyebrow={t('eyWorkspace')} title={t('welcome')} description={t('pending')} action={<Link href="/projects/new" className="button button-primary"><Plus size={17}/>{t('newProject')}</Link>}/>
     {isError ? <ErrorNotice t={t} retry={() => refetch()}/> : projects?.length ? <div className="dashboard-grid"><section className="project-list-area"><div className="section-head"><div><div className="eyebrow">{t('active')}</div><h2>{t('projects')}</h2></div><span className="count-chip">{projects.length.toString().padStart(2,'0')}</span></div>{projects.map((project, i) => <ProjectCard key={project.id} project={project} lang={lang} t={t} index={i}/>)}</section>
-      <aside className="dashboard-aside"><div className="aside-panel"><div className="eyebrow">{t('actions')}</div><h3>{t('pending')}</h3>{projects.slice(0,2).map((p, i) => <Link href={`/projects/${p.id}`} className="action-link" key={p.id}><span className={`action-icon action-icon-${i}`}><ClipboardCheck size={16}/></span><span><strong>{p.name}</strong><small>{roleLabel(p.participantRole,t)} · {p.city}</small></span><ArrowUpRight size={14}/></Link>)}<div className="aside-foot"><ShieldCheck size={15}/>{t('disclaimer')}</div></div><div className="aside-stat"><span className="eyebrow">{t('history')}</span><strong>{projects.length} <small>{t('projects').toLowerCase()}</small></strong><span>{t('trust')}</span></div></aside>
+      <aside className="dashboard-aside"><div className="aside-panel"><div className="eyebrow">{t('actions')}</div><h3>{t('pending')}</h3>{projects.slice(0,2).map((p, i) => <Link href={`/projects/${p.id}`} className="action-link" key={p.id}><span className={`action-icon action-icon-${i}`}><ClipboardCheck size={16}/></span><span><strong>{p.name}</strong><small>{roleLabel(p.participantRole,t)} · {p.city}</small></span><ArrowUpRight size={14}/></Link>)}<div className="aside-foot"><ShieldCheck size={15}/>{t('disclaimer')}</div></div><div className="aside-stat"><span className="eyebrow">{t('history')}</span><strong>{projects.length} <small>{t('projects').toLowerCase()}</small></strong><span>{t('trust')}</span></div><Link href="/smeta" className="passport-promo" data-testid="link-smeta-promo"><Calculator size={19}/><div><strong>{t('smeta')}</strong><small>{t('smetaPromo')}</small></div><ArrowUpRight size={15}/></Link></aside>
     </div> : <div className="empty-projects"><div className="empty-illustration"><div className="empty-window"><div/><div/><div/></div><DoorOpen size={36}/></div><span className="eyebrow">{t('active')}</span><h2 className="font-display">{t('noProjects')}</h2><p>{t('noProjectsText')}</p><Link href="/projects/new" className="button button-primary"><Plus size={17}/>{t('createFirst')}</Link></div>}
   </AppShell>;
 }
@@ -220,6 +230,14 @@ function Overview(p:any) {
     </div></>;
 }
 function NewRoute({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <CreateProjectPage lang={lang} change={change} t={t}/>; }
+type ShellProps = { lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string };
+function SmetaShell({ crumbs, children, ...shell }: ShellProps & { crumbs?: Crumb[]; children: ReactNode }) {
+  return <Protected t={shell.t}><AppShell {...shell} active="smeta" crumbs={[{ label: 'AI Smeta', href: crumbs?.length ? '/smeta' : undefined }, ...(crumbs || [])]}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
+}
+function SmetaDetailRoute({ projectId, ...shell }: ShellProps & { projectId: string }) {
+  const project = useSmetaProject(projectId);
+  return <SmetaShell {...shell} crumbs={project ? [{ label: project.name }] : []}><EstimateDetailPage projectId={projectId}/></SmetaShell>;
+}
 function InvitationPage({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) {
   const accept=useAcceptInvitation();const [,setLocation]=useLocation();const token=new URLSearchParams(window.location.search).get('token')||'';const [typed,setTyped]=useState(token);
   return <Protected t={t}><AppShell lang={lang} change={change} t={t}><div className="invite-page"><div className="invite-mark"><FileCheck2 size={25}/></div><div className="eyebrow">{t('eyAccess')}</div><h1 className="font-display">{t('acceptInvite')}</h1><p>{t('trust')}</p><form onSubmit={e=>{e.preventDefault();accept.mutate({data:{token:typed}},{onSuccess:()=>{setLocation('/dashboard');}});}}><Field label={t('invitationToken')} name="invite-token" required value={typed} onChange={setTyped}/><Button type="submit" disabled={accept.isPending}>{t('accept')}<ArrowRight size={15}/></Button></form>{accept.isError&&<p className="form-error">{t('error')}</p>}</div></AppShell></Protected>;
@@ -272,6 +290,11 @@ function ClerkRoutes() {
       <Route path="/projects/:projectId/passport" component={()=> <ProjectRoute section="passport" lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/projects/:projectId" component={()=> <ProjectRoute lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/invites/accept" component={()=> <InvitationPage lang={lang} change={changeLang} t={t}/>}/>
+      <Route path="/estimate/:publicToken">{params => <Suspense fallback={<Loading t={t}/>}><PublicEstimatePage token={params.publicToken}/></Suspense>}</Route>
+      <Route path="/smeta">{() => <SmetaShell lang={lang} change={changeLang} t={t}><SmetaDashboardPage/></SmetaShell>}</Route>
+      <Route path="/smeta/new">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Yeni smeta' }]}><NewEstimatePage/></SmetaShell>}</Route>
+      <Route path="/smeta/:projectId/print">{params => <Protected t={t}><Suspense fallback={<Loading t={t}/>}><EstimatePrintPage projectId={params.projectId}/></Suspense></Protected>}</Route>
+      <Route path="/smeta/:projectId">{params => <SmetaDetailRoute projectId={params.projectId} lang={lang} change={changeLang} t={t}/>}</Route>
       <Route component={NotFound}/>
     </Switch><Toaster/><FeedbackBanner t={t}/></QueryClientProvider>
   </ClerkProvider>;
