@@ -151,7 +151,7 @@
 .partner-tile:nth-child(even):hover,.partner-tile:nth-child(even):focus-visible { transform:translateY(-10px) rotate(1.5deg) scale(1.03); }
 .partner-tile:hover .partner-fill,.partner-tile:focus-visible .partner-fill { clip-path:circle(150% at 50% 100%); }
 .partner-tile:hover .partner-corner,.partner-tile:focus-visible .partner-corner { transform:rotate(45deg) scale(1.1);background:#ddc899;color:#173c33; }
-.partner-tile:hover .partner-logo,.partner-tile:focus-visible .partner-logo { transform:translateY(-12px) scale(1.12) rotate(6deg);background:#f7f4ea;border-radius:50%;color:#1d4339; }
+.partner-tile:hover .partner-logo,.partner-tile:focus-visible .partner-logo { transform:translateY(-12px) scale(1.14);background:#f7f4ea;color:#1d4339; }
 .partner-tile:hover .partner-name,.partner-tile:focus-visible .partner-name { transform:translateY(-10px); }
 .partner-tile:hover .partner-domain,.partner-tile:focus-visible .partner-domain { opacity:0;transform:translateY(-10px); }
 .partner-tile:hover .partner-visit,.partner-tile:focus-visible .partner-visit { opacity:1;transform:translateY(0); }
