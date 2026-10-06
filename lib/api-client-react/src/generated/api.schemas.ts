@@ -1588,6 +1588,22 @@ export type SharedEstimateApproval = {
   name: string;
 };
 
+/**
+ * Public-safe company header, frozen when the estimate is sent. No team members, owner ids or internal defaults.
+ */
+export interface SharedEstimateCompany {
+  name: string;
+  logoUrl?: string;
+  phone?: string;
+  email?: string;
+  city?: string;
+  serviceArea?: string;
+  website?: string;
+  instagram?: string;
+  services: string[];
+  paymentTermsNote?: string;
+}
+
 export interface SharedEstimate {
   project: SharedEstimateProject;
   contractor: SharedEstimateContractor;
@@ -1601,6 +1617,7 @@ export interface SharedEstimate {
   payments: SharedEstimatePaymentsItem[];
   approval?: SharedEstimateApproval;
   revisionRequestedAt?: string;
+  company?: SharedEstimateCompany;
 }
 
 export interface SharedEstimateApprovalInput {
@@ -1648,6 +1665,326 @@ export interface SharedChangeOrderDecisionInput {
   decision: SharedChangeOrderDecisionInputDecision;
   /** @maxLength 500 */
   note?: string;
+}
+
+export type ContractorPlan = typeof ContractorPlan[keyof typeof ContractorPlan];
+
+
+export const ContractorPlan = {
+  baslangic: 'baslangic',
+  pesekar: 'pesekar',
+  biznes: 'biznes',
+} as const;
+
+export type ContractorBusinessType = typeof ContractorBusinessType[keyof typeof ContractorBusinessType];
+
+
+export const ContractorBusinessType = {
+  renovation_company: 'renovation_company',
+  foreman: 'foreman',
+  design_studio: 'design_studio',
+  construction_company: 'construction_company',
+  project_manager: 'project_manager',
+  other: 'other',
+} as const;
+
+export type ContractorMonthlyProjects = typeof ContractorMonthlyProjects[keyof typeof ContractorMonthlyProjects];
+
+
+export const ContractorMonthlyProjects = {
+  '1-2': '1-2',
+  '3-5': '3-5',
+  '6-10': '6-10',
+  '10+': '10+',
+} as const;
+
+export type ContractorChallenge = typeof ContractorChallenge[keyof typeof ContractorChallenge];
+
+
+export const ContractorChallenge = {
+  estimates: 'estimates',
+  client_approval: 'client_approval',
+  change_orders: 'change_orders',
+  expenses: 'expenses',
+  photo_handover: 'photo_handover',
+} as const;
+
+export type CompanyPaymentTerms = typeof CompanyPaymentTerms[keyof typeof CompanyPaymentTerms];
+
+
+export const CompanyPaymentTerms = {
+  '30-40-30': '30-40-30',
+  '50-50': '50-50',
+  '30-30-30-10': '30-30-30-10',
+  '100-end': '100-end',
+} as const;
+
+export interface CompanyTeamMember {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+  /** @maxLength 80 */
+  role: string;
+}
+
+export interface CompanyProfile {
+  id: string;
+  companyName: string;
+  description: string;
+  city: string;
+  serviceArea: string;
+  phone: string;
+  email: string;
+  website?: string;
+  instagram?: string;
+  services: string[];
+  teamMembers: CompanyTeamMember[];
+  logoUrl?: string;
+  defaultPaymentTerms: CompanyPaymentTerms;
+  paymentTermsNote: string;
+  defaultValidityDays: number;
+  /** @nullable */
+  defaultWastePercentage: number | null;
+  defaultMarginPercentage: number;
+  /** Name, phone and city are filled in */
+  complete: boolean;
+  updatedAt: string;
+}
+
+export interface CompanyProfileInput {
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  companyName: string;
+  /** @maxLength 1000 */
+  description: string;
+  /** @maxLength 80 */
+  city: string;
+  /** @maxLength 200 */
+  serviceArea: string;
+  /**
+     * @maxLength 32
+     * @pattern ^[+0-9 ()-]*$
+     */
+  phone: string;
+  /** @maxLength 254 */
+  email: string;
+  /** @maxLength 250 */
+  website?: string;
+  /** @maxLength 120 */
+  instagram?: string;
+  /**
+     * @maxItems 20
+     * @items.minLength 1
+     * @items.maxLength 60
+     */
+  services: string[];
+  /** @maxItems 30 */
+  teamMembers: CompanyTeamMember[];
+  defaultPaymentTerms: CompanyPaymentTerms;
+  /** @maxLength 500 */
+  paymentTermsNote: string;
+  /**
+     * @minimum 7
+     * @maximum 90
+     */
+  defaultValidityDays: number;
+  /**
+     * @minimum 0
+     * @maximum 0.5
+     * @nullable
+     */
+  defaultWastePercentage: number | null;
+  /**
+     * @minimum 0
+     * @maximum 0.6
+     */
+  defaultMarginPercentage: number;
+}
+
+export type CompanyLogoInputContentType = typeof CompanyLogoInputContentType[keyof typeof CompanyLogoInputContentType];
+
+
+export const CompanyLogoInputContentType = {
+  'image/png': 'image/png',
+  'image/jpeg': 'image/jpeg',
+  'image/webp': 'image/webp',
+} as const;
+
+export interface CompanyLogoInput {
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  objectPath: string;
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  originalName: string;
+  contentType: CompanyLogoInputContentType;
+  /**
+     * @minimum 1
+     * @maximum 2097152
+     */
+  size: number;
+}
+
+export type ContractorOnboardingInputStatus = typeof ContractorOnboardingInputStatus[keyof typeof ContractorOnboardingInputStatus];
+
+
+export const ContractorOnboardingInputStatus = {
+  pending: 'pending',
+  completed: 'completed',
+  skipped: 'skipped',
+} as const;
+
+export interface ContractorOnboardingInput {
+  /** @maxLength 120 */
+  fullName?: string;
+  /**
+     * @maxLength 32
+     * @pattern ^[+0-9 ()-]*$
+     */
+  phone?: string;
+  businessType?: ContractorBusinessType;
+  monthlyProjects?: ContractorMonthlyProjects;
+  mainChallenge?: ContractorChallenge;
+  /**
+     * @minimum 2
+     * @maximum 4
+     */
+  step?: number;
+  status?: ContractorOnboardingInputStatus;
+  termsAccepted?: boolean;
+  /** @maxLength 40 */
+  signupSource?: string;
+}
+
+export interface ContractorChecklistInput {
+  dismissed: boolean;
+}
+
+export type ContractorAccountOnboardingStatus = typeof ContractorAccountOnboardingStatus[keyof typeof ContractorAccountOnboardingStatus];
+
+
+export const ContractorAccountOnboardingStatus = {
+  pending: 'pending',
+  completed: 'completed',
+  skipped: 'skipped',
+} as const;
+
+export type ContractorAccountOnboarding = {
+  status: ContractorAccountOnboardingStatus;
+  step: number;
+  fullName?: string;
+  phone?: string;
+  businessType?: ContractorBusinessType;
+  monthlyProjects?: ContractorMonthlyProjects;
+  mainChallenge?: ContractorChallenge;
+  completedAt?: string;
+};
+
+export type ContractorAccountPlanSource = typeof ContractorAccountPlanSource[keyof typeof ContractorAccountPlanSource];
+
+
+export const ContractorAccountPlanSource = {
+  default: 'default',
+  legacy: 'legacy',
+  manual: 'manual',
+} as const;
+
+export type ContractorAccountPlan = {
+  id: ContractorPlan;
+  source: ContractorAccountPlanSource;
+};
+
+export type ContractorAccountChecklistItems = {
+  companyProfile: boolean;
+  firstEstimate: boolean;
+  clientAdded: boolean;
+  estimateShared: boolean;
+  photoEvidence: boolean;
+};
+
+export type ContractorAccountChecklist = {
+  dismissed: boolean;
+  items: ContractorAccountChecklistItems;
+  /** A client approved at least one estimate */
+  firstApproval: boolean;
+};
+
+export type ContractorAccountUsage = {
+  smetaProjects: number;
+};
+
+export interface ContractorAccount {
+  onboarding: ContractorAccountOnboarding;
+  plan: ContractorAccountPlan;
+  checklist: ContractorAccountChecklist;
+  usage: ContractorAccountUsage;
+  profile?: CompanyProfile;
+}
+
+export type LeadRequestInputPreferredContactTime = typeof LeadRequestInputPreferredContactTime[keyof typeof LeadRequestInputPreferredContactTime];
+
+
+export const LeadRequestInputPreferredContactTime = {
+  morning: 'morning',
+  afternoon: 'afternoon',
+  evening: 'evening',
+  any: 'any',
+} as const;
+
+export type LeadRequestInputSource = typeof LeadRequestInputSource[keyof typeof LeadRequestInputSource];
+
+
+export const LeadRequestInputSource = {
+  contractor_landing: 'contractor_landing',
+  pricing: 'pricing',
+  upgrade: 'upgrade',
+  plan_page: 'plan_page',
+} as const;
+
+export interface LeadRequestInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  fullName: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  companyName: string;
+  /**
+     * @minLength 9
+     * @maxLength 32
+     * @pattern ^[+0-9 ()-]+$
+     */
+  phone: string;
+  monthlyProjects: ContractorMonthlyProjects;
+  /**
+     * @minLength 2
+     * @maxLength 500
+     */
+  mainChallenge: string;
+  preferredContactTime: LeadRequestInputPreferredContactTime;
+  source: LeadRequestInputSource;
+  interestedPlan?: ContractorPlan;
+  /**
+     * Honeypot; must stay empty
+     * @maxLength 200
+     */
+  website?: string;
+}
+
+export interface LeadRequestResult {
+  id: string;
+  message: string;
 }
 
 export type GetSharedPassport200 = {

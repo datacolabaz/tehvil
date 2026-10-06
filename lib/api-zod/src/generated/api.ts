@@ -5500,7 +5500,19 @@ export const GetSharedEstimateResponse = zod.object({
   "approvedAt": zod.string().datetime({"offset":true}),
   "name": zod.string()
 }).optional(),
-  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional()
+  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional(),
+  "company": zod.object({
+  "name": zod.string(),
+  "logoUrl": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "email": zod.string().optional(),
+  "city": zod.string().optional(),
+  "serviceArea": zod.string().optional(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "paymentTermsNote": zod.string().optional()
+}).optional().describe('Public-safe company header, frozen when the estimate is sent. No team members, owner ids or internal defaults.')
 })
 
 
@@ -5622,7 +5634,19 @@ export const ApproveSharedEstimateResponse = zod.object({
   "approvedAt": zod.string().datetime({"offset":true}),
   "name": zod.string()
 }).optional(),
-  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional()
+  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional(),
+  "company": zod.object({
+  "name": zod.string(),
+  "logoUrl": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "email": zod.string().optional(),
+  "city": zod.string().optional(),
+  "serviceArea": zod.string().optional(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "paymentTermsNote": zod.string().optional()
+}).optional().describe('Public-safe company header, frozen when the estimate is sent. No team members, owner ids or internal defaults.')
 })
 
 
@@ -5741,7 +5765,19 @@ export const RequestSharedEstimateRevisionResponse = zod.object({
   "approvedAt": zod.string().datetime({"offset":true}),
   "name": zod.string()
 }).optional(),
-  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional()
+  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional(),
+  "company": zod.object({
+  "name": zod.string(),
+  "logoUrl": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "email": zod.string().optional(),
+  "city": zod.string().optional(),
+  "serviceArea": zod.string().optional(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "paymentTermsNote": zod.string().optional()
+}).optional().describe('Public-safe company header, frozen when the estimate is sent. No team members, owner ids or internal defaults.')
 })
 
 
@@ -5857,7 +5893,562 @@ export const DecideSharedChangeOrderResponse = zod.object({
   "approvedAt": zod.string().datetime({"offset":true}),
   "name": zod.string()
 }).optional(),
-  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional()
+  "revisionRequestedAt": zod.string().datetime({"offset":true}).optional(),
+  "company": zod.object({
+  "name": zod.string(),
+  "logoUrl": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "email": zod.string().optional(),
+  "city": zod.string().optional(),
+  "serviceArea": zod.string().optional(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "paymentTermsNote": zod.string().optional()
+}).optional().describe('Public-safe company header, frozen when the estimate is sent. No team members, owner ids or internal defaults.')
+})
+
+
+/**
+ * Creates the account on first use. Users who already had projects get the legacy plan and skip onboarding.
+ * @summary Onboarding state, plan, activation checklist and company profile of the signed-in user
+ */
+export const getContractorAccountResponseProfileTeamMembersItemNameMax = 120;
+
+export const getContractorAccountResponseProfileTeamMembersItemRoleMax = 80;
+
+
+
+export const GetContractorAccountResponse = zod.object({
+  "onboarding": zod.object({
+  "status": zod.enum(['pending', 'completed', 'skipped']),
+  "step": zod.number().int(),
+  "fullName": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "businessType": zod.enum(['renovation_company', 'foreman', 'design_studio', 'construction_company', 'project_manager', 'other']).optional(),
+  "monthlyProjects": zod.enum(['1-2', '3-5', '6-10', '10+']).optional(),
+  "mainChallenge": zod.enum(['estimates', 'client_approval', 'change_orders', 'expenses', 'photo_handover']).optional(),
+  "completedAt": zod.string().datetime({"offset":true}).optional()
+}),
+  "plan": zod.object({
+  "id": zod.enum(['baslangic', 'pesekar', 'biznes']),
+  "source": zod.enum(['default', 'legacy', 'manual'])
+}),
+  "checklist": zod.object({
+  "dismissed": zod.boolean(),
+  "items": zod.object({
+  "companyProfile": zod.boolean(),
+  "firstEstimate": zod.boolean(),
+  "clientAdded": zod.boolean(),
+  "estimateShared": zod.boolean(),
+  "photoEvidence": zod.boolean()
+}),
+  "firstApproval": zod.boolean().describe('A client approved at least one estimate')
+}),
+  "usage": zod.object({
+  "smetaProjects": zod.number().int()
+}),
+  "profile": zod.object({
+  "id": zod.string(),
+  "companyName": zod.string(),
+  "description": zod.string(),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "teamMembers": zod.array(zod.object({
+  "name": zod.string().min(1).max(getContractorAccountResponseProfileTeamMembersItemNameMax),
+  "role": zod.string().max(getContractorAccountResponseProfileTeamMembersItemRoleMax)
+})),
+  "logoUrl": zod.string().optional(),
+  "defaultPaymentTerms": zod.enum(['30-40-30', '50-50', '30-30-30-10', '100-end']),
+  "paymentTermsNote": zod.string(),
+  "defaultValidityDays": zod.number().int(),
+  "defaultWastePercentage": zod.number().nullable(),
+  "defaultMarginPercentage": zod.number(),
+  "complete": zod.boolean().describe('Name, phone and city are filled in'),
+  "updatedAt": zod.string().datetime({"offset":true})
+}).optional()
+})
+
+
+/**
+ * @summary Save onboarding answers and progress
+ */
+export const updateContractorOnboardingBodyFullNameMax = 120;
+
+export const updateContractorOnboardingBodyPhoneMax = 32;
+
+
+export const updateContractorOnboardingBodyPhoneRegExp = new RegExp('^[+0-9 ()-]*$');
+export const updateContractorOnboardingBodyStepMin = 2;
+export const updateContractorOnboardingBodyStepMax = 4;
+
+export const updateContractorOnboardingBodySignupSourceMax = 40;
+
+
+
+export const UpdateContractorOnboardingBody = zod.object({
+  "fullName": zod.string().max(updateContractorOnboardingBodyFullNameMax).optional(),
+  "phone": zod.string().max(updateContractorOnboardingBodyPhoneMax).regex(updateContractorOnboardingBodyPhoneRegExp).optional(),
+  "businessType": zod.enum(['renovation_company', 'foreman', 'design_studio', 'construction_company', 'project_manager', 'other']).optional(),
+  "monthlyProjects": zod.enum(['1-2', '3-5', '6-10', '10+']).optional(),
+  "mainChallenge": zod.enum(['estimates', 'client_approval', 'change_orders', 'expenses', 'photo_handover']).optional(),
+  "step": zod.number().int().min(updateContractorOnboardingBodyStepMin).max(updateContractorOnboardingBodyStepMax).optional(),
+  "status": zod.enum(['pending', 'completed', 'skipped']).optional(),
+  "termsAccepted": zod.boolean().optional(),
+  "signupSource": zod.string().max(updateContractorOnboardingBodySignupSourceMax).optional()
+})
+
+export const updateContractorOnboardingResponseProfileTeamMembersItemNameMax = 120;
+
+export const updateContractorOnboardingResponseProfileTeamMembersItemRoleMax = 80;
+
+
+
+export const UpdateContractorOnboardingResponse = zod.object({
+  "onboarding": zod.object({
+  "status": zod.enum(['pending', 'completed', 'skipped']),
+  "step": zod.number().int(),
+  "fullName": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "businessType": zod.enum(['renovation_company', 'foreman', 'design_studio', 'construction_company', 'project_manager', 'other']).optional(),
+  "monthlyProjects": zod.enum(['1-2', '3-5', '6-10', '10+']).optional(),
+  "mainChallenge": zod.enum(['estimates', 'client_approval', 'change_orders', 'expenses', 'photo_handover']).optional(),
+  "completedAt": zod.string().datetime({"offset":true}).optional()
+}),
+  "plan": zod.object({
+  "id": zod.enum(['baslangic', 'pesekar', 'biznes']),
+  "source": zod.enum(['default', 'legacy', 'manual'])
+}),
+  "checklist": zod.object({
+  "dismissed": zod.boolean(),
+  "items": zod.object({
+  "companyProfile": zod.boolean(),
+  "firstEstimate": zod.boolean(),
+  "clientAdded": zod.boolean(),
+  "estimateShared": zod.boolean(),
+  "photoEvidence": zod.boolean()
+}),
+  "firstApproval": zod.boolean().describe('A client approved at least one estimate')
+}),
+  "usage": zod.object({
+  "smetaProjects": zod.number().int()
+}),
+  "profile": zod.object({
+  "id": zod.string(),
+  "companyName": zod.string(),
+  "description": zod.string(),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "teamMembers": zod.array(zod.object({
+  "name": zod.string().min(1).max(updateContractorOnboardingResponseProfileTeamMembersItemNameMax),
+  "role": zod.string().max(updateContractorOnboardingResponseProfileTeamMembersItemRoleMax)
+})),
+  "logoUrl": zod.string().optional(),
+  "defaultPaymentTerms": zod.enum(['30-40-30', '50-50', '30-30-30-10', '100-end']),
+  "paymentTermsNote": zod.string(),
+  "defaultValidityDays": zod.number().int(),
+  "defaultWastePercentage": zod.number().nullable(),
+  "defaultMarginPercentage": zod.number(),
+  "complete": zod.boolean().describe('Name, phone and city are filled in'),
+  "updatedAt": zod.string().datetime({"offset":true})
+}).optional()
+})
+
+
+/**
+ * @summary Dismiss or reopen the activation checklist
+ */
+export const UpdateContractorChecklistBody = zod.object({
+  "dismissed": zod.boolean()
+})
+
+export const updateContractorChecklistResponseProfileTeamMembersItemNameMax = 120;
+
+export const updateContractorChecklistResponseProfileTeamMembersItemRoleMax = 80;
+
+
+
+export const UpdateContractorChecklistResponse = zod.object({
+  "onboarding": zod.object({
+  "status": zod.enum(['pending', 'completed', 'skipped']),
+  "step": zod.number().int(),
+  "fullName": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "businessType": zod.enum(['renovation_company', 'foreman', 'design_studio', 'construction_company', 'project_manager', 'other']).optional(),
+  "monthlyProjects": zod.enum(['1-2', '3-5', '6-10', '10+']).optional(),
+  "mainChallenge": zod.enum(['estimates', 'client_approval', 'change_orders', 'expenses', 'photo_handover']).optional(),
+  "completedAt": zod.string().datetime({"offset":true}).optional()
+}),
+  "plan": zod.object({
+  "id": zod.enum(['baslangic', 'pesekar', 'biznes']),
+  "source": zod.enum(['default', 'legacy', 'manual'])
+}),
+  "checklist": zod.object({
+  "dismissed": zod.boolean(),
+  "items": zod.object({
+  "companyProfile": zod.boolean(),
+  "firstEstimate": zod.boolean(),
+  "clientAdded": zod.boolean(),
+  "estimateShared": zod.boolean(),
+  "photoEvidence": zod.boolean()
+}),
+  "firstApproval": zod.boolean().describe('A client approved at least one estimate')
+}),
+  "usage": zod.object({
+  "smetaProjects": zod.number().int()
+}),
+  "profile": zod.object({
+  "id": zod.string(),
+  "companyName": zod.string(),
+  "description": zod.string(),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "teamMembers": zod.array(zod.object({
+  "name": zod.string().min(1).max(updateContractorChecklistResponseProfileTeamMembersItemNameMax),
+  "role": zod.string().max(updateContractorChecklistResponseProfileTeamMembersItemRoleMax)
+})),
+  "logoUrl": zod.string().optional(),
+  "defaultPaymentTerms": zod.enum(['30-40-30', '50-50', '30-30-30-10', '100-end']),
+  "paymentTermsNote": zod.string(),
+  "defaultValidityDays": zod.number().int(),
+  "defaultWastePercentage": zod.number().nullable(),
+  "defaultMarginPercentage": zod.number(),
+  "complete": zod.boolean().describe('Name, phone and city are filled in'),
+  "updatedAt": zod.string().datetime({"offset":true})
+}).optional()
+})
+
+
+/**
+ * @summary Create or update the company profile shown on client estimates
+ */
+export const saveCompanyProfileBodyCompanyNameMin = 2;
+export const saveCompanyProfileBodyCompanyNameMax = 160;
+
+export const saveCompanyProfileBodyDescriptionMax = 1000;
+
+export const saveCompanyProfileBodyCityMax = 80;
+
+export const saveCompanyProfileBodyServiceAreaMax = 200;
+
+export const saveCompanyProfileBodyPhoneMax = 32;
+
+
+export const saveCompanyProfileBodyPhoneRegExp = new RegExp('^[+0-9 ()-]*$');
+export const saveCompanyProfileBodyEmailMax = 254;
+
+export const saveCompanyProfileBodyWebsiteMax = 250;
+
+export const saveCompanyProfileBodyInstagramMax = 120;
+
+export const saveCompanyProfileBodyServicesItemMax = 60;
+
+export const saveCompanyProfileBodyServicesMax = 20;
+
+export const saveCompanyProfileBodyTeamMembersItemNameMax = 120;
+
+export const saveCompanyProfileBodyTeamMembersItemRoleMax = 80;
+
+export const saveCompanyProfileBodyTeamMembersMax = 30;
+
+export const saveCompanyProfileBodyPaymentTermsNoteMax = 500;
+
+export const saveCompanyProfileBodyDefaultValidityDaysMin = 7;
+export const saveCompanyProfileBodyDefaultValidityDaysMax = 90;
+
+export const saveCompanyProfileBodyDefaultWastePercentageMin = 0;
+export const saveCompanyProfileBodyDefaultWastePercentageMax = 0.5;
+
+export const saveCompanyProfileBodyDefaultMarginPercentageMin = 0;
+export const saveCompanyProfileBodyDefaultMarginPercentageMax = 0.6;
+
+
+
+export const SaveCompanyProfileBody = zod.object({
+  "companyName": zod.string().min(saveCompanyProfileBodyCompanyNameMin).max(saveCompanyProfileBodyCompanyNameMax),
+  "description": zod.string().max(saveCompanyProfileBodyDescriptionMax),
+  "city": zod.string().max(saveCompanyProfileBodyCityMax),
+  "serviceArea": zod.string().max(saveCompanyProfileBodyServiceAreaMax),
+  "phone": zod.string().max(saveCompanyProfileBodyPhoneMax).regex(saveCompanyProfileBodyPhoneRegExp),
+  "email": zod.string().max(saveCompanyProfileBodyEmailMax),
+  "website": zod.string().max(saveCompanyProfileBodyWebsiteMax).optional(),
+  "instagram": zod.string().max(saveCompanyProfileBodyInstagramMax).optional(),
+  "services": zod.array(zod.string().min(1).max(saveCompanyProfileBodyServicesItemMax)).max(saveCompanyProfileBodyServicesMax),
+  "teamMembers": zod.array(zod.object({
+  "name": zod.string().min(1).max(saveCompanyProfileBodyTeamMembersItemNameMax),
+  "role": zod.string().max(saveCompanyProfileBodyTeamMembersItemRoleMax)
+})).max(saveCompanyProfileBodyTeamMembersMax),
+  "defaultPaymentTerms": zod.enum(['30-40-30', '50-50', '30-30-30-10', '100-end']),
+  "paymentTermsNote": zod.string().max(saveCompanyProfileBodyPaymentTermsNoteMax),
+  "defaultValidityDays": zod.number().int().min(saveCompanyProfileBodyDefaultValidityDaysMin).max(saveCompanyProfileBodyDefaultValidityDaysMax),
+  "defaultWastePercentage": zod.number().min(saveCompanyProfileBodyDefaultWastePercentageMin).max(saveCompanyProfileBodyDefaultWastePercentageMax).nullable(),
+  "defaultMarginPercentage": zod.number().min(saveCompanyProfileBodyDefaultMarginPercentageMin).max(saveCompanyProfileBodyDefaultMarginPercentageMax)
+})
+
+export const saveCompanyProfileResponseProfileTeamMembersItemNameMax = 120;
+
+export const saveCompanyProfileResponseProfileTeamMembersItemRoleMax = 80;
+
+
+
+export const SaveCompanyProfileResponse = zod.object({
+  "onboarding": zod.object({
+  "status": zod.enum(['pending', 'completed', 'skipped']),
+  "step": zod.number().int(),
+  "fullName": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "businessType": zod.enum(['renovation_company', 'foreman', 'design_studio', 'construction_company', 'project_manager', 'other']).optional(),
+  "monthlyProjects": zod.enum(['1-2', '3-5', '6-10', '10+']).optional(),
+  "mainChallenge": zod.enum(['estimates', 'client_approval', 'change_orders', 'expenses', 'photo_handover']).optional(),
+  "completedAt": zod.string().datetime({"offset":true}).optional()
+}),
+  "plan": zod.object({
+  "id": zod.enum(['baslangic', 'pesekar', 'biznes']),
+  "source": zod.enum(['default', 'legacy', 'manual'])
+}),
+  "checklist": zod.object({
+  "dismissed": zod.boolean(),
+  "items": zod.object({
+  "companyProfile": zod.boolean(),
+  "firstEstimate": zod.boolean(),
+  "clientAdded": zod.boolean(),
+  "estimateShared": zod.boolean(),
+  "photoEvidence": zod.boolean()
+}),
+  "firstApproval": zod.boolean().describe('A client approved at least one estimate')
+}),
+  "usage": zod.object({
+  "smetaProjects": zod.number().int()
+}),
+  "profile": zod.object({
+  "id": zod.string(),
+  "companyName": zod.string(),
+  "description": zod.string(),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "teamMembers": zod.array(zod.object({
+  "name": zod.string().min(1).max(saveCompanyProfileResponseProfileTeamMembersItemNameMax),
+  "role": zod.string().max(saveCompanyProfileResponseProfileTeamMembersItemRoleMax)
+})),
+  "logoUrl": zod.string().optional(),
+  "defaultPaymentTerms": zod.enum(['30-40-30', '50-50', '30-30-30-10', '100-end']),
+  "paymentTermsNote": zod.string(),
+  "defaultValidityDays": zod.number().int(),
+  "defaultWastePercentage": zod.number().nullable(),
+  "defaultMarginPercentage": zod.number(),
+  "complete": zod.boolean().describe('Name, phone and city are filled in'),
+  "updatedAt": zod.string().datetime({"offset":true})
+}).optional()
+})
+
+
+/**
+ * @summary Attach a logo uploaded through /storage/uploads/request-url
+ */
+export const setCompanyLogoBodyObjectPathMax = 500;
+
+export const setCompanyLogoBodyOriginalNameMax = 255;
+
+export const setCompanyLogoBodySizeMax = 2097152;
+
+
+
+export const SetCompanyLogoBody = zod.object({
+  "objectPath": zod.string().min(1).max(setCompanyLogoBodyObjectPathMax),
+  "originalName": zod.string().min(1).max(setCompanyLogoBodyOriginalNameMax),
+  "contentType": zod.enum(['image/png', 'image/jpeg', 'image/webp']),
+  "size": zod.number().int().min(1).max(setCompanyLogoBodySizeMax)
+})
+
+export const setCompanyLogoResponseProfileTeamMembersItemNameMax = 120;
+
+export const setCompanyLogoResponseProfileTeamMembersItemRoleMax = 80;
+
+
+
+export const SetCompanyLogoResponse = zod.object({
+  "onboarding": zod.object({
+  "status": zod.enum(['pending', 'completed', 'skipped']),
+  "step": zod.number().int(),
+  "fullName": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "businessType": zod.enum(['renovation_company', 'foreman', 'design_studio', 'construction_company', 'project_manager', 'other']).optional(),
+  "monthlyProjects": zod.enum(['1-2', '3-5', '6-10', '10+']).optional(),
+  "mainChallenge": zod.enum(['estimates', 'client_approval', 'change_orders', 'expenses', 'photo_handover']).optional(),
+  "completedAt": zod.string().datetime({"offset":true}).optional()
+}),
+  "plan": zod.object({
+  "id": zod.enum(['baslangic', 'pesekar', 'biznes']),
+  "source": zod.enum(['default', 'legacy', 'manual'])
+}),
+  "checklist": zod.object({
+  "dismissed": zod.boolean(),
+  "items": zod.object({
+  "companyProfile": zod.boolean(),
+  "firstEstimate": zod.boolean(),
+  "clientAdded": zod.boolean(),
+  "estimateShared": zod.boolean(),
+  "photoEvidence": zod.boolean()
+}),
+  "firstApproval": zod.boolean().describe('A client approved at least one estimate')
+}),
+  "usage": zod.object({
+  "smetaProjects": zod.number().int()
+}),
+  "profile": zod.object({
+  "id": zod.string(),
+  "companyName": zod.string(),
+  "description": zod.string(),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "teamMembers": zod.array(zod.object({
+  "name": zod.string().min(1).max(setCompanyLogoResponseProfileTeamMembersItemNameMax),
+  "role": zod.string().max(setCompanyLogoResponseProfileTeamMembersItemRoleMax)
+})),
+  "logoUrl": zod.string().optional(),
+  "defaultPaymentTerms": zod.enum(['30-40-30', '50-50', '30-30-30-10', '100-end']),
+  "paymentTermsNote": zod.string(),
+  "defaultValidityDays": zod.number().int(),
+  "defaultWastePercentage": zod.number().nullable(),
+  "defaultMarginPercentage": zod.number(),
+  "complete": zod.boolean().describe('Name, phone and city are filled in'),
+  "updatedAt": zod.string().datetime({"offset":true})
+}).optional()
+})
+
+
+export const removeCompanyLogoResponseProfileTeamMembersItemNameMax = 120;
+
+export const removeCompanyLogoResponseProfileTeamMembersItemRoleMax = 80;
+
+
+
+export const RemoveCompanyLogoResponse = zod.object({
+  "onboarding": zod.object({
+  "status": zod.enum(['pending', 'completed', 'skipped']),
+  "step": zod.number().int(),
+  "fullName": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "businessType": zod.enum(['renovation_company', 'foreman', 'design_studio', 'construction_company', 'project_manager', 'other']).optional(),
+  "monthlyProjects": zod.enum(['1-2', '3-5', '6-10', '10+']).optional(),
+  "mainChallenge": zod.enum(['estimates', 'client_approval', 'change_orders', 'expenses', 'photo_handover']).optional(),
+  "completedAt": zod.string().datetime({"offset":true}).optional()
+}),
+  "plan": zod.object({
+  "id": zod.enum(['baslangic', 'pesekar', 'biznes']),
+  "source": zod.enum(['default', 'legacy', 'manual'])
+}),
+  "checklist": zod.object({
+  "dismissed": zod.boolean(),
+  "items": zod.object({
+  "companyProfile": zod.boolean(),
+  "firstEstimate": zod.boolean(),
+  "clientAdded": zod.boolean(),
+  "estimateShared": zod.boolean(),
+  "photoEvidence": zod.boolean()
+}),
+  "firstApproval": zod.boolean().describe('A client approved at least one estimate')
+}),
+  "usage": zod.object({
+  "smetaProjects": zod.number().int()
+}),
+  "profile": zod.object({
+  "id": zod.string(),
+  "companyName": zod.string(),
+  "description": zod.string(),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "services": zod.array(zod.string()),
+  "teamMembers": zod.array(zod.object({
+  "name": zod.string().min(1).max(removeCompanyLogoResponseProfileTeamMembersItemNameMax),
+  "role": zod.string().max(removeCompanyLogoResponseProfileTeamMembersItemRoleMax)
+})),
+  "logoUrl": zod.string().optional(),
+  "defaultPaymentTerms": zod.enum(['30-40-30', '50-50', '30-30-30-10', '100-end']),
+  "paymentTermsNote": zod.string(),
+  "defaultValidityDays": zod.number().int(),
+  "defaultWastePercentage": zod.number().nullable(),
+  "defaultMarginPercentage": zod.number(),
+  "complete": zod.boolean().describe('Name, phone and city are filled in'),
+  "updatedAt": zod.string().datetime({"offset":true})
+}).optional()
+})
+
+
+/**
+ * @summary Public company logo used on shared estimates
+ */
+export const GetCompanyLogoParams = zod.object({
+  "profileId": zod.coerce.string().uuid()
+})
+
+export const GetCompanyLogoResponse = zod.unknown()
+
+
+/**
+ * @summary Public demo / contact request (rate limited)
+ */
+export const createDemoRequestBodyFullNameMin = 2;
+export const createDemoRequestBodyFullNameMax = 120;
+
+export const createDemoRequestBodyCompanyNameMax = 160;
+
+export const createDemoRequestBodyPhoneMin = 9;
+export const createDemoRequestBodyPhoneMax = 32;
+
+
+export const createDemoRequestBodyPhoneRegExp = new RegExp('^[+0-9 ()-]+$');
+export const createDemoRequestBodyMainChallengeMin = 2;
+export const createDemoRequestBodyMainChallengeMax = 500;
+
+export const createDemoRequestBodyWebsiteMax = 200;
+
+
+
+export const CreateDemoRequestBody = zod.object({
+  "fullName": zod.string().min(createDemoRequestBodyFullNameMin).max(createDemoRequestBodyFullNameMax),
+  "companyName": zod.string().min(1).max(createDemoRequestBodyCompanyNameMax),
+  "phone": zod.string().min(createDemoRequestBodyPhoneMin).max(createDemoRequestBodyPhoneMax).regex(createDemoRequestBodyPhoneRegExp),
+  "monthlyProjects": zod.enum(['1-2', '3-5', '6-10', '10+']),
+  "mainChallenge": zod.string().min(createDemoRequestBodyMainChallengeMin).max(createDemoRequestBodyMainChallengeMax),
+  "preferredContactTime": zod.enum(['morning', 'afternoon', 'evening', 'any']),
+  "source": zod.enum(['contractor_landing', 'pricing', 'upgrade', 'plan_page']),
+  "interestedPlan": zod.enum(['baslangic', 'pesekar', 'biznes']).optional(),
+  "website": zod.string().max(createDemoRequestBodyWebsiteMax).optional().describe('Honeypot; must stay empty')
+})
+
+export const CreateDemoRequestResponse = zod.object({
+  "id": zod.string(),
+  "message": zod.string()
 })
 
 

@@ -19,3 +19,4 @@
 
 export * from "./renovation";
 export * from "./smeta";
+export * from "./contractor";

@@ -25,6 +25,11 @@ import type {
   ChangeOrder,
   ChangeOrderDecision,
   ChangeOrderInput,
+  CompanyLogoInput,
+  CompanyProfileInput,
+  ContractorAccount,
+  ContractorChecklistInput,
+  ContractorOnboardingInput,
   Dashboard,
   GetSharedPassport200,
   HandoverInput,
@@ -32,6 +37,8 @@ import type {
   Invitation,
   InvitationAcceptInput,
   InvitationInput,
+  LeadRequestInput,
+  LeadRequestResult,
   Milestone,
   MilestoneDecision,
   MilestoneInput,
@@ -4078,5 +4085,668 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDecideSharedChangeOrderMutationOptions(options));
+    }
+
+export const getGetContractorAccountUrl = () => {
+
+
+
+
+  return `/api/contractor/account`
+}
+
+/**
+ * Creates the account on first use. Users who already had projects get the legacy plan and skip onboarding.
+ * @summary Onboarding state, plan, activation checklist and company profile of the signed-in user
+ */
+export const getContractorAccount = async ( options?: Parameters<typeof customFetch>[1]): Promise<ContractorAccount> => {
+
+  return customFetch<ContractorAccount>(getGetContractorAccountUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetContractorAccountQueryKey = () => {
+    return [
+    `/api/contractor/account`
+    ] as const;
+    }
+
+
+export const getGetContractorAccountQueryOptions = <TData = Awaited<ReturnType<typeof getContractorAccount>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getContractorAccount>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContractorAccountQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContractorAccount>>> = ({ signal }) => getContractorAccount({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContractorAccount>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetContractorAccountQueryResult = NonNullable<Awaited<ReturnType<typeof getContractorAccount>>>
+export type GetContractorAccountQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Onboarding state, plan, activation checklist and company profile of the signed-in user
+ */
+
+export function useGetContractorAccount<TData = Awaited<ReturnType<typeof getContractorAccount>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getContractorAccount>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetContractorAccountQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateContractorOnboardingUrl = () => {
+
+
+
+
+  return `/api/contractor/onboarding`
+}
+
+/**
+ * @summary Save onboarding answers and progress
+ */
+export const updateContractorOnboarding = async (contractorOnboardingInput: ContractorOnboardingInput, options?: Parameters<typeof customFetch>[1]): Promise<ContractorAccount> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ContractorAccount>(getUpdateContractorOnboardingUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(contractorOnboardingInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateContractorOnboardingMutationKey = () => ['updateContractorOnboarding'] as const;
+
+export const getUpdateContractorOnboardingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContractorOnboarding>>, TError,UpdateContractorOnboardingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateContractorOnboarding>>, TError,UpdateContractorOnboardingMutationVariables, TContext> => {
+
+const mutationKey = getUpdateContractorOnboardingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateContractorOnboarding>>, UpdateContractorOnboardingMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateContractorOnboarding(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateContractorOnboardingMutationResult = NonNullable<Awaited<ReturnType<typeof updateContractorOnboarding>>>
+    export type UpdateContractorOnboardingMutationBody = BodyType<ContractorOnboardingInput>
+    export type UpdateContractorOnboardingMutationError = ErrorType<unknown>
+    export type UpdateContractorOnboardingMutationVariables = {data: BodyType<ContractorOnboardingInput>}
+
+    /**
+ * @summary Save onboarding answers and progress
+ */
+export const useUpdateContractorOnboarding = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContractorOnboarding>>, TError,UpdateContractorOnboardingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateContractorOnboarding>>,
+        TError,
+        UpdateContractorOnboardingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateContractorOnboardingMutationOptions(options));
+    }
+
+export const getUpdateContractorChecklistUrl = () => {
+
+
+
+
+  return `/api/contractor/checklist`
+}
+
+/**
+ * @summary Dismiss or reopen the activation checklist
+ */
+export const updateContractorChecklist = async (contractorChecklistInput: ContractorChecklistInput, options?: Parameters<typeof customFetch>[1]): Promise<ContractorAccount> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ContractorAccount>(getUpdateContractorChecklistUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(contractorChecklistInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateContractorChecklistMutationKey = () => ['updateContractorChecklist'] as const;
+
+export const getUpdateContractorChecklistMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContractorChecklist>>, TError,UpdateContractorChecklistMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateContractorChecklist>>, TError,UpdateContractorChecklistMutationVariables, TContext> => {
+
+const mutationKey = getUpdateContractorChecklistMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateContractorChecklist>>, UpdateContractorChecklistMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateContractorChecklist(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateContractorChecklistMutationResult = NonNullable<Awaited<ReturnType<typeof updateContractorChecklist>>>
+    export type UpdateContractorChecklistMutationBody = BodyType<ContractorChecklistInput>
+    export type UpdateContractorChecklistMutationError = ErrorType<unknown>
+    export type UpdateContractorChecklistMutationVariables = {data: BodyType<ContractorChecklistInput>}
+
+    /**
+ * @summary Dismiss or reopen the activation checklist
+ */
+export const useUpdateContractorChecklist = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateContractorChecklist>>, TError,UpdateContractorChecklistMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateContractorChecklist>>,
+        TError,
+        UpdateContractorChecklistMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateContractorChecklistMutationOptions(options));
+    }
+
+export const getSaveCompanyProfileUrl = () => {
+
+
+
+
+  return `/api/contractor/company-profile`
+}
+
+/**
+ * @summary Create or update the company profile shown on client estimates
+ */
+export const saveCompanyProfile = async (companyProfileInput: CompanyProfileInput, options?: Parameters<typeof customFetch>[1]): Promise<ContractorAccount> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ContractorAccount>(getSaveCompanyProfileUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(companyProfileInput)
+  }
+);}
+
+
+
+
+
+export const getSaveCompanyProfileMutationKey = () => ['saveCompanyProfile'] as const;
+
+export const getSaveCompanyProfileMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveCompanyProfile>>, TError,SaveCompanyProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveCompanyProfile>>, TError,SaveCompanyProfileMutationVariables, TContext> => {
+
+const mutationKey = getSaveCompanyProfileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveCompanyProfile>>, SaveCompanyProfileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  saveCompanyProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveCompanyProfileMutationResult = NonNullable<Awaited<ReturnType<typeof saveCompanyProfile>>>
+    export type SaveCompanyProfileMutationBody = BodyType<CompanyProfileInput>
+    export type SaveCompanyProfileMutationError = ErrorType<unknown>
+    export type SaveCompanyProfileMutationVariables = {data: BodyType<CompanyProfileInput>}
+
+    /**
+ * @summary Create or update the company profile shown on client estimates
+ */
+export const useSaveCompanyProfile = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveCompanyProfile>>, TError,SaveCompanyProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveCompanyProfile>>,
+        TError,
+        SaveCompanyProfileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveCompanyProfileMutationOptions(options));
+    }
+
+export const getSetCompanyLogoUrl = () => {
+
+
+
+
+  return `/api/contractor/company-profile/logo`
+}
+
+/**
+ * @summary Attach a logo uploaded through /storage/uploads/request-url
+ */
+export const setCompanyLogo = async (companyLogoInput: CompanyLogoInput, options?: Parameters<typeof customFetch>[1]): Promise<ContractorAccount> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ContractorAccount>(getSetCompanyLogoUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(companyLogoInput)
+  }
+);}
+
+
+
+
+
+export const getSetCompanyLogoMutationKey = () => ['setCompanyLogo'] as const;
+
+export const getSetCompanyLogoMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setCompanyLogo>>, TError,SetCompanyLogoMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setCompanyLogo>>, TError,SetCompanyLogoMutationVariables, TContext> => {
+
+const mutationKey = getSetCompanyLogoMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setCompanyLogo>>, SetCompanyLogoMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  setCompanyLogo(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetCompanyLogoMutationResult = NonNullable<Awaited<ReturnType<typeof setCompanyLogo>>>
+    export type SetCompanyLogoMutationBody = BodyType<CompanyLogoInput>
+    export type SetCompanyLogoMutationError = ErrorType<unknown>
+    export type SetCompanyLogoMutationVariables = {data: BodyType<CompanyLogoInput>}
+
+    /**
+ * @summary Attach a logo uploaded through /storage/uploads/request-url
+ */
+export const useSetCompanyLogo = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setCompanyLogo>>, TError,SetCompanyLogoMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setCompanyLogo>>,
+        TError,
+        SetCompanyLogoMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetCompanyLogoMutationOptions(options));
+    }
+
+export const getRemoveCompanyLogoUrl = () => {
+
+
+
+
+  return `/api/contractor/company-profile/logo`
+}
+
+export const removeCompanyLogo = async ( options?: Parameters<typeof customFetch>[1]): Promise<ContractorAccount> => {
+
+  return customFetch<ContractorAccount>(getRemoveCompanyLogoUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRemoveCompanyLogoMutationKey = () => ['removeCompanyLogo'] as const;
+
+export const getRemoveCompanyLogoMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeCompanyLogo>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeCompanyLogo>>, TError,void, TContext> => {
+
+const mutationKey = getRemoveCompanyLogoMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeCompanyLogo>>, void> = () => {
+
+
+          return  removeCompanyLogo(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveCompanyLogoMutationResult = NonNullable<Awaited<ReturnType<typeof removeCompanyLogo>>>
+
+    export type RemoveCompanyLogoMutationError = ErrorType<unknown>
+
+
+    export const useRemoveCompanyLogo = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeCompanyLogo>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removeCompanyLogo>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRemoveCompanyLogoMutationOptions(options));
+    }
+
+export const getGetCompanyLogoUrl = (profileId: string,) => {
+
+
+
+
+  return `/api/company-logos/${profileId}`
+}
+
+/**
+ * @summary Public company logo used on shared estimates
+ */
+export const getCompanyLogo = async (profileId: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetCompanyLogoUrl(profileId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCompanyLogoQueryKey = (profileId: string,) => {
+    return [
+    `/api/company-logos/${profileId}`
+    ] as const;
+    }
+
+
+export const getGetCompanyLogoQueryOptions = <TData = Awaited<ReturnType<typeof getCompanyLogo>>, TError = ErrorType<unknown>>(profileId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCompanyLogo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCompanyLogoQueryKey(profileId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCompanyLogo>>> = ({ signal }) => getCompanyLogo(profileId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: profileId !== null && profileId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCompanyLogo>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCompanyLogoQueryResult = NonNullable<Awaited<ReturnType<typeof getCompanyLogo>>>
+export type GetCompanyLogoQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Public company logo used on shared estimates
+ */
+
+export function useGetCompanyLogo<TData = Awaited<ReturnType<typeof getCompanyLogo>>, TError = ErrorType<unknown>>(
+ profileId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCompanyLogo>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCompanyLogoQueryOptions(profileId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateDemoRequestUrl = () => {
+
+
+
+
+  return `/api/demo-requests`
+}
+
+/**
+ * @summary Public demo / contact request (rate limited)
+ */
+export const createDemoRequest = async (leadRequestInput: LeadRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<LeadRequestResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<LeadRequestResult>(getCreateDemoRequestUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(leadRequestInput)
+  }
+);}
+
+
+
+
+
+export const getCreateDemoRequestMutationKey = () => ['createDemoRequest'] as const;
+
+export const getCreateDemoRequestMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDemoRequest>>, TError,CreateDemoRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createDemoRequest>>, TError,CreateDemoRequestMutationVariables, TContext> => {
+
+const mutationKey = getCreateDemoRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createDemoRequest>>, CreateDemoRequestMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createDemoRequest(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateDemoRequestMutationResult = NonNullable<Awaited<ReturnType<typeof createDemoRequest>>>
+    export type CreateDemoRequestMutationBody = BodyType<LeadRequestInput>
+    export type CreateDemoRequestMutationError = ErrorType<unknown>
+    export type CreateDemoRequestMutationVariables = {data: BodyType<LeadRequestInput>}
+
+    /**
+ * @summary Public demo / contact request (rate limited)
+ */
+export const useCreateDemoRequest = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDemoRequest>>, TError,CreateDemoRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createDemoRequest>>,
+        TError,
+        CreateDemoRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateDemoRequestMutationOptions(options));
     }
 

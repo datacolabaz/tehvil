@@ -7,6 +7,7 @@
  */
 import type { SharedEstimateApproval } from './sharedEstimateApproval';
 import type { SharedEstimateChangeOrdersItem } from './sharedEstimateChangeOrdersItem';
+import type { SharedEstimateCompany } from './sharedEstimateCompany';
 import type { SharedEstimateContractor } from './sharedEstimateContractor';
 import type { SharedEstimatePaymentsItem } from './sharedEstimatePaymentsItem';
 import type { SharedEstimateProject } from './sharedEstimateProject';
@@ -26,4 +27,5 @@ export interface SharedEstimate {
   payments: SharedEstimatePaymentsItem[];
   approval?: SharedEstimateApproval;
   revisionRequestedAt?: string;
+  company?: SharedEstimateCompany;
 }

@@ -26,6 +26,10 @@ tags:
     description: Private project evidence and document storage
   - name: smeta
     description: AI Smeta estimates, budget control and client approval
+  - name: contractor
+    description: Contractor onboarding, company profile, activation checklist and plan
+  - name: leads
+    description: Public demo and contact requests
 paths:
   /healthz:
     get:
@@ -885,6 +889,125 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/SharedEstimate" }
+  /contractor/account:
+    get:
+      operationId: getContractorAccount
+      tags: [contractor]
+      summary: Onboarding state, plan, activation checklist and company profile of the signed-in user
+      description: Creates the account on first use. Users who already had projects get the legacy plan and skip onboarding.
+      responses:
+        "200":
+          description: Contractor account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContractorAccount" }
+  /contractor/onboarding:
+    put:
+      operationId: updateContractorOnboarding
+      tags: [contractor]
+      summary: Save onboarding answers and progress
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContractorOnboardingInput" }
+      responses:
+        "200":
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContractorAccount" }
+  /contractor/checklist:
+    put:
+      operationId: updateContractorChecklist
+      tags: [contractor]
+      summary: Dismiss or reopen the activation checklist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContractorChecklistInput" }
+      responses:
+        "200":
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContractorAccount" }
+  /contractor/company-profile:
+    put:
+      operationId: saveCompanyProfile
+      tags: [contractor]
+      summary: Create or update the company profile shown on client estimates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompanyProfileInput" }
+      responses:
+        "200":
+          description: Updated account with the saved profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContractorAccount" }
+  /contractor/company-profile/logo:
+    put:
+      operationId: setCompanyLogo
+      tags: [contractor]
+      summary: Attach a logo uploaded through /storage/uploads/request-url
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompanyLogoInput" }
+      responses:
+        "200":
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContractorAccount" }
+    delete:
+      operationId: removeCompanyLogo
+      tags: [contractor]
+      responses:
+        "200":
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContractorAccount" }
+  /company-logos/{profileId}:
+    get:
+      operationId: getCompanyLogo
+      tags: [contractor]
+      summary: Public company logo used on shared estimates
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Image
+          content:
+            "image/*":
+              schema:
+                type: string
+                format: binary
+  /demo-requests:
+    post:
+      operationId: createDemoRequest
+      tags: [leads]
+      summary: Public demo / contact request (rate limited)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LeadRequestInput" }
+      responses:
+        "201":
+          description: Request stored
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LeadRequestResult" }
 components:
   parameters:
     ProjectId:
@@ -1792,7 +1915,25 @@ components:
             name: { type: string }
           required: [approvedAt, name]
         revisionRequestedAt: { type: string, format: date-time }
+        company: { $ref: "#/components/schemas/SharedEstimateCompany" }
       required: [project, contractor, client, message, expiresAt, estimate, changeOrders, approvedChangesTotal, finalTotal, payments]
+    SharedEstimateCompany:
+      type: object
+      description: Public-safe company header, frozen when the estimate is sent. No team members, owner ids or internal defaults.
+      properties:
+        name: { type: string }
+        logoUrl: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        city: { type: string }
+        serviceArea: { type: string }
+        website: { type: string }
+        instagram: { type: string }
+        services:
+          type: array
+          items: { type: string }
+        paymentTermsNote: { type: string }
+      required: [name, services]
     SharedEstimateApprovalInput:
       type: object
       properties:
@@ -1814,4 +1955,164 @@ components:
         decision: { type: string, enum: [approved, rejected] }
         note: { type: string, maxLength: 500 }
       required: [decision]
+    ContractorPlan:
+      type: string
+      enum: [baslangic, pesekar, biznes]
+    ContractorBusinessType:
+      type: string
+      enum: [renovation_company, foreman, design_studio, construction_company, project_manager, other]
+    ContractorMonthlyProjects:
+      type: string
+      enum: ["1-2", "3-5", "6-10", "10+"]
+    ContractorChallenge:
+      type: string
+      enum: [estimates, client_approval, change_orders, expenses, photo_handover]
+    CompanyPaymentTerms:
+      type: string
+      enum: ["30-40-30", "50-50", "30-30-30-10", "100-end"]
+    CompanyTeamMember:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        role: { type: string, maxLength: 80 }
+      required: [name, role]
+    CompanyProfile:
+      type: object
+      properties:
+        id: { type: string }
+        companyName: { type: string }
+        description: { type: string }
+        city: { type: string }
+        serviceArea: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        website: { type: string }
+        instagram: { type: string }
+        services:
+          type: array
+          items: { type: string }
+        teamMembers:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyTeamMember" }
+        logoUrl: { type: string }
+        defaultPaymentTerms: { $ref: "#/components/schemas/CompanyPaymentTerms" }
+        paymentTermsNote: { type: string }
+        defaultValidityDays: { type: integer }
+        defaultWastePercentage: { type: ["number", "null"] }
+        defaultMarginPercentage: { type: number }
+        complete: { type: boolean, description: "Name, phone and city are filled in" }
+        updatedAt: { type: string, format: date-time }
+      required: [id, companyName, description, city, serviceArea, phone, email, services, teamMembers, defaultPaymentTerms, paymentTermsNote, defaultValidityDays, defaultWastePercentage, defaultMarginPercentage, complete, updatedAt]
+    CompanyProfileInput:
+      type: object
+      properties:
+        companyName: { type: string, minLength: 2, maxLength: 160 }
+        description: { type: string, maxLength: 1000 }
+        city: { type: string, maxLength: 80 }
+        serviceArea: { type: string, maxLength: 200 }
+        phone: { type: string, maxLength: 32, pattern: "^[+0-9 ()-]*$" }
+        email: { type: string, maxLength: 254 }
+        website: { type: string, maxLength: 250 }
+        instagram: { type: string, maxLength: 120 }
+        services:
+          type: array
+          maxItems: 20
+          items: { type: string, minLength: 1, maxLength: 60 }
+        teamMembers:
+          type: array
+          maxItems: 30
+          items: { $ref: "#/components/schemas/CompanyTeamMember" }
+        defaultPaymentTerms: { $ref: "#/components/schemas/CompanyPaymentTerms" }
+        paymentTermsNote: { type: string, maxLength: 500 }
+        defaultValidityDays: { type: integer, minimum: 7, maximum: 90 }
+        defaultWastePercentage: { type: ["number", "null"], minimum: 0, maximum: 0.5 }
+        defaultMarginPercentage: { type: number, minimum: 0, maximum: 0.6 }
+      required: [companyName, description, city, serviceArea, phone, email, services, teamMembers, defaultPaymentTerms, paymentTermsNote, defaultValidityDays, defaultWastePercentage, defaultMarginPercentage]
+    CompanyLogoInput:
+      type: object
+      properties:
+        objectPath: { type: string, minLength: 1, maxLength: 500 }
+        originalName: { type: string, minLength: 1, maxLength: 255 }
+        contentType: { type: string, enum: [image/png, image/jpeg, image/webp] }
+        size: { type: integer, minimum: 1, maximum: 2097152 }
+      required: [objectPath, originalName, contentType, size]
+    ContractorOnboardingInput:
+      type: object
+      properties:
+        fullName: { type: string, maxLength: 120 }
+        phone: { type: string, maxLength: 32, pattern: "^[+0-9 ()-]*$" }
+        businessType: { $ref: "#/components/schemas/ContractorBusinessType" }
+        monthlyProjects: { $ref: "#/components/schemas/ContractorMonthlyProjects" }
+        mainChallenge: { $ref: "#/components/schemas/ContractorChallenge" }
+        step: { type: integer, minimum: 2, maximum: 4 }
+        status: { type: string, enum: [pending, completed, skipped] }
+        termsAccepted: { type: boolean }
+        signupSource: { type: string, maxLength: 40 }
+    ContractorChecklistInput:
+      type: object
+      properties:
+        dismissed: { type: boolean }
+      required: [dismissed]
+    ContractorAccount:
+      type: object
+      properties:
+        onboarding:
+          type: object
+          properties:
+            status: { type: string, enum: [pending, completed, skipped] }
+            step: { type: integer }
+            fullName: { type: string }
+            phone: { type: string }
+            businessType: { $ref: "#/components/schemas/ContractorBusinessType" }
+            monthlyProjects: { $ref: "#/components/schemas/ContractorMonthlyProjects" }
+            mainChallenge: { $ref: "#/components/schemas/ContractorChallenge" }
+            completedAt: { type: string, format: date-time }
+          required: [status, step]
+        plan:
+          type: object
+          properties:
+            id: { $ref: "#/components/schemas/ContractorPlan" }
+            source: { type: string, enum: [default, legacy, manual] }
+          required: [id, source]
+        checklist:
+          type: object
+          properties:
+            dismissed: { type: boolean }
+            items:
+              type: object
+              properties:
+                companyProfile: { type: boolean }
+                firstEstimate: { type: boolean }
+                clientAdded: { type: boolean }
+                estimateShared: { type: boolean }
+                photoEvidence: { type: boolean }
+              required: [companyProfile, firstEstimate, clientAdded, estimateShared, photoEvidence]
+            firstApproval: { type: boolean, description: "A client approved at least one estimate" }
+          required: [dismissed, items, firstApproval]
+        usage:
+          type: object
+          properties:
+            smetaProjects: { type: integer }
+          required: [smetaProjects]
+        profile: { $ref: "#/components/schemas/CompanyProfile" }
+      required: [onboarding, plan, checklist, usage]
+    LeadRequestInput:
+      type: object
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        companyName: { type: string, minLength: 1, maxLength: 160 }
+        phone: { type: string, minLength: 9, maxLength: 32, pattern: "^[+0-9 ()-]+$" }
+        monthlyProjects: { $ref: "#/components/schemas/ContractorMonthlyProjects" }
+        mainChallenge: { type: string, minLength: 2, maxLength: 500 }
+        preferredContactTime: { type: string, enum: [morning, afternoon, evening, any] }
+        source: { type: string, enum: [contractor_landing, pricing, upgrade, plan_page] }
+        interestedPlan: { $ref: "#/components/schemas/ContractorPlan" }
+        website: { type: string, maxLength: 200, description: "Honeypot; must stay empty" }
+      required: [fullName, companyName, phone, monthlyProjects, mainChallenge, preferredContactTime, source]
+    LeadRequestResult:
+      type: object
+      properties:
+        id: { type: string }
+        message: { type: string }
+      required: [id, message]
 
