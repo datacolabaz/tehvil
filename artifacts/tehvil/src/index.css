@@ -169,3 +169,15 @@
 .landing-contact { order:5;width:100%;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;font-style:normal;color:#66766f; }
 .landing-contact a { color:#1d4339;font-weight:600;text-decoration:none; }
 .landing-contact a:hover { text-decoration:underline; }
+
+/* Landing footer: desktop grid */
+@media (min-width: 761px) {
+  .landing-footer { display:grid;grid-template-columns:repeat(6,1fr);grid-template-areas:"brand note note note note lang" "guides guides legal legal contact contact";align-items:start;gap:26px 24px;padding-block:30px 40px; }
+  .landing-footer > .brand { grid-area:brand;align-self:center; }
+  .landing-footer > p { grid-area:note;max-width:none;margin:0;align-self:center; }
+  .landing-footer > :nth-child(3) { grid-area:lang;justify-self:end;align-self:center; }
+  .landing-legal[aria-label] { grid-area:guides; }
+  .landing-legal:not([aria-label]) { grid-area:legal; }
+  .landing-contact { grid-area:contact; }
+  .landing-legal,.landing-contact { flex-direction:column;flex-wrap:nowrap;gap:9px;width:auto;padding-top:22px;border-top:1px solid #e1ded4; }
+}
