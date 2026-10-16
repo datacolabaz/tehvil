@@ -578,3 +578,127 @@ body.rl-public-body { background:#f6f4ed; }
 .rl-stat .eyebrow { letter-spacing:.08em;padding-right:26px; }
 .rl-panel .section-head .text-link { white-space:nowrap;display:inline-flex;align-items:center;gap:4px; }
 .rl-share-grid + .rl-panel { margin-top:14px; }
+
+/* ---------------- Onboarding: welcome, start cards, first-week plan ---------------- */
+.rl-welcome-lead { margin:0 0 12px;color:#4f665a;font-size:15px;line-height:1.6; }
+.rl-welcome-steps { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 16px;padding:0;list-style:none; }
+.rl-welcome-steps li { display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;background:#f3f2ea;color:#3f584d;font-size:13px;font-weight:600; }
+.rl-welcome-steps b { width:24px;height:24px;display:grid;place-items:center;flex:0 0 auto;border-radius:8px;background:#21473d;color:#e6cc85;font-size:12px; }
+.rl-welcome-actions { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px; }
+.rl-big-action { display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:118px;padding:16px;border:1.5px solid #dfe3d7;border-radius:16px;background:#fffef9;color:#21473d;text-align:left;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s; }
+.rl-big-action:hover { transform:translateY(-2px);border-color:#9db4a4;box-shadow:0 10px 26px rgba(31,64,54,.08); }
+.rl-big-action b { font:800 15px var(--app-font-serif); }
+.rl-big-action small { color:#7a867e;font-size:12px; }
+.rl-big-action.gold { background:linear-gradient(135deg,#173c33,#2a5649);border-color:#c9a85c;color:#f2e3b8; }
+.rl-big-action.gold small { color:#c3cfc5; }
+.rl-welcome-later { display:block;margin:14px auto 0; }
+
+.rl-start { margin-bottom:18px; }
+.rl-start-head h2 { margin:8px 0 4px;color:#1e3d35;font-size:26px;letter-spacing:-.04em; }
+.rl-start-head p { margin:0 0 14px;color:#6f7d74;font-size:14px; }
+.rl-start-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px; }
+.rl-start-card { display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:18px;border:1px solid #e3e0d5;border-radius:18px;background:#fcfbf6;color:inherit;text-decoration:none;transition:transform .18s,box-shadow .18s; }
+.rl-start-card:hover { transform:translateY(-2px);box-shadow:0 10px 26px rgba(31,64,54,.07); }
+.rl-start-card strong { color:#26463c;font:800 16px/1.25 var(--app-font-serif); }
+.rl-start-card p { flex:1;margin:0;color:#6f7d74;font-size:13px;line-height:1.55; }
+.rl-start-icon { width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#e5ebe1;color:#2f6a4f; }
+.rl-start-card.gold { background:linear-gradient(160deg,#173c33,#24493f);border-color:#c9a85c; }
+.rl-start-card.gold strong { color:#f2e3b8; }
+.rl-start-card.gold p { color:#c3cfc5; }
+.rl-start-card.gold .rl-start-icon { background:#e6cc85;color:#173c33; }
+.rl-start-card.gold .button-primary { background:#e6cc85;border-color:#e6cc85;color:#173c33; }
+.rl-start-card.done { opacity:.7; }
+.rl-start-card.done .rl-start-icon { background:#21473d;color:#e6cc85; }
+
+.rl-week-plan .section-head { margin-bottom:8px; }
+.rl-week-plan h3 { margin:4px 0 0;color:#28483e;font:700 16px var(--app-font-serif); }
+.rl-progress { height:6px;margin:4px 0 12px;border-radius:99px;background:#e8e8df;overflow:hidden; }
+.rl-progress span { display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#3f6153,#c9a85c); }
+.rl-plan { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;margin:0;padding:0;list-style:none; }
+.rl-week-plan.compact .rl-plan { grid-template-columns:1fr;gap:2px; }
+.rl-plan a { display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:10px;color:inherit;text-decoration:none; }
+.rl-plan a:hover { background:#f2f1e8; }
+.rl-plan strong { display:block;color:#3f584d;font-size:13px; }
+.rl-plan small { display:block;margin-top:1px;color:#86918a;font-size:11px; }
+.rl-plan svg { margin-left:auto;color:#3f6153; }
+.rl-plan-dot { width:24px;height:24px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;border:1.5px solid #cfd6cc;color:#7a867e;font-size:11px;font-weight:800; }
+.rl-plan li.done strong { color:#8a958d;text-decoration:line-through;text-decoration-color:#c5ccc4; }
+.rl-plan li.done .rl-plan-dot { background:#21473d;border-color:#21473d;color:#e6cc85; }
+.rl-plan li.next a { background:#eef4ee;box-shadow:inset 0 0 0 1px #cfe0d3; }
+.rl-plan li.next .rl-plan-dot { border-color:#21473d;color:#21473d; }
+
+/* ---------------- Listing wizard ---------------- */
+.rl-mini-steps { display:flex;gap:5px;margin-bottom:12px; }
+.rl-mini-steps i { flex:1;height:4px;border-radius:99px;background:#e3e3d9; }
+.rl-mini-steps i.on { background:#21473d; }
+.rl-import { margin-bottom:10px;padding:13px;border:1px dashed #b7c6b8;border-radius:14px;background:#f5f8f2; }
+.rl-import-head { display:flex;gap:10px;color:#2f6a4f; }
+.rl-import-head b { display:block;color:#26463c;font-size:13px; }
+.rl-import-head small { display:block;color:#7a867e;font-size:12px; }
+.rl-import-row { display:flex;gap:6px;margin-top:10px; }
+.rl-import-row input { flex:1;min-width:0;min-height:38px;padding:7px 10px;border:1px solid #dcded3;border-radius:9px;background:#fffef9;font-size:13px; }
+.rl-import-ok { display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;margin:8px 0 0;color:#2f6a4f;font-size:12px;font-weight:600; }
+.rl-import-ok span { color:#8a6a35; }
+.rl-offer { display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 4px;text-align:center; }
+.rl-offer h3 { margin:4px 0 0;color:#21473d;font:800 19px/1.3 var(--app-font-serif);letter-spacing:-.02em; }
+.rl-offer p { margin:0;color:#66776d;font-size:14px;line-height:1.6; }
+.rl-offer .full-button { margin-top:4px; }
+.rl-offer-icon { width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(135deg,#173c33,#2a5649);color:#e6cc85; }
+.rl-offer-icon.ok { background:#e0ece3;color:#2f6a4f; }
+.rl-next-banner { display:flex;align-items:flex-start;gap:8px;padding:12px 14px;border-radius:12px;background:#f6ecd9;color:#5e4a1f!important;text-align:left; }
+.rl-next-banner svg { flex:0 0 auto;margin-top:2px; }
+
+/* ---------------- Lead form ---------------- */
+.rl-seg { display:flex;flex-wrap:wrap;gap:5px; }
+.rl-seg button { padding:7px 11px;border:1px solid #dcded3;border-radius:99px;background:#fffef9;color:#4f665a;font-size:13px;font-weight:600;cursor:pointer; }
+.rl-seg button.on { background:#21473d;border-color:#21473d;color:#f2e8c9; }
+.rl-chips button.on { background:#21473d;border-color:#21473d;color:#f2e8c9; }
+.rl-next-box .field { margin:6px 0; }
+
+/* ---------------- Passport wizard additions ---------------- */
+.rl-pick-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px; }
+.rl-pick { display:flex;align-items:center;gap:11px;padding:10px;border:1.5px solid #e3e0d5;border-radius:14px;background:#fffef9;color:inherit;text-align:left;cursor:pointer; }
+.rl-pick:hover { border-color:#9db4a4;box-shadow:0 6px 18px rgba(31,64,54,.06); }
+.rl-pick-cover { width:64px;height:52px;flex:0 0 auto;display:grid;place-items:center;overflow:hidden;border-radius:10px;background:#e7e8de;color:#7a8f80; }
+.rl-pick-cover img { width:100%;height:100%;object-fit:cover; }
+.rl-pick-body { min-width:0; }
+.rl-pick-body strong { display:block;overflow:hidden;color:#26463c;font-size:13px;text-overflow:ellipsis;white-space:nowrap; }
+.rl-pick-body small { display:block;color:#7f8a82;font-size:12px; }
+.rl-pick.new { border-style:dashed;background:#f7f8f2; }
+.rl-pick.new .rl-pick-cover { background:#21473d;color:#e6cc85; }
+.rl-target-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px; }
+.rl-target { display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:14px;border:1.5px solid #e3e0d5;border-radius:14px;background:#fffef9;color:#3f584d;text-align:left;cursor:pointer; }
+.rl-target b { color:#26463c;font-size:14px; }
+.rl-target small { color:#7a867e;font-size:12px;line-height:1.45; }
+.rl-target-icon { width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#ecebe2;color:#5d7066; }
+.rl-target.on { border-color:#21473d;box-shadow:0 0 0 3px rgba(33,71,61,.1); }
+.rl-target.on .rl-target-icon { background:#21473d;color:#e6cc85; }
+.rl-target.handover.on { background:linear-gradient(135deg,#173c33,#2a5649);border-color:#c9a85c; }
+.rl-target.handover.on b { color:#f2e3b8; }
+.rl-target.handover.on small { color:#c3cfc5; }
+.rl-target.handover.on .rl-target-icon { background:#e6cc85;color:#173c33; }
+.rl-basic-note p { margin:0;color:#2f6a4f;font-size:14px; }
+
+/* ---------------- WhatsApp connect ---------------- */
+.rl-connect-banner { display:flex;align-items:center;gap:12px;width:100%;margin-bottom:16px;padding:14px 16px;border:1px solid #cbe6d4;border-radius:14px;background:#eef8f1;color:#1f6a40;text-align:left;cursor:pointer; }
+.rl-connect-banner span { flex:1; }
+.rl-connect-banner b,.rl-connect-banner small { display:block; }
+.rl-connect-banner small { color:#4f7a60;font-size:12px; }
+.rl-check-list { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;margin:0 0 12px;padding:0;list-style:none; }
+.rl-check-list li { display:flex;align-items:center;gap:7px;color:#3f584d;font-size:13px; }
+.rl-check-list svg { color:#1f7a45; }
+.rl-connect-done { display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:18px;align-items:start; }
+button.rl-mode { width:100%;text-align:left; }
+
+@media (max-width: 980px) {
+  .rl-start-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 680px) {
+  .rl-welcome-actions,.rl-welcome-steps,.rl-start-grid,.rl-plan,.rl-target-grid,.rl-check-list,.rl-connect-done { grid-template-columns:minmax(0,1fr); }
+  .rl-connect-done .rl-qr { justify-self:center; }
+  .rl-big-action { min-height:auto;flex-direction:row;align-items:center;flex-wrap:wrap; }
+  .rl-big-action small { flex-basis:100%; }
+  .rl-start-head h2 { font-size:22px; }
+}
+.modal-card.sm-modal { overflow-x:hidden; } .rl-connect-done>div { min-width:0; }
+.rl-plan .rl-plan-dot svg { margin:0;color:inherit; }

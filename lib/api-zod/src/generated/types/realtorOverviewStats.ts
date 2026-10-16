@@ -20,4 +20,5 @@ export interface RealtorOverviewStats {
   leads30d: number;
   appointments30d: number;
   passportListingViews: number;
+  newLeads: number;
 }

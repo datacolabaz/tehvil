@@ -35,6 +35,8 @@ import type {
   Invitation,
   InvitationAcceptInput,
   InvitationInput,
+  ListingImport,
+  ListingImportInput,
   Milestone,
   MilestoneDecision,
   MilestoneInput,
@@ -4963,6 +4965,94 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCreateRealtorListingMutationOptions(options));
+    }
+
+export const getImportRealtorListingUrl = () => {
+
+
+
+
+  return `/api/realtor/listings/import`
+}
+
+/**
+ * @summary Read a Brokly.az, Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
+ */
+export const importRealtorListing = async (listingImportInput: ListingImportInput, options?: Parameters<typeof customFetch>[1]): Promise<ListingImport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ListingImport>(getImportRealtorListingUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(listingImportInput)
+  }
+);}
+
+
+
+
+
+export const getImportRealtorListingMutationKey = () => ['importRealtorListing'] as const;
+
+export const getImportRealtorListingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importRealtorListing>>, TError,ImportRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof importRealtorListing>>, TError,ImportRealtorListingMutationVariables, TContext> => {
+
+const mutationKey = getImportRealtorListingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importRealtorListing>>, ImportRealtorListingMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  importRealtorListing(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportRealtorListingMutationResult = NonNullable<Awaited<ReturnType<typeof importRealtorListing>>>
+    export type ImportRealtorListingMutationBody = BodyType<ListingImportInput>
+    export type ImportRealtorListingMutationError = ErrorType<unknown>
+    export type ImportRealtorListingMutationVariables = {data: BodyType<ListingImportInput>}
+
+    /**
+ * @summary Read a Brokly.az, Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
+ */
+export const useImportRealtorListing = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importRealtorListing>>, TError,ImportRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof importRealtorListing>>,
+        TError,
+        ImportRealtorListingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getImportRealtorListingMutationOptions(options));
     }
 
 export const getGetRealtorListingUrl = (listingId: string,) => {

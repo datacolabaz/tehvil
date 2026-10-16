@@ -1033,6 +1033,22 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/RealtorListing" }
+  /realtor/listings/import:
+    post:
+      operationId: importRealtorListing
+      tags: [realtor]
+      summary: Read a Brokly.az, Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ListingImportInput" }
+      responses:
+        "200":
+          description: Fields found on the page; photos are copied into the realtor's media
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListingImport" }
   /realtor/listings/{listingId}:
     get:
       operationId: getRealtorListing
@@ -2814,7 +2830,8 @@ components:
         leads30d: { type: integer }
         appointments30d: { type: integer }
         passportListingViews: { type: integer }
-      required: [newLeadsToday, waitingLeads, upcomingAppointments, activeListings, certifiedListings, publishedPassports, qrScans, passportViews, whatsappClicks, brandImpressions, leads30d, appointments30d, passportListingViews]
+        newLeads: { type: integer }
+      required: [newLeads, newLeadsToday, waitingLeads, upcomingAppointments, activeListings, certifiedListings, publishedPassports, qrScans, passportViews, whatsappClicks, brandImpressions, leads30d, appointments30d, passportListingViews]
     RealtorOverview:
       type: object
       properties:
@@ -2827,7 +2844,8 @@ components:
         funnel: { type: array, items: { $ref: "#/components/schemas/RealtorCount" } }
         sources: { type: array, items: { $ref: "#/components/schemas/RealtorCount" } }
         daily: { type: array, items: { $ref: "#/components/schemas/RealtorCount" } }
-      required: [profileExists, stats, todayLeads, dueLeads, upcoming, notifications, funnel, sources, daily]
+        setup: { $ref: "#/components/schemas/RealtorSetup" }
+      required: [profileExists, stats, todayLeads, dueLeads, upcoming, notifications, funnel, sources, daily, setup]
     PassportRealtor:
       type: object
       properties:
@@ -3106,3 +3124,42 @@ components:
         reminderTemplate: { type: string, maxLength: 120 }
         templateLanguage: { type: string, maxLength: 12 }
       required: [mode, businessPhone, autoReplyEnabled, greeting, followUpEnabled, followUpHours, followUpText, reminderEnabled, reminderHoursBefore, reminderText, workdayStartHour, workdayEndHour, followUpTemplate, reminderTemplate, templateLanguage]
+    ListingImportInput:
+      type: object
+      properties:
+        url: { type: string, minLength: 8, maxLength: 500 }
+      required: [url]
+    ListingImport:
+      type: object
+      properties:
+        url: { type: string }
+        portal: { type: string, enum: [brokly, tap, bina, yeniemlak, instagram, other] }
+        title: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        dealType: { type: ["string", "null"] }
+        propertyKind: { type: ["string", "null"] }
+        district: { type: ["string", "null"] }
+        address: { type: ["string", "null"] }
+        rooms: { type: ["integer", "null"] }
+        areaM2: { type: ["number", "null"] }
+        floor: { type: ["string", "null"] }
+        price: { type: ["number", "null"] }
+        currency: { type: ["string", "null"] }
+        photos: { type: array, items: { $ref: "#/components/schemas/RealtorMedia" } }
+        found: { type: array, items: { type: string } }
+        warnings: { type: array, items: { type: string } }
+      required: [url, portal, title, description, dealType, propertyKind, district, address, rooms, areaM2, floor, price, currency, photos, found, warnings]
+    RealtorSetup:
+      type: object
+      properties:
+        profileComplete: { type: boolean }
+        listings: { type: integer }
+        leads: { type: integer }
+        passports: { type: integer }
+        publishedPassports: { type: integer }
+        appointments: { type: integer }
+        whatsappConnected: { type: boolean }
+        whatsappMode: { type: string }
+        passportViews: { type: integer }
+        firstName: { type: string }
+      required: [profileComplete, listings, leads, passports, publishedPassports, appointments, whatsappConnected, whatsappMode, passportViews, firstName]

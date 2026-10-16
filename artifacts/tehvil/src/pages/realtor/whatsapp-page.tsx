@@ -1,13 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { getGetRealtorOverviewQueryKey, useGetRealtorProfile } from '@workspace/api-client-react';
 import { Link } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, Bell, Bot, Building2, CalendarClock, CheckCircle2, Hand, LoaderCircle, MessageCircle, Repeat, Save, Server, ShieldAlert, Sparkles, UserCheck } from 'lucide-react';
+import { ArrowRight, Bell, Bot, Building2, CalendarClock, Check, CheckCircle2, Hand, LoaderCircle, MessageCircle, Repeat, Save, Server, ShieldAlert, Sparkles, UserCheck } from 'lucide-react';
 import {
   getGetRealtorWhatsappQueryKey, useGetRealtorWhatsapp, useListRealtorMessages, useUpdateRealtorWhatsapp,
   type RealtorWhatsappInput, type RealtorWhatsappSettings,
 } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
-import { CopyButton, Pill, RealtorToaster, Skeleton, toast } from '@/components/realtor/ui';
+import { CopyButton, Modal, Pill, QrCode, RealtorToaster, Skeleton, toast } from '@/components/realtor/ui';
+import { waUrl } from '@/lib/realtor/labels';
 import { relative } from '@/lib/realtor/labels';
 
 const DEFAULTS = {
@@ -24,8 +26,13 @@ const FLOW = [
 export function RealtorWhatsappPage() {
   const settings = useGetRealtorWhatsapp();
   const messages = useListRealtorMessages();
+  const [connect, setConnect] = useState(() => new URLSearchParams(window.location.search).has('connect'));
+  const s = settings.data;
+  const connected = !!s && (s.mode === 'cloud_api' ? s.tokenSet && !!s.phoneNumberId && s.cloudApiAvailable : !!s.businessPhone);
   return <>
-    <PageHeading eyebrow="WhatsApp avtomatlaşdırma" title="WhatsApp" description="Yeni leadə dərhal cavab, filtr sualları, uyğun elan, görüş təklifi və follow-up — avtomatik və ya bir kliklə." />
+    <PageHeading eyebrow="WhatsApp avtomatlaşdırma" title="WhatsApp" description="Yeni leadə dərhal cavab, filtr sualları, uyğun elan, görüş təklifi və follow-up — avtomatik və ya bir kliklə." action={<button type="button" className={`button ${connected ? 'button-secondary' : 'button-primary rl-wa'}`} onClick={() => setConnect(true)} data-testid="button-connect-whatsapp"><MessageCircle size={16} />{connected ? 'Bağlantı və müştəri linki' : 'WhatsApp bağla'}</button>} />
+    {s && !connected && <button type="button" className="rl-connect-banner" onClick={() => setConnect(true)}><MessageCircle size={18} /><span><b>WhatsApp-ı bağlayın və yeni leadlərə dərhal avtomatik cavab verin.</b><small>1 dəqiqə çəkir — nömrənizi yazın, rejimi seçin.</small></span><ArrowRight size={16} /></button>}
+    {connect && s && <ConnectWizard s={s} onClose={() => { setConnect(false); if (window.location.search.includes('connect')) window.history.replaceState(null, '', window.location.pathname); }} />}
     <ol className="rl-flow" aria-label="Avtomatlaşdırma axını">{FLOW.map((s, i) => <li key={i}><s.icon size={16} /><span>{s.t}</span>{i < FLOW.length - 1 && <ArrowRight size={13} className="rl-flow-arrow" />}</li>)}</ol>
     {settings.isLoading || !settings.data ? <Skeleton rows={3} /> : <div className="sm-dash-grid">
       <SettingsForm s={settings.data} />
@@ -123,4 +130,53 @@ function SettingsForm({ s }: { s: RealtorWhatsappSettings }) {
 
 function Toggle({ on, set }: { on: boolean; set: (v: boolean) => void }) {
   return <button type="button" role="switch" aria-checked={on} className={`rl-switch ${on ? 'on' : ''}`} onClick={() => set(!on)}><i /><span>{on ? 'Aktiv' : 'Söndürülüb'}</span></button>;
+}
+
+/** Guided connection: number → mode → customer link. */
+function ConnectWizard({ s, onClose }: { s: RealtorWhatsappSettings; onClose: () => void }) {
+  const qc = useQueryClient();
+  const profile = useGetRealtorProfile();
+  const save = useUpdateRealtorWhatsapp();
+  const [step, setStep] = useState<1 | 2 | 3>(s.businessPhone ? 3 : 1);
+  const [phone, setPhone] = useState(s.businessPhone);
+  const [auto, setAuto] = useState(s.autoReplyEnabled);
+  const [mode, setMode] = useState(s.mode);
+  useEffect(() => { if (!phone && profile.data) setPhone(profile.data.whatsapp || profile.data.phone); }, [profile.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const submit = () => save.mutate({ data: {
+    mode: mode === 'cloud_api' && s.cloudApiAvailable ? 'cloud_api' : 'manual', businessPhone: phone.trim(), phoneNumberId: s.phoneNumberId, autoReplyEnabled: auto,
+    greeting: s.greeting || DEFAULTS.greeting, followUpEnabled: s.followUpEnabled, followUpHours: s.followUpHours, followUpText: s.followUpText || DEFAULTS.followUp,
+    reminderEnabled: s.reminderEnabled, reminderHoursBefore: s.reminderHoursBefore, reminderText: s.reminderText || DEFAULTS.reminder, workdayStartHour: s.workdayStartHour,
+    workdayEndHour: s.workdayEndHour, followUpTemplate: s.followUpTemplate, reminderTemplate: s.reminderTemplate, templateLanguage: s.templateLanguage || 'az',
+  } }, { onSuccess: () => { void qc.invalidateQueries({ queryKey: getGetRealtorWhatsappQueryKey() }); void qc.invalidateQueries({ queryKey: getGetRealtorOverviewQueryKey() }); setStep(3); } });
+  const customerLink = waUrl(phone, 'Salam! Mənzil axtarıram.');
+  return <Modal open onClose={onClose} eyebrow={`WhatsApp bağla · ${Math.min(step, 3)}/3`} title={step === 3 ? 'WhatsApp bağlandı' : 'WhatsApp-ı bağlayın'} wide>
+    {step === 1 && <div className="rl-form">
+      <p className="rl-welcome-lead">Bağlandıqdan sonra sistem:</p>
+      <ul className="rl-check-list">
+        <li><Check size={14} />Yeni leadə ilk cavabı göndərir</li><li><Check size={14} />“Alqı yoxsa icarə?” sualını verir</li>
+        <li><Check size={14} />Rayon, büdcə və otaq sayını soruşur</li><li><Check size={14} />Uyğun elanı göndərir</li>
+        <li><Check size={14} />Görüş vaxtı təklif edir</li><li><Check size={14} />Sizə “bu lead görüşə hazırdır” bildirişi göndərir</li>
+      </ul>
+      <Field label="WhatsApp nömrəniz" name="connect-phone" type="tel" required value={phone} onChange={setPhone} placeholder="+994 50 000 00 00" />
+      <label className="rl-check"><input type="checkbox" checked={auto} onChange={e => setAuto(e.target.checked)} /><span>Yeni leadlərə avtomatik ilk cavab və filtr sualları</span></label>
+      <div className="rl-step-nav"><span /><button type="button" className="button button-primary" disabled={phone.replace(/\D/g, '').length < 9} onClick={() => setStep(2)}>Davam et<ArrowRight size={15} /></button></div>
+    </div>}
+    {step === 2 && <div>
+      <div className="rl-mode-grid">
+        <button type="button" className={`rl-mode ${mode === 'manual' ? 'on' : ''}`} onClick={() => setMode('manual')}><Hand size={18} /><b>Bir kliklə göndərmə</b><small>Dərhal işləyir. Hər mesaj hazırlanır, siz WhatsApp-da “Göndər” basırsınız. Pasport səhifəsindən gələn sorğular avtomatik lead olur.</small></button>
+        <button type="button" className={`rl-mode ${mode === 'cloud_api' ? 'on' : ''} ${s.cloudApiAvailable ? '' : 'disabled'}`} disabled={!s.cloudApiAvailable} onClick={() => setMode('cloud_api')}><Bot size={18} /><b>Tam avtomatik</b><small>{s.cloudApiAvailable ? 'WhatsApp Business API: bot özü cavab verir və görüş təyin edir. Meta-dan Phone number ID və token lazımdır.' : 'Server administratoru WhatsApp Business API-ni aktivləşdirəndə açılacaq.'}</small></button>
+      </div>
+      <div className="rl-step-nav"><button type="button" className="button button-quiet" onClick={() => setStep(1)}>Geri</button><button type="button" className="button button-primary" disabled={save.isPending} onClick={submit} data-testid="button-connect-save">{save.isPending && <LoaderCircle className="spin" size={15} />}Bağla</button></div>
+    </div>}
+    {step === 3 && <div className="rl-connect-done">
+      <div><p className="rl-welcome-lead"><CheckCircle2 size={16} className="sm-ii" /> {s.mode === 'cloud_api' && s.tokenSet ? 'Bot aktivdir: yeni mesajlara avtomatik cavab gedəcək.' : 'Hazırdır: hər lead üçün hazır mesajlar bir kliklə göndəriləcək.'}</p>
+        <div className="eyebrow">Müştəri linkiniz</div>
+        <p className="rl-hint">Instagram bio-ya, elanlara və vizit kartına qoyun — müştəri bir kliklə sizə yazır.</p>
+        <div className="rl-url"><code>{decodeURIComponent(customerLink.replace(/^https:\/\//, ''))}</code><CopyButton text={customerLink} /></div>
+        {mode === 'cloud_api' && !s.tokenSet && <p className="rl-warn">Tam avtomatik rejim üçün aşağıdakı formada Phone number ID və access token daxil edin.</p>}
+        <div className="rl-step-nav"><button type="button" className="button button-quiet" onClick={() => setStep(1)}>Nömrəni dəyiş</button><button type="button" className="button button-primary" onClick={onClose}>Hazırdır</button></div>
+      </div>
+      <QrCode value={customerLink} size={150} label="Müştəri skan edib yazır" />
+    </div>}
+  </Modal>;
 }

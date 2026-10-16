@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  AlarmClock, ArrowRight, Bot, CalendarPlus, ChevronRight, Columns3, List, LoaderCircle, MessageCircle, Phone, Plus, Search, Send,
+  AlarmClock, ArrowRight, Bot, CheckCircle2, CalendarPlus, ChevronRight, Columns3, List, LoaderCircle, MessageCircle, Phone, Plus, Search, Send,
   ShieldCheck, Trash2, UserPlus, Wallet,
 } from 'lucide-react';
 import {
@@ -14,7 +14,7 @@ import {
 import { Field, PageHeading } from '@/components/kit';
 import { Drawer, Empty, Pill, RealtorToaster, Skeleton, toast } from '@/components/realtor/ui';
 import {
-  DEAL_LEAD, LEAD_STATUS, LEAD_STATUSES, LEAD_TONE, SOURCE, SOURCES, dateTime, facts, fromLocalInput, leadScripts, num, price, relative, toLocalInput, waUrl,
+  DEAL_LEAD, LEAD_STATUS, LEAD_STATUSES, LEAD_TONE, SOURCE, SOURCES, dateTime, dayKey, timeText, facts, fromLocalInput, leadScripts, num, price, relative, toLocalInput, waUrl,
 } from '@/lib/realtor/labels';
 
 type View = 'board' | 'list';
@@ -119,48 +119,84 @@ const toPayload = (f: LeadForm): RealtorLeadPatch => {
   };
 };
 
-function LeadFields({ form, set }: { form: LeadForm; set: (k: keyof LeadForm) => (v: string) => void }) {
+const NEXT_PRESETS = ['WhatsApp-dan yazacağam', 'Zəng edəcəyəm', 'Elan göndərəcəyəm', 'Görüş planlayacağam'];
+/** Baku-time preset: today at `hour` (tomorrow if already past), or tomorrow at `hour`. */
+function at(hour: number, dayOffset = 0) {
+  const now = new Date();
+  const b = new Date(now.getTime() + 4 * 3_600_000);
+  b.setUTCDate(b.getUTCDate() + dayOffset); b.setUTCHours(hour, 0, 0, 0);
+  let t = new Date(b.getTime() - 4 * 3_600_000);
+  if (dayOffset === 0 && t.getTime() < now.getTime() + 15 * 60_000) t = new Date(t.getTime() + 86_400_000);
+  return toLocalInput(t.toISOString());
+}
+
+function LeadFields({ form, set, simple = false }: { form: LeadForm; set: (k: keyof LeadForm) => (v: string) => void; simple?: boolean }) {
   const agents = useListRealtorAgents();
   const listings = useListRealtorListings();
   const quick = (hours: number) => set('nextActionAt')(toLocalInput(new Date(Date.now() + hours * 3_600_000).toISOString()));
+  const [more, setMore] = useState(!simple);
   return <>
     <div className="field-grid">
-      <Field label="Ad" name="lead-name" required value={form.fullName} onChange={set('fullName')} />
+      <Field label="Müştərinin adı" name="lead-name" required value={form.fullName} onChange={set('fullName')} />
       <Field label="Telefon / WhatsApp" name="lead-phone" type="tel" value={form.phone} onChange={set('phone')} placeholder="+994 …" />
     </div>
-    <div className="field-grid">
-      <Field label="Mənbə" name="lead-source"><select value={form.source} onChange={e => set('source')(e.target.value)}>{SOURCES.map(s => <option key={s} value={s}>{SOURCE[s]}</option>)}</select></Field>
-      <Field label="Alqı / icarə" name="lead-deal"><select value={form.dealType} onChange={e => set('dealType')(e.target.value)}><option value="">—</option><option value="sale">Alqı</option><option value="rent">İcarə</option></select></Field>
-    </div>
-    <div className="field-grid">
-      <Field label="Rayon" name="lead-district" value={form.district} onChange={set('district')} placeholder="məs. Yasamal, 28 May" />
+    <div className="field"><span>Lead mənbəyi</span><div className="rl-seg" role="radiogroup" aria-label="Lead mənbəyi">{SOURCES.map(s => <button key={s} type="button" role="radio" aria-checked={form.source === s} className={form.source === s ? 'on' : ''} onClick={() => set('source')(s)}>{SOURCE[s]}</button>)}</div></div>
+    <div className="field"><span>Alqı və ya icarə</span><div className="rl-seg" role="radiogroup" aria-label="Alqı və ya icarə">{[['sale', 'Alqı'], ['rent', 'İcarə'], ['', 'Bilinmir']].map(([v, l]) => <button key={v} type="button" role="radio" aria-checked={form.dealType === v} className={form.dealType === v ? 'on' : ''} onClick={() => set('dealType')(v)}>{l}</button>)}</div></div>
+    <div className="field-grid three">
+      <Field label="Rayon" name="lead-district" value={form.district} onChange={set('district')} placeholder="məs. Yasamal" />
+      <Field label="Büdcə (maks, AZN)" name="lead-budget-max" type="number" min="0" value={form.budgetMax} onChange={set('budgetMax')} />
       <Field label="Otaq sayı" name="lead-rooms" type="number" min="0" value={form.rooms} onChange={set('rooms')} />
     </div>
-    <div className="field-grid">
-      <Field label="Büdcə, min (AZN)" name="lead-budget-min" type="number" min="0" value={form.budgetMin} onChange={set('budgetMin')} />
-      <Field label="Büdcə, maks (AZN)" name="lead-budget-max" type="number" min="0" value={form.budgetMax} onChange={set('budgetMax')} />
-    </div>
-    <Field label="Nə vaxt almaq / köçmək istəyir" name="lead-timeframe" value={form.timeframe} onChange={set('timeframe')} placeholder="məs. 1 ay ərzində" />
+    <Field label="Qeyd" name="lead-notes"><textarea value={form.notes} onChange={e => set('notes')(e.target.value)} rows={simple ? 2 : 4} maxLength={4000} /></Field>
     <div className="rl-next-box">
-      <Field label="Növbəti aksiya" name="lead-next" value={form.nextAction} onChange={set('nextAction')} placeholder="məs. 3 variant göndər, zəng et" />
-      <Field label="Tarix və saat" name="lead-next-at" type="datetime-local" value={form.nextActionAt} onChange={set('nextActionAt')} />
-      <div className="rl-chips"><button type="button" onClick={() => quick(2)}>2 saat</button><button type="button" onClick={() => quick(24)}>Sabah</button><button type="button" onClick={() => quick(72)}>3 gün</button><button type="button" onClick={() => set('nextActionAt')('')}>Təmizlə</button></div>
+      <div className="field"><span>Növbəti aksiya</span><div className="rl-chips">{NEXT_PRESETS.map(p => <button key={p} type="button" className={form.nextAction === p ? 'on' : ''} onClick={() => set('nextAction')(p)}>{p}</button>)}</div></div>
+      <Field label="Və ya öz mətniniz" name="lead-next" value={form.nextAction} onChange={set('nextAction')} placeholder="məs. 3 variant göndər" />
+      <Field label="Tarix və vaxt" name="lead-next-at" type="datetime-local" value={form.nextActionAt} onChange={set('nextActionAt')} />
+      <div className="rl-chips"><button type="button" onClick={() => set('nextActionAt')(at(18))}>Bu gün 18:00</button><button type="button" onClick={() => set('nextActionAt')(at(10, 1))}>Sabah 10:00</button><button type="button" onClick={() => quick(2)}>2 saat sonra</button><button type="button" onClick={() => quick(72)}>3 gün</button><button type="button" onClick={() => set('nextActionAt')('')}>Təmizlə</button></div>
     </div>
-    <div className="field-grid">
-      {(agents.data?.length ?? 0) > 0 && <Field label="Agent" name="lead-agent"><select value={form.agentId} onChange={e => set('agentId')(e.target.value)}><option value="">— Özüm —</option>{agents.data!.filter(a => a.active || a.id === form.agentId).map(a => <option key={a.id} value={a.id}>{a.fullName}</option>)}</select></Field>}
-      <Field label="Maraqlandığı elan" name="lead-listing"><select value={form.listingId} onChange={e => set('listingId')(e.target.value)}><option value="">—</option>{(listings.data ?? []).map(l => <option key={l.id} value={l.id}>{l.title}</option>)}</select></Field>
-    </div>
-    <Field label="Qeydlər" name="lead-notes"><textarea value={form.notes} onChange={e => set('notes')(e.target.value)} rows={4} maxLength={4000} /></Field>
+    {!more ? <button type="button" className="sm-link-btn" onClick={() => setMore(true)}>+ Daha çox: büdcə aralığı, vaxt, elan, agent</button> : <>
+      <div className="field-grid">
+        <Field label="Büdcə, min (AZN)" name="lead-budget-min" type="number" min="0" value={form.budgetMin} onChange={set('budgetMin')} />
+        <Field label="Nə vaxt almaq / köçmək istəyir" name="lead-timeframe" value={form.timeframe} onChange={set('timeframe')} placeholder="məs. 1 ay ərzində" />
+      </div>
+      <div className="field-grid">
+        {(agents.data?.length ?? 0) > 0 && <Field label="Agent" name="lead-agent"><select value={form.agentId} onChange={e => set('agentId')(e.target.value)}><option value="">— Özüm —</option>{agents.data!.filter(a => a.active || a.id === form.agentId).map(a => <option key={a.id} value={a.id}>{a.fullName}</option>)}</select></Field>}
+        <Field label="Maraqlandığı elan" name="lead-listing"><select value={form.listingId} onChange={e => set('listingId')(e.target.value)}><option value="">—</option>{(listings.data ?? []).map(l => <option key={l.id} value={l.id}>{l.title}</option>)}</select></Field>
+      </div>
+    </>}
   </>;
+}
+
+/** "Bu gün 18:00", "Sabah 10:00" or a date. */
+function whenText(iso: string | null | undefined) {
+  if (!iso) return '';
+  const k = dayKey(new Date(iso)); const today = dayKey(new Date()); const tomorrow = dayKey(new Date(Date.now() + 86_400_000));
+  return `${k === today ? 'Bu gün' : k === tomorrow ? 'Sabah' : dateTime(iso).split(',')[0]} ${timeText(iso)}`;
 }
 
 function NewLeadDrawer({ onClose, onCreated }: { onClose: () => void; onCreated: (id: string) => void }) {
   const create = useCreateRealtorLead();
-  const [form, setForm] = useState(() => ({ ...leadForm(), nextAction: 'İlk cavabı göndər', nextActionAt: toLocalInput(new Date(Date.now() + 3_600_000).toISOString()) }));
+  const qc = useQueryClient();
+  const [form, setForm] = useState(() => ({ ...leadForm(), nextAction: NEXT_PRESETS[0], nextActionAt: at(18) }));
+  const [created, setCreated] = useState<RealtorLead | null>(null);
   const set = (k: keyof LeadForm) => (v: string) => setForm(o => ({ ...o, [k]: v }));
-  const submit = (e: FormEvent) => { e.preventDefault(); const p = toPayload(form); create.mutate({ data: { ...p, fullName: p.fullName!, source: p.source! } }, { onSuccess: l => { toast('Lead əlavə olundu'); onCreated(l.id); } }); };
-  return <Drawer open onClose={onClose} eyebrow="Yeni lead" title="Lead əlavə et" footer={<button type="submit" form="new-lead" className="button button-primary full-button" disabled={create.isPending} data-testid="button-save-lead">{create.isPending && <LoaderCircle className="spin" size={15} />}Yadda saxla</button>}>
-    <form id="new-lead" className="rl-form" onSubmit={submit}><LeadFields form={form} set={set} /></form>
+  const submit = (e: FormEvent) => { e.preventDefault(); const p = toPayload(form); create.mutate({ data: { ...p, fullName: p.fullName!, source: p.source! } }, { onSuccess: l => { setCreated(l); void qc.invalidateQueries({ queryKey: getListRealtorLeadsQueryKey() }); void qc.invalidateQueries({ queryKey: getGetRealtorOverviewQueryKey() }); } }); };
+  if (created) {
+    const first = created.fullName.split(' ')[0];
+    return <Drawer open onClose={() => onCreated(created.id)} eyebrow="Lead" title="Yeni lead yaradıldı">
+      <div className="rl-offer">
+        <span className="rl-offer-icon ok"><CheckCircle2 size={26} /></span>
+        <h3>{created.fullName}</h3>
+        {created.nextAction ? <p className="rl-next-banner"><AlarmClock size={15} /><span><b>Növbəti aksiya:</b> {created.nextActionAt ? `${whenText(created.nextActionAt)} — ` : ''}{created.nextAction}</span></p> : <p>Növbəti aksiya təyin edilməyib.</p>}
+        <p className="rl-hint">Vaxtı çatanda sizə bildiriş gələcək.</p>
+        {created.phone && <a className="button button-primary full-button rl-wa" href={waUrl(created.phone, `Salam, ${first}! `)} target="_blank" rel="noreferrer"><MessageCircle size={16} />İndi WhatsApp-dan yaz</a>}
+        <button type="button" className="button button-secondary full-button" onClick={() => onCreated(created.id)}>Lead-i aç</button>
+        <button type="button" className="button button-quiet full-button" onClick={() => { setCreated(null); setForm({ ...leadForm(), nextAction: NEXT_PRESETS[0], nextActionAt: at(18) }); }}><Plus size={15} />Daha bir lead əlavə et</button>
+      </div>
+    </Drawer>;
+  }
+  return <Drawer open onClose={onClose} eyebrow="Yeni lead" title="Lead əlavə et" footer={<button type="submit" form="new-lead" className="button button-primary full-button" disabled={create.isPending} data-testid="button-save-lead">{create.isPending && <LoaderCircle className="spin" size={15} />}Lead-i yarat</button>}>
+    <form id="new-lead" className="rl-form" onSubmit={submit}><LeadFields form={form} set={set} simple /></form>
   </Drawer>;
 }
 

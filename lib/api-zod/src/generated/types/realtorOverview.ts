@@ -10,6 +10,7 @@ import type { RealtorCount } from './realtorCount';
 import type { RealtorLead } from './realtorLead';
 import type { RealtorNotification } from './realtorNotification';
 import type { RealtorOverviewStats } from './realtorOverviewStats';
+import type { RealtorSetup } from './realtorSetup';
 
 export interface RealtorOverview {
   profileExists: boolean;
@@ -21,4 +22,5 @@ export interface RealtorOverview {
   funnel: RealtorCount[];
   sources: RealtorCount[];
   daily: RealtorCount[];
+  setup: RealtorSetup;
 }
