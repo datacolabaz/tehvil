@@ -25,6 +25,9 @@ import type {
   ChangeOrder,
   ChangeOrderDecision,
   ChangeOrderInput,
+  ConfirmLink,
+  ContractorConfirmInput,
+  ContractorConfirmView,
   Dashboard,
   GetSharedPassport200,
   HandoverInput,
@@ -35,15 +38,45 @@ import type {
   Milestone,
   MilestoneDecision,
   MilestoneInput,
+  OwnerConfirmView,
+  OwnerDecisionInput,
   Passport,
   PassportShare,
   PassportShareInput,
   PassportShareRecord,
+  PassportStatusInput,
+  PassportWorkInput,
   PaymentInput,
   PaymentItem,
   PaymentNote,
   Project,
   ProjectInput,
+  PropertyPassport,
+  PropertyPassportInput,
+  PublicPassport,
+  PublicPassportEventInput,
+  PublicPassportLeadInput,
+  RealtorAgent,
+  RealtorAgentInput,
+  RealtorAppointment,
+  RealtorAppointmentInput,
+  RealtorAppointmentPatch,
+  RealtorLead,
+  RealtorLeadInput,
+  RealtorLeadPatch,
+  RealtorListing,
+  RealtorListingInput,
+  RealtorMedia,
+  RealtorMediaAttachInput,
+  RealtorMessage,
+  RealtorMessageInput,
+  RealtorMessageResult,
+  RealtorNotification,
+  RealtorOverview,
+  RealtorProfile,
+  RealtorProfileInput,
+  RealtorWhatsappInput,
+  RealtorWhatsappSettings,
   RevisionInput,
   RevisionReply,
   RevisionRequest,
@@ -4078,5 +4111,3698 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDecideSharedChangeOrderMutationOptions(options));
+    }
+
+export const getGetRealtorOverviewUrl = () => {
+
+
+
+
+  return `/api/realtor/overview`
+}
+
+/**
+ * @summary Realtor dashboard summary (İcmal)
+ */
+export const getRealtorOverview = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorOverview> => {
+
+  return customFetch<RealtorOverview>(getGetRealtorOverviewUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRealtorOverviewQueryKey = () => {
+    return [
+    `/api/realtor/overview`
+    ] as const;
+    }
+
+
+export const getGetRealtorOverviewQueryOptions = <TData = Awaited<ReturnType<typeof getRealtorOverview>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorOverview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRealtorOverviewQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRealtorOverview>>> = ({ signal }) => getRealtorOverview({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRealtorOverview>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRealtorOverviewQueryResult = NonNullable<Awaited<ReturnType<typeof getRealtorOverview>>>
+export type GetRealtorOverviewQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Realtor dashboard summary (İcmal)
+ */
+
+export function useGetRealtorOverview<TData = Awaited<ReturnType<typeof getRealtorOverview>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorOverview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRealtorOverviewQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetRealtorProfileUrl = () => {
+
+
+
+
+  return `/api/realtor/profile`
+}
+
+export const getRealtorProfile = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorProfile> => {
+
+  return customFetch<RealtorProfile>(getGetRealtorProfileUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRealtorProfileQueryKey = () => {
+    return [
+    `/api/realtor/profile`
+    ] as const;
+    }
+
+
+export const getGetRealtorProfileQueryOptions = <TData = Awaited<ReturnType<typeof getRealtorProfile>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRealtorProfileQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRealtorProfile>>> = ({ signal }) => getRealtorProfile({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRealtorProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRealtorProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getRealtorProfile>>>
+export type GetRealtorProfileQueryError = ErrorType<unknown>
+
+
+
+export function useGetRealtorProfile<TData = Awaited<ReturnType<typeof getRealtorProfile>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRealtorProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateRealtorProfileUrl = () => {
+
+
+
+
+  return `/api/realtor/profile`
+}
+
+export const updateRealtorProfile = async (realtorProfileInput: RealtorProfileInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorProfile> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorProfile>(getUpdateRealtorProfileUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorProfileInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateRealtorProfileMutationKey = () => ['updateRealtorProfile'] as const;
+
+export const getUpdateRealtorProfileMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorProfile>>, TError,UpdateRealtorProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRealtorProfile>>, TError,UpdateRealtorProfileMutationVariables, TContext> => {
+
+const mutationKey = getUpdateRealtorProfileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRealtorProfile>>, UpdateRealtorProfileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateRealtorProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRealtorProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateRealtorProfile>>>
+    export type UpdateRealtorProfileMutationBody = BodyType<RealtorProfileInput>
+    export type UpdateRealtorProfileMutationError = ErrorType<unknown>
+    export type UpdateRealtorProfileMutationVariables = {data: BodyType<RealtorProfileInput>}
+
+    export const useUpdateRealtorProfile = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorProfile>>, TError,UpdateRealtorProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRealtorProfile>>,
+        TError,
+        UpdateRealtorProfileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateRealtorProfileMutationOptions(options));
+    }
+
+export const getAttachRealtorMediaUrl = () => {
+
+
+
+
+  return `/api/realtor/media`
+}
+
+/**
+ * @summary Register freshly uploaded photos or logos for use in listings, passports and the profile
+ */
+export const attachRealtorMedia = async (realtorMediaAttachInput: RealtorMediaAttachInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorMedia[]> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorMedia[]>(getAttachRealtorMediaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorMediaAttachInput)
+  }
+);}
+
+
+
+
+
+export const getAttachRealtorMediaMutationKey = () => ['attachRealtorMedia'] as const;
+
+export const getAttachRealtorMediaMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof attachRealtorMedia>>, TError,AttachRealtorMediaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof attachRealtorMedia>>, TError,AttachRealtorMediaMutationVariables, TContext> => {
+
+const mutationKey = getAttachRealtorMediaMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof attachRealtorMedia>>, AttachRealtorMediaMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  attachRealtorMedia(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AttachRealtorMediaMutationResult = NonNullable<Awaited<ReturnType<typeof attachRealtorMedia>>>
+    export type AttachRealtorMediaMutationBody = BodyType<RealtorMediaAttachInput>
+    export type AttachRealtorMediaMutationError = ErrorType<unknown>
+    export type AttachRealtorMediaMutationVariables = {data: BodyType<RealtorMediaAttachInput>}
+
+    /**
+ * @summary Register freshly uploaded photos or logos for use in listings, passports and the profile
+ */
+export const useAttachRealtorMedia = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof attachRealtorMedia>>, TError,AttachRealtorMediaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof attachRealtorMedia>>,
+        TError,
+        AttachRealtorMediaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAttachRealtorMediaMutationOptions(options));
+    }
+
+export const getGetRealtorMediaUrl = (mediaId: string,) => {
+
+
+
+
+  return `/api/realtor-media/${mediaId}`
+}
+
+/**
+ * @summary Serve a realtor photo to its owner, or publicly when it appears in a published passport
+ */
+export const getRealtorMedia = async (mediaId: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetRealtorMediaUrl(mediaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRealtorMediaQueryKey = (mediaId: string,) => {
+    return [
+    `/api/realtor-media/${mediaId}`
+    ] as const;
+    }
+
+
+export const getGetRealtorMediaQueryOptions = <TData = Awaited<ReturnType<typeof getRealtorMedia>>, TError = ErrorType<unknown>>(mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRealtorMediaQueryKey(mediaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRealtorMedia>>> = ({ signal }) => getRealtorMedia(mediaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: mediaId !== null && mediaId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRealtorMedia>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRealtorMediaQueryResult = NonNullable<Awaited<ReturnType<typeof getRealtorMedia>>>
+export type GetRealtorMediaQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Serve a realtor photo to its owner, or publicly when it appears in a published passport
+ */
+
+export function useGetRealtorMedia<TData = Awaited<ReturnType<typeof getRealtorMedia>>, TError = ErrorType<unknown>>(
+ mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRealtorMediaQueryOptions(mediaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListRealtorAgentsUrl = () => {
+
+
+
+
+  return `/api/realtor/agents`
+}
+
+export const listRealtorAgents = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorAgent[]> => {
+
+  return customFetch<RealtorAgent[]>(getListRealtorAgentsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRealtorAgentsQueryKey = () => {
+    return [
+    `/api/realtor/agents`
+    ] as const;
+    }
+
+
+export const getListRealtorAgentsQueryOptions = <TData = Awaited<ReturnType<typeof listRealtorAgents>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorAgents>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRealtorAgentsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRealtorAgents>>> = ({ signal }) => listRealtorAgents({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRealtorAgents>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRealtorAgentsQueryResult = NonNullable<Awaited<ReturnType<typeof listRealtorAgents>>>
+export type ListRealtorAgentsQueryError = ErrorType<unknown>
+
+
+
+export function useListRealtorAgents<TData = Awaited<ReturnType<typeof listRealtorAgents>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorAgents>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRealtorAgentsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateRealtorAgentUrl = () => {
+
+
+
+
+  return `/api/realtor/agents`
+}
+
+export const createRealtorAgent = async (realtorAgentInput: RealtorAgentInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorAgent> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorAgent>(getCreateRealtorAgentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorAgentInput)
+  }
+);}
+
+
+
+
+
+export const getCreateRealtorAgentMutationKey = () => ['createRealtorAgent'] as const;
+
+export const getCreateRealtorAgentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRealtorAgent>>, TError,CreateRealtorAgentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRealtorAgent>>, TError,CreateRealtorAgentMutationVariables, TContext> => {
+
+const mutationKey = getCreateRealtorAgentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRealtorAgent>>, CreateRealtorAgentMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createRealtorAgent(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRealtorAgentMutationResult = NonNullable<Awaited<ReturnType<typeof createRealtorAgent>>>
+    export type CreateRealtorAgentMutationBody = BodyType<RealtorAgentInput>
+    export type CreateRealtorAgentMutationError = ErrorType<unknown>
+    export type CreateRealtorAgentMutationVariables = {data: BodyType<RealtorAgentInput>}
+
+    export const useCreateRealtorAgent = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRealtorAgent>>, TError,CreateRealtorAgentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createRealtorAgent>>,
+        TError,
+        CreateRealtorAgentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateRealtorAgentMutationOptions(options));
+    }
+
+export const getUpdateRealtorAgentUrl = (agentId: string,) => {
+
+
+
+
+  return `/api/realtor/agents/${agentId}`
+}
+
+export const updateRealtorAgent = async (agentId: string,
+    realtorAgentInput: RealtorAgentInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorAgent> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorAgent>(getUpdateRealtorAgentUrl(agentId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorAgentInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateRealtorAgentMutationKey = () => ['updateRealtorAgent'] as const;
+
+export const getUpdateRealtorAgentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorAgent>>, TError,UpdateRealtorAgentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRealtorAgent>>, TError,UpdateRealtorAgentMutationVariables, TContext> => {
+
+const mutationKey = getUpdateRealtorAgentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRealtorAgent>>, UpdateRealtorAgentMutationVariables> = (props) => {
+          const {agentId,data} = props ?? {};
+
+          return  updateRealtorAgent(agentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRealtorAgentMutationResult = NonNullable<Awaited<ReturnType<typeof updateRealtorAgent>>>
+    export type UpdateRealtorAgentMutationBody = BodyType<RealtorAgentInput>
+    export type UpdateRealtorAgentMutationError = ErrorType<unknown>
+    export type UpdateRealtorAgentMutationVariables = {agentId: string;data: BodyType<RealtorAgentInput>}
+
+    export const useUpdateRealtorAgent = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorAgent>>, TError,UpdateRealtorAgentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRealtorAgent>>,
+        TError,
+        UpdateRealtorAgentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateRealtorAgentMutationOptions(options));
+    }
+
+export const getDeleteRealtorAgentUrl = (agentId: string,) => {
+
+
+
+
+  return `/api/realtor/agents/${agentId}`
+}
+
+export const deleteRealtorAgent = async (agentId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getDeleteRealtorAgentUrl(agentId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteRealtorAgentMutationKey = () => ['deleteRealtorAgent'] as const;
+
+export const getDeleteRealtorAgentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorAgent>>, TError,DeleteRealtorAgentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorAgent>>, TError,DeleteRealtorAgentMutationVariables, TContext> => {
+
+const mutationKey = getDeleteRealtorAgentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRealtorAgent>>, DeleteRealtorAgentMutationVariables> = (props) => {
+          const {agentId} = props ?? {};
+
+          return  deleteRealtorAgent(agentId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteRealtorAgentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRealtorAgent>>>
+
+    export type DeleteRealtorAgentMutationError = ErrorType<unknown>
+    export type DeleteRealtorAgentMutationVariables = {agentId: string}
+
+    export const useDeleteRealtorAgent = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorAgent>>, TError,DeleteRealtorAgentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteRealtorAgent>>,
+        TError,
+        DeleteRealtorAgentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteRealtorAgentMutationOptions(options));
+    }
+
+export const getListRealtorListingsUrl = () => {
+
+
+
+
+  return `/api/realtor/listings`
+}
+
+export const listRealtorListings = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorListing[]> => {
+
+  return customFetch<RealtorListing[]>(getListRealtorListingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRealtorListingsQueryKey = () => {
+    return [
+    `/api/realtor/listings`
+    ] as const;
+    }
+
+
+export const getListRealtorListingsQueryOptions = <TData = Awaited<ReturnType<typeof listRealtorListings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorListings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRealtorListingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRealtorListings>>> = ({ signal }) => listRealtorListings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRealtorListings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRealtorListingsQueryResult = NonNullable<Awaited<ReturnType<typeof listRealtorListings>>>
+export type ListRealtorListingsQueryError = ErrorType<unknown>
+
+
+
+export function useListRealtorListings<TData = Awaited<ReturnType<typeof listRealtorListings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorListings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRealtorListingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateRealtorListingUrl = () => {
+
+
+
+
+  return `/api/realtor/listings`
+}
+
+export const createRealtorListing = async (realtorListingInput: RealtorListingInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorListing> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorListing>(getCreateRealtorListingUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorListingInput)
+  }
+);}
+
+
+
+
+
+export const getCreateRealtorListingMutationKey = () => ['createRealtorListing'] as const;
+
+export const getCreateRealtorListingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRealtorListing>>, TError,CreateRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRealtorListing>>, TError,CreateRealtorListingMutationVariables, TContext> => {
+
+const mutationKey = getCreateRealtorListingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRealtorListing>>, CreateRealtorListingMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createRealtorListing(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRealtorListingMutationResult = NonNullable<Awaited<ReturnType<typeof createRealtorListing>>>
+    export type CreateRealtorListingMutationBody = BodyType<RealtorListingInput>
+    export type CreateRealtorListingMutationError = ErrorType<unknown>
+    export type CreateRealtorListingMutationVariables = {data: BodyType<RealtorListingInput>}
+
+    export const useCreateRealtorListing = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRealtorListing>>, TError,CreateRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createRealtorListing>>,
+        TError,
+        CreateRealtorListingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateRealtorListingMutationOptions(options));
+    }
+
+export const getGetRealtorListingUrl = (listingId: string,) => {
+
+
+
+
+  return `/api/realtor/listings/${listingId}`
+}
+
+export const getRealtorListing = async (listingId: string, options?: Parameters<typeof customFetch>[1]): Promise<RealtorListing> => {
+
+  return customFetch<RealtorListing>(getGetRealtorListingUrl(listingId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRealtorListingQueryKey = (listingId: string,) => {
+    return [
+    `/api/realtor/listings/${listingId}`
+    ] as const;
+    }
+
+
+export const getGetRealtorListingQueryOptions = <TData = Awaited<ReturnType<typeof getRealtorListing>>, TError = ErrorType<unknown>>(listingId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorListing>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRealtorListingQueryKey(listingId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRealtorListing>>> = ({ signal }) => getRealtorListing(listingId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: listingId !== null && listingId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRealtorListing>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRealtorListingQueryResult = NonNullable<Awaited<ReturnType<typeof getRealtorListing>>>
+export type GetRealtorListingQueryError = ErrorType<unknown>
+
+
+
+export function useGetRealtorListing<TData = Awaited<ReturnType<typeof getRealtorListing>>, TError = ErrorType<unknown>>(
+ listingId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorListing>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRealtorListingQueryOptions(listingId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateRealtorListingUrl = (listingId: string,) => {
+
+
+
+
+  return `/api/realtor/listings/${listingId}`
+}
+
+export const updateRealtorListing = async (listingId: string,
+    realtorListingInput: RealtorListingInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorListing> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorListing>(getUpdateRealtorListingUrl(listingId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorListingInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateRealtorListingMutationKey = () => ['updateRealtorListing'] as const;
+
+export const getUpdateRealtorListingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorListing>>, TError,UpdateRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRealtorListing>>, TError,UpdateRealtorListingMutationVariables, TContext> => {
+
+const mutationKey = getUpdateRealtorListingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRealtorListing>>, UpdateRealtorListingMutationVariables> = (props) => {
+          const {listingId,data} = props ?? {};
+
+          return  updateRealtorListing(listingId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRealtorListingMutationResult = NonNullable<Awaited<ReturnType<typeof updateRealtorListing>>>
+    export type UpdateRealtorListingMutationBody = BodyType<RealtorListingInput>
+    export type UpdateRealtorListingMutationError = ErrorType<unknown>
+    export type UpdateRealtorListingMutationVariables = {listingId: string;data: BodyType<RealtorListingInput>}
+
+    export const useUpdateRealtorListing = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorListing>>, TError,UpdateRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRealtorListing>>,
+        TError,
+        UpdateRealtorListingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateRealtorListingMutationOptions(options));
+    }
+
+export const getDeleteRealtorListingUrl = (listingId: string,) => {
+
+
+
+
+  return `/api/realtor/listings/${listingId}`
+}
+
+export const deleteRealtorListing = async (listingId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getDeleteRealtorListingUrl(listingId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteRealtorListingMutationKey = () => ['deleteRealtorListing'] as const;
+
+export const getDeleteRealtorListingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorListing>>, TError,DeleteRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorListing>>, TError,DeleteRealtorListingMutationVariables, TContext> => {
+
+const mutationKey = getDeleteRealtorListingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRealtorListing>>, DeleteRealtorListingMutationVariables> = (props) => {
+          const {listingId} = props ?? {};
+
+          return  deleteRealtorListing(listingId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteRealtorListingMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRealtorListing>>>
+
+    export type DeleteRealtorListingMutationError = ErrorType<unknown>
+    export type DeleteRealtorListingMutationVariables = {listingId: string}
+
+    export const useDeleteRealtorListing = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorListing>>, TError,DeleteRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteRealtorListing>>,
+        TError,
+        DeleteRealtorListingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteRealtorListingMutationOptions(options));
+    }
+
+export const getListRealtorLeadsUrl = () => {
+
+
+
+
+  return `/api/realtor/leads`
+}
+
+export const listRealtorLeads = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorLead[]> => {
+
+  return customFetch<RealtorLead[]>(getListRealtorLeadsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRealtorLeadsQueryKey = () => {
+    return [
+    `/api/realtor/leads`
+    ] as const;
+    }
+
+
+export const getListRealtorLeadsQueryOptions = <TData = Awaited<ReturnType<typeof listRealtorLeads>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeads>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRealtorLeadsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRealtorLeads>>> = ({ signal }) => listRealtorLeads({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeads>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRealtorLeadsQueryResult = NonNullable<Awaited<ReturnType<typeof listRealtorLeads>>>
+export type ListRealtorLeadsQueryError = ErrorType<unknown>
+
+
+
+export function useListRealtorLeads<TData = Awaited<ReturnType<typeof listRealtorLeads>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeads>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRealtorLeadsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateRealtorLeadUrl = () => {
+
+
+
+
+  return `/api/realtor/leads`
+}
+
+export const createRealtorLead = async (realtorLeadInput: RealtorLeadInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorLead> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorLead>(getCreateRealtorLeadUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorLeadInput)
+  }
+);}
+
+
+
+
+
+export const getCreateRealtorLeadMutationKey = () => ['createRealtorLead'] as const;
+
+export const getCreateRealtorLeadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRealtorLead>>, TError,CreateRealtorLeadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRealtorLead>>, TError,CreateRealtorLeadMutationVariables, TContext> => {
+
+const mutationKey = getCreateRealtorLeadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRealtorLead>>, CreateRealtorLeadMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createRealtorLead(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRealtorLeadMutationResult = NonNullable<Awaited<ReturnType<typeof createRealtorLead>>>
+    export type CreateRealtorLeadMutationBody = BodyType<RealtorLeadInput>
+    export type CreateRealtorLeadMutationError = ErrorType<unknown>
+    export type CreateRealtorLeadMutationVariables = {data: BodyType<RealtorLeadInput>}
+
+    export const useCreateRealtorLead = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRealtorLead>>, TError,CreateRealtorLeadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createRealtorLead>>,
+        TError,
+        CreateRealtorLeadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateRealtorLeadMutationOptions(options));
+    }
+
+export const getUpdateRealtorLeadUrl = (leadId: string,) => {
+
+
+
+
+  return `/api/realtor/leads/${leadId}`
+}
+
+export const updateRealtorLead = async (leadId: string,
+    realtorLeadPatch: RealtorLeadPatch, options?: Parameters<typeof customFetch>[1]): Promise<RealtorLead> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorLead>(getUpdateRealtorLeadUrl(leadId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorLeadPatch)
+  }
+);}
+
+
+
+
+
+export const getUpdateRealtorLeadMutationKey = () => ['updateRealtorLead'] as const;
+
+export const getUpdateRealtorLeadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorLead>>, TError,UpdateRealtorLeadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRealtorLead>>, TError,UpdateRealtorLeadMutationVariables, TContext> => {
+
+const mutationKey = getUpdateRealtorLeadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRealtorLead>>, UpdateRealtorLeadMutationVariables> = (props) => {
+          const {leadId,data} = props ?? {};
+
+          return  updateRealtorLead(leadId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRealtorLeadMutationResult = NonNullable<Awaited<ReturnType<typeof updateRealtorLead>>>
+    export type UpdateRealtorLeadMutationBody = BodyType<RealtorLeadPatch>
+    export type UpdateRealtorLeadMutationError = ErrorType<unknown>
+    export type UpdateRealtorLeadMutationVariables = {leadId: string;data: BodyType<RealtorLeadPatch>}
+
+    export const useUpdateRealtorLead = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorLead>>, TError,UpdateRealtorLeadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRealtorLead>>,
+        TError,
+        UpdateRealtorLeadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateRealtorLeadMutationOptions(options));
+    }
+
+export const getDeleteRealtorLeadUrl = (leadId: string,) => {
+
+
+
+
+  return `/api/realtor/leads/${leadId}`
+}
+
+export const deleteRealtorLead = async (leadId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getDeleteRealtorLeadUrl(leadId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteRealtorLeadMutationKey = () => ['deleteRealtorLead'] as const;
+
+export const getDeleteRealtorLeadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorLead>>, TError,DeleteRealtorLeadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorLead>>, TError,DeleteRealtorLeadMutationVariables, TContext> => {
+
+const mutationKey = getDeleteRealtorLeadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRealtorLead>>, DeleteRealtorLeadMutationVariables> = (props) => {
+          const {leadId} = props ?? {};
+
+          return  deleteRealtorLead(leadId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteRealtorLeadMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRealtorLead>>>
+
+    export type DeleteRealtorLeadMutationError = ErrorType<unknown>
+    export type DeleteRealtorLeadMutationVariables = {leadId: string}
+
+    export const useDeleteRealtorLead = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorLead>>, TError,DeleteRealtorLeadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteRealtorLead>>,
+        TError,
+        DeleteRealtorLeadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteRealtorLeadMutationOptions(options));
+    }
+
+export const getListRealtorLeadMatchesUrl = (leadId: string,) => {
+
+
+
+
+  return `/api/realtor/leads/${leadId}/matches`
+}
+
+/**
+ * @summary Active listings that fit the lead's deal type, district, rooms and budget
+ */
+export const listRealtorLeadMatches = async (leadId: string, options?: Parameters<typeof customFetch>[1]): Promise<RealtorListing[]> => {
+
+  return customFetch<RealtorListing[]>(getListRealtorLeadMatchesUrl(leadId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRealtorLeadMatchesQueryKey = (leadId: string,) => {
+    return [
+    `/api/realtor/leads/${leadId}/matches`
+    ] as const;
+    }
+
+
+export const getListRealtorLeadMatchesQueryOptions = <TData = Awaited<ReturnType<typeof listRealtorLeadMatches>>, TError = ErrorType<unknown>>(leadId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeadMatches>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRealtorLeadMatchesQueryKey(leadId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRealtorLeadMatches>>> = ({ signal }) => listRealtorLeadMatches(leadId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: leadId !== null && leadId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeadMatches>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRealtorLeadMatchesQueryResult = NonNullable<Awaited<ReturnType<typeof listRealtorLeadMatches>>>
+export type ListRealtorLeadMatchesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Active listings that fit the lead's deal type, district, rooms and budget
+ */
+
+export function useListRealtorLeadMatches<TData = Awaited<ReturnType<typeof listRealtorLeadMatches>>, TError = ErrorType<unknown>>(
+ leadId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeadMatches>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRealtorLeadMatchesQueryOptions(leadId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListRealtorLeadMessagesUrl = (leadId: string,) => {
+
+
+
+
+  return `/api/realtor/leads/${leadId}/messages`
+}
+
+export const listRealtorLeadMessages = async (leadId: string, options?: Parameters<typeof customFetch>[1]): Promise<RealtorMessage[]> => {
+
+  return customFetch<RealtorMessage[]>(getListRealtorLeadMessagesUrl(leadId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRealtorLeadMessagesQueryKey = (leadId: string,) => {
+    return [
+    `/api/realtor/leads/${leadId}/messages`
+    ] as const;
+    }
+
+
+export const getListRealtorLeadMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listRealtorLeadMessages>>, TError = ErrorType<unknown>>(leadId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeadMessages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRealtorLeadMessagesQueryKey(leadId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRealtorLeadMessages>>> = ({ signal }) => listRealtorLeadMessages(leadId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: leadId !== null && leadId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeadMessages>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRealtorLeadMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listRealtorLeadMessages>>>
+export type ListRealtorLeadMessagesQueryError = ErrorType<unknown>
+
+
+
+export function useListRealtorLeadMessages<TData = Awaited<ReturnType<typeof listRealtorLeadMessages>>, TError = ErrorType<unknown>>(
+ leadId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorLeadMessages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRealtorLeadMessagesQueryOptions(leadId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSendRealtorLeadMessageUrl = (leadId: string,) => {
+
+
+
+
+  return `/api/realtor/leads/${leadId}/messages`
+}
+
+/**
+ * @summary Send through the WhatsApp Cloud API when connected; otherwise log it and return a click-to-chat link
+ */
+export const sendRealtorLeadMessage = async (leadId: string,
+    realtorMessageInput: RealtorMessageInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorMessageResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorMessageResult>(getSendRealtorLeadMessageUrl(leadId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorMessageInput)
+  }
+);}
+
+
+
+
+
+export const getSendRealtorLeadMessageMutationKey = () => ['sendRealtorLeadMessage'] as const;
+
+export const getSendRealtorLeadMessageMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendRealtorLeadMessage>>, TError,SendRealtorLeadMessageMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendRealtorLeadMessage>>, TError,SendRealtorLeadMessageMutationVariables, TContext> => {
+
+const mutationKey = getSendRealtorLeadMessageMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendRealtorLeadMessage>>, SendRealtorLeadMessageMutationVariables> = (props) => {
+          const {leadId,data} = props ?? {};
+
+          return  sendRealtorLeadMessage(leadId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendRealtorLeadMessageMutationResult = NonNullable<Awaited<ReturnType<typeof sendRealtorLeadMessage>>>
+    export type SendRealtorLeadMessageMutationBody = BodyType<RealtorMessageInput>
+    export type SendRealtorLeadMessageMutationError = ErrorType<unknown>
+    export type SendRealtorLeadMessageMutationVariables = {leadId: string;data: BodyType<RealtorMessageInput>}
+
+    /**
+ * @summary Send through the WhatsApp Cloud API when connected; otherwise log it and return a click-to-chat link
+ */
+export const useSendRealtorLeadMessage = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendRealtorLeadMessage>>, TError,SendRealtorLeadMessageMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendRealtorLeadMessage>>,
+        TError,
+        SendRealtorLeadMessageMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSendRealtorLeadMessageMutationOptions(options));
+    }
+
+export const getListRealtorMessagesUrl = () => {
+
+
+
+
+  return `/api/realtor/messages`
+}
+
+export const listRealtorMessages = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorMessage[]> => {
+
+  return customFetch<RealtorMessage[]>(getListRealtorMessagesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRealtorMessagesQueryKey = () => {
+    return [
+    `/api/realtor/messages`
+    ] as const;
+    }
+
+
+export const getListRealtorMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listRealtorMessages>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorMessages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRealtorMessagesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRealtorMessages>>> = ({ signal }) => listRealtorMessages({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRealtorMessages>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRealtorMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listRealtorMessages>>>
+export type ListRealtorMessagesQueryError = ErrorType<unknown>
+
+
+
+export function useListRealtorMessages<TData = Awaited<ReturnType<typeof listRealtorMessages>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorMessages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRealtorMessagesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListRealtorAppointmentsUrl = () => {
+
+
+
+
+  return `/api/realtor/appointments`
+}
+
+export const listRealtorAppointments = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorAppointment[]> => {
+
+  return customFetch<RealtorAppointment[]>(getListRealtorAppointmentsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRealtorAppointmentsQueryKey = () => {
+    return [
+    `/api/realtor/appointments`
+    ] as const;
+    }
+
+
+export const getListRealtorAppointmentsQueryOptions = <TData = Awaited<ReturnType<typeof listRealtorAppointments>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorAppointments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRealtorAppointmentsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRealtorAppointments>>> = ({ signal }) => listRealtorAppointments({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRealtorAppointments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRealtorAppointmentsQueryResult = NonNullable<Awaited<ReturnType<typeof listRealtorAppointments>>>
+export type ListRealtorAppointmentsQueryError = ErrorType<unknown>
+
+
+
+export function useListRealtorAppointments<TData = Awaited<ReturnType<typeof listRealtorAppointments>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorAppointments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRealtorAppointmentsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateRealtorAppointmentUrl = () => {
+
+
+
+
+  return `/api/realtor/appointments`
+}
+
+export const createRealtorAppointment = async (realtorAppointmentInput: RealtorAppointmentInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorAppointment> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorAppointment>(getCreateRealtorAppointmentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorAppointmentInput)
+  }
+);}
+
+
+
+
+
+export const getCreateRealtorAppointmentMutationKey = () => ['createRealtorAppointment'] as const;
+
+export const getCreateRealtorAppointmentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRealtorAppointment>>, TError,CreateRealtorAppointmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRealtorAppointment>>, TError,CreateRealtorAppointmentMutationVariables, TContext> => {
+
+const mutationKey = getCreateRealtorAppointmentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRealtorAppointment>>, CreateRealtorAppointmentMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createRealtorAppointment(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRealtorAppointmentMutationResult = NonNullable<Awaited<ReturnType<typeof createRealtorAppointment>>>
+    export type CreateRealtorAppointmentMutationBody = BodyType<RealtorAppointmentInput>
+    export type CreateRealtorAppointmentMutationError = ErrorType<unknown>
+    export type CreateRealtorAppointmentMutationVariables = {data: BodyType<RealtorAppointmentInput>}
+
+    export const useCreateRealtorAppointment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRealtorAppointment>>, TError,CreateRealtorAppointmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createRealtorAppointment>>,
+        TError,
+        CreateRealtorAppointmentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateRealtorAppointmentMutationOptions(options));
+    }
+
+export const getUpdateRealtorAppointmentUrl = (appointmentId: string,) => {
+
+
+
+
+  return `/api/realtor/appointments/${appointmentId}`
+}
+
+export const updateRealtorAppointment = async (appointmentId: string,
+    realtorAppointmentPatch: RealtorAppointmentPatch, options?: Parameters<typeof customFetch>[1]): Promise<RealtorAppointment> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorAppointment>(getUpdateRealtorAppointmentUrl(appointmentId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorAppointmentPatch)
+  }
+);}
+
+
+
+
+
+export const getUpdateRealtorAppointmentMutationKey = () => ['updateRealtorAppointment'] as const;
+
+export const getUpdateRealtorAppointmentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorAppointment>>, TError,UpdateRealtorAppointmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRealtorAppointment>>, TError,UpdateRealtorAppointmentMutationVariables, TContext> => {
+
+const mutationKey = getUpdateRealtorAppointmentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRealtorAppointment>>, UpdateRealtorAppointmentMutationVariables> = (props) => {
+          const {appointmentId,data} = props ?? {};
+
+          return  updateRealtorAppointment(appointmentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRealtorAppointmentMutationResult = NonNullable<Awaited<ReturnType<typeof updateRealtorAppointment>>>
+    export type UpdateRealtorAppointmentMutationBody = BodyType<RealtorAppointmentPatch>
+    export type UpdateRealtorAppointmentMutationError = ErrorType<unknown>
+    export type UpdateRealtorAppointmentMutationVariables = {appointmentId: string;data: BodyType<RealtorAppointmentPatch>}
+
+    export const useUpdateRealtorAppointment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorAppointment>>, TError,UpdateRealtorAppointmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRealtorAppointment>>,
+        TError,
+        UpdateRealtorAppointmentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateRealtorAppointmentMutationOptions(options));
+    }
+
+export const getDeleteRealtorAppointmentUrl = (appointmentId: string,) => {
+
+
+
+
+  return `/api/realtor/appointments/${appointmentId}`
+}
+
+export const deleteRealtorAppointment = async (appointmentId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getDeleteRealtorAppointmentUrl(appointmentId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteRealtorAppointmentMutationKey = () => ['deleteRealtorAppointment'] as const;
+
+export const getDeleteRealtorAppointmentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorAppointment>>, TError,DeleteRealtorAppointmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorAppointment>>, TError,DeleteRealtorAppointmentMutationVariables, TContext> => {
+
+const mutationKey = getDeleteRealtorAppointmentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRealtorAppointment>>, DeleteRealtorAppointmentMutationVariables> = (props) => {
+          const {appointmentId} = props ?? {};
+
+          return  deleteRealtorAppointment(appointmentId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteRealtorAppointmentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRealtorAppointment>>>
+
+    export type DeleteRealtorAppointmentMutationError = ErrorType<unknown>
+    export type DeleteRealtorAppointmentMutationVariables = {appointmentId: string}
+
+    export const useDeleteRealtorAppointment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRealtorAppointment>>, TError,DeleteRealtorAppointmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteRealtorAppointment>>,
+        TError,
+        DeleteRealtorAppointmentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteRealtorAppointmentMutationOptions(options));
+    }
+
+export const getListPropertyPassportsUrl = () => {
+
+
+
+
+  return `/api/realtor/passports`
+}
+
+export const listPropertyPassports = async ( options?: Parameters<typeof customFetch>[1]): Promise<PropertyPassport[]> => {
+
+  return customFetch<PropertyPassport[]>(getListPropertyPassportsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListPropertyPassportsQueryKey = () => {
+    return [
+    `/api/realtor/passports`
+    ] as const;
+    }
+
+
+export const getListPropertyPassportsQueryOptions = <TData = Awaited<ReturnType<typeof listPropertyPassports>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPropertyPassports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListPropertyPassportsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPropertyPassports>>> = ({ signal }) => listPropertyPassports({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPropertyPassports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListPropertyPassportsQueryResult = NonNullable<Awaited<ReturnType<typeof listPropertyPassports>>>
+export type ListPropertyPassportsQueryError = ErrorType<unknown>
+
+
+
+export function useListPropertyPassports<TData = Awaited<ReturnType<typeof listPropertyPassports>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPropertyPassports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListPropertyPassportsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreatePropertyPassportUrl = () => {
+
+
+
+
+  return `/api/realtor/passports`
+}
+
+export const createPropertyPassport = async (propertyPassportInput: PropertyPassportInput, options?: Parameters<typeof customFetch>[1]): Promise<PropertyPassport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PropertyPassport>(getCreatePropertyPassportUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(propertyPassportInput)
+  }
+);}
+
+
+
+
+
+export const getCreatePropertyPassportMutationKey = () => ['createPropertyPassport'] as const;
+
+export const getCreatePropertyPassportMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPropertyPassport>>, TError,CreatePropertyPassportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPropertyPassport>>, TError,CreatePropertyPassportMutationVariables, TContext> => {
+
+const mutationKey = getCreatePropertyPassportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPropertyPassport>>, CreatePropertyPassportMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createPropertyPassport(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePropertyPassportMutationResult = NonNullable<Awaited<ReturnType<typeof createPropertyPassport>>>
+    export type CreatePropertyPassportMutationBody = BodyType<PropertyPassportInput>
+    export type CreatePropertyPassportMutationError = ErrorType<unknown>
+    export type CreatePropertyPassportMutationVariables = {data: BodyType<PropertyPassportInput>}
+
+    export const useCreatePropertyPassport = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPropertyPassport>>, TError,CreatePropertyPassportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createPropertyPassport>>,
+        TError,
+        CreatePropertyPassportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreatePropertyPassportMutationOptions(options));
+    }
+
+export const getGetPropertyPassportUrl = (passportId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}`
+}
+
+export const getPropertyPassport = async (passportId: string, options?: Parameters<typeof customFetch>[1]): Promise<PropertyPassport> => {
+
+  return customFetch<PropertyPassport>(getGetPropertyPassportUrl(passportId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPropertyPassportQueryKey = (passportId: string,) => {
+    return [
+    `/api/realtor/passports/${passportId}`
+    ] as const;
+    }
+
+
+export const getGetPropertyPassportQueryOptions = <TData = Awaited<ReturnType<typeof getPropertyPassport>>, TError = ErrorType<unknown>>(passportId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPropertyPassport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPropertyPassportQueryKey(passportId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPropertyPassport>>> = ({ signal }) => getPropertyPassport(passportId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: passportId !== null && passportId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPropertyPassport>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPropertyPassportQueryResult = NonNullable<Awaited<ReturnType<typeof getPropertyPassport>>>
+export type GetPropertyPassportQueryError = ErrorType<unknown>
+
+
+
+export function useGetPropertyPassport<TData = Awaited<ReturnType<typeof getPropertyPassport>>, TError = ErrorType<unknown>>(
+ passportId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPropertyPassport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPropertyPassportQueryOptions(passportId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdatePropertyPassportUrl = (passportId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}`
+}
+
+export const updatePropertyPassport = async (passportId: string,
+    propertyPassportInput: PropertyPassportInput, options?: Parameters<typeof customFetch>[1]): Promise<PropertyPassport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PropertyPassport>(getUpdatePropertyPassportUrl(passportId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(propertyPassportInput)
+  }
+);}
+
+
+
+
+
+export const getUpdatePropertyPassportMutationKey = () => ['updatePropertyPassport'] as const;
+
+export const getUpdatePropertyPassportMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePropertyPassport>>, TError,UpdatePropertyPassportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePropertyPassport>>, TError,UpdatePropertyPassportMutationVariables, TContext> => {
+
+const mutationKey = getUpdatePropertyPassportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePropertyPassport>>, UpdatePropertyPassportMutationVariables> = (props) => {
+          const {passportId,data} = props ?? {};
+
+          return  updatePropertyPassport(passportId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePropertyPassportMutationResult = NonNullable<Awaited<ReturnType<typeof updatePropertyPassport>>>
+    export type UpdatePropertyPassportMutationBody = BodyType<PropertyPassportInput>
+    export type UpdatePropertyPassportMutationError = ErrorType<unknown>
+    export type UpdatePropertyPassportMutationVariables = {passportId: string;data: BodyType<PropertyPassportInput>}
+
+    export const useUpdatePropertyPassport = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePropertyPassport>>, TError,UpdatePropertyPassportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updatePropertyPassport>>,
+        TError,
+        UpdatePropertyPassportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdatePropertyPassportMutationOptions(options));
+    }
+
+export const getDeletePropertyPassportUrl = (passportId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}`
+}
+
+export const deletePropertyPassport = async (passportId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getDeletePropertyPassportUrl(passportId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeletePropertyPassportMutationKey = () => ['deletePropertyPassport'] as const;
+
+export const getDeletePropertyPassportMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePropertyPassport>>, TError,DeletePropertyPassportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePropertyPassport>>, TError,DeletePropertyPassportMutationVariables, TContext> => {
+
+const mutationKey = getDeletePropertyPassportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePropertyPassport>>, DeletePropertyPassportMutationVariables> = (props) => {
+          const {passportId} = props ?? {};
+
+          return  deletePropertyPassport(passportId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePropertyPassportMutationResult = NonNullable<Awaited<ReturnType<typeof deletePropertyPassport>>>
+
+    export type DeletePropertyPassportMutationError = ErrorType<unknown>
+    export type DeletePropertyPassportMutationVariables = {passportId: string}
+
+    export const useDeletePropertyPassport = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePropertyPassport>>, TError,DeletePropertyPassportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deletePropertyPassport>>,
+        TError,
+        DeletePropertyPassportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeletePropertyPassportMutationOptions(options));
+    }
+
+export const getSetPropertyPassportStatusUrl = (passportId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}/status`
+}
+
+export const setPropertyPassportStatus = async (passportId: string,
+    passportStatusInput: PassportStatusInput, options?: Parameters<typeof customFetch>[1]): Promise<PropertyPassport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PropertyPassport>(getSetPropertyPassportStatusUrl(passportId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(passportStatusInput)
+  }
+);}
+
+
+
+
+
+export const getSetPropertyPassportStatusMutationKey = () => ['setPropertyPassportStatus'] as const;
+
+export const getSetPropertyPassportStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setPropertyPassportStatus>>, TError,SetPropertyPassportStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setPropertyPassportStatus>>, TError,SetPropertyPassportStatusMutationVariables, TContext> => {
+
+const mutationKey = getSetPropertyPassportStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setPropertyPassportStatus>>, SetPropertyPassportStatusMutationVariables> = (props) => {
+          const {passportId,data} = props ?? {};
+
+          return  setPropertyPassportStatus(passportId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetPropertyPassportStatusMutationResult = NonNullable<Awaited<ReturnType<typeof setPropertyPassportStatus>>>
+    export type SetPropertyPassportStatusMutationBody = BodyType<PassportStatusInput>
+    export type SetPropertyPassportStatusMutationError = ErrorType<unknown>
+    export type SetPropertyPassportStatusMutationVariables = {passportId: string;data: BodyType<PassportStatusInput>}
+
+    export const useSetPropertyPassportStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setPropertyPassportStatus>>, TError,SetPropertyPassportStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setPropertyPassportStatus>>,
+        TError,
+        SetPropertyPassportStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetPropertyPassportStatusMutationOptions(options));
+    }
+
+export const getCreatePassportWorkUrl = (passportId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}/works`
+}
+
+export const createPassportWork = async (passportId: string,
+    passportWorkInput: PassportWorkInput, options?: Parameters<typeof customFetch>[1]): Promise<PropertyPassport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PropertyPassport>(getCreatePassportWorkUrl(passportId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(passportWorkInput)
+  }
+);}
+
+
+
+
+
+export const getCreatePassportWorkMutationKey = () => ['createPassportWork'] as const;
+
+export const getCreatePassportWorkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPassportWork>>, TError,CreatePassportWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPassportWork>>, TError,CreatePassportWorkMutationVariables, TContext> => {
+
+const mutationKey = getCreatePassportWorkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPassportWork>>, CreatePassportWorkMutationVariables> = (props) => {
+          const {passportId,data} = props ?? {};
+
+          return  createPassportWork(passportId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePassportWorkMutationResult = NonNullable<Awaited<ReturnType<typeof createPassportWork>>>
+    export type CreatePassportWorkMutationBody = BodyType<PassportWorkInput>
+    export type CreatePassportWorkMutationError = ErrorType<unknown>
+    export type CreatePassportWorkMutationVariables = {passportId: string;data: BodyType<PassportWorkInput>}
+
+    export const useCreatePassportWork = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPassportWork>>, TError,CreatePassportWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createPassportWork>>,
+        TError,
+        CreatePassportWorkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreatePassportWorkMutationOptions(options));
+    }
+
+export const getUpdatePassportWorkUrl = (passportId: string,
+    workId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}/works/${workId}`
+}
+
+/**
+ * @summary Edit a work. Changing its content clears contractor and owner confirmations.
+ */
+export const updatePassportWork = async (passportId: string,
+    workId: string,
+    passportWorkInput: PassportWorkInput, options?: Parameters<typeof customFetch>[1]): Promise<PropertyPassport> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PropertyPassport>(getUpdatePassportWorkUrl(passportId,workId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(passportWorkInput)
+  }
+);}
+
+
+
+
+
+export const getUpdatePassportWorkMutationKey = () => ['updatePassportWork'] as const;
+
+export const getUpdatePassportWorkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePassportWork>>, TError,UpdatePassportWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePassportWork>>, TError,UpdatePassportWorkMutationVariables, TContext> => {
+
+const mutationKey = getUpdatePassportWorkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePassportWork>>, UpdatePassportWorkMutationVariables> = (props) => {
+          const {passportId,workId,data} = props ?? {};
+
+          return  updatePassportWork(passportId,workId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePassportWorkMutationResult = NonNullable<Awaited<ReturnType<typeof updatePassportWork>>>
+    export type UpdatePassportWorkMutationBody = BodyType<PassportWorkInput>
+    export type UpdatePassportWorkMutationError = ErrorType<unknown>
+    export type UpdatePassportWorkMutationVariables = {passportId: string;workId: string;data: BodyType<PassportWorkInput>}
+
+    /**
+ * @summary Edit a work. Changing its content clears contractor and owner confirmations.
+ */
+export const useUpdatePassportWork = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePassportWork>>, TError,UpdatePassportWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updatePassportWork>>,
+        TError,
+        UpdatePassportWorkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdatePassportWorkMutationOptions(options));
+    }
+
+export const getDeletePassportWorkUrl = (passportId: string,
+    workId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}/works/${workId}`
+}
+
+export const deletePassportWork = async (passportId: string,
+    workId: string, options?: Parameters<typeof customFetch>[1]): Promise<PropertyPassport> => {
+
+  return customFetch<PropertyPassport>(getDeletePassportWorkUrl(passportId,workId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeletePassportWorkMutationKey = () => ['deletePassportWork'] as const;
+
+export const getDeletePassportWorkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePassportWork>>, TError,DeletePassportWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePassportWork>>, TError,DeletePassportWorkMutationVariables, TContext> => {
+
+const mutationKey = getDeletePassportWorkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePassportWork>>, DeletePassportWorkMutationVariables> = (props) => {
+          const {passportId,workId} = props ?? {};
+
+          return  deletePassportWork(passportId,workId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePassportWorkMutationResult = NonNullable<Awaited<ReturnType<typeof deletePassportWork>>>
+
+    export type DeletePassportWorkMutationError = ErrorType<unknown>
+    export type DeletePassportWorkMutationVariables = {passportId: string;workId: string}
+
+    export const useDeletePassportWork = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePassportWork>>, TError,DeletePassportWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deletePassportWork>>,
+        TError,
+        DeletePassportWorkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeletePassportWorkMutationOptions(options));
+    }
+
+export const getCreateContractorConfirmLinkUrl = (passportId: string,
+    workId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}/works/${workId}/contractor-link`
+}
+
+/**
+ * @summary Create a fresh single-work confirmation link for the contractor (replaces the previous one)
+ */
+export const createContractorConfirmLink = async (passportId: string,
+    workId: string, options?: Parameters<typeof customFetch>[1]): Promise<ConfirmLink> => {
+
+  return customFetch<ConfirmLink>(getCreateContractorConfirmLinkUrl(passportId,workId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCreateContractorConfirmLinkMutationKey = () => ['createContractorConfirmLink'] as const;
+
+export const getCreateContractorConfirmLinkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createContractorConfirmLink>>, TError,CreateContractorConfirmLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createContractorConfirmLink>>, TError,CreateContractorConfirmLinkMutationVariables, TContext> => {
+
+const mutationKey = getCreateContractorConfirmLinkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createContractorConfirmLink>>, CreateContractorConfirmLinkMutationVariables> = (props) => {
+          const {passportId,workId} = props ?? {};
+
+          return  createContractorConfirmLink(passportId,workId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateContractorConfirmLinkMutationResult = NonNullable<Awaited<ReturnType<typeof createContractorConfirmLink>>>
+
+    export type CreateContractorConfirmLinkMutationError = ErrorType<unknown>
+    export type CreateContractorConfirmLinkMutationVariables = {passportId: string;workId: string}
+
+    /**
+ * @summary Create a fresh single-work confirmation link for the contractor (replaces the previous one)
+ */
+export const useCreateContractorConfirmLink = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createContractorConfirmLink>>, TError,CreateContractorConfirmLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createContractorConfirmLink>>,
+        TError,
+        CreateContractorConfirmLinkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateContractorConfirmLinkMutationOptions(options));
+    }
+
+export const getCreateOwnerConfirmLinkUrl = (passportId: string,) => {
+
+
+
+
+  return `/api/realtor/passports/${passportId}/owner-link`
+}
+
+/**
+ * @summary Create a fresh handover acceptance link for the homeowner (replaces the previous one)
+ */
+export const createOwnerConfirmLink = async (passportId: string, options?: Parameters<typeof customFetch>[1]): Promise<ConfirmLink> => {
+
+  return customFetch<ConfirmLink>(getCreateOwnerConfirmLinkUrl(passportId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCreateOwnerConfirmLinkMutationKey = () => ['createOwnerConfirmLink'] as const;
+
+export const getCreateOwnerConfirmLinkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createOwnerConfirmLink>>, TError,CreateOwnerConfirmLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createOwnerConfirmLink>>, TError,CreateOwnerConfirmLinkMutationVariables, TContext> => {
+
+const mutationKey = getCreateOwnerConfirmLinkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createOwnerConfirmLink>>, CreateOwnerConfirmLinkMutationVariables> = (props) => {
+          const {passportId} = props ?? {};
+
+          return  createOwnerConfirmLink(passportId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateOwnerConfirmLinkMutationResult = NonNullable<Awaited<ReturnType<typeof createOwnerConfirmLink>>>
+
+    export type CreateOwnerConfirmLinkMutationError = ErrorType<unknown>
+    export type CreateOwnerConfirmLinkMutationVariables = {passportId: string}
+
+    /**
+ * @summary Create a fresh handover acceptance link for the homeowner (replaces the previous one)
+ */
+export const useCreateOwnerConfirmLink = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createOwnerConfirmLink>>, TError,CreateOwnerConfirmLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createOwnerConfirmLink>>,
+        TError,
+        CreateOwnerConfirmLinkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateOwnerConfirmLinkMutationOptions(options));
+    }
+
+export const getGetRealtorWhatsappUrl = () => {
+
+
+
+
+  return `/api/realtor/whatsapp`
+}
+
+export const getRealtorWhatsapp = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorWhatsappSettings> => {
+
+  return customFetch<RealtorWhatsappSettings>(getGetRealtorWhatsappUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRealtorWhatsappQueryKey = () => {
+    return [
+    `/api/realtor/whatsapp`
+    ] as const;
+    }
+
+
+export const getGetRealtorWhatsappQueryOptions = <TData = Awaited<ReturnType<typeof getRealtorWhatsapp>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorWhatsapp>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRealtorWhatsappQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRealtorWhatsapp>>> = ({ signal }) => getRealtorWhatsapp({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRealtorWhatsapp>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRealtorWhatsappQueryResult = NonNullable<Awaited<ReturnType<typeof getRealtorWhatsapp>>>
+export type GetRealtorWhatsappQueryError = ErrorType<unknown>
+
+
+
+export function useGetRealtorWhatsapp<TData = Awaited<ReturnType<typeof getRealtorWhatsapp>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRealtorWhatsapp>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRealtorWhatsappQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateRealtorWhatsappUrl = () => {
+
+
+
+
+  return `/api/realtor/whatsapp`
+}
+
+export const updateRealtorWhatsapp = async (realtorWhatsappInput: RealtorWhatsappInput, options?: Parameters<typeof customFetch>[1]): Promise<RealtorWhatsappSettings> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RealtorWhatsappSettings>(getUpdateRealtorWhatsappUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(realtorWhatsappInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateRealtorWhatsappMutationKey = () => ['updateRealtorWhatsapp'] as const;
+
+export const getUpdateRealtorWhatsappMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorWhatsapp>>, TError,UpdateRealtorWhatsappMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRealtorWhatsapp>>, TError,UpdateRealtorWhatsappMutationVariables, TContext> => {
+
+const mutationKey = getUpdateRealtorWhatsappMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRealtorWhatsapp>>, UpdateRealtorWhatsappMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateRealtorWhatsapp(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRealtorWhatsappMutationResult = NonNullable<Awaited<ReturnType<typeof updateRealtorWhatsapp>>>
+    export type UpdateRealtorWhatsappMutationBody = BodyType<RealtorWhatsappInput>
+    export type UpdateRealtorWhatsappMutationError = ErrorType<unknown>
+    export type UpdateRealtorWhatsappMutationVariables = {data: BodyType<RealtorWhatsappInput>}
+
+    export const useUpdateRealtorWhatsapp = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRealtorWhatsapp>>, TError,UpdateRealtorWhatsappMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRealtorWhatsapp>>,
+        TError,
+        UpdateRealtorWhatsappMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateRealtorWhatsappMutationOptions(options));
+    }
+
+export const getListRealtorNotificationsUrl = () => {
+
+
+
+
+  return `/api/realtor/notifications`
+}
+
+export const listRealtorNotifications = async ( options?: Parameters<typeof customFetch>[1]): Promise<RealtorNotification[]> => {
+
+  return customFetch<RealtorNotification[]>(getListRealtorNotificationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRealtorNotificationsQueryKey = () => {
+    return [
+    `/api/realtor/notifications`
+    ] as const;
+    }
+
+
+export const getListRealtorNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof listRealtorNotifications>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRealtorNotificationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRealtorNotifications>>> = ({ signal }) => listRealtorNotifications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRealtorNotifications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRealtorNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof listRealtorNotifications>>>
+export type ListRealtorNotificationsQueryError = ErrorType<unknown>
+
+
+
+export function useListRealtorNotifications<TData = Awaited<ReturnType<typeof listRealtorNotifications>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRealtorNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRealtorNotificationsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getMarkRealtorNotificationsReadUrl = () => {
+
+
+
+
+  return `/api/realtor/notifications/read`
+}
+
+export const markRealtorNotificationsRead = async ( options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getMarkRealtorNotificationsReadUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkRealtorNotificationsReadMutationKey = () => ['markRealtorNotificationsRead'] as const;
+
+export const getMarkRealtorNotificationsReadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markRealtorNotificationsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markRealtorNotificationsRead>>, TError,void, TContext> => {
+
+const mutationKey = getMarkRealtorNotificationsReadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markRealtorNotificationsRead>>, void> = () => {
+
+
+          return  markRealtorNotificationsRead(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkRealtorNotificationsReadMutationResult = NonNullable<Awaited<ReturnType<typeof markRealtorNotificationsRead>>>
+
+    export type MarkRealtorNotificationsReadMutationError = ErrorType<unknown>
+
+
+    export const useMarkRealtorNotificationsRead = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markRealtorNotificationsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markRealtorNotificationsRead>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getMarkRealtorNotificationsReadMutationOptions(options));
+    }
+
+export const getGetPublicPassportUrl = (publicId: string,) => {
+
+
+
+
+  return `/api/public/passports/${publicId}`
+}
+
+/**
+ * @summary Buyer-facing passport, no sign-in. Each request counts one view.
+ */
+export const getPublicPassport = async (publicId: string, options?: Parameters<typeof customFetch>[1]): Promise<PublicPassport> => {
+
+  return customFetch<PublicPassport>(getGetPublicPassportUrl(publicId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicPassportQueryKey = (publicId: string,) => {
+    return [
+    `/api/public/passports/${publicId}`
+    ] as const;
+    }
+
+
+export const getGetPublicPassportQueryOptions = <TData = Awaited<ReturnType<typeof getPublicPassport>>, TError = ErrorType<unknown>>(publicId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicPassport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicPassportQueryKey(publicId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicPassport>>> = ({ signal }) => getPublicPassport(publicId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: publicId !== null && publicId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicPassport>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicPassportQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicPassport>>>
+export type GetPublicPassportQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Buyer-facing passport, no sign-in. Each request counts one view.
+ */
+
+export function useGetPublicPassport<TData = Awaited<ReturnType<typeof getPublicPassport>>, TError = ErrorType<unknown>>(
+ publicId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicPassport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicPassportQueryOptions(publicId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRecordPublicPassportEventUrl = (publicId: string,) => {
+
+
+
+
+  return `/api/public/passports/${publicId}/events`
+}
+
+export const recordPublicPassportEvent = async (publicId: string,
+    publicPassportEventInput: PublicPassportEventInput, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ActionResult>(getRecordPublicPassportEventUrl(publicId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(publicPassportEventInput)
+  }
+);}
+
+
+
+
+
+export const getRecordPublicPassportEventMutationKey = () => ['recordPublicPassportEvent'] as const;
+
+export const getRecordPublicPassportEventMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordPublicPassportEvent>>, TError,RecordPublicPassportEventMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordPublicPassportEvent>>, TError,RecordPublicPassportEventMutationVariables, TContext> => {
+
+const mutationKey = getRecordPublicPassportEventMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordPublicPassportEvent>>, RecordPublicPassportEventMutationVariables> = (props) => {
+          const {publicId,data} = props ?? {};
+
+          return  recordPublicPassportEvent(publicId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordPublicPassportEventMutationResult = NonNullable<Awaited<ReturnType<typeof recordPublicPassportEvent>>>
+    export type RecordPublicPassportEventMutationBody = BodyType<PublicPassportEventInput>
+    export type RecordPublicPassportEventMutationError = ErrorType<unknown>
+    export type RecordPublicPassportEventMutationVariables = {publicId: string;data: BodyType<PublicPassportEventInput>}
+
+    export const useRecordPublicPassportEvent = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordPublicPassportEvent>>, TError,RecordPublicPassportEventMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordPublicPassportEvent>>,
+        TError,
+        RecordPublicPassportEventMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRecordPublicPassportEventMutationOptions(options));
+    }
+
+export const getCreatePublicPassportLeadUrl = (publicId: string,) => {
+
+
+
+
+  return `/api/public/passports/${publicId}/leads`
+}
+
+/**
+ * @summary Buyer contact request from the passport page; becomes a lead for the realtor
+ */
+export const createPublicPassportLead = async (publicId: string,
+    publicPassportLeadInput: PublicPassportLeadInput, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ActionResult>(getCreatePublicPassportLeadUrl(publicId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(publicPassportLeadInput)
+  }
+);}
+
+
+
+
+
+export const getCreatePublicPassportLeadMutationKey = () => ['createPublicPassportLead'] as const;
+
+export const getCreatePublicPassportLeadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPublicPassportLead>>, TError,CreatePublicPassportLeadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPublicPassportLead>>, TError,CreatePublicPassportLeadMutationVariables, TContext> => {
+
+const mutationKey = getCreatePublicPassportLeadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPublicPassportLead>>, CreatePublicPassportLeadMutationVariables> = (props) => {
+          const {publicId,data} = props ?? {};
+
+          return  createPublicPassportLead(publicId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePublicPassportLeadMutationResult = NonNullable<Awaited<ReturnType<typeof createPublicPassportLead>>>
+    export type CreatePublicPassportLeadMutationBody = BodyType<PublicPassportLeadInput>
+    export type CreatePublicPassportLeadMutationError = ErrorType<unknown>
+    export type CreatePublicPassportLeadMutationVariables = {publicId: string;data: BodyType<PublicPassportLeadInput>}
+
+    /**
+ * @summary Buyer contact request from the passport page; becomes a lead for the realtor
+ */
+export const useCreatePublicPassportLead = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPublicPassportLead>>, TError,CreatePublicPassportLeadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createPublicPassportLead>>,
+        TError,
+        CreatePublicPassportLeadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreatePublicPassportLeadMutationOptions(options));
+    }
+
+export const getGetContractorConfirmationUrl = (token: string,) => {
+
+
+
+
+  return `/api/public/passport-confirm/contractor/${token}`
+}
+
+export const getContractorConfirmation = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<ContractorConfirmView> => {
+
+  return customFetch<ContractorConfirmView>(getGetContractorConfirmationUrl(token),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetContractorConfirmationQueryKey = (token: string,) => {
+    return [
+    `/api/public/passport-confirm/contractor/${token}`
+    ] as const;
+    }
+
+
+export const getGetContractorConfirmationQueryOptions = <TData = Awaited<ReturnType<typeof getContractorConfirmation>>, TError = ErrorType<unknown>>(token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getContractorConfirmation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContractorConfirmationQueryKey(token);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContractorConfirmation>>> = ({ signal }) => getContractorConfirmation(token, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: token !== null && token !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContractorConfirmation>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetContractorConfirmationQueryResult = NonNullable<Awaited<ReturnType<typeof getContractorConfirmation>>>
+export type GetContractorConfirmationQueryError = ErrorType<unknown>
+
+
+
+export function useGetContractorConfirmation<TData = Awaited<ReturnType<typeof getContractorConfirmation>>, TError = ErrorType<unknown>>(
+ token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getContractorConfirmation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetContractorConfirmationQueryOptions(token,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getConfirmContractorWorkUrl = (token: string,) => {
+
+
+
+
+  return `/api/public/passport-confirm/contractor/${token}`
+}
+
+export const confirmContractorWork = async (token: string,
+    contractorConfirmInput: ContractorConfirmInput, options?: Parameters<typeof customFetch>[1]): Promise<ContractorConfirmView> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ContractorConfirmView>(getConfirmContractorWorkUrl(token),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(contractorConfirmInput)
+  }
+);}
+
+
+
+
+
+export const getConfirmContractorWorkMutationKey = () => ['confirmContractorWork'] as const;
+
+export const getConfirmContractorWorkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmContractorWork>>, TError,ConfirmContractorWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmContractorWork>>, TError,ConfirmContractorWorkMutationVariables, TContext> => {
+
+const mutationKey = getConfirmContractorWorkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmContractorWork>>, ConfirmContractorWorkMutationVariables> = (props) => {
+          const {token,data} = props ?? {};
+
+          return  confirmContractorWork(token,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmContractorWorkMutationResult = NonNullable<Awaited<ReturnType<typeof confirmContractorWork>>>
+    export type ConfirmContractorWorkMutationBody = BodyType<ContractorConfirmInput>
+    export type ConfirmContractorWorkMutationError = ErrorType<unknown>
+    export type ConfirmContractorWorkMutationVariables = {token: string;data: BodyType<ContractorConfirmInput>}
+
+    export const useConfirmContractorWork = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmContractorWork>>, TError,ConfirmContractorWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof confirmContractorWork>>,
+        TError,
+        ConfirmContractorWorkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getConfirmContractorWorkMutationOptions(options));
+    }
+
+export const getGetOwnerConfirmationUrl = (token: string,) => {
+
+
+
+
+  return `/api/public/passport-confirm/owner/${token}`
+}
+
+export const getOwnerConfirmation = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<OwnerConfirmView> => {
+
+  return customFetch<OwnerConfirmView>(getGetOwnerConfirmationUrl(token),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOwnerConfirmationQueryKey = (token: string,) => {
+    return [
+    `/api/public/passport-confirm/owner/${token}`
+    ] as const;
+    }
+
+
+export const getGetOwnerConfirmationQueryOptions = <TData = Awaited<ReturnType<typeof getOwnerConfirmation>>, TError = ErrorType<unknown>>(token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOwnerConfirmation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOwnerConfirmationQueryKey(token);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOwnerConfirmation>>> = ({ signal }) => getOwnerConfirmation(token, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: token !== null && token !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOwnerConfirmation>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetOwnerConfirmationQueryResult = NonNullable<Awaited<ReturnType<typeof getOwnerConfirmation>>>
+export type GetOwnerConfirmationQueryError = ErrorType<unknown>
+
+
+
+export function useGetOwnerConfirmation<TData = Awaited<ReturnType<typeof getOwnerConfirmation>>, TError = ErrorType<unknown>>(
+ token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOwnerConfirmation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetOwnerConfirmationQueryOptions(token,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getDecideOwnerWorkUrl = (token: string,
+    workId: string,) => {
+
+
+
+
+  return `/api/public/passport-confirm/owner/${token}/works/${workId}`
+}
+
+export const decideOwnerWork = async (token: string,
+    workId: string,
+    ownerDecisionInput: OwnerDecisionInput, options?: Parameters<typeof customFetch>[1]): Promise<OwnerConfirmView> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<OwnerConfirmView>(getDecideOwnerWorkUrl(token,workId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(ownerDecisionInput)
+  }
+);}
+
+
+
+
+
+export const getDecideOwnerWorkMutationKey = () => ['decideOwnerWork'] as const;
+
+export const getDecideOwnerWorkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideOwnerWork>>, TError,DecideOwnerWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideOwnerWork>>, TError,DecideOwnerWorkMutationVariables, TContext> => {
+
+const mutationKey = getDecideOwnerWorkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideOwnerWork>>, DecideOwnerWorkMutationVariables> = (props) => {
+          const {token,workId,data} = props ?? {};
+
+          return  decideOwnerWork(token,workId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideOwnerWorkMutationResult = NonNullable<Awaited<ReturnType<typeof decideOwnerWork>>>
+    export type DecideOwnerWorkMutationBody = BodyType<OwnerDecisionInput>
+    export type DecideOwnerWorkMutationError = ErrorType<unknown>
+    export type DecideOwnerWorkMutationVariables = {token: string;workId: string;data: BodyType<OwnerDecisionInput>}
+
+    export const useDecideOwnerWork = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideOwnerWork>>, TError,DecideOwnerWorkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideOwnerWork>>,
+        TError,
+        DecideOwnerWorkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideOwnerWorkMutationOptions(options));
     }
 

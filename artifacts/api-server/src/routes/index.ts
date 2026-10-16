@@ -11,11 +11,14 @@ import storageRouter from "./storage";
 import lifecycleRouter from "./projectLifecycle";
 import sharedEstimatesRouter from "./sharedEstimates";
 import smetaRouter from "./smeta";
+import realtorRouter from "./realtor";
+import realtorPublicRouter from "./realtorPublic";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(sharedEstimatesRouter);
+router.use(realtorPublicRouter);
 router.use(storageRouter);
 router.use(lifecycleRouter);
 router.use(requireAuth);
@@ -26,5 +29,6 @@ router.use(milestonesRouter);
 router.use(paymentsRouter);
 router.use(activityRouter);
 router.use(smetaRouter);
+router.use(realtorRouter);
 
 export default router;

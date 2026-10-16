@@ -26,6 +26,8 @@ tags:
     description: Private project evidence and document storage
   - name: smeta
     description: AI Smeta estimates, budget control and client approval
+  - name: realtor
+    description: Realtor sales and trust platform — listings, leads, appointments, WhatsApp automation and Təhvil-certified apartment passports
 paths:
   /healthz:
     get:
@@ -885,6 +887,666 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/SharedEstimate" }
+  /realtor/overview:
+    get:
+      operationId: getRealtorOverview
+      tags: [realtor]
+      summary: Realtor dashboard summary (İcmal)
+      responses:
+        "200":
+          description: Counters, today's leads, due follow-ups, upcoming appointments and notifications
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorOverview" }
+  /realtor/profile:
+    get:
+      operationId: getRealtorProfile
+      tags: [realtor]
+      responses:
+        "200":
+          description: The signed-in realtor's profile; `exists` is false before onboarding
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorProfile" }
+    put:
+      operationId: updateRealtorProfile
+      tags: [realtor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorProfileInput" }
+      responses:
+        "200":
+          description: Saved profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorProfile" }
+  /realtor/media:
+    post:
+      operationId: attachRealtorMedia
+      tags: [realtor]
+      summary: Register freshly uploaded photos or logos for use in listings, passports and the profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorMediaAttachInput" }
+      responses:
+        "200":
+          description: Registered media
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorMedia" }
+  /realtor-media/{mediaId}:
+    get:
+      operationId: getRealtorMedia
+      tags: [realtor]
+      summary: Serve a realtor photo to its owner, or publicly when it appears in a published passport
+      parameters:
+        - $ref: "#/components/parameters/RealtorMediaId"
+      responses:
+        "200":
+          description: Image content
+          content:
+            "*/*":
+              schema: { type: string, format: binary }
+  /realtor/agents:
+    get:
+      operationId: listRealtorAgents
+      tags: [realtor]
+      responses:
+        "200":
+          description: Agency team with per-agent results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorAgent" }
+    post:
+      operationId: createRealtorAgent
+      tags: [realtor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorAgentInput" }
+      responses:
+        "201":
+          description: Agent added
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorAgent" }
+  /realtor/agents/{agentId}:
+    patch:
+      operationId: updateRealtorAgent
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorAgentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorAgentInput" }
+      responses:
+        "200":
+          description: Agent saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorAgent" }
+    delete:
+      operationId: deleteRealtorAgent
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorAgentId"
+      responses:
+        "200":
+          description: Agent removed; their leads, listings and appointments become unassigned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /realtor/listings:
+    get:
+      operationId: listRealtorListings
+      tags: [realtor]
+      responses:
+        "200":
+          description: All listings with passport badge and view counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorListing" }
+    post:
+      operationId: createRealtorListing
+      tags: [realtor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorListingInput" }
+      responses:
+        "201":
+          description: Listing created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorListing" }
+  /realtor/listings/{listingId}:
+    get:
+      operationId: getRealtorListing
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorListingId"
+      responses:
+        "200":
+          description: Listing
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorListing" }
+    put:
+      operationId: updateRealtorListing
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorListingId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorListingInput" }
+      responses:
+        "200":
+          description: Listing saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorListing" }
+    delete:
+      operationId: deleteRealtorListing
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorListingId"
+      responses:
+        "200":
+          description: Listing deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /realtor/leads:
+    get:
+      operationId: listRealtorLeads
+      tags: [realtor]
+      responses:
+        "200":
+          description: All leads, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorLead" }
+    post:
+      operationId: createRealtorLead
+      tags: [realtor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorLeadInput" }
+      responses:
+        "201":
+          description: Lead created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorLead" }
+  /realtor/leads/{leadId}:
+    patch:
+      operationId: updateRealtorLead
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorLeadId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorLeadPatch" }
+      responses:
+        "200":
+          description: Lead saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorLead" }
+    delete:
+      operationId: deleteRealtorLead
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorLeadId"
+      responses:
+        "200":
+          description: Lead deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /realtor/leads/{leadId}/matches:
+    get:
+      operationId: listRealtorLeadMatches
+      tags: [realtor]
+      summary: Active listings that fit the lead's deal type, district, rooms and budget
+      parameters:
+        - $ref: "#/components/parameters/RealtorLeadId"
+      responses:
+        "200":
+          description: Best matches first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorListing" }
+  /realtor/leads/{leadId}/messages:
+    get:
+      operationId: listRealtorLeadMessages
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorLeadId"
+      responses:
+        "200":
+          description: WhatsApp conversation log, oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorMessage" }
+    post:
+      operationId: sendRealtorLeadMessage
+      tags: [realtor]
+      summary: Send through the WhatsApp Cloud API when connected; otherwise log it and return a click-to-chat link
+      parameters:
+        - $ref: "#/components/parameters/RealtorLeadId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorMessageInput" }
+      responses:
+        "200":
+          description: Message result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorMessageResult" }
+  /realtor/messages:
+    get:
+      operationId: listRealtorMessages
+      tags: [realtor]
+      responses:
+        "200":
+          description: Latest 100 WhatsApp messages across leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorMessage" }
+  /realtor/appointments:
+    get:
+      operationId: listRealtorAppointments
+      tags: [realtor]
+      responses:
+        "200":
+          description: Appointments ordered by start time
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorAppointment" }
+    post:
+      operationId: createRealtorAppointment
+      tags: [realtor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorAppointmentInput" }
+      responses:
+        "201":
+          description: Appointment planned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorAppointment" }
+  /realtor/appointments/{appointmentId}:
+    patch:
+      operationId: updateRealtorAppointment
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorAppointmentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorAppointmentPatch" }
+      responses:
+        "200":
+          description: Appointment saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorAppointment" }
+    delete:
+      operationId: deleteRealtorAppointment
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/RealtorAppointmentId"
+      responses:
+        "200":
+          description: Appointment deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /realtor/passports:
+    get:
+      operationId: listPropertyPassports
+      tags: [realtor]
+      responses:
+        "200":
+          description: The realtor's apartment passports
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PropertyPassport" }
+    post:
+      operationId: createPropertyPassport
+      tags: [realtor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PropertyPassportInput" }
+      responses:
+        "201":
+          description: Draft passport created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PropertyPassport" }
+  /realtor/passports/{passportId}:
+    get:
+      operationId: getPropertyPassport
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+      responses:
+        "200":
+          description: Passport with works and statistics
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PropertyPassport" }
+    put:
+      operationId: updatePropertyPassport
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PropertyPassportInput" }
+      responses:
+        "200":
+          description: Passport saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PropertyPassport" }
+    delete:
+      operationId: deletePropertyPassport
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+      responses:
+        "200":
+          description: Passport deleted; its public link stops working
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /realtor/passports/{passportId}/status:
+    post:
+      operationId: setPropertyPassportStatus
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PassportStatusInput" }
+      responses:
+        "200":
+          description: Passport with the new status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PropertyPassport" }
+  /realtor/passports/{passportId}/works:
+    post:
+      operationId: createPassportWork
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PassportWorkInput" }
+      responses:
+        "201":
+          description: Passport with the new work
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PropertyPassport" }
+  /realtor/passports/{passportId}/works/{workId}:
+    put:
+      operationId: updatePassportWork
+      tags: [realtor]
+      summary: Edit a work. Changing its content clears contractor and owner confirmations.
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+        - $ref: "#/components/parameters/PassportWorkId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PassportWorkInput" }
+      responses:
+        "200":
+          description: Passport with the saved work
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PropertyPassport" }
+    delete:
+      operationId: deletePassportWork
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+        - $ref: "#/components/parameters/PassportWorkId"
+      responses:
+        "200":
+          description: Passport without the work
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PropertyPassport" }
+  /realtor/passports/{passportId}/works/{workId}/contractor-link:
+    post:
+      operationId: createContractorConfirmLink
+      tags: [realtor]
+      summary: Create a fresh single-work confirmation link for the contractor (replaces the previous one)
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+        - $ref: "#/components/parameters/PassportWorkId"
+      responses:
+        "200":
+          description: Link to send to the contractor
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConfirmLink" }
+  /realtor/passports/{passportId}/owner-link:
+    post:
+      operationId: createOwnerConfirmLink
+      tags: [realtor]
+      summary: Create a fresh handover acceptance link for the homeowner (replaces the previous one)
+      parameters:
+        - $ref: "#/components/parameters/PassportId"
+      responses:
+        "200":
+          description: Link to send to the homeowner
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConfirmLink" }
+  /realtor/whatsapp:
+    get:
+      operationId: getRealtorWhatsapp
+      tags: [realtor]
+      responses:
+        "200":
+          description: WhatsApp automation settings; the access token is never returned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorWhatsappSettings" }
+    put:
+      operationId: updateRealtorWhatsapp
+      tags: [realtor]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealtorWhatsappInput" }
+      responses:
+        "200":
+          description: Saved settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RealtorWhatsappSettings" }
+  /realtor/notifications:
+    get:
+      operationId: listRealtorNotifications
+      tags: [realtor]
+      responses:
+        "200":
+          description: Latest 50 notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RealtorNotification" }
+  /realtor/notifications/read:
+    post:
+      operationId: markRealtorNotificationsRead
+      tags: [realtor]
+      responses:
+        "200":
+          description: All notifications marked as read
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /public/passports/{publicId}:
+    get:
+      operationId: getPublicPassport
+      tags: [realtor]
+      summary: Buyer-facing passport, no sign-in. Each request counts one view.
+      parameters:
+        - $ref: "#/components/parameters/PassportPublicId"
+      responses:
+        "200":
+          description: Published passport
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicPassport" }
+  /public/passports/{publicId}/events:
+    post:
+      operationId: recordPublicPassportEvent
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/PassportPublicId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PublicPassportEventInput" }
+      responses:
+        "200":
+          description: Recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /public/passports/{publicId}/leads:
+    post:
+      operationId: createPublicPassportLead
+      tags: [realtor]
+      summary: Buyer contact request from the passport page; becomes a lead for the realtor
+      parameters:
+        - $ref: "#/components/parameters/PassportPublicId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PublicPassportLeadInput" }
+      responses:
+        "200":
+          description: Request sent
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /public/passport-confirm/contractor/{token}:
+    get:
+      operationId: getContractorConfirmation
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/ConfirmToken"
+      responses:
+        "200":
+          description: The work the contractor is asked to confirm
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContractorConfirmView" }
+    post:
+      operationId: confirmContractorWork
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/ConfirmToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContractorConfirmInput" }
+      responses:
+        "200":
+          description: Confirmation recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContractorConfirmView" }
+  /public/passport-confirm/owner/{token}:
+    get:
+      operationId: getOwnerConfirmation
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/ConfirmToken"
+      responses:
+        "200":
+          description: Passport works for the homeowner to accept
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OwnerConfirmView" }
+  /public/passport-confirm/owner/{token}/works/{workId}:
+    post:
+      operationId: decideOwnerWork
+      tags: [realtor]
+      parameters:
+        - $ref: "#/components/parameters/ConfirmToken"
+        - $ref: "#/components/parameters/PassportWorkId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OwnerDecisionInput" }
+      responses:
+        "200":
+          description: Decision recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OwnerConfirmView" }
 components:
   parameters:
     ProjectId:
@@ -899,6 +1561,51 @@ components:
       required: true
       schema: { type: string, format: uuid }
     SharedEstimateToken:
+      name: token
+      in: path
+      required: true
+      schema: { type: string, minLength: 20, maxLength: 64, pattern: "^[A-Za-z0-9_-]+$" }
+    RealtorMediaId:
+      name: mediaId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    RealtorAgentId:
+      name: agentId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    RealtorListingId:
+      name: listingId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    RealtorLeadId:
+      name: leadId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    RealtorAppointmentId:
+      name: appointmentId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    PassportId:
+      name: passportId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    PassportWorkId:
+      name: workId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    PassportPublicId:
+      name: publicId
+      in: path
+      required: true
+      schema: { type: string, minLength: 6, maxLength: 16, pattern: "^[a-z0-9]+$" }
+    ConfirmToken:
       name: token
       in: path
       required: true
@@ -1815,3 +2522,587 @@ components:
         note: { type: string, maxLength: 500 }
       required: [decision]
 
+    RealtorMedia:
+      type: object
+      properties:
+        id: { type: string }
+        url: { type: string }
+        originalName: { type: string }
+        contentType: { type: string }
+        size: { type: integer }
+      required: [id, url, originalName, contentType, size]
+    RealtorMediaAttachInput:
+      type: object
+      properties:
+        files:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { $ref: "#/components/schemas/MediaInput" }
+      required: [files]
+    RealtorProfile:
+      type: object
+      properties:
+        exists: { type: boolean }
+        fullName: { type: string }
+        agency: { type: string }
+        phone: { type: string }
+        whatsapp: { type: string }
+        instagram: { type: string }
+        bio: { type: string }
+        photoMediaId: { type: ["string", "null"] }
+        photoUrl: { type: ["string", "null"] }
+        logoMediaId: { type: ["string", "null"] }
+        logoUrl: { type: ["string", "null"] }
+      required: [exists, fullName, agency, phone, whatsapp, instagram, bio, photoMediaId, photoUrl, logoMediaId, logoUrl]
+    RealtorProfileInput:
+      type: object
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        agency: { type: string, maxLength: 120 }
+        phone: { type: string, maxLength: 32 }
+        whatsapp: { type: string, maxLength: 32 }
+        instagram: { type: string, maxLength: 120 }
+        bio: { type: string, maxLength: 1000 }
+        photoMediaId: { type: ["string", "null"], format: uuid }
+        logoMediaId: { type: ["string", "null"], format: uuid }
+      required: [fullName, agency, phone, whatsapp, instagram, bio]
+    RealtorAgentStats:
+      type: object
+      properties:
+        leads: { type: integer }
+        activeLeads: { type: integer }
+        deals: { type: integer }
+        appointments: { type: integer }
+        listings: { type: integer }
+      required: [leads, activeLeads, deals, appointments, listings]
+    RealtorAgent:
+      type: object
+      properties:
+        id: { type: string }
+        fullName: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        stats: { $ref: "#/components/schemas/RealtorAgentStats" }
+      required: [id, fullName, phone, email, active, createdAt, stats]
+    RealtorAgentInput:
+      type: object
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        phone: { type: string, maxLength: 32 }
+        email: { type: string, maxLength: 254 }
+        active: { type: boolean }
+      required: [fullName]
+    ExternalLink:
+      type: object
+      properties:
+        portal: { type: string, enum: [brokly, tap, bina, yeniemlak, instagram, other] }
+        url: { type: string, minLength: 8, maxLength: 500 }
+      required: [portal, url]
+    RealtorListing:
+      type: object
+      properties:
+        id: { type: string }
+        agentId: { type: ["string", "null"] }
+        agentName: { type: ["string", "null"] }
+        title: { type: string }
+        dealType: { type: string, enum: [sale, rent] }
+        propertyKind: { type: string, enum: [apartment, villa, office, country_house, other] }
+        district: { type: string }
+        address: { type: string }
+        rooms: { type: ["integer", "null"] }
+        areaM2: { type: ["number", "null"] }
+        floor: { type: string }
+        price: { type: ["number", "null"] }
+        currency: { type: string, enum: [AZN, USD] }
+        status: { type: string, enum: [active, pending, sold, archived] }
+        description: { type: string }
+        externalLinks: { type: array, items: { $ref: "#/components/schemas/ExternalLink" } }
+        photoIds: { type: array, items: { type: string } }
+        photos: { type: array, items: { $ref: "#/components/schemas/RealtorMedia" } }
+        passportId: { type: ["string", "null"] }
+        passportPublicId: { type: ["string", "null"] }
+        passportStatus: { type: ["string", "null"] }
+        trustLevel: { type: ["string", "null"] }
+        views: { type: integer }
+        leadCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, agentId, agentName, title, dealType, propertyKind, district, address, rooms, areaM2, floor, price, currency, status, description, externalLinks, photoIds, photos, passportId, passportPublicId, passportStatus, trustLevel, views, leadCount, createdAt, updatedAt]
+    RealtorListingInput:
+      type: object
+      properties:
+        agentId: { type: ["string", "null"], format: uuid }
+        title: { type: string, minLength: 2, maxLength: 160 }
+        dealType: { type: string, enum: [sale, rent] }
+        propertyKind: { type: string, enum: [apartment, villa, office, country_house, other] }
+        district: { type: string, minLength: 1, maxLength: 120 }
+        address: { type: string, maxLength: 200 }
+        rooms: { type: ["integer", "null"], minimum: 0, maximum: 50 }
+        areaM2: { type: ["number", "null"], minimum: 0, maximum: 100000 }
+        floor: { type: string, maxLength: 20 }
+        price: { type: ["number", "null"], minimum: 0 }
+        currency: { type: string, enum: [AZN, USD] }
+        status: { type: string, enum: [active, pending, sold, archived] }
+        description: { type: string, maxLength: 4000 }
+        externalLinks: { type: array, maxItems: 6, items: { $ref: "#/components/schemas/ExternalLink" } }
+        photoIds: { type: array, maxItems: 20, items: { type: string, format: uuid } }
+      required: [title, dealType, propertyKind, district, address, floor, currency, status, description, externalLinks, photoIds]
+    RealtorLead:
+      type: object
+      properties:
+        id: { type: string }
+        agentId: { type: ["string", "null"] }
+        agentName: { type: ["string", "null"] }
+        listingId: { type: ["string", "null"] }
+        listingTitle: { type: ["string", "null"] }
+        fullName: { type: string }
+        phone: { type: string }
+        source: { type: string, enum: [whatsapp, instagram, facebook, site, brokly, phone, other] }
+        status: { type: string, enum: [new, contacted, interested, meeting, deal, lost] }
+        dealType: { type: ["string", "null"] }
+        district: { type: string }
+        rooms: { type: ["integer", "null"] }
+        budgetMin: { type: ["number", "null"] }
+        budgetMax: { type: ["number", "null"] }
+        timeframe: { type: string }
+        notes: { type: string }
+        nextAction: { type: string }
+        nextActionAt: { type: ["string", "null"], format: date-time }
+        lastContactAt: { type: ["string", "null"], format: date-time }
+        readyForMeeting: { type: boolean }
+        botStep: { type: ["string", "null"] }
+        overdue: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, agentId, agentName, listingId, listingTitle, fullName, phone, source, status, dealType, district, rooms, budgetMin, budgetMax, timeframe, notes, nextAction, nextActionAt, lastContactAt, readyForMeeting, botStep, overdue, createdAt, updatedAt]
+    RealtorLeadInput:
+      type: object
+      properties:
+        agentId: { type: ["string", "null"], format: uuid }
+        listingId: { type: ["string", "null"], format: uuid }
+        fullName: { type: string, minLength: 1, maxLength: 120 }
+        phone: { type: string, maxLength: 32 }
+        source: { type: string, enum: [whatsapp, instagram, facebook, site, brokly, phone, other] }
+        status: { type: string, enum: [new, contacted, interested, meeting, deal, lost] }
+        dealType: { type: ["string", "null"], enum: [sale, rent, null] }
+        district: { type: string, maxLength: 120 }
+        rooms: { type: ["integer", "null"], minimum: 0, maximum: 50 }
+        budgetMin: { type: ["number", "null"], minimum: 0 }
+        budgetMax: { type: ["number", "null"], minimum: 0 }
+        timeframe: { type: string, maxLength: 120 }
+        notes: { type: string, maxLength: 4000 }
+        nextAction: { type: string, maxLength: 300 }
+        nextActionAt: { type: ["string", "null"], format: date-time }
+      required: [fullName, source]
+    RealtorLeadPatch:
+      type: object
+      properties:
+        agentId: { type: ["string", "null"], format: uuid }
+        listingId: { type: ["string", "null"], format: uuid }
+        fullName: { type: string, minLength: 1, maxLength: 120 }
+        phone: { type: string, maxLength: 32 }
+        source: { type: string, enum: [whatsapp, instagram, facebook, site, brokly, phone, other] }
+        status: { type: string, enum: [new, contacted, interested, meeting, deal, lost] }
+        dealType: { type: ["string", "null"], enum: [sale, rent, null] }
+        district: { type: string, maxLength: 120 }
+        rooms: { type: ["integer", "null"], minimum: 0, maximum: 50 }
+        budgetMin: { type: ["number", "null"], minimum: 0 }
+        budgetMax: { type: ["number", "null"], minimum: 0 }
+        timeframe: { type: string, maxLength: 120 }
+        notes: { type: string, maxLength: 4000 }
+        nextAction: { type: string, maxLength: 300 }
+        nextActionAt: { type: ["string", "null"], format: date-time }
+        readyForMeeting: { type: boolean }
+    RealtorMessage:
+      type: object
+      properties:
+        id: { type: string }
+        leadId: { type: ["string", "null"] }
+        leadName: { type: ["string", "null"] }
+        direction: { type: string, enum: [in, out] }
+        kind: { type: string }
+        body: { type: string }
+        status: { type: string, enum: [received, sent, failed, manual] }
+        error: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+      required: [id, leadId, leadName, direction, kind, body, status, error, createdAt]
+    RealtorMessageInput:
+      type: object
+      properties:
+        body: { type: string, minLength: 1, maxLength: 2000 }
+        kind: { type: string, enum: [manual, listing, slots, follow_up, reminder, question] }
+      required: [body]
+    RealtorMessageResult:
+      type: object
+      properties:
+        message: { $ref: "#/components/schemas/RealtorMessage" }
+        waLink: { type: ["string", "null"] }
+      required: [message, waLink]
+    RealtorAppointment:
+      type: object
+      properties:
+        id: { type: string }
+        leadId: { type: ["string", "null"] }
+        leadName: { type: ["string", "null"] }
+        leadPhone: { type: ["string", "null"] }
+        listingId: { type: ["string", "null"] }
+        listingTitle: { type: ["string", "null"] }
+        listingAddress: { type: ["string", "null"] }
+        agentId: { type: ["string", "null"] }
+        agentName: { type: ["string", "null"] }
+        startsAt: { type: string, format: date-time }
+        durationMin: { type: integer }
+        status: { type: string, enum: [planned, done, cancelled, rescheduled] }
+        notes: { type: string }
+        reminderSentAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+      required: [id, leadId, leadName, leadPhone, listingId, listingTitle, listingAddress, agentId, agentName, startsAt, durationMin, status, notes, reminderSentAt, createdAt]
+    RealtorAppointmentInput:
+      type: object
+      properties:
+        leadId: { type: ["string", "null"], format: uuid }
+        listingId: { type: ["string", "null"], format: uuid }
+        agentId: { type: ["string", "null"], format: uuid }
+        startsAt: { type: string, format: date-time }
+        durationMin: { type: integer, minimum: 10, maximum: 480 }
+        status: { type: string, enum: [planned, done, cancelled, rescheduled] }
+        notes: { type: string, maxLength: 2000 }
+      required: [startsAt]
+    RealtorAppointmentPatch:
+      type: object
+      properties:
+        leadId: { type: ["string", "null"], format: uuid }
+        listingId: { type: ["string", "null"], format: uuid }
+        agentId: { type: ["string", "null"], format: uuid }
+        startsAt: { type: string, format: date-time }
+        durationMin: { type: integer, minimum: 10, maximum: 480 }
+        status: { type: string, enum: [planned, done, cancelled, rescheduled] }
+        notes: { type: string, maxLength: 2000 }
+    RealtorNotification:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string }
+        title: { type: string }
+        body: { type: string }
+        href: { type: string }
+        read: { type: boolean }
+        createdAt: { type: string, format: date-time }
+      required: [id, kind, title, body, href, read, createdAt]
+    RealtorCount:
+      type: object
+      properties:
+        key: { type: string }
+        count: { type: integer }
+      required: [key, count]
+    RealtorOverviewStats:
+      type: object
+      properties:
+        newLeadsToday: { type: integer }
+        waitingLeads: { type: integer }
+        upcomingAppointments: { type: integer }
+        activeListings: { type: integer }
+        certifiedListings: { type: integer }
+        publishedPassports: { type: integer }
+        qrScans: { type: integer }
+        passportViews: { type: integer }
+        whatsappClicks: { type: integer }
+        brandImpressions: { type: integer }
+        leads30d: { type: integer }
+        appointments30d: { type: integer }
+        passportListingViews: { type: integer }
+      required: [newLeadsToday, waitingLeads, upcomingAppointments, activeListings, certifiedListings, publishedPassports, qrScans, passportViews, whatsappClicks, brandImpressions, leads30d, appointments30d, passportListingViews]
+    RealtorOverview:
+      type: object
+      properties:
+        profileExists: { type: boolean }
+        stats: { $ref: "#/components/schemas/RealtorOverviewStats" }
+        todayLeads: { type: array, items: { $ref: "#/components/schemas/RealtorLead" } }
+        dueLeads: { type: array, items: { $ref: "#/components/schemas/RealtorLead" } }
+        upcoming: { type: array, items: { $ref: "#/components/schemas/RealtorAppointment" } }
+        notifications: { type: array, items: { $ref: "#/components/schemas/RealtorNotification" } }
+        funnel: { type: array, items: { $ref: "#/components/schemas/RealtorCount" } }
+        sources: { type: array, items: { $ref: "#/components/schemas/RealtorCount" } }
+        daily: { type: array, items: { $ref: "#/components/schemas/RealtorCount" } }
+      required: [profileExists, stats, todayLeads, dueLeads, upcoming, notifications, funnel, sources, daily]
+    PassportRealtor:
+      type: object
+      properties:
+        name: { type: string }
+        agency: { type: string }
+        phone: { type: string }
+        whatsapp: { type: string }
+        instagram: { type: string }
+        photoMediaId: { type: ["string", "null"] }
+        photoUrl: { type: ["string", "null"] }
+        logoMediaId: { type: ["string", "null"] }
+        logoUrl: { type: ["string", "null"] }
+      required: [name, agency, phone, whatsapp, instagram, photoMediaId, photoUrl, logoMediaId, logoUrl]
+    PassportRealtorInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        agency: { type: string, maxLength: 120 }
+        phone: { type: string, maxLength: 32 }
+        whatsapp: { type: string, maxLength: 32 }
+        instagram: { type: string, maxLength: 120 }
+        photoMediaId: { type: ["string", "null"], format: uuid }
+        logoMediaId: { type: ["string", "null"], format: uuid }
+      required: [name, agency, phone, whatsapp, instagram]
+    PassportWork:
+      type: object
+      properties:
+        id: { type: string }
+        position: { type: integer }
+        title: { type: string }
+        startDate: { type: ["string", "null"], format: date }
+        endDate: { type: ["string", "null"], format: date }
+        contractorName: { type: string }
+        contractorPhone: { type: string }
+        description: { type: string }
+        materials: { type: string }
+        beforePhotoIds: { type: array, items: { type: string } }
+        afterPhotoIds: { type: array, items: { type: string } }
+        beforePhotos: { type: array, items: { $ref: "#/components/schemas/RealtorMedia" } }
+        afterPhotos: { type: array, items: { $ref: "#/components/schemas/RealtorMedia" } }
+        contractorConfirmedAt: { type: ["string", "null"], format: date-time }
+        contractorConfirmedName: { type: ["string", "null"] }
+        contractorNote: { type: ["string", "null"] }
+        contractorLinkActive: { type: boolean }
+        handoverStatus: { type: string, enum: [pending, accepted, revision] }
+        ownerDecidedAt: { type: ["string", "null"], format: date-time }
+        ownerDecidedName: { type: ["string", "null"] }
+        ownerNote: { type: ["string", "null"] }
+      required: [id, position, title, startDate, endDate, contractorName, contractorPhone, description, materials, beforePhotoIds, afterPhotoIds, beforePhotos, afterPhotos, contractorConfirmedAt, contractorConfirmedName, contractorNote, contractorLinkActive, handoverStatus, ownerDecidedAt, ownerDecidedName, ownerNote]
+    PassportWorkInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 2, maxLength: 160 }
+        startDate: { type: ["string", "null"], format: date }
+        endDate: { type: ["string", "null"], format: date }
+        contractorName: { type: string, maxLength: 120 }
+        contractorPhone: { type: string, maxLength: 32 }
+        description: { type: string, maxLength: 3000 }
+        materials: { type: string, maxLength: 2000 }
+        beforePhotoIds: { type: array, maxItems: 12, items: { type: string, format: uuid } }
+        afterPhotoIds: { type: array, maxItems: 12, items: { type: string, format: uuid } }
+      required: [title, contractorName, contractorPhone, description, materials, beforePhotoIds, afterPhotoIds]
+    PassportStats:
+      type: object
+      properties:
+        views: { type: integer }
+        qrScans: { type: integer }
+        whatsappClicks: { type: integer }
+        shares: { type: integer }
+        leads: { type: integer }
+      required: [views, qrScans, whatsappClicks, shares, leads]
+    PropertyPassport:
+      type: object
+      properties:
+        id: { type: string }
+        publicId: { type: string }
+        publicUrl: { type: string }
+        listingId: { type: ["string", "null"] }
+        title: { type: string }
+        dealType: { type: string, enum: [sale, rent] }
+        propertyKind: { type: string, enum: [apartment, villa, office, country_house, other] }
+        district: { type: string }
+        address: { type: string }
+        rooms: { type: ["integer", "null"] }
+        areaM2: { type: ["number", "null"] }
+        price: { type: ["number", "null"] }
+        currency: { type: string, enum: [AZN, USD] }
+        listingUrls: { type: array, items: { $ref: "#/components/schemas/ExternalLink" } }
+        photoIds: { type: array, items: { type: string } }
+        photos: { type: array, items: { $ref: "#/components/schemas/RealtorMedia" } }
+        realtor: { $ref: "#/components/schemas/PassportRealtor" }
+        status: { type: string, enum: [draft, published, archived] }
+        trustLevel: { type: string, enum: [basic, contractor, handover] }
+        ownerName: { type: string }
+        ownerPhone: { type: string }
+        ownerLinkActive: { type: boolean }
+        works: { type: array, items: { $ref: "#/components/schemas/PassportWork" } }
+        stats: { $ref: "#/components/schemas/PassportStats" }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, publicId, publicUrl, listingId, title, dealType, propertyKind, district, address, rooms, areaM2, price, currency, listingUrls, photoIds, photos, realtor, status, trustLevel, ownerName, ownerPhone, ownerLinkActive, works, stats, publishedAt, createdAt, updatedAt]
+    PropertyPassportInput:
+      type: object
+      properties:
+        listingId: { type: ["string", "null"], format: uuid }
+        title: { type: string, minLength: 2, maxLength: 160 }
+        dealType: { type: string, enum: [sale, rent] }
+        propertyKind: { type: string, enum: [apartment, villa, office, country_house, other] }
+        district: { type: string, minLength: 1, maxLength: 120 }
+        address: { type: string, maxLength: 200 }
+        rooms: { type: ["integer", "null"], minimum: 0, maximum: 50 }
+        areaM2: { type: ["number", "null"], minimum: 0, maximum: 100000 }
+        price: { type: ["number", "null"], minimum: 0 }
+        currency: { type: string, enum: [AZN, USD] }
+        listingUrls: { type: array, maxItems: 6, items: { $ref: "#/components/schemas/ExternalLink" } }
+        photoIds: { type: array, maxItems: 20, items: { type: string, format: uuid } }
+        realtor: { $ref: "#/components/schemas/PassportRealtorInput" }
+        ownerName: { type: string, maxLength: 120 }
+        ownerPhone: { type: string, maxLength: 32 }
+      required: [title, dealType, propertyKind, district, address, currency, listingUrls, photoIds, realtor, ownerName, ownerPhone]
+    PassportStatusInput:
+      type: object
+      properties:
+        status: { type: string, enum: [draft, published, archived] }
+      required: [status]
+    ConfirmLink:
+      type: object
+      properties:
+        url: { type: string }
+      required: [url]
+    PublicPassportRealtor:
+      type: object
+      properties:
+        name: { type: string }
+        agency: { type: string }
+        phone: { type: string }
+        whatsapp: { type: string }
+        instagram: { type: string }
+        photoUrl: { type: ["string", "null"] }
+        logoUrl: { type: ["string", "null"] }
+      required: [name, agency, phone, whatsapp, instagram, photoUrl, logoUrl]
+    PublicPassportWork:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        startDate: { type: ["string", "null"], format: date }
+        endDate: { type: ["string", "null"], format: date }
+        contractorName: { type: string }
+        description: { type: string }
+        materials: { type: string }
+        beforePhotos: { type: array, items: { $ref: "#/components/schemas/RealtorMedia" } }
+        afterPhotos: { type: array, items: { $ref: "#/components/schemas/RealtorMedia" } }
+        contractorConfirmedAt: { type: ["string", "null"], format: date-time }
+        handoverStatus: { type: string, enum: [pending, accepted, revision] }
+        ownerDecidedAt: { type: ["string", "null"], format: date-time }
+      required: [id, title, startDate, endDate, contractorName, description, materials, beforePhotos, afterPhotos, contractorConfirmedAt, handoverStatus, ownerDecidedAt]
+    PublicPassport:
+      type: object
+      properties:
+        publicId: { type: string }
+        publicUrl: { type: string }
+        title: { type: string }
+        dealType: { type: string, enum: [sale, rent] }
+        propertyKind: { type: string, enum: [apartment, villa, office, country_house, other] }
+        district: { type: string }
+        address: { type: string }
+        rooms: { type: ["integer", "null"] }
+        areaM2: { type: ["number", "null"] }
+        price: { type: ["number", "null"] }
+        currency: { type: string, enum: [AZN, USD] }
+        listingUrls: { type: array, items: { $ref: "#/components/schemas/ExternalLink" } }
+        photos: { type: array, items: { $ref: "#/components/schemas/RealtorMedia" } }
+        realtor: { $ref: "#/components/schemas/PublicPassportRealtor" }
+        trustLevel: { type: string, enum: [basic, contractor, handover] }
+        works: { type: array, items: { $ref: "#/components/schemas/PublicPassportWork" } }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [publicId, publicUrl, title, dealType, propertyKind, district, address, rooms, areaM2, price, currency, listingUrls, photos, realtor, trustLevel, works, publishedAt, updatedAt]
+    PublicPassportEventInput:
+      type: object
+      properties:
+        kind: { type: string, enum: [qr_scan, whatsapp_click, share] }
+      required: [kind]
+    PublicPassportLeadInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        phone: { type: string, minLength: 7, maxLength: 32 }
+        message: { type: string, maxLength: 1000 }
+        consent: { type: boolean, enum: [true] }
+      required: [name, phone, consent]
+    ContractorConfirmView:
+      type: object
+      properties:
+        passportTitle: { type: string }
+        district: { type: string }
+        realtorName: { type: string }
+        agency: { type: string }
+        work: { $ref: "#/components/schemas/PublicPassportWork" }
+        confirmed: { type: boolean }
+        confirmedName: { type: ["string", "null"] }
+      required: [passportTitle, district, realtorName, agency, work, confirmed, confirmedName]
+    ContractorConfirmInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        note: { type: string, maxLength: 500 }
+        confirm: { type: boolean, enum: [true] }
+      required: [name, confirm]
+    OwnerConfirmView:
+      type: object
+      properties:
+        ownerName: { type: string }
+        passport: { $ref: "#/components/schemas/PublicPassport" }
+        published: { type: boolean }
+      required: [ownerName, passport, published]
+    OwnerDecisionInput:
+      type: object
+      properties:
+        decision: { type: string, enum: [accepted, revision] }
+        name: { type: string, minLength: 2, maxLength: 120 }
+        note: { type: string, maxLength: 500 }
+      required: [decision, name]
+    RealtorWhatsappStats:
+      type: object
+      properties:
+        sent: { type: integer }
+        received: { type: integer }
+        failed: { type: integer }
+        manual: { type: integer }
+      required: [sent, received, failed, manual]
+    RealtorWhatsappSettings:
+      type: object
+      properties:
+        mode: { type: string, enum: [manual, cloud_api] }
+        businessPhone: { type: string }
+        phoneNumberId: { type: ["string", "null"] }
+        tokenSet: { type: boolean }
+        cloudApiAvailable: { type: boolean }
+        webhookUrl: { type: string }
+        autoReplyEnabled: { type: boolean }
+        greeting: { type: string }
+        followUpEnabled: { type: boolean }
+        followUpHours: { type: integer }
+        followUpText: { type: string }
+        reminderEnabled: { type: boolean }
+        reminderHoursBefore: { type: integer }
+        reminderText: { type: string }
+        workdayStartHour: { type: integer }
+        workdayEndHour: { type: integer }
+        followUpTemplate: { type: string }
+        reminderTemplate: { type: string }
+        templateLanguage: { type: string }
+        stats: { $ref: "#/components/schemas/RealtorWhatsappStats" }
+      required: [mode, businessPhone, phoneNumberId, tokenSet, cloudApiAvailable, webhookUrl, autoReplyEnabled, greeting, followUpEnabled, followUpHours, followUpText, reminderEnabled, reminderHoursBefore, reminderText, workdayStartHour, workdayEndHour, followUpTemplate, reminderTemplate, templateLanguage, stats]
+    RealtorWhatsappInput:
+      type: object
+      properties:
+        mode: { type: string, enum: [manual, cloud_api] }
+        businessPhone: { type: string, maxLength: 32 }
+        phoneNumberId: { type: ["string", "null"], maxLength: 64, pattern: "^[0-9]*$" }
+        accessToken: { type: string, maxLength: 1000 }
+        autoReplyEnabled: { type: boolean }
+        greeting: { type: string, maxLength: 1000 }
+        followUpEnabled: { type: boolean }
+        followUpHours: { type: integer, minimum: 4, maximum: 336 }
+        followUpText: { type: string, maxLength: 1000 }
+        reminderEnabled: { type: boolean }
+        reminderHoursBefore: { type: integer, minimum: 1, maximum: 72 }
+        reminderText: { type: string, maxLength: 1000 }
+        workdayStartHour: { type: integer, minimum: 0, maximum: 23 }
+        workdayEndHour: { type: integer, minimum: 1, maximum: 24 }
+        followUpTemplate: { type: string, maxLength: 120 }
+        reminderTemplate: { type: string, maxLength: 120 }
+        templateLanguage: { type: string, maxLength: 12 }
+      required: [mode, businessPhone, autoReplyEnabled, greeting, followUpEnabled, followUpHours, followUpText, reminderEnabled, reminderHoursBefore, reminderText, workdayStartHour, workdayEndHour, followUpTemplate, reminderTemplate, templateLanguage]

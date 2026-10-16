@@ -1650,6 +1650,1244 @@ export interface SharedChangeOrderDecisionInput {
   note?: string;
 }
 
+export interface RealtorMedia {
+  id: string;
+  url: string;
+  originalName: string;
+  contentType: string;
+  size: number;
+}
+
+export interface RealtorMediaAttachInput {
+  /**
+     * @minItems 1
+     * @maxItems 20
+     */
+  files: MediaInput[];
+}
+
+export interface RealtorProfile {
+  exists: boolean;
+  fullName: string;
+  agency: string;
+  phone: string;
+  whatsapp: string;
+  instagram: string;
+  bio: string;
+  /** @nullable */
+  photoMediaId: string | null;
+  /** @nullable */
+  photoUrl: string | null;
+  /** @nullable */
+  logoMediaId: string | null;
+  /** @nullable */
+  logoUrl: string | null;
+}
+
+export interface RealtorProfileInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  fullName: string;
+  /** @maxLength 120 */
+  agency: string;
+  /** @maxLength 32 */
+  phone: string;
+  /** @maxLength 32 */
+  whatsapp: string;
+  /** @maxLength 120 */
+  instagram: string;
+  /** @maxLength 1000 */
+  bio: string;
+  /** @nullable */
+  photoMediaId?: string | null;
+  /** @nullable */
+  logoMediaId?: string | null;
+}
+
+export interface RealtorAgentStats {
+  leads: number;
+  activeLeads: number;
+  deals: number;
+  appointments: number;
+  listings: number;
+}
+
+export interface RealtorAgent {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  active: boolean;
+  createdAt: string;
+  stats: RealtorAgentStats;
+}
+
+export interface RealtorAgentInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  fullName: string;
+  /** @maxLength 32 */
+  phone?: string;
+  /** @maxLength 254 */
+  email?: string;
+  active?: boolean;
+}
+
+export type ExternalLinkPortal = typeof ExternalLinkPortal[keyof typeof ExternalLinkPortal];
+
+
+export const ExternalLinkPortal = {
+  brokly: 'brokly',
+  tap: 'tap',
+  bina: 'bina',
+  yeniemlak: 'yeniemlak',
+  instagram: 'instagram',
+  other: 'other',
+} as const;
+
+export interface ExternalLink {
+  portal: ExternalLinkPortal;
+  /**
+     * @minLength 8
+     * @maxLength 500
+     */
+  url: string;
+}
+
+export type RealtorListingDealType = typeof RealtorListingDealType[keyof typeof RealtorListingDealType];
+
+
+export const RealtorListingDealType = {
+  sale: 'sale',
+  rent: 'rent',
+} as const;
+
+export type RealtorListingPropertyKind = typeof RealtorListingPropertyKind[keyof typeof RealtorListingPropertyKind];
+
+
+export const RealtorListingPropertyKind = {
+  apartment: 'apartment',
+  villa: 'villa',
+  office: 'office',
+  country_house: 'country_house',
+  other: 'other',
+} as const;
+
+export type RealtorListingCurrency = typeof RealtorListingCurrency[keyof typeof RealtorListingCurrency];
+
+
+export const RealtorListingCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+} as const;
+
+export type RealtorListingStatus = typeof RealtorListingStatus[keyof typeof RealtorListingStatus];
+
+
+export const RealtorListingStatus = {
+  active: 'active',
+  pending: 'pending',
+  sold: 'sold',
+  archived: 'archived',
+} as const;
+
+export interface RealtorListing {
+  id: string;
+  /** @nullable */
+  agentId: string | null;
+  /** @nullable */
+  agentName: string | null;
+  title: string;
+  dealType: RealtorListingDealType;
+  propertyKind: RealtorListingPropertyKind;
+  district: string;
+  address: string;
+  /** @nullable */
+  rooms: number | null;
+  /** @nullable */
+  areaM2: number | null;
+  floor: string;
+  /** @nullable */
+  price: number | null;
+  currency: RealtorListingCurrency;
+  status: RealtorListingStatus;
+  description: string;
+  externalLinks: ExternalLink[];
+  photoIds: string[];
+  photos: RealtorMedia[];
+  /** @nullable */
+  passportId: string | null;
+  /** @nullable */
+  passportPublicId: string | null;
+  /** @nullable */
+  passportStatus: string | null;
+  /** @nullable */
+  trustLevel: string | null;
+  views: number;
+  leadCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RealtorListingInputDealType = typeof RealtorListingInputDealType[keyof typeof RealtorListingInputDealType];
+
+
+export const RealtorListingInputDealType = {
+  sale: 'sale',
+  rent: 'rent',
+} as const;
+
+export type RealtorListingInputPropertyKind = typeof RealtorListingInputPropertyKind[keyof typeof RealtorListingInputPropertyKind];
+
+
+export const RealtorListingInputPropertyKind = {
+  apartment: 'apartment',
+  villa: 'villa',
+  office: 'office',
+  country_house: 'country_house',
+  other: 'other',
+} as const;
+
+export type RealtorListingInputCurrency = typeof RealtorListingInputCurrency[keyof typeof RealtorListingInputCurrency];
+
+
+export const RealtorListingInputCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+} as const;
+
+export type RealtorListingInputStatus = typeof RealtorListingInputStatus[keyof typeof RealtorListingInputStatus];
+
+
+export const RealtorListingInputStatus = {
+  active: 'active',
+  pending: 'pending',
+  sold: 'sold',
+  archived: 'archived',
+} as const;
+
+export interface RealtorListingInput {
+  /** @nullable */
+  agentId?: string | null;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  title: string;
+  dealType: RealtorListingInputDealType;
+  propertyKind: RealtorListingInputPropertyKind;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  district: string;
+  /** @maxLength 200 */
+  address: string;
+  /**
+     * @minimum 0
+     * @maximum 50
+     * @nullable
+     */
+  rooms?: number | null;
+  /**
+     * @minimum 0
+     * @maximum 100000
+     * @nullable
+     */
+  areaM2?: number | null;
+  /** @maxLength 20 */
+  floor: string;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  price?: number | null;
+  currency: RealtorListingInputCurrency;
+  status: RealtorListingInputStatus;
+  /** @maxLength 4000 */
+  description: string;
+  /** @maxItems 6 */
+  externalLinks: ExternalLink[];
+  /** @maxItems 20 */
+  photoIds: string[];
+}
+
+export type RealtorLeadSource = typeof RealtorLeadSource[keyof typeof RealtorLeadSource];
+
+
+export const RealtorLeadSource = {
+  whatsapp: 'whatsapp',
+  instagram: 'instagram',
+  facebook: 'facebook',
+  site: 'site',
+  brokly: 'brokly',
+  phone: 'phone',
+  other: 'other',
+} as const;
+
+export type RealtorLeadStatus = typeof RealtorLeadStatus[keyof typeof RealtorLeadStatus];
+
+
+export const RealtorLeadStatus = {
+  new: 'new',
+  contacted: 'contacted',
+  interested: 'interested',
+  meeting: 'meeting',
+  deal: 'deal',
+  lost: 'lost',
+} as const;
+
+export interface RealtorLead {
+  id: string;
+  /** @nullable */
+  agentId: string | null;
+  /** @nullable */
+  agentName: string | null;
+  /** @nullable */
+  listingId: string | null;
+  /** @nullable */
+  listingTitle: string | null;
+  fullName: string;
+  phone: string;
+  source: RealtorLeadSource;
+  status: RealtorLeadStatus;
+  /** @nullable */
+  dealType: string | null;
+  district: string;
+  /** @nullable */
+  rooms: number | null;
+  /** @nullable */
+  budgetMin: number | null;
+  /** @nullable */
+  budgetMax: number | null;
+  timeframe: string;
+  notes: string;
+  nextAction: string;
+  /** @nullable */
+  nextActionAt: string | null;
+  /** @nullable */
+  lastContactAt: string | null;
+  readyForMeeting: boolean;
+  /** @nullable */
+  botStep: string | null;
+  overdue: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RealtorLeadInputSource = typeof RealtorLeadInputSource[keyof typeof RealtorLeadInputSource];
+
+
+export const RealtorLeadInputSource = {
+  whatsapp: 'whatsapp',
+  instagram: 'instagram',
+  facebook: 'facebook',
+  site: 'site',
+  brokly: 'brokly',
+  phone: 'phone',
+  other: 'other',
+} as const;
+
+export type RealtorLeadInputStatus = typeof RealtorLeadInputStatus[keyof typeof RealtorLeadInputStatus];
+
+
+export const RealtorLeadInputStatus = {
+  new: 'new',
+  contacted: 'contacted',
+  interested: 'interested',
+  meeting: 'meeting',
+  deal: 'deal',
+  lost: 'lost',
+} as const;
+
+/**
+ * @nullable
+ */
+export type RealtorLeadInputDealType = typeof RealtorLeadInputDealType[keyof typeof RealtorLeadInputDealType] | null;
+
+
+export const RealtorLeadInputDealType = {
+  sale: 'sale',
+  rent: 'rent',
+} as const;
+
+export interface RealtorLeadInput {
+  /** @nullable */
+  agentId?: string | null;
+  /** @nullable */
+  listingId?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  fullName: string;
+  /** @maxLength 32 */
+  phone?: string;
+  source: RealtorLeadInputSource;
+  status?: RealtorLeadInputStatus;
+  /** @nullable */
+  dealType?: RealtorLeadInputDealType;
+  /** @maxLength 120 */
+  district?: string;
+  /**
+     * @minimum 0
+     * @maximum 50
+     * @nullable
+     */
+  rooms?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  budgetMin?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  budgetMax?: number | null;
+  /** @maxLength 120 */
+  timeframe?: string;
+  /** @maxLength 4000 */
+  notes?: string;
+  /** @maxLength 300 */
+  nextAction?: string;
+  /** @nullable */
+  nextActionAt?: string | null;
+}
+
+export type RealtorLeadPatchSource = typeof RealtorLeadPatchSource[keyof typeof RealtorLeadPatchSource];
+
+
+export const RealtorLeadPatchSource = {
+  whatsapp: 'whatsapp',
+  instagram: 'instagram',
+  facebook: 'facebook',
+  site: 'site',
+  brokly: 'brokly',
+  phone: 'phone',
+  other: 'other',
+} as const;
+
+export type RealtorLeadPatchStatus = typeof RealtorLeadPatchStatus[keyof typeof RealtorLeadPatchStatus];
+
+
+export const RealtorLeadPatchStatus = {
+  new: 'new',
+  contacted: 'contacted',
+  interested: 'interested',
+  meeting: 'meeting',
+  deal: 'deal',
+  lost: 'lost',
+} as const;
+
+/**
+ * @nullable
+ */
+export type RealtorLeadPatchDealType = typeof RealtorLeadPatchDealType[keyof typeof RealtorLeadPatchDealType] | null;
+
+
+export const RealtorLeadPatchDealType = {
+  sale: 'sale',
+  rent: 'rent',
+} as const;
+
+export interface RealtorLeadPatch {
+  /** @nullable */
+  agentId?: string | null;
+  /** @nullable */
+  listingId?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  fullName?: string;
+  /** @maxLength 32 */
+  phone?: string;
+  source?: RealtorLeadPatchSource;
+  status?: RealtorLeadPatchStatus;
+  /** @nullable */
+  dealType?: RealtorLeadPatchDealType;
+  /** @maxLength 120 */
+  district?: string;
+  /**
+     * @minimum 0
+     * @maximum 50
+     * @nullable
+     */
+  rooms?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  budgetMin?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  budgetMax?: number | null;
+  /** @maxLength 120 */
+  timeframe?: string;
+  /** @maxLength 4000 */
+  notes?: string;
+  /** @maxLength 300 */
+  nextAction?: string;
+  /** @nullable */
+  nextActionAt?: string | null;
+  readyForMeeting?: boolean;
+}
+
+export type RealtorMessageDirection = typeof RealtorMessageDirection[keyof typeof RealtorMessageDirection];
+
+
+export const RealtorMessageDirection = {
+  in: 'in',
+  out: 'out',
+} as const;
+
+export type RealtorMessageStatus = typeof RealtorMessageStatus[keyof typeof RealtorMessageStatus];
+
+
+export const RealtorMessageStatus = {
+  received: 'received',
+  sent: 'sent',
+  failed: 'failed',
+  manual: 'manual',
+} as const;
+
+export interface RealtorMessage {
+  id: string;
+  /** @nullable */
+  leadId: string | null;
+  /** @nullable */
+  leadName: string | null;
+  direction: RealtorMessageDirection;
+  kind: string;
+  body: string;
+  status: RealtorMessageStatus;
+  /** @nullable */
+  error: string | null;
+  createdAt: string;
+}
+
+export type RealtorMessageInputKind = typeof RealtorMessageInputKind[keyof typeof RealtorMessageInputKind];
+
+
+export const RealtorMessageInputKind = {
+  manual: 'manual',
+  listing: 'listing',
+  slots: 'slots',
+  follow_up: 'follow_up',
+  reminder: 'reminder',
+  question: 'question',
+} as const;
+
+export interface RealtorMessageInput {
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  body: string;
+  kind?: RealtorMessageInputKind;
+}
+
+export interface RealtorMessageResult {
+  message: RealtorMessage;
+  /** @nullable */
+  waLink: string | null;
+}
+
+export type RealtorAppointmentStatus = typeof RealtorAppointmentStatus[keyof typeof RealtorAppointmentStatus];
+
+
+export const RealtorAppointmentStatus = {
+  planned: 'planned',
+  done: 'done',
+  cancelled: 'cancelled',
+  rescheduled: 'rescheduled',
+} as const;
+
+export interface RealtorAppointment {
+  id: string;
+  /** @nullable */
+  leadId: string | null;
+  /** @nullable */
+  leadName: string | null;
+  /** @nullable */
+  leadPhone: string | null;
+  /** @nullable */
+  listingId: string | null;
+  /** @nullable */
+  listingTitle: string | null;
+  /** @nullable */
+  listingAddress: string | null;
+  /** @nullable */
+  agentId: string | null;
+  /** @nullable */
+  agentName: string | null;
+  startsAt: string;
+  durationMin: number;
+  status: RealtorAppointmentStatus;
+  notes: string;
+  /** @nullable */
+  reminderSentAt: string | null;
+  createdAt: string;
+}
+
+export type RealtorAppointmentInputStatus = typeof RealtorAppointmentInputStatus[keyof typeof RealtorAppointmentInputStatus];
+
+
+export const RealtorAppointmentInputStatus = {
+  planned: 'planned',
+  done: 'done',
+  cancelled: 'cancelled',
+  rescheduled: 'rescheduled',
+} as const;
+
+export interface RealtorAppointmentInput {
+  /** @nullable */
+  leadId?: string | null;
+  /** @nullable */
+  listingId?: string | null;
+  /** @nullable */
+  agentId?: string | null;
+  startsAt: string;
+  /**
+     * @minimum 10
+     * @maximum 480
+     */
+  durationMin?: number;
+  status?: RealtorAppointmentInputStatus;
+  /** @maxLength 2000 */
+  notes?: string;
+}
+
+export type RealtorAppointmentPatchStatus = typeof RealtorAppointmentPatchStatus[keyof typeof RealtorAppointmentPatchStatus];
+
+
+export const RealtorAppointmentPatchStatus = {
+  planned: 'planned',
+  done: 'done',
+  cancelled: 'cancelled',
+  rescheduled: 'rescheduled',
+} as const;
+
+export interface RealtorAppointmentPatch {
+  /** @nullable */
+  leadId?: string | null;
+  /** @nullable */
+  listingId?: string | null;
+  /** @nullable */
+  agentId?: string | null;
+  startsAt?: string;
+  /**
+     * @minimum 10
+     * @maximum 480
+     */
+  durationMin?: number;
+  status?: RealtorAppointmentPatchStatus;
+  /** @maxLength 2000 */
+  notes?: string;
+}
+
+export interface RealtorNotification {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  href: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface RealtorCount {
+  key: string;
+  count: number;
+}
+
+export interface RealtorOverviewStats {
+  newLeadsToday: number;
+  waitingLeads: number;
+  upcomingAppointments: number;
+  activeListings: number;
+  certifiedListings: number;
+  publishedPassports: number;
+  qrScans: number;
+  passportViews: number;
+  whatsappClicks: number;
+  brandImpressions: number;
+  leads30d: number;
+  appointments30d: number;
+  passportListingViews: number;
+}
+
+export interface RealtorOverview {
+  profileExists: boolean;
+  stats: RealtorOverviewStats;
+  todayLeads: RealtorLead[];
+  dueLeads: RealtorLead[];
+  upcoming: RealtorAppointment[];
+  notifications: RealtorNotification[];
+  funnel: RealtorCount[];
+  sources: RealtorCount[];
+  daily: RealtorCount[];
+}
+
+export interface PassportRealtor {
+  name: string;
+  agency: string;
+  phone: string;
+  whatsapp: string;
+  instagram: string;
+  /** @nullable */
+  photoMediaId: string | null;
+  /** @nullable */
+  photoUrl: string | null;
+  /** @nullable */
+  logoMediaId: string | null;
+  /** @nullable */
+  logoUrl: string | null;
+}
+
+export interface PassportRealtorInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  /** @maxLength 120 */
+  agency: string;
+  /** @maxLength 32 */
+  phone: string;
+  /** @maxLength 32 */
+  whatsapp: string;
+  /** @maxLength 120 */
+  instagram: string;
+  /** @nullable */
+  photoMediaId?: string | null;
+  /** @nullable */
+  logoMediaId?: string | null;
+}
+
+export type PassportWorkHandoverStatus = typeof PassportWorkHandoverStatus[keyof typeof PassportWorkHandoverStatus];
+
+
+export const PassportWorkHandoverStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  revision: 'revision',
+} as const;
+
+export interface PassportWork {
+  id: string;
+  position: number;
+  title: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  contractorName: string;
+  contractorPhone: string;
+  description: string;
+  materials: string;
+  beforePhotoIds: string[];
+  afterPhotoIds: string[];
+  beforePhotos: RealtorMedia[];
+  afterPhotos: RealtorMedia[];
+  /** @nullable */
+  contractorConfirmedAt: string | null;
+  /** @nullable */
+  contractorConfirmedName: string | null;
+  /** @nullable */
+  contractorNote: string | null;
+  contractorLinkActive: boolean;
+  handoverStatus: PassportWorkHandoverStatus;
+  /** @nullable */
+  ownerDecidedAt: string | null;
+  /** @nullable */
+  ownerDecidedName: string | null;
+  /** @nullable */
+  ownerNote: string | null;
+}
+
+export interface PassportWorkInput {
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  title: string;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
+  /** @maxLength 120 */
+  contractorName: string;
+  /** @maxLength 32 */
+  contractorPhone: string;
+  /** @maxLength 3000 */
+  description: string;
+  /** @maxLength 2000 */
+  materials: string;
+  /** @maxItems 12 */
+  beforePhotoIds: string[];
+  /** @maxItems 12 */
+  afterPhotoIds: string[];
+}
+
+export interface PassportStats {
+  views: number;
+  qrScans: number;
+  whatsappClicks: number;
+  shares: number;
+  leads: number;
+}
+
+export type PropertyPassportDealType = typeof PropertyPassportDealType[keyof typeof PropertyPassportDealType];
+
+
+export const PropertyPassportDealType = {
+  sale: 'sale',
+  rent: 'rent',
+} as const;
+
+export type PropertyPassportPropertyKind = typeof PropertyPassportPropertyKind[keyof typeof PropertyPassportPropertyKind];
+
+
+export const PropertyPassportPropertyKind = {
+  apartment: 'apartment',
+  villa: 'villa',
+  office: 'office',
+  country_house: 'country_house',
+  other: 'other',
+} as const;
+
+export type PropertyPassportCurrency = typeof PropertyPassportCurrency[keyof typeof PropertyPassportCurrency];
+
+
+export const PropertyPassportCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+} as const;
+
+export type PropertyPassportStatus = typeof PropertyPassportStatus[keyof typeof PropertyPassportStatus];
+
+
+export const PropertyPassportStatus = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export type PropertyPassportTrustLevel = typeof PropertyPassportTrustLevel[keyof typeof PropertyPassportTrustLevel];
+
+
+export const PropertyPassportTrustLevel = {
+  basic: 'basic',
+  contractor: 'contractor',
+  handover: 'handover',
+} as const;
+
+export interface PropertyPassport {
+  id: string;
+  publicId: string;
+  publicUrl: string;
+  /** @nullable */
+  listingId: string | null;
+  title: string;
+  dealType: PropertyPassportDealType;
+  propertyKind: PropertyPassportPropertyKind;
+  district: string;
+  address: string;
+  /** @nullable */
+  rooms: number | null;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  price: number | null;
+  currency: PropertyPassportCurrency;
+  listingUrls: ExternalLink[];
+  photoIds: string[];
+  photos: RealtorMedia[];
+  realtor: PassportRealtor;
+  status: PropertyPassportStatus;
+  trustLevel: PropertyPassportTrustLevel;
+  ownerName: string;
+  ownerPhone: string;
+  ownerLinkActive: boolean;
+  works: PassportWork[];
+  stats: PassportStats;
+  /** @nullable */
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PropertyPassportInputDealType = typeof PropertyPassportInputDealType[keyof typeof PropertyPassportInputDealType];
+
+
+export const PropertyPassportInputDealType = {
+  sale: 'sale',
+  rent: 'rent',
+} as const;
+
+export type PropertyPassportInputPropertyKind = typeof PropertyPassportInputPropertyKind[keyof typeof PropertyPassportInputPropertyKind];
+
+
+export const PropertyPassportInputPropertyKind = {
+  apartment: 'apartment',
+  villa: 'villa',
+  office: 'office',
+  country_house: 'country_house',
+  other: 'other',
+} as const;
+
+export type PropertyPassportInputCurrency = typeof PropertyPassportInputCurrency[keyof typeof PropertyPassportInputCurrency];
+
+
+export const PropertyPassportInputCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+} as const;
+
+export interface PropertyPassportInput {
+  /** @nullable */
+  listingId?: string | null;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  title: string;
+  dealType: PropertyPassportInputDealType;
+  propertyKind: PropertyPassportInputPropertyKind;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  district: string;
+  /** @maxLength 200 */
+  address: string;
+  /**
+     * @minimum 0
+     * @maximum 50
+     * @nullable
+     */
+  rooms?: number | null;
+  /**
+     * @minimum 0
+     * @maximum 100000
+     * @nullable
+     */
+  areaM2?: number | null;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  price?: number | null;
+  currency: PropertyPassportInputCurrency;
+  /** @maxItems 6 */
+  listingUrls: ExternalLink[];
+  /** @maxItems 20 */
+  photoIds: string[];
+  realtor: PassportRealtorInput;
+  /** @maxLength 120 */
+  ownerName: string;
+  /** @maxLength 32 */
+  ownerPhone: string;
+}
+
+export type PassportStatusInputStatus = typeof PassportStatusInputStatus[keyof typeof PassportStatusInputStatus];
+
+
+export const PassportStatusInputStatus = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export interface PassportStatusInput {
+  status: PassportStatusInputStatus;
+}
+
+export interface ConfirmLink {
+  url: string;
+}
+
+export interface PublicPassportRealtor {
+  name: string;
+  agency: string;
+  phone: string;
+  whatsapp: string;
+  instagram: string;
+  /** @nullable */
+  photoUrl: string | null;
+  /** @nullable */
+  logoUrl: string | null;
+}
+
+export type PublicPassportWorkHandoverStatus = typeof PublicPassportWorkHandoverStatus[keyof typeof PublicPassportWorkHandoverStatus];
+
+
+export const PublicPassportWorkHandoverStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  revision: 'revision',
+} as const;
+
+export interface PublicPassportWork {
+  id: string;
+  title: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  contractorName: string;
+  description: string;
+  materials: string;
+  beforePhotos: RealtorMedia[];
+  afterPhotos: RealtorMedia[];
+  /** @nullable */
+  contractorConfirmedAt: string | null;
+  handoverStatus: PublicPassportWorkHandoverStatus;
+  /** @nullable */
+  ownerDecidedAt: string | null;
+}
+
+export type PublicPassportDealType = typeof PublicPassportDealType[keyof typeof PublicPassportDealType];
+
+
+export const PublicPassportDealType = {
+  sale: 'sale',
+  rent: 'rent',
+} as const;
+
+export type PublicPassportPropertyKind = typeof PublicPassportPropertyKind[keyof typeof PublicPassportPropertyKind];
+
+
+export const PublicPassportPropertyKind = {
+  apartment: 'apartment',
+  villa: 'villa',
+  office: 'office',
+  country_house: 'country_house',
+  other: 'other',
+} as const;
+
+export type PublicPassportCurrency = typeof PublicPassportCurrency[keyof typeof PublicPassportCurrency];
+
+
+export const PublicPassportCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+} as const;
+
+export type PublicPassportTrustLevel = typeof PublicPassportTrustLevel[keyof typeof PublicPassportTrustLevel];
+
+
+export const PublicPassportTrustLevel = {
+  basic: 'basic',
+  contractor: 'contractor',
+  handover: 'handover',
+} as const;
+
+export interface PublicPassport {
+  publicId: string;
+  publicUrl: string;
+  title: string;
+  dealType: PublicPassportDealType;
+  propertyKind: PublicPassportPropertyKind;
+  district: string;
+  address: string;
+  /** @nullable */
+  rooms: number | null;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  price: number | null;
+  currency: PublicPassportCurrency;
+  listingUrls: ExternalLink[];
+  photos: RealtorMedia[];
+  realtor: PublicPassportRealtor;
+  trustLevel: PublicPassportTrustLevel;
+  works: PublicPassportWork[];
+  /** @nullable */
+  publishedAt: string | null;
+  updatedAt: string;
+}
+
+export type PublicPassportEventInputKind = typeof PublicPassportEventInputKind[keyof typeof PublicPassportEventInputKind];
+
+
+export const PublicPassportEventInputKind = {
+  qr_scan: 'qr_scan',
+  whatsapp_click: 'whatsapp_click',
+  share: 'share',
+} as const;
+
+export interface PublicPassportEventInput {
+  kind: PublicPassportEventInputKind;
+}
+
+export interface PublicPassportLeadInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  /**
+     * @minLength 7
+     * @maxLength 32
+     */
+  phone: string;
+  /** @maxLength 1000 */
+  message?: string;
+  consent: true;
+}
+
+export interface ContractorConfirmView {
+  passportTitle: string;
+  district: string;
+  realtorName: string;
+  agency: string;
+  work: PublicPassportWork;
+  confirmed: boolean;
+  /** @nullable */
+  confirmedName: string | null;
+}
+
+export interface ContractorConfirmInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  /** @maxLength 500 */
+  note?: string;
+  confirm: true;
+}
+
+export interface OwnerConfirmView {
+  ownerName: string;
+  passport: PublicPassport;
+  published: boolean;
+}
+
+export type OwnerDecisionInputDecision = typeof OwnerDecisionInputDecision[keyof typeof OwnerDecisionInputDecision];
+
+
+export const OwnerDecisionInputDecision = {
+  accepted: 'accepted',
+  revision: 'revision',
+} as const;
+
+export interface OwnerDecisionInput {
+  decision: OwnerDecisionInputDecision;
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  /** @maxLength 500 */
+  note?: string;
+}
+
+export interface RealtorWhatsappStats {
+  sent: number;
+  received: number;
+  failed: number;
+  manual: number;
+}
+
+export type RealtorWhatsappSettingsMode = typeof RealtorWhatsappSettingsMode[keyof typeof RealtorWhatsappSettingsMode];
+
+
+export const RealtorWhatsappSettingsMode = {
+  manual: 'manual',
+  cloud_api: 'cloud_api',
+} as const;
+
+export interface RealtorWhatsappSettings {
+  mode: RealtorWhatsappSettingsMode;
+  businessPhone: string;
+  /** @nullable */
+  phoneNumberId: string | null;
+  tokenSet: boolean;
+  cloudApiAvailable: boolean;
+  webhookUrl: string;
+  autoReplyEnabled: boolean;
+  greeting: string;
+  followUpEnabled: boolean;
+  followUpHours: number;
+  followUpText: string;
+  reminderEnabled: boolean;
+  reminderHoursBefore: number;
+  reminderText: string;
+  workdayStartHour: number;
+  workdayEndHour: number;
+  followUpTemplate: string;
+  reminderTemplate: string;
+  templateLanguage: string;
+  stats: RealtorWhatsappStats;
+}
+
+export type RealtorWhatsappInputMode = typeof RealtorWhatsappInputMode[keyof typeof RealtorWhatsappInputMode];
+
+
+export const RealtorWhatsappInputMode = {
+  manual: 'manual',
+  cloud_api: 'cloud_api',
+} as const;
+
+export interface RealtorWhatsappInput {
+  mode: RealtorWhatsappInputMode;
+  /** @maxLength 32 */
+  businessPhone: string;
+  /**
+     * @maxLength 64
+     * @nullable
+     * @pattern ^[0-9]*$
+     */
+  phoneNumberId?: string | null;
+  /** @maxLength 1000 */
+  accessToken?: string;
+  autoReplyEnabled: boolean;
+  /** @maxLength 1000 */
+  greeting: string;
+  followUpEnabled: boolean;
+  /**
+     * @minimum 4
+     * @maximum 336
+     */
+  followUpHours: number;
+  /** @maxLength 1000 */
+  followUpText: string;
+  reminderEnabled: boolean;
+  /**
+     * @minimum 1
+     * @maximum 72
+     */
+  reminderHoursBefore: number;
+  /** @maxLength 1000 */
+  reminderText: string;
+  /**
+     * @minimum 0
+     * @maximum 23
+     */
+  workdayStartHour: number;
+  /**
+     * @minimum 1
+     * @maximum 24
+     */
+  workdayEndHour: number;
+  /** @maxLength 120 */
+  followUpTemplate: string;
+  /** @maxLength 120 */
+  reminderTemplate: string;
+  /** @maxLength 12 */
+  templateLanguage: string;
+}
+
 export type GetSharedPassport200 = {
   passport: Passport;
   includeFinancial: boolean;
