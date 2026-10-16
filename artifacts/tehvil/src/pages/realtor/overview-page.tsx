@@ -1,15 +1,16 @@
-import { Link } from 'wouter';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Link, useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle, ArrowUpRight, Bell, BellRing, Building2, CalendarClock, CheckCheck, Eye, FilePlus2, Megaphone, MessageCircle,
-  Plus, QrCode, ShieldCheck, Sparkles, UserPlus, Users,
+  Plus, QrCode, ShieldCheck, Sparkles, UserPlus, Users, Check, ChevronRight, X, BarChart3, UserRound,
 } from 'lucide-react';
 import {
   getGetRealtorOverviewQueryKey, useGetRealtorOverview, useGetRealtorProfile, useMarkRealtorNotificationsRead,
-  type RealtorAppointment, type RealtorLead,
+  type RealtorAppointment, type RealtorLead, type RealtorSetup,
 } from '@workspace/api-client-react';
 import { PageHeading } from '@/components/kit';
-import { Empty, Pill, RealtorToaster, Skeleton, StatTile } from '@/components/realtor/ui';
+import { Empty, Modal, Pill, RealtorToaster, Skeleton, StatTile } from '@/components/realtor/ui';
 import { COPY, LEAD_STATUS, LEAD_TONE, SOURCE, dayShort, num, relative, timeText } from '@/lib/realtor/labels';
 import { ProfileForm } from './profile-page';
 
@@ -18,7 +19,14 @@ export function RealtorOverviewPage() {
   const overview = useGetRealtorOverview();
   const profile = useGetRealtorProfile();
   const markRead = useMarkRealtorNotificationsRead();
+  const [, setLocation] = useLocation();
+  const [welcome, setWelcome] = useState(() => new URLSearchParams(window.location.search).has('welcome'));
   const d = overview.data;
+  const empty = !!d && d.profileExists && d.setup.listings === 0 && d.setup.leads === 0 && d.setup.passports === 0;
+  // First visit with an empty workspace: greet once even if the user arrived another way.
+  useEffect(() => { if (empty && !readFlag(WELCOME_KEY)) setWelcome(true); }, [empty]);
+  const closeWelcome = () => { setFlag(WELCOME_KEY); setWelcome(false); if (window.location.search.includes('welcome')) window.history.replaceState(null, '', window.location.pathname); };
+  const go = (href: string) => { setFlag(WELCOME_KEY); setWelcome(false); setLocation(href); };
 
   if (overview.isLoading || profile.isLoading) return <><Heading /><Skeleton rows={4} /></>;
   if (!d || !profile.data) return <><Heading /><div className="notice error-notice" role="alert"><p>Məlumatı yükləmək alınmadı.</p><button className="button button-secondary" onClick={() => { void overview.refetch(); void profile.refetch(); }}>Yenidən cəhd et</button></div></>;
@@ -36,25 +44,52 @@ export function RealtorOverviewPage() {
             <li><b>3</b>Mənzil üçün “Təhvil Pasportu” yaradın, QR kodu paylaşın.</li>
           </ol>
         </div>
-        <ProfileForm profile={profile.data} compact onSaved={() => { void qc.invalidateQueries({ queryKey: getGetRealtorOverviewQueryKey() }); }} />
+        <ProfileForm profile={profile.data} compact onSaved={() => { void qc.invalidateQueries({ queryKey: getGetRealtorOverviewQueryKey() }); setWelcome(true); }} />
       </div>
       <RealtorToaster />
     </>;
   }
 
   const s = d.stats;
+  const welcomeModal = <Modal open={welcome} onClose={closeWelcome} eyebrow="Təhvil.az · Realtor" title={`Xoş gəlmisiniz${d.setup.firstName ? `, ${d.setup.firstName}` : ''}!`} wide>
+    <p className="rl-welcome-lead">Təhvil.az-da satış prosesinizi idarə edə və hər mənzilinizi <b>“Təhvil Sertifikatlı Mənzil”</b> kimi təqdim edə bilərsiniz.</p>
+    <ol className="rl-welcome-steps"><li><b>1</b>İlk elanınızı əlavə edin</li><li><b>2</b>Lead və ya müştəri əlavə edin</li><li><b>3</b>Mənzil üçün Təhvil Pasportu yaradın</li><li><b>4</b>QR kodu paylaşın</li></ol>
+    <div className="rl-welcome-actions">
+      <button type="button" className="rl-big-action" onClick={() => go('/realtor/listings?new=1')} data-testid="welcome-listing"><Megaphone size={22} /><b>Elan əlavə et</b><small>Mənzili satışa hazırlayın</small></button>
+      <button type="button" className="rl-big-action" onClick={() => go('/realtor/leads?new=1')} data-testid="welcome-lead"><UserPlus size={22} /><b>Lead əlavə et</b><small>Müştərini qeyd edin</small></button>
+      <button type="button" className="rl-big-action gold" onClick={() => go('/realtor/passports/new')} data-testid="welcome-passport"><ShieldCheck size={22} /><b>Təhvil Pasportu yarat</b><small>QR kodlu təmir tarixçəsi</small></button>
+    </div>
+    <button type="button" className="sm-link-btn rl-welcome-later" onClick={closeWelcome}>Sonra — dashboard-a keç</button>
+  </Modal>;
+
+  if (empty) return <>
+    <Heading />
+    <section className="rl-start" aria-label="Başlayın">
+      <div className="rl-start-head"><div className="eyebrow">Başlayın</div><h2 className="font-display">Burada ilk 5 dəqiqədə nə edə bilərsiniz</h2><p>Bir elan və bir pasport — və alıcıya göstərəcəyiniz QR kod hazırdır.</p></div>
+      <div className="rl-start-grid">
+        <StartCard icon={<Megaphone size={20} />} title="İlk elanınızı əlavə edin" text="İlk mənzilinizi əlavə edin və satışa hazır edin." cta="Elan əlavə et" href="/realtor/listings?new=1" />
+        <StartCard icon={<UserPlus size={20} />} title="İlk leadinizi əlavə edin" text="Müştərilərinizi bir yerdə idarə edin." cta="Lead əlavə et" href="/realtor/leads?new=1" />
+        <StartCard icon={<ShieldCheck size={20} />} title="İlk Təhvil Pasportunuzu yaradın" text="Mənziliniz üçün foto sübutlu, QR kodlu təmir tarixçəsi yaradın." cta="Pasport yarat" href="/realtor/passports/new" gold />
+        <StartCard icon={<MessageCircle size={20} />} title="WhatsApp-ı bağlayın" text="Yeni leadlərə avtomatik cavab verin." cta="WhatsApp bağla" href="/realtor/whatsapp?connect=1" done={d.setup.whatsappConnected} />
+      </div>
+    </section>
+    <FirstWeek setup={d.setup} />
+    {welcomeModal}
+    <RealtorToaster />
+  </>;
+
   const unread = d.notifications.filter(n => !n.read).length;
   const funnelMax = Math.max(1, ...d.funnel.map(f => f.count));
   const dailyMax = Math.max(1, ...d.daily.map(x => x.count));
   return <>
     <Heading />
     <section className="sm-stats rl-stats" aria-label="Bugünkü icmal">
-      <StatTile icon={<UserPlus size={17} />} label="Bugünkü yeni leadlər" value={s.newLeadsToday} hint={`Son 30 gün: ${s.leads30d}`} tone="dark" />
-      <StatTile icon={<Users size={17} />} label="Gözləmədə olan müştərilər" value={s.waitingLeads} hint="Yeni və cavab gözləyən" tone={s.waitingLeads > 5 ? 'alert' : undefined} />
+      <StatTile icon={<Building2 size={17} />} label="Aktiv elanlar" value={s.activeListings} hint={`${d.setup.listings} elan cəmi`} />
+      <StatTile icon={<ShieldCheck size={17} />} label="Təhvil Pasportlu elanlar" value={s.certifiedListings} hint={`${s.publishedPassports} dərc olunmuş pasport`} tone="gold" />
+      <StatTile icon={<UserPlus size={17} />} label="Yeni leadlər" value={s.newLeads} hint={`Bu gün: ${s.newLeadsToday} · gözləyən: ${s.waitingLeads}`} tone="dark" />
       <StatTile icon={<CalendarClock size={17} />} label="Planlaşdırılan görüşlər" value={s.upcomingAppointments} hint="Qarşıdakı günlər" />
-      <StatTile icon={<Building2 size={17} />} label="Aktual elanlar" value={s.activeListings} hint={`${s.certifiedListings} sertifikatlı`} />
-      <StatTile icon={<ShieldCheck size={17} />} label="Təhvil Sertifikatlı Mənzil" value={s.publishedPassports} hint="Dərc olunmuş pasport" tone="gold" />
-      <StatTile icon={<QrCode size={17} />} label="QR kod skan sayı" value={s.qrScans} hint={`${num(s.passportViews)} pasport baxışı`} />
+      <StatTile icon={<QrCode size={17} />} label="QR kod skanları" value={s.qrScans} hint="Pasport QR kodu ilə" />
+      <StatTile icon={<Eye size={17} />} label="Pasport baxışları" value={num(s.passportViews)} hint={`WhatsApp klik: ${s.whatsappClicks}`} />
     </section>
 
     <div className="sm-dash-grid rl-dash-grid">
@@ -78,6 +113,7 @@ export function RealtorOverviewPage() {
       </div>
 
       <aside className="sm-aside">
+        <FirstWeek setup={d.setup} compact />
         <div className="aside-panel rl-notes">
           <div className="section-head" style={{ marginBottom: 6 }}><div><div className="eyebrow">{unread ? `${unread} oxunmamış` : 'Bildirişlər'}</div><h3>{unread ? <BellRing size={16} className="sm-ii" /> : <Bell size={16} className="sm-ii" />} Bildirişlər</h3></div>
             {unread > 0 && <button type="button" className="sm-link-btn" onClick={() => markRead.mutate(undefined, { onSuccess: () => { void qc.invalidateQueries({ queryKey: getGetRealtorOverviewQueryKey() }); } })}><CheckCheck size={13} />Oxundu</button>}</div>
@@ -85,7 +121,7 @@ export function RealtorOverviewPage() {
             : <p className="sm-muted" style={{ fontSize: 13, margin: 0 }}>Hələ bildiriş yoxdur. Yeni lead, podratçı təsdiqi və ev sahibi qəbulu burada görünəcək.</p>}
         </div>
 
-        <div className="aside-panel">
+        <div className="aside-panel" id="results">
           <div className="eyebrow">Son 30 gün</div>
           <h3>Nəticə paneli</h3>
           <dl className="rl-results">
@@ -115,6 +151,7 @@ export function RealtorOverviewPage() {
         </div>
       </aside>
     </div>
+    {welcomeModal}
     <RealtorToaster />
   </>;
 }
@@ -140,4 +177,43 @@ function ApptRow({ appt }: { appt: RealtorAppointment }) {
     <span className="rl-row-main"><strong>{appt.leadName || 'Müştəri'}</strong><small>{appt.listingTitle || 'Mənzil seçilməyib'}{appt.agentName ? ` · ${appt.agentName}` : ''}</small></span>
     <ArrowUpRight size={14} />
   </Link>;
+}
+
+const WELCOME_KEY = 'tehvil-realtor-welcome-seen';
+const WEEK_KEY = 'tehvil-realtor-week-hidden';
+function readFlag(k: string) { try { return localStorage.getItem(k) === '1'; } catch { return false; } }
+function setFlag(k: string) { try { localStorage.setItem(k, '1'); } catch { /* private mode */ } }
+
+function StartCard({ icon, title, text, cta, href, gold = false, done = false }: { icon: ReactNode; title: string; text: string; cta: string; href: string; gold?: boolean; done?: boolean }) {
+  return <Link href={href} className={`rl-start-card ${gold ? 'gold' : ''} ${done ? 'done' : ''}`}>
+    <span className="rl-start-icon">{done ? <Check size={20} /> : icon}</span>
+    <strong>{title}</strong><p>{text}</p>
+    <span className="button button-primary sm-btn-sm">{done ? 'Bağlanıb' : cta}<ChevronRight size={14} /></span>
+  </Link>;
+}
+
+/** "İlk həftə planı": eight steps that turn the panel into a daily tool. */
+function FirstWeek({ setup, compact = false }: { setup: RealtorSetup; compact?: boolean }) {
+  const [hidden, setHidden] = useState(() => readFlag(WEEK_KEY));
+  const steps = [
+    { done: setup.profileComplete, title: 'Profili tamamla', hint: 'Foto və WhatsApp nömrəsi pasportda görünür', href: '/realtor/profile', icon: UserRound },
+    { done: setup.listings > 0, title: 'İlk elanı əlavə et', hint: 'Brokly/Tap/Bina linkindən avtomatik doldurun', href: '/realtor/listings?new=1', icon: Megaphone },
+    { done: setup.leads > 0, title: 'İlk lead-i əlavə et', hint: 'Növbəti aksiya və vaxtı qeyd edin', href: '/realtor/leads?new=1', icon: UserPlus },
+    { done: setup.whatsappConnected, title: 'WhatsApp-ı bağla', hint: 'Yeni leadlərə dərhal cavab', href: '/realtor/whatsapp?connect=1', icon: MessageCircle },
+    { done: setup.passports > 0, title: 'İlk Təhvil Pasportunu yarat', hint: 'Təmir işləri, fotolar, təsdiqlər', href: '/realtor/passports/new', icon: ShieldCheck },
+    { done: setup.publishedPassports > 0, title: 'QR kodu elana və WhatsApp-a əlavə et', hint: 'Pasportu dərc edin və paylaşın', href: '/realtor/passports', icon: QrCode },
+    { done: setup.appointments > 0, title: 'İlk görüşü planla', hint: 'Müştəriyə xatırlatma gedəcək', href: '/realtor/appointments?new=1', icon: CalendarClock },
+    { done: setup.passportViews > 0, title: 'Nəticələri dashboard-da izlə', hint: 'Baxışlar, QR skanları, leadlər', href: '/realtor#results', icon: BarChart3 },
+  ];
+  const doneCount = steps.filter(x => x.done).length;
+  if (compact && (hidden || doneCount === steps.length)) return null;
+  const next = steps.findIndex(x => !x.done);
+  return <section className={`rl-week-plan ${compact ? 'compact aside-panel' : 'surface rl-panel'}`} aria-label="İlk həftə planı">
+    <div className="section-head"><div><div className="eyebrow">İlk həftə planı · {doneCount}/{steps.length}</div><h3>{doneCount === steps.length ? 'Hazırsınız — Təhvil gündəlik iş alətinizdir' : 'Başlama planı'}</h3></div>
+      {compact && <button type="button" className="icon-button" aria-label="Gizlət" title="Gizlət" onClick={() => { setFlag(WEEK_KEY); setHidden(true); }}><X size={15} /></button>}</div>
+    <div className="rl-progress" role="img" aria-label={`${doneCount} / ${steps.length} addım`}><span style={{ width: `${(doneCount / steps.length) * 100}%` }} /></div>
+    <ol className="rl-plan">{steps.map((st, i) => <li key={st.title} className={`${st.done ? 'done' : ''} ${i === next ? 'next' : ''}`}>
+      <Link href={st.href}><span className="rl-plan-dot">{st.done ? <Check size={13} /> : i + 1}</span><span><strong>{st.title}</strong>{(!compact || i === next) && <small>{st.hint}</small>}</span>{i === next && <ChevronRight size={15} />}</Link>
+    </li>)}</ol>
+  </section>;
 }

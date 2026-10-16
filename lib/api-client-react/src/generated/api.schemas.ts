@@ -2322,6 +2322,20 @@ export interface RealtorOverviewStats {
   leads30d: number;
   appointments30d: number;
   passportListingViews: number;
+  newLeads: number;
+}
+
+export interface RealtorSetup {
+  profileComplete: boolean;
+  listings: number;
+  leads: number;
+  passports: number;
+  publishedPassports: number;
+  appointments: number;
+  whatsappConnected: boolean;
+  whatsappMode: string;
+  passportViews: number;
+  firstName: string;
 }
 
 export interface RealtorOverview {
@@ -2334,6 +2348,7 @@ export interface RealtorOverview {
   funnel: RealtorCount[];
   sources: RealtorCount[];
   daily: RealtorCount[];
+  setup: RealtorSetup;
 }
 
 export interface PassportRealtor {
@@ -2886,6 +2901,56 @@ export interface RealtorWhatsappInput {
   reminderTemplate: string;
   /** @maxLength 12 */
   templateLanguage: string;
+}
+
+export interface ListingImportInput {
+  /**
+     * @minLength 8
+     * @maxLength 500
+     */
+  url: string;
+}
+
+export type ListingImportPortal = typeof ListingImportPortal[keyof typeof ListingImportPortal];
+
+
+export const ListingImportPortal = {
+  brokly: 'brokly',
+  tap: 'tap',
+  bina: 'bina',
+  yeniemlak: 'yeniemlak',
+  instagram: 'instagram',
+  other: 'other',
+} as const;
+
+export interface ListingImport {
+  url: string;
+  portal: ListingImportPortal;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  dealType: string | null;
+  /** @nullable */
+  propertyKind: string | null;
+  /** @nullable */
+  district: string | null;
+  /** @nullable */
+  address: string | null;
+  /** @nullable */
+  rooms: number | null;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  floor: string | null;
+  /** @nullable */
+  price: number | null;
+  /** @nullable */
+  currency: string | null;
+  photos: RealtorMedia[];
+  found: string[];
+  warnings: string[];
 }
 
 export type GetSharedPassport200 = {

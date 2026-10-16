@@ -40,6 +40,7 @@ import {
   UpdateRealtorWhatsappBody,
   CreateContractorConfirmLinkParams,
   CreateOwnerConfirmLinkParams,
+  ImportRealtorListingBody,
 } from "@workspace/api-zod";
 import {
   db,
@@ -72,7 +73,9 @@ import {
   workContentChanged,
 } from "../lib/realtorCore";
 import { attachRealtorMedia, mediaDto, MediaError, ownedMediaIds, realtorMediaUrl } from "../lib/realtorMedia";
-import { cloudApiAvailable, encryptToken, getSettings, sendToLead } from "../lib/realtorWhatsapp";
+import { cloudApiAvailable, encryptToken, getSettings, isConnected, sendToLead } from "../lib/realtorWhatsapp";
+import { ImportError, importListing } from "../lib/realtorImport";
+import { rateLimit } from "../lib/rateLimit";
 
 const router: IRouter = Router();
 const uid = (req: Request) => getAuth(req).userId!;
@@ -235,6 +238,20 @@ router.post("/realtor/listings", async (req, res): Promise<void> => {
   if (!(await refsOwned(userId, { agentId: body.data.agentId }))) return bad(res, "Agent tapılmadı");
   const [row] = await db.insert(realtorListingsTable).values({ ownerUserId: userId, ...(await listingValues(userId, body.data)) }).returning();
   res.status(201).json((await listingDtos([row], userId))[0]);
+});
+
+const importLimit = rateLimit({ windowMs: 10 * 60_000, max: 20, key: (req) => `ri:${getAuth(req).userId}` });
+
+router.post("/realtor/listings/import", importLimit, async (req, res): Promise<void> => {
+  const body = ImportRealtorListingBody.safeParse(req.body);
+  if (!body.success) return bad(res, "Elan linkini yazın");
+  try {
+    res.json(await importListing(uid(req), body.data.url));
+  } catch (err) {
+    if (err instanceof ImportError) return bad(res, err.message);
+    req.log.warn({ err }, "realtor.import_failed");
+    bad(res, "Səhifəni oxumaq alınmadı. Sahələri əl ilə doldurun.");
+  }
 });
 
 router.get("/realtor/listings/:listingId", async (req, res): Promise<void> => {
@@ -695,6 +712,8 @@ router.get("/realtor/overview", async (req, res): Promise<void> => {
       .groupBy(sql`1`),
     db.select().from(realtorNotificationsTable).where(eq(realtorNotificationsTable.ownerUserId, userId)).orderBy(desc(realtorNotificationsTable.createdAt)).limit(8),
   ]);
+  const [profileRow] = await db.select().from(realtorProfilesTable).where(eq(realtorProfilesTable.userId, userId));
+  const [waRow] = await db.select().from(realtorWhatsappSettingsTable).where(eq(realtorWhatsappSettingsTable.userId, userId));
   const open = (s: string) => !["deal", "lost"].includes(s);
   const published = passports.filter((p) => p.status === "published");
   const certifiedListingIds = new Set(published.map((p) => p.listingId).filter(Boolean));
@@ -724,6 +743,19 @@ router.get("/realtor/overview", async (req, res): Promise<void> => {
       leads30d: leads.filter((l) => l.createdAt >= since30).length,
       appointments30d: appts.filter((a) => a.createdAt >= since30).length,
       passportListingViews: sum("passport_view", (id) => !!id && linkedPassportIds.has(id)),
+      newLeads: leads.filter((l) => l.status === "new").length,
+    },
+    setup: {
+      profileComplete: !!profileRow && !!profileRow.fullName && !!(profileRow.whatsapp || profileRow.phone) && !!profileRow.photoMediaId,
+      listings: listings.length,
+      leads: leads.length,
+      passports: passports.filter((p) => p.status !== "archived").length,
+      publishedPassports: published.length,
+      appointments: appts.length,
+      whatsappConnected: !!waRow && (isConnected(waRow) || (waRow.mode === "manual" && !!waRow.businessPhone)),
+      whatsappMode: waRow?.mode ?? "none",
+      passportViews: views,
+      firstName: (profileRow?.fullName ?? "").split(" ")[0] ?? "",
     },
     todayLeads: await leadDtos(leads.filter((l) => l.createdAt >= today).slice(0, 8), userId),
     dueLeads: await leadDtos(due, userId),

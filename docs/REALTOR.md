@@ -19,6 +19,21 @@ Siz leadləri, elanları və görüşləri Təhvil.az-da idarə edirsiniz; hər 
 
 Qeydiyyat: landing səhifəsindəki “Realtor kimi başla” → `/sign-up?realtor=1`, qeydiyyatdan sonra `/realtor`-a yönləndirir.
 
+## Qeydiyyatdan sonrakı axın
+
+**Profil → İlk elan → İlk lead → WhatsApp → İlk Təhvil Pasportu → QR paylaşımı → Nəticələr**
+
+- Profil yaradılan kimi “Xoş gəlmisiniz, [Ad]!” pəncərəsi açılır: Elan əlavə et / Lead əlavə et / Təhvil Pasportu yarat.
+- Elan, lead və pasport yoxdursa, İcmal boş görünmür: 4 “Başlayın” kartı və 8 addımlı “İlk həftə planı” göstərilir (addımlar real məlumatdan avtomatik işarələnir).
+- Elan wizardı: 1) mənzil məlumatı (Brokly/Tap/Bina linkindən avtomatik doldurma ilə) → 2) portal linkləri → 3) “Təhvil Pasportu yaratmaq istəyirsiniz?” — “Bəli” birbaşa pasport wizardına aparır.
+- Lead forması: mənbə və alqı/icarə düymələri, növbəti aksiya presetləri (“Zəng edəcəyəm”, “Elan göndərəcəyəm”…), “Bu gün 18:00” kimi vaxt seçimi; yaradılanda “Növbəti aksiya: Bu gün 18:00 — …” göstərilir.
+- Pasport wizardı mövcud elanı seçməklə başlayır; etibar addımında hədəf səviyyə seçilir (səviyyə təsdiqlərlə avtomatik yüksəlir).
+- WhatsApp bağlama: nömrə → rejim → müştəri linki və QR (Instagram bio və elanlar üçün).
+
+### Linkdən avtomatik doldurma
+
+`POST /api/realtor/listings/import` portal səhifəsini oxuyur (OpenGraph, JSON-LD, “3 otaqlı”, “96 m²”, “185 000 AZN” kimi ifadələr) və şəkilləri realtorun media yaddaşına köçürür. Yalnız dəstəklənən portallar açılır (brokly.az, tap.az, bina.az, yeniemlak.az, emlak.az, arenda.az, ev10.az, lalafo.az, unvan.az); hər yönləndirmə yoxlanılır, daxili/özəl IP ünvanlara müraciət bloklanır. Portallar dizaynını dəyişə bilər — tapılmayan sahələri realtor əl ilə doldurur. Real portal səhifələrində hələ sınaqdan keçirilməyib.
+
 ## Etibar səviyyələri
 
 1. **Əsas pasport** — məlumatı realtor/ev sahibi yükləyib.

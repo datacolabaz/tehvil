@@ -14,7 +14,7 @@ import {
 } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
 import { CertifiedSeal, CopyButton, PhotoPicker, Pill, QrCode as Qr, RealtorToaster, Skeleton, TrustBadge, TrustLadder, qrDataUrl, toast } from '@/components/realtor/ui';
-import { HANDOVER, KIND, PORTAL, PASSPORT_STATUS, dateText, num, passportShareText, passportUrl, qrUrl, waUrl, type Trust } from '@/lib/realtor/labels';
+import { HANDOVER, KIND, PORTAL, PASSPORT_STATUS, dateText, facts, num, price, passportShareText, passportUrl, qrUrl, waUrl, type Trust } from '@/lib/realtor/labels';
 import { downloadBlob, storyImage } from '@/lib/realtor/story';
 
 const STEPS = [
@@ -127,9 +127,24 @@ function StepProperty({ draft, setDraft, onNext, saving, isNew }: { draft: Draft
     setDraft({ ...draft, listingId: l.id, title: l.title, dealType: l.dealType, propertyKind: l.propertyKind, district: l.district, address: l.address, rooms: l.rooms?.toString() ?? '', areaM2: l.areaM2?.toString() ?? '', price: l.price?.toString() ?? '', currency: l.currency, links: l.externalLinks.length ? l.externalLinks : draft.links, photos: l.photos.length ? l.photos : draft.photos });
   };
   const submit = (e: FormEvent) => { e.preventDefault(); onNext(); };
+  const [picking, setPicking] = useState(isNew && !draft.listingId);
+  if (picking && listings.isLoading) return <Skeleton rows={2} />;
+  if (picking && (listings.data?.length ?? 0) > 0) {
+    return <div className="surface form-card rl-step-card">
+      <div className="form-section-title"><span>01</span><h2>Mənzili seçin</h2></div>
+      <p className="rl-hint" style={{ marginTop: -6 }}>Mövcud elanlarınızdan birini seçin — məlumat və şəkillər avtomatik doldurulacaq. Və ya yeni mənzil əlavə edin.</p>
+      <div className="rl-pick-grid">
+        {listings.data!.map(l => <button type="button" key={l.id} className="rl-pick" onClick={() => { pick(l.id); setPicking(false); }} data-testid={`pick-listing-${l.id}`}>
+          <span className="rl-pick-cover">{l.photos[0] ? <img src={l.photos[0].url} alt="" /> : <Building2 size={22} />}</span>
+          <span className="rl-pick-body"><strong>{l.title}</strong><small>{facts(l)} · {price(l.price, l.currency)}</small>{l.passportId && <small className="rl-cert">Pasportu var — yenisini yaradacaqsınız</small>}</span>
+        </button>)}
+        <button type="button" className="rl-pick new" onClick={() => setPicking(false)} data-testid="pick-new-property"><span className="rl-pick-cover"><Plus size={24} /></span><span className="rl-pick-body"><strong>Yeni mənzil əlavə et</strong><small>Elanı olmayan mənzil üçün</small></span></button>
+      </div>
+    </div>;
+  }
   return <form className="surface form-card rl-form rl-step-card" onSubmit={submit}>
-    <div className="form-section-title"><span>01</span><h2>Mənzil məlumatı</h2></div>
-    {(listings.data?.length ?? 0) > 0 && <Field label="Elandan doldur" name="pp-listing"><select value={draft.listingId} onChange={e => pick(e.target.value)}><option value="">— Elan seçin (istəyə görə) —</option>{listings.data!.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}</select></Field>}
+    <div className="form-section-title"><span>01</span><h2>Mənzil məlumatı</h2>{isNew && (listings.data?.length ?? 0) > 0 && <button type="button" className="sm-link-btn" style={{ marginLeft: 'auto' }} onClick={() => setPicking(true)}>Başqa elan seç</button>}</div>
+    {!isNew && (listings.data?.length ?? 0) > 0 && <Field label="Bağlı elan" name="pp-listing"><select value={draft.listingId} onChange={e => pick(e.target.value)}><option value="">— Elan seçin (istəyə görə) —</option>{listings.data!.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}</select></Field>}
     <Field label="Başlıq" name="pp-title" required value={draft.title} onChange={f('title')} placeholder="məs. Yasamalda tam təmirli 2 otaqlı mənzil" />
     <div className="field-grid">
       <Field label="Rayon" name="pp-district" required value={draft.district} onChange={f('district')} />
@@ -284,13 +299,29 @@ function StepTrust({ passport, draft, setDraft, onSaveOwner, onBack, onNext, ref
   };
   const contractorText = (w: PassportWork, url: string) => `Salam${w.contractorName ? `, ${w.contractorName}` : ''}! "${passport.title}" mənzilində gördüyünüz "${w.title}" işini Təhvil pasportunda təsdiqləməyinizi xahiş edirəm. Bir klik kifayətdir:\n${url}`;
   const ownerText = (url: string) => `Salam${draft.ownerName ? `, ${draft.ownerName}` : ''}! Mənzilinizin Təhvil pasportu hazırdır. Hər təmir mərhələsini fotolara baxıb qəbul edin — bu, alıcının güvənini artırır:\n${url}`;
+  const targetKey = `tehvil-passport-target-${passport.id}`;
+  const [target, setTargetState] = useState<Trust>(() => { try { return (localStorage.getItem(targetKey) as Trust) || (passport.ownerPhone ? 'handover' : 'contractor'); } catch { return 'handover'; } });
+  const setTarget = (t: Trust) => { setTargetState(t); try { localStorage.setItem(targetKey, t); } catch { /* ignore */ } };
+  const TARGETS: { k: Trust; title: string; text: string; icon: typeof KeyRound }[] = [
+    { k: 'basic', title: 'Əsas pasport', text: 'Məlumatları siz yükləmisiniz. Dərhal dərc edə bilərsiniz.', icon: KeyRound },
+    { k: 'contractor', title: 'Podratçı təsdiqli', text: 'Usta hər işi linklə təsdiqləyir.', icon: HardHat },
+    { k: 'handover', title: 'Təhvil təsdiqli', text: 'Ev sahibi hər mərhələni foto ilə qəbul edir. Ən güclü.', icon: ShieldCheck },
+  ];
   return <div className="rl-step-card rl-trust-step">
+    <div className="surface rl-panel">
+      <div className="section-head"><div><div className="eyebrow">04 · Etibar səviyyəsi</div><h2>Hansı səviyyəyə çatmaq istəyirsiniz?</h2></div></div>
+      <div className="rl-target-grid" role="radiogroup" aria-label="Hədəf etibar səviyyəsi">{TARGETS.map((t, i) => <button key={t.k} type="button" role="radio" aria-checked={target === t.k} className={`rl-target ${t.k} ${target === t.k ? 'on' : ''}`} onClick={() => setTarget(t.k)} data-testid={`target-${t.k}`}>
+        <span className="rl-target-icon"><t.icon size={18} /></span><b>{i + 1}. {t.title}</b><small>{t.text}</small>
+      </button>)}</div>
+      <p className="rl-hint">Səviyyə təsdiqlərlə avtomatik yüksəlir: alıcı yalnız həqiqətən alınmış təsdiqləri görür.</p>
+    </div>
+    {target === 'basic' && <div className="surface rl-panel rl-basic-note"><p><Check size={15} className="sm-ii" /> Əsas pasport hazırdır. Paylaşım addımında dərc edin — podratçı və ev sahibi təsdiqini sonra da əlavə edə bilərsiniz.</p></div>}
     <div className="surface rl-panel">
       <div className="section-head"><div><div className="eyebrow">04 · Etibar statusu</div><h2>Hazırkı səviyyə: {passport.trustLevel === 'handover' ? 'Təhvil təsdiqli' : passport.trustLevel === 'contractor' ? 'Podratçı təsdiqli' : 'Əsas pasport'}</h2></div><TrustBadge level={level} size="lg" /></div>
       <TrustLadder level={level} />
     </div>
 
-    <div className="surface rl-panel">
+    {target !== 'basic' && <div className="surface rl-panel">
       <div className="section-head"><div><div className="eyebrow"><HardHat size={12} className="sm-ii" /> Səviyyə 2</div><h3>Podratçı təsdiqi {allContractor && <Check size={16} className="sm-ii" />}</h3></div></div>
       <p className="rl-hint">Hər iş üçün podratçıya unikal link göndərin. O, “Bu işi mən görmüşəm” deyə təsdiqləyir — qeydiyyat tələb olunmur.</p>
       {passport.works.map(w => <div key={w.id} className="rl-confirm-row">
@@ -299,9 +330,9 @@ function StepTrust({ passport, draft, setDraft, onSaveOwner, onBack, onNext, ref
           ? <div className="rl-link-actions"><CopyButton text={links[w.id]} /><a className="button button-secondary sm-btn-sm rl-wa" href={waUrl(w.contractorPhone, contractorText(w, links[w.id]))} target="_blank" rel="noreferrer"><MessageCircle size={13} />WhatsApp</a></div>
           : <button type="button" className="button button-secondary sm-btn-sm" disabled={busy === w.id} onClick={() => { void contractorLink(w); }}>{busy === w.id ? <LoaderCircle className="spin" size={13} /> : <Link2 size={13} />}{w.contractorLinkActive ? 'Yeni link' : 'Təsdiq linki'}</button>}
       </div>)}
-    </div>
+    </div>}
 
-    <div className="surface rl-panel rl-owner-panel">
+    {target === 'handover' && <div className="surface rl-panel rl-owner-panel">
       <div className="section-head"><div><div className="eyebrow"><KeyRound size={12} className="sm-ii" /> Səviyyə 3 — ən yüksək</div><h3>Ev sahibinin foto ilə qəbulu {allOwner && <Check size={16} className="sm-ii" />}</h3></div></div>
       <p className="rl-hint">Ev sahibi hər işi “sonra” fotolarına baxaraq qəbul edir və ya düzəliş istəyir. Bütün işlər qəbul olunanda pasport “Təhvil təsdiqli” olur.</p>
       {missingAfter.length > 0 && <p className="rl-warn"><AlertTriangle size={14} />{missingAfter.length} işin “sonra” fotosu yoxdur — ev sahibi onları qəbul edə bilməyəcək.</p>}
@@ -315,7 +346,7 @@ function StepTrust({ passport, draft, setDraft, onSaveOwner, onBack, onNext, ref
           : <button type="button" className="button button-primary sm-btn-sm" disabled={busy === 'owner' || !passport.works.length} onClick={() => { void ownerLink(); }}>{busy === 'owner' ? <LoaderCircle className="spin" size={13} /> : <ClipboardCheck size={13} />}{passport.ownerLinkActive ? 'Yeni qəbul linki' : 'Qəbul linki yarat'}</button>}
       </div>
       <div className="rl-owner-status">{passport.works.map(w => <span key={w.id} className={w.handoverStatus}>{w.handoverStatus === 'accepted' ? <Check size={12} /> : w.handoverStatus === 'revision' ? <AlertTriangle size={12} /> : <span className="dot" />}{w.title}</span>)}</div>
-    </div>
+    </div>}
     <StepNav onBack={onBack} onNext={onNext} nextLabel="Paylaşıma keç" />
   </div>;
 }
@@ -353,7 +384,7 @@ function StepShare({ passport, onBack, refresh }: { passport: PropertyPassport; 
       <div className="surface rl-panel rl-share-qr">
         <CertifiedSeal level={passport.trustLevel as Trust} />
         <Qr value={qrUrl(passport.publicId)} size={188} label="QR kodla təmir tarixçəsini yoxlayın" />
-        <div className="rl-link-actions"><button type="button" className="button button-secondary sm-btn-sm" onClick={() => { void downloadQr(); }} disabled={!published}><Download size={13} />QR PNG</button><a className="button button-secondary sm-btn-sm" href={`${url}/print`} target="_blank" rel="noreferrer" aria-disabled={!published} onClick={e => { if (!published) e.preventDefault(); }}><FileDown size={13} />PDF yüklə</a></div>
+        <div className="rl-link-actions"><button type="button" className="button button-secondary sm-btn-sm" onClick={() => { void downloadQr(); }} disabled={!published}><Download size={13} />QR kodu yüklə</button><a className="button button-secondary sm-btn-sm" href={`${url}/print`} target="_blank" rel="noreferrer" aria-disabled={!published} onClick={e => { if (!published) e.preventDefault(); }}><FileDown size={13} />PDF yüklə</a></div>
       </div>
       <div className="surface rl-panel">
         <div className="eyebrow">Unikal link</div>
@@ -362,7 +393,7 @@ function StepShare({ passport, onBack, refresh }: { passport: PropertyPassport; 
         <pre className="rl-pre small">{text}</pre>
         <div className="rl-link-actions"><CopyButton text={text} label="Mətni kopyala" /><a className="button button-primary sm-btn-sm rl-wa" href={waUrl('', text)} target="_blank" rel="noreferrer"><MessageCircle size={13} />WhatsApp-da paylaş</a></div>
         <div className="eyebrow" style={{ marginTop: 16 }}>Instagram story</div>
-        <div className="rl-link-actions"><button type="button" className="button button-secondary sm-btn-sm" onClick={() => { void story(); }} disabled={storyBusy || !published}>{storyBusy ? <LoaderCircle className="spin" size={13} /> : <Instagram size={13} />}Story şəkli yarat (1080×1920)</button></div>
+        <div className="rl-link-actions"><button type="button" className="button button-secondary sm-btn-sm" onClick={() => { void story(); }} disabled={storyBusy || !published}>{storyBusy ? <LoaderCircle className="spin" size={13} /> : <Instagram size={13} />}Instagram story üçün şəkil yarat</button></div>
         {preview && <img className="rl-story-preview" src={preview} alt="Story şəkli" />}
       </div>
     </div>

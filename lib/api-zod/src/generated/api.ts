@@ -5879,7 +5879,8 @@ export const GetRealtorOverviewResponse = zod.object({
   "brandImpressions": zod.number().int(),
   "leads30d": zod.number().int(),
   "appointments30d": zod.number().int(),
-  "passportListingViews": zod.number().int()
+  "passportListingViews": zod.number().int(),
+  "newLeads": zod.number().int()
 }),
   "todayLeads": zod.array(zod.object({
   "id": zod.string(),
@@ -5970,7 +5971,19 @@ export const GetRealtorOverviewResponse = zod.object({
   "daily": zod.array(zod.object({
   "key": zod.string(),
   "count": zod.number().int()
-}))
+})),
+  "setup": zod.object({
+  "profileComplete": zod.boolean(),
+  "listings": zod.number().int(),
+  "leads": zod.number().int(),
+  "passports": zod.number().int(),
+  "publishedPassports": zod.number().int(),
+  "appointments": zod.number().int(),
+  "whatsappConnected": zod.boolean(),
+  "whatsappMode": zod.string(),
+  "passportViews": zod.number().int(),
+  "firstName": zod.string()
+})
 })
 
 
@@ -6304,6 +6317,44 @@ export const CreateRealtorListingResponse = zod.object({
   "leadCount": zod.number().int(),
   "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Read a Brokly.az, Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
+ */
+export const importRealtorListingBodyUrlMin = 8;
+export const importRealtorListingBodyUrlMax = 500;
+
+
+
+export const ImportRealtorListingBody = zod.object({
+  "url": zod.string().min(importRealtorListingBodyUrlMin).max(importRealtorListingBodyUrlMax)
+})
+
+export const ImportRealtorListingResponse = zod.object({
+  "url": zod.string(),
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "title": zod.string().nullable(),
+  "description": zod.string().nullable(),
+  "dealType": zod.string().nullable(),
+  "propertyKind": zod.string().nullable(),
+  "district": zod.string().nullable(),
+  "address": zod.string().nullable(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "floor": zod.string().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.string().nullable(),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "found": zod.array(zod.string()),
+  "warnings": zod.array(zod.string())
 })
 
 
