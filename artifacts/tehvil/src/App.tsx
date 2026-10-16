@@ -5,7 +5,7 @@ import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { Route, Switch, Link, Redirect, Router as WouterRouter, useLocation } from 'wouter';
 import {
-  ArrowDownLeft, ArrowRight, ArrowUpRight, Calculator, Check, CheckCircle2, ChevronDown, ChevronRight,
+  ArrowDownLeft, ArrowRight, ArrowUpRight, Building2, CalendarClock, Calculator, Megaphone, MessageCircle, QrCode, UserRound, Users, UsersRound, Check, CheckCircle2, ChevronDown, ChevronRight,
   ClipboardCheck, Clock3, DoorOpen, FileCheck2, FilePlus2, FileText, Home, ImagePlus,
   LayoutDashboard, ListChecks, LoaderCircle, LogOut, Menu, Plus, ShieldCheck,
   WalletCards, X,
@@ -42,12 +42,38 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import './index.css';
 import './smeta.css';
+import './realtor.css';
 
 const SmetaDashboardPage = lazy(() => import('@/pages/smeta/dashboard-page').then(m => ({ default: m.SmetaDashboardPage })));
 const NewEstimatePage = lazy(() => import('@/pages/smeta/new-estimate-page').then(m => ({ default: m.NewEstimatePage })));
 const EstimateDetailPage = lazy(() => import('@/pages/smeta/estimate-page').then(m => ({ default: m.EstimateDetailPage })));
 const PublicEstimatePage = lazy(() => import('@/pages/smeta/public-estimate-page').then(m => ({ default: m.PublicEstimatePage })));
 const EstimatePrintPage = lazy(() => import('@/pages/smeta/print-page').then(m => ({ default: m.EstimatePrintPage })));
+const RealtorOverviewPage = lazy(() => import('@/pages/realtor/overview-page').then(m => ({ default: m.RealtorOverviewPage })));
+const RealtorListingsPage = lazy(() => import('@/pages/realtor/listings-page').then(m => ({ default: m.RealtorListingsPage })));
+const RealtorLeadsPage = lazy(() => import('@/pages/realtor/leads-page').then(m => ({ default: m.RealtorLeadsPage })));
+const RealtorAppointmentsPage = lazy(() => import('@/pages/realtor/appointments-page').then(m => ({ default: m.RealtorAppointmentsPage })));
+const RealtorPassportsPage = lazy(() => import('@/pages/realtor/passports-page').then(m => ({ default: m.RealtorPassportsPage })));
+const PassportWizardPage = lazy(() => import('@/pages/realtor/passport-wizard-page').then(m => ({ default: m.PassportWizardPage })));
+const RealtorWhatsappPage = lazy(() => import('@/pages/realtor/whatsapp-page').then(m => ({ default: m.RealtorWhatsappPage })));
+const RealtorProfilePage = lazy(() => import('@/pages/realtor/profile-page').then(m => ({ default: m.RealtorProfilePage })));
+const RealtorTeamPage = lazy(() => import('@/pages/realtor/team-page').then(m => ({ default: m.RealtorTeamPage })));
+const PublicPassportPage = lazy(() => import('@/pages/realtor/public-passport-page').then(m => ({ default: m.PublicPassportPage })));
+const PrintPassportPage = lazy(() => import('@/pages/realtor/public-passport-page').then(m => ({ default: m.PrintPassportPage })));
+const ContractorConfirmPage = lazy(() => import('@/pages/realtor/confirm-pages').then(m => ({ default: m.ContractorConfirmPage })));
+const OwnerConfirmPage = lazy(() => import('@/pages/realtor/confirm-pages').then(m => ({ default: m.OwnerConfirmPage })));
+
+/** Realtor panel sections (the brief's sidebar). Labels are Azerbaijani, like the AI Smeta module. */
+const REALTOR_NAV = [
+  { href: '/realtor', key: 'overview', label: 'İcmal', icon: LayoutDashboard },
+  { href: '/realtor/listings', key: 'listings', label: 'Elanlarım', icon: Megaphone },
+  { href: '/realtor/leads', key: 'leads', label: 'Müştərilər / Leadlər', icon: Users },
+  { href: '/realtor/appointments', key: 'appointments', label: 'Görüşlər', icon: CalendarClock },
+  { href: '/realtor/passports', key: 'passports', label: 'Təhvil Sertifikatlı Mənzil', icon: QrCode },
+  { href: '/realtor/whatsapp', key: 'whatsapp', label: 'WhatsApp avtomatlaşdırma', icon: MessageCircle },
+  { href: '/realtor/profile', key: 'profile', label: 'Realtor profili', icon: UserRound },
+  { href: '/realtor/team', key: 'team', label: 'Komanda', icon: UsersRound },
+] as const;
 
 const queryClient = new QueryClient({ mutationCache: new MutationCache({ onError: e => emitFeedback(errorToMsg(e)) }), defaultOptions: { queries: { retry: 1, staleTime: 20_000, refetchOnWindowFocus: true } } });
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -72,12 +98,13 @@ function Brand({ inverse = false }: { inverse?: boolean }) {
   return <Link href="/" className={`brand ${inverse ? 'inverse' : ''}`} data-testid="link-brand"><span className="brand-mark">t.</span><span>Təhvil</span></Link>;
 }
 type Crumb = { label: string; href?: string };
-function AppShell({ children, project, projectId, active, crumbs, lang, change, t }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string }) {
+function AppShell({ children, project, projectId, active, crumbs, lang, change, t, realtorSection }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string; realtorSection?: string }) {
   const [open, setOpen] = useState(false);
   const { signOut } = useClerk(); const { user } = useUser();
   const nav: { href: string; icon: typeof Home; key: TKey; badge?: boolean }[] = [
     { href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' as const },
     { href: '/smeta', icon: Calculator, key: 'smeta' as const, badge: true },
+    { href: '/realtor', icon: Building2, key: 'realtor' as const, badge: true },
     ...(projectId ? [
       { href: `/projects/${projectId}`, icon: Home, key: 'projects' as const },
       { href: `/projects/${projectId}/scope`, icon: ListChecks, key: 'scope' as const },
@@ -93,6 +120,7 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
       {project && <div className="project-switcher"><span className="project-symbol">⌂</span><div><small>{t('projects')}</small><strong>{project.name}</strong></div><ChevronDown size={14}/></div>}
       <div className="sidebar-label">{projectId ? project?.name || t('projects') : t('dashboard')}</div>
       <nav className="side-nav">{nav.map(({ href, icon: Icon, key, badge }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${active === key || (!active && key === 'dashboard') ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{t(key)}</span>{badge && <span className="nav-badge">{t('newBadge')}</span>}{active === key && <span className="nav-active-dot"/>}</Link>)}</nav>
+      {realtorSection && <><div className="sidebar-label">{t('realtor')}</div><nav className="side-nav rl-side-nav">{REALTOR_NAV.map(({ href, key, label, icon: Icon }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${realtorSection === key ? 'selected' : ''}`} data-testid={`nav-realtor-${key}`}><Icon size={17}/><span>{label}</span>{realtorSection === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       <div className="sidebar-bottom"><div className="privacy-note"><ShieldCheck size={17}/><p>{t('disclaimer')}</p></div><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
     </aside>
     <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs"><Link href="/dashboard">{t('dashboard')}</Link>{project && <><ChevronRight size={13}/><span>{project.name}</span></>}{crumbs?.map((c, i) => <Fragment key={i}><ChevronRight size={13}/>{c.href ? <Link href={c.href}>{c.label}</Link> : <span>{c.label}</span>}</Fragment>)}</div><div className="topbar-tools"><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
@@ -109,6 +137,7 @@ function Landing({ lang, change, t }: { lang: Lang; change: (v: Lang)=>void; t: 
       <div className="hero-art appear-delay"><div className="art-topline"><span><i/> {t('artTop')}</span><span>01 — 03</span></div><div className="blueprint"><div className="blueprint-label">{lang==='az'?'BAKI · YAŞAYIŞ / 02':lang==='ru'?'БАКУ · ЖИЛОЕ / 02':'BAKU · RESIDENTIAL / 02'}</div><div className="blueprint-plan"><div className="plan-room room-living"><span>{t('planLiving')}</span><small>01</small></div><div className="plan-room room-kitchen"><span>{t('planKitchen')}</span><small>02</small></div><div className="plan-room room-bed"><span>{t('planBed')}</span><small>03</small></div><div className="plan-room room-bath"><span>{t('planBath')}</span><small>04</small></div><div className="plan-door"/></div><div className="plan-dim">6.40 m <span>3.80 m</span></div><div className="plan-status"><div className="status-check"><Check size={15}/></div><div><strong>{t('planApproved')}</strong><small>{t('planParties')}</small></div><div className="status-mini">{t('planRecorded')}</div></div></div><div className="art-foot"><span>{t('artOne')}</span><span>40°22' N / 49°50' E</span></div></div>
     </section><div className="trust-strip"><div className="wrap trust-items"><span>{t('trust')}</span><i/><span>{t('clarity')}</span><i/><span>{t('history')}</span></div></div>
     <section className="workflow wrap" id="how"><div className="workflow-intro"><div className="eyebrow">{t('eyCertain')}</div><h2 className="font-display">{t('workflow')}</h2><p>{t('workflowLead')}</p></div><div className="workflow-list">{stages.map((stage, i) => { const Icons=[FileCheck2, ArrowRight, ImagePlus]; const Icon=Icons[i]; return <article className="workflow-row" key={stage}><div className="workflow-number">0{i+1}</div><div className="workflow-icon"><Icon size={20}/></div><div><h3>{stage}</h3><p>{descriptions[i]}</p></div><ChevronRight className="workflow-chevron" size={18}/></article>; })}</div></section>
+    <section className="rl-landing wrap" id="realtor"><div className="rl-landing-copy"><div className="eyebrow"><span className="eyebrow-dot"/>{lang==='az'?'Realtorlar üçün':lang==='ru'?'Для риелторов':'For realtors'}</div><h2 className="font-display">{lang==='az'?'Realtor üçün satış və etibar platforması':lang==='ru'?'Платформа продаж и доверия для риелторов':'A sales and trust platform for realtors'}</h2><p>{lang==='az'?'Siz leadləri, elanları və görüşləri Təhvil.az-da idarə edirsiniz; hər mənzilinizi QR kodlu, foto sübutlu və ev sahibi təsdiqli “Təhvil Sertifikatlı Mənzil” kimi təqdim edirsiniz. Rəqibiniz yalnız satış prosesini idarə edir, siz həm satışı idarə edir, həm də alıcının güvənini qazanırsınız.':lang==='ru'?'Вы ведёте лиды, объявления и показы в Təhvil.az и представляете каждую квартиру как «Квартиру с сертификатом Təhvil» — с QR-кодом, фотодоказательствами и подтверждением владельца. Конкурент управляет только продажей, вы — продажей и доверием покупателя.':'You manage leads, listings and viewings in Təhvil.az and present every apartment as a “Təhvil-certified apartment” with a QR code, photo evidence and owner confirmation. Competitors manage the sale; you manage the sale and earn the buyer\'s trust.'}</p><Link href="/sign-up?realtor=1" className="button button-primary">{lang==='az'?'Realtor kimi başla':lang==='ru'?'Начать как риелтор':'Start as a realtor'}<ArrowRight size={16}/></Link></div><ul className="rl-landing-list"><li><Users size={18}/><span><b>{lang==='az'?'Lead və CRM':lang==='ru'?'Лиды и CRM':'Leads and CRM'}</b>{lang==='az'?'WhatsApp, Instagram, Facebook, sayt, Brokly — hamısı bir paneldə.':lang==='ru'?'WhatsApp, Instagram, Facebook, сайт, Brokly — в одной панели.':'WhatsApp, Instagram, Facebook, website, Brokly — in one panel.'}</span></li><li><MessageCircle size={18}/><span><b>{lang==='az'?'WhatsApp avtomatlaşdırma':lang==='ru'?'Автоматизация WhatsApp':'WhatsApp automation'}</b>{lang==='az'?'Avtomatik cavab, filtr sualları, uyğun elan və görüş təklifi.':lang==='ru'?'Автоответ, уточняющие вопросы, подбор объявлений и время показа.':'Auto-reply, qualifying questions, matching listings and viewing slots.'}</span></li><li><QrCode size={18}/><span><b>{lang==='az'?'Təhvil Sertifikatlı Mənzil':lang==='ru'?'Квартира с сертификатом Təhvil':'Təhvil-certified apartment'}</b>{lang==='az'?'QR kodla təmir tarixçəsini yoxlayın — foto sübut, podratçı və ev sahibi təsdiqi.':lang==='ru'?'История ремонта по QR-коду — фото, подтверждение подрядчика и владельца.':'Verify renovation history by QR — photos, contractor and owner confirmation.'}</span></li></ul></section>
     <section className="closing wrap"><div className="closing-inner"><div className="closing-mark">t.</div><div><div className="eyebrow">{t('tagline')}</div><h2 className="font-display">{t('start')}</h2><p>{t('lead')}</p></div><Link href="/sign-up" className="button button-primary">{t('createFirst')}<ArrowRight size={16}/></Link></div></section>
     <Partners lang={lang}/>
     <footer className="landing-footer wrap"><Brand/><p>{t('disclaimer')}</p><LanguagePicker lang={lang} change={change}/><nav className="landing-legal" aria-label="Bələdçilər"><a href="/temir-tehvil-akti.html">Təhvil-təslim aktı</a><a href="/temir-islerinin-qebulu.html">Təmir işlərinin qəbulu</a><a href="/podratci-ile-razilasma.html">Podratçı ilə razılaşma</a><a href="/temir-elave-isler.html">Əlavə işlər və dəyişikliklər</a></nav><nav className="landing-legal"><a href="/privacy.html">{lang==='az'?'Məxfilik siyasəti':lang==='ru'?'Политика конфиденциальности':'Privacy policy'}</a><a href="/terms.html">{lang==='az'?'İstifadə şərtləri':lang==='ru'?'Условия использования':'Terms of use'}</a></nav><address className="landing-contact"><a href="mailto:support@tehvil.az">support@tehvil.az</a><a href="tel:+994503066626">+994 50 306 66 26</a><a href="https://wa.me/994503066626" target="_blank" rel="noopener noreferrer">WhatsApp</a><span>Bakı, Səbail rayonu, Badamdar qəsəbəsi, 26-cı küçə, 20</span></address></footer>
@@ -137,8 +166,8 @@ function DashboardContent({ lang, change, t }: { lang: Lang; change:(v:Lang)=>vo
   if (isLoading) return <AppShell lang={lang} change={change} t={t}><Loading t={t}/></AppShell>;
   return <AppShell lang={lang} change={change} t={t}><PageHeading eyebrow={t('eyWorkspace')} title={t('welcome')} description={t('pending')} action={<Link href="/projects/new" className="button button-primary"><Plus size={17}/>{t('newProject')}</Link>}/>
     {isError ? <ErrorNotice t={t} retry={() => refetch()}/> : projects?.length ? <div className="dashboard-grid"><section className="project-list-area"><div className="section-head"><div><div className="eyebrow">{t('active')}</div><h2>{t('projects')}</h2></div><span className="count-chip">{projects.length.toString().padStart(2,'0')}</span></div>{projects.map((project, i) => <ProjectCard key={project.id} project={project} lang={lang} t={t} index={i}/>)}</section>
-      <aside className="dashboard-aside"><div className="aside-panel"><div className="eyebrow">{t('actions')}</div><h3>{t('pending')}</h3>{projects.slice(0,2).map((p, i) => <Link href={`/projects/${p.id}`} className="action-link" key={p.id}><span className={`action-icon action-icon-${i}`}><ClipboardCheck size={16}/></span><span><strong>{p.name}</strong><small>{roleLabel(p.participantRole,t)} · {p.city}</small></span><ArrowUpRight size={14}/></Link>)}<div className="aside-foot"><ShieldCheck size={15}/>{t('disclaimer')}</div></div><div className="aside-stat"><span className="eyebrow">{t('history')}</span><strong>{projects.length} <small>{t('projects').toLowerCase()}</small></strong><span>{t('trust')}</span></div><Link href="/smeta" className="passport-promo" data-testid="link-smeta-promo"><Calculator size={19}/><div><strong>{t('smeta')}</strong><small>{t('smetaPromo')}</small></div><ArrowUpRight size={15}/></Link></aside>
-    </div> : <div className="empty-projects"><div className="empty-illustration"><div className="empty-window"><div/><div/><div/></div><DoorOpen size={36}/></div><span className="eyebrow">{t('active')}</span><h2 className="font-display">{t('noProjects')}</h2><p>{t('noProjectsText')}</p><Link href="/projects/new" className="button button-primary"><Plus size={17}/>{t('createFirst')}</Link></div>}
+      <aside className="dashboard-aside"><div className="aside-panel"><div className="eyebrow">{t('actions')}</div><h3>{t('pending')}</h3>{projects.slice(0,2).map((p, i) => <Link href={`/projects/${p.id}`} className="action-link" key={p.id}><span className={`action-icon action-icon-${i}`}><ClipboardCheck size={16}/></span><span><strong>{p.name}</strong><small>{roleLabel(p.participantRole,t)} · {p.city}</small></span><ArrowUpRight size={14}/></Link>)}<div className="aside-foot"><ShieldCheck size={15}/>{t('disclaimer')}</div></div><div className="aside-stat"><span className="eyebrow">{t('history')}</span><strong>{projects.length} <small>{t('projects').toLowerCase()}</small></strong><span>{t('trust')}</span></div><Link href="/smeta" className="passport-promo" data-testid="link-smeta-promo"><Calculator size={19}/><div><strong>{t('smeta')}</strong><small>{t('smetaPromo')}</small></div><ArrowUpRight size={15}/></Link><Link href="/realtor" className="passport-promo" data-testid="link-realtor-promo"><Building2 size={19}/><div><strong>{t('realtor')}</strong><small>{t('realtorPromo')}</small></div><ArrowUpRight size={15}/></Link></aside>
+    </div> : <div className="empty-projects"><div className="empty-illustration"><div className="empty-window"><div/><div/><div/></div><DoorOpen size={36}/></div><span className="eyebrow">{t('active')}</span><h2 className="font-display">{t('noProjects')}</h2><p>{t('noProjectsText')}</p><Link href="/projects/new" className="button button-primary"><Plus size={17}/>{t('createFirst')}</Link><Link href="/realtor" className="text-link rl-empty-realtor"><Building2 size={15}/>{t('realtor')}<ArrowUpRight size={14}/></Link></div>}
   </AppShell>;
 }
 function ProjectCard({ project, lang, t, index }: { project: Project; lang: Lang; t:(k:TKey)=>string; index:number }) {
@@ -238,6 +267,11 @@ function SmetaDetailRoute({ projectId, ...shell }: ShellProps & { projectId: str
   const project = useSmetaProject(projectId);
   return <SmetaShell {...shell} crumbs={project ? [{ label: project.name }] : []}><EstimateDetailPage projectId={projectId}/></SmetaShell>;
 }
+function RealtorShell({ section, crumbs, children, ...shell }: ShellProps & { section: string; crumbs?: Crumb[]; children: ReactNode }) {
+  const label = REALTOR_NAV.find(n => n.key === section)?.label;
+  return <Protected t={shell.t}><AppShell {...shell} active="realtor" realtorSection={section} crumbs={[{ label: shell.t('realtor'), href: section === 'overview' && !crumbs?.length ? undefined : '/realtor' }, ...(section !== 'overview' && label ? [{ label, href: crumbs?.length ? REALTOR_NAV.find(n => n.key === section)?.href : undefined }] : []), ...(crumbs || [])]}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
+}
+function PublicSuspense({ children, t }: { children: ReactNode; t: (k: TKey) => string }) { return <Suspense fallback={<Loading t={t}/>}>{children}</Suspense>; }
 function InvitationPage({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) {
   const accept=useAcceptInvitation();const [,setLocation]=useLocation();const token=new URLSearchParams(window.location.search).get('token')||'';const [typed,setTyped]=useState(token);
   return <Protected t={t}><AppShell lang={lang} change={change} t={t}><div className="invite-page"><div className="invite-mark"><FileCheck2 size={25}/></div><div className="eyebrow">{t('eyAccess')}</div><h1 className="font-display">{t('acceptInvite')}</h1><p>{t('trust')}</p><form onSubmit={e=>{e.preventDefault();accept.mutate({data:{token:typed}},{onSuccess:()=>{setLocation('/dashboard');}});}}><Field label={t('invitationToken')} name="invite-token" required value={typed} onChange={setTyped}/><Button type="submit" disabled={accept.isPending}>{t('accept')}<ArrowRight size={15}/></Button></form>{accept.isError&&<p className="form-error">{t('error')}</p>}</div></AppShell></Protected>;
@@ -253,8 +287,9 @@ const clerkCopy: Record<Lang, Record<string, unknown>> = {
 };
 function authTag() { const l=(localStorage.getItem('tehvil-language') as Lang)||'az'; return l==='ru'?'БАКУ · ПРОСТРАНСТВО ПРОЕКТА':l==='en'?'BAKU · PROJECT SPACE':'BAKI · LAYİHƏ MƏKANI'; }
 function authCopy() { return copy[((localStorage.getItem('tehvil-language') as Lang) || 'az')]; }
-function SignInPage() { const c=authCopy(); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`}/></div></div>; }
-function SignUpPage() { const c=authCopy(); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`}/></div></div>; }
+function SignInPage() { const c=authCopy(); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} {...realtorRedirect()}/></div></div>; }
+function realtorRedirect() { return new URLSearchParams(window.location.search).get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {}; }
+function SignUpPage() { const c=authCopy(); const realtor=!!realtorRedirect().forceRedirectUrl; return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${realtor?'?realtor=1':''}`} {...realtorRedirect()}/></div></div>; }
 function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/dashboard"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
 function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   const [msg, setMsg] = useState<FeedbackMsg | null>(null);
@@ -279,6 +314,10 @@ function ClerkRoutes() {
     routerPush={to=>setLocation(stripBase(to))} routerReplace={to=>setLocation(stripBase(to),{replace:true})}>
     <QueryClientProvider client={queryClient}><ClerkCacheInvalidator/><Switch>
       <Route path="/share/:token" component={()=> <SharedPassportPage token={window.location.pathname.split('/').filter(Boolean).pop()||''} lang={lang} change={changeLang} t={t}/>}/>
+      <Route path="/p/confirm/contractor/:token">{params => <PublicSuspense t={t}><ContractorConfirmPage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/p/confirm/owner/:token">{params => <PublicSuspense t={t}><OwnerConfirmPage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/p/:publicId/print">{params => <PublicSuspense t={t}><PrintPassportPage publicId={params.publicId}/></PublicSuspense>}</Route>
+      <Route path="/p/:publicId">{params => <PublicSuspense t={t}><PublicPassportPage publicId={params.publicId}/></PublicSuspense>}</Route>
       <Route path="/" component={()=> <HomeRedirect lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/sign-in/*?" component={SignInPage}/><Route path="/sign-up/*?" component={SignUpPage}/>
       <Route path="/dashboard" component={()=> <DashboardPage lang={lang} change={changeLang} t={t}/>}/>
@@ -295,6 +334,16 @@ function ClerkRoutes() {
       <Route path="/smeta">{() => <SmetaShell lang={lang} change={changeLang} t={t}><SmetaDashboardPage/></SmetaShell>}</Route>
       <Route path="/smeta/new">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Yeni smeta' }]}><NewEstimatePage/></SmetaShell>}</Route>
       <Route path="/smeta/:projectId/print">{params => <Protected t={t}><Suspense fallback={<Loading t={t}/>}><EstimatePrintPage projectId={params.projectId}/></Suspense></Protected>}</Route>
+      <Route path="/realtor">{() => <RealtorShell section="overview" lang={lang} change={changeLang} t={t}><RealtorOverviewPage/></RealtorShell>}</Route>
+      <Route path="/realtor/listings">{() => <RealtorShell section="listings" lang={lang} change={changeLang} t={t}><RealtorListingsPage/></RealtorShell>}</Route>
+      <Route path="/realtor/leads">{() => <RealtorShell section="leads" lang={lang} change={changeLang} t={t}><RealtorLeadsPage/></RealtorShell>}</Route>
+      <Route path="/realtor/appointments">{() => <RealtorShell section="appointments" lang={lang} change={changeLang} t={t}><RealtorAppointmentsPage/></RealtorShell>}</Route>
+      <Route path="/realtor/passports">{() => <RealtorShell section="passports" lang={lang} change={changeLang} t={t}><RealtorPassportsPage/></RealtorShell>}</Route>
+      <Route path="/realtor/passports/new">{() => <RealtorShell section="passports" crumbs={[{ label: 'Yeni pasport' }]} lang={lang} change={changeLang} t={t}><PassportWizardPage/></RealtorShell>}</Route>
+      <Route path="/realtor/passports/:passportId">{params => <RealtorShell section="passports" crumbs={[{ label: 'Pasport' }]} lang={lang} change={changeLang} t={t}><PassportWizardPage passportId={params.passportId}/></RealtorShell>}</Route>
+      <Route path="/realtor/whatsapp">{() => <RealtorShell section="whatsapp" lang={lang} change={changeLang} t={t}><RealtorWhatsappPage/></RealtorShell>}</Route>
+      <Route path="/realtor/profile">{() => <RealtorShell section="profile" lang={lang} change={changeLang} t={t}><RealtorProfilePage/></RealtorShell>}</Route>
+      <Route path="/realtor/team">{() => <RealtorShell section="team" lang={lang} change={changeLang} t={t}><RealtorTeamPage/></RealtorShell>}</Route>
       <Route path="/smeta/:projectId">{params => <SmetaDetailRoute projectId={params.projectId} lang={lang} change={changeLang} t={t}/>}</Route>
       <Route component={NotFound}/>
     </Switch><Toaster/><FeedbackBanner t={t}/></QueryClientProvider>

@@ -4,6 +4,7 @@ import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
 import pinoHttp from "pino-http";
 import router from "./routes";
+import whatsappWebhookRouter from "./routes/whatsappWebhook";
 import { logger } from "./lib/logger";
 import {
   CLERK_PROXY_PATH,
@@ -21,7 +22,7 @@ app.use(
         return {
           id: req.id,
           method: req.method,
-          url: req.url?.split("?")[0]?.replace(/(\/shared-(?:passports|estimates)\/)[^/]+/, "$1[redacted]"),
+          url: req.url?.split("?")[0]?.replace(/(\/shared-(?:passports|estimates)\/|\/passport-confirm\/(?:contractor|owner)\/)[^/]+/, "$1[redacted]"),
         };
       },
       res(res) {
@@ -35,6 +36,8 @@ app.use(
 app.set("trust proxy", 1);
 if (process.env.CLERK_AUTH_MODE !== "external") app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 app.use(cors({ credentials: true, origin: process.env.PUBLIC_APP_URL || true }));
+// Raw body for signature verification; must run before the JSON parser.
+app.use("/api/whatsapp/webhook", whatsappWebhookRouter);
 // Estimate saves send the whole project document.
 app.use("/api/smeta", express.json({ limit: "2mb" }));
 app.use(express.json());

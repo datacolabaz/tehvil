@@ -15,6 +15,11 @@ Mobile-first renovation project records for homeowners and contractors, in Azerb
 - Printable renovation passport (use the browser's **Save as PDF**)
 - Expiring, revocable read-only summary links; financial information is opt-in
 - Read-only project archiving
+- **Realtor panel** (`/realtor`): overview, listings with portal links, lead CRM (board/list, next action and reminders), appointment calendar, agency team, realtor profile and branding
+- **“Təhvil Sertifikatlı Mənzil” passport**: 5-step wizard, three trust levels (basic → contractor-confirmed → homeowner photo-accepted), per-work contractor links and a homeowner acceptance link (regenerating a link replaces the old one), public page `/p/{id}` without sign-in, QR code, printable PDF, WhatsApp share text and Instagram story image
+- **WhatsApp automation**: one-tap prepared messages, or WhatsApp Cloud API with a qualifying bot (deal type, district, budget, rooms, timeframe → matching listings → viewing slots → booked appointment), follow-ups and viewing reminders
+
+See [docs/REALTOR.md](docs/REALTOR.md) for the realtor module.
 
 **Not a marketplace, payment processor, escrow service, legal adviser or legal e-signature system.** In-app approvals are project audit records. Files in public passport summaries are intentionally omitted; evidence remains available only to authenticated project participants.
 
@@ -55,6 +60,7 @@ Required configuration names, **never values in source control**:
 - `VITE_CLERK_PROXY_URL` when the managed proxy is configured
 - `DEFAULT_OBJECT_STORAGE_BUCKET_ID`, `PRIVATE_OBJECT_DIR`, `PUBLIC_OBJECT_SEARCH_PATHS`
 - `PORT` for each service; `BASE_PATH` for the web artifact
+- Optional, realtor WhatsApp automation: `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_TOKEN_KEY`
 
 Apply development schema changes:
 

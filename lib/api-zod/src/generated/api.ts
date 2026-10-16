@@ -5861,3 +5861,2585 @@ export const DecideSharedChangeOrderResponse = zod.object({
 })
 
 
+/**
+ * @summary Realtor dashboard summary (İcmal)
+ */
+export const GetRealtorOverviewResponse = zod.object({
+  "profileExists": zod.boolean(),
+  "stats": zod.object({
+  "newLeadsToday": zod.number().int(),
+  "waitingLeads": zod.number().int(),
+  "upcomingAppointments": zod.number().int(),
+  "activeListings": zod.number().int(),
+  "certifiedListings": zod.number().int(),
+  "publishedPassports": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "passportViews": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "brandImpressions": zod.number().int(),
+  "leads30d": zod.number().int(),
+  "appointments30d": zod.number().int(),
+  "passportListingViews": zod.number().int()
+}),
+  "todayLeads": zod.array(zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
+  "dealType": zod.string().nullable(),
+  "district": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "budgetMin": zod.number().nullable(),
+  "budgetMax": zod.number().nullable(),
+  "timeframe": zod.string(),
+  "notes": zod.string(),
+  "nextAction": zod.string(),
+  "nextActionAt": zod.string().datetime({"offset":true}).nullable(),
+  "lastContactAt": zod.string().datetime({"offset":true}).nullable(),
+  "readyForMeeting": zod.boolean(),
+  "botStep": zod.string().nullable(),
+  "overdue": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})),
+  "dueLeads": zod.array(zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
+  "dealType": zod.string().nullable(),
+  "district": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "budgetMin": zod.number().nullable(),
+  "budgetMax": zod.number().nullable(),
+  "timeframe": zod.string(),
+  "notes": zod.string(),
+  "nextAction": zod.string(),
+  "nextActionAt": zod.string().datetime({"offset":true}).nullable(),
+  "lastContactAt": zod.string().datetime({"offset":true}).nullable(),
+  "readyForMeeting": zod.boolean(),
+  "botStep": zod.string().nullable(),
+  "overdue": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})),
+  "upcoming": zod.array(zod.object({
+  "id": zod.string(),
+  "leadId": zod.string().nullable(),
+  "leadName": zod.string().nullable(),
+  "leadPhone": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "listingAddress": zod.string().nullable(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "startsAt": zod.string().datetime({"offset":true}),
+  "durationMin": zod.number().int(),
+  "status": zod.enum(['planned', 'done', 'cancelled', 'rescheduled']),
+  "notes": zod.string(),
+  "reminderSentAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notifications": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "href": zod.string(),
+  "read": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "funnel": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number().int()
+})),
+  "sources": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number().int()
+})),
+  "daily": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.number().int()
+}))
+})
+
+
+export const GetRealtorProfileResponse = zod.object({
+  "exists": zod.boolean(),
+  "fullName": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "bio": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+})
+
+
+export const updateRealtorProfileBodyFullNameMin = 2;
+export const updateRealtorProfileBodyFullNameMax = 120;
+
+export const updateRealtorProfileBodyAgencyMax = 120;
+
+export const updateRealtorProfileBodyPhoneMax = 32;
+
+export const updateRealtorProfileBodyWhatsappMax = 32;
+
+export const updateRealtorProfileBodyInstagramMax = 120;
+
+export const updateRealtorProfileBodyBioMax = 1000;
+
+
+
+export const UpdateRealtorProfileBody = zod.object({
+  "fullName": zod.string().min(updateRealtorProfileBodyFullNameMin).max(updateRealtorProfileBodyFullNameMax),
+  "agency": zod.string().max(updateRealtorProfileBodyAgencyMax),
+  "phone": zod.string().max(updateRealtorProfileBodyPhoneMax),
+  "whatsapp": zod.string().max(updateRealtorProfileBodyWhatsappMax),
+  "instagram": zod.string().max(updateRealtorProfileBodyInstagramMax),
+  "bio": zod.string().max(updateRealtorProfileBodyBioMax),
+  "photoMediaId": zod.string().uuid().nullish(),
+  "logoMediaId": zod.string().uuid().nullish()
+})
+
+export const UpdateRealtorProfileResponse = zod.object({
+  "exists": zod.boolean(),
+  "fullName": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "bio": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+})
+
+
+/**
+ * @summary Register freshly uploaded photos or logos for use in listings, passports and the profile
+ */
+
+export const attachRealtorMediaBodyFilesItemOriginalNameMax = 255;
+
+export const attachRealtorMediaBodyFilesItemSizeMax = 52428800;
+
+export const attachRealtorMediaBodyFilesMax = 20;
+
+
+
+export const AttachRealtorMediaBody = zod.object({
+  "files": zod.array(zod.object({
+  "objectPath": zod.string().min(1),
+  "originalName": zod.string().min(1).max(attachRealtorMediaBodyFilesItemOriginalNameMax),
+  "contentType": zod.string(),
+  "size": zod.number().int().min(1).max(attachRealtorMediaBodyFilesItemSizeMax)
+})).min(1).max(attachRealtorMediaBodyFilesMax)
+})
+
+export const AttachRealtorMediaResponseItem = zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})
+export const AttachRealtorMediaResponse = zod.array(AttachRealtorMediaResponseItem)
+
+
+/**
+ * @summary Serve a realtor photo to its owner, or publicly when it appears in a published passport
+ */
+export const GetRealtorMediaParams = zod.object({
+  "mediaId": zod.coerce.string().uuid()
+})
+
+export const GetRealtorMediaResponse = zod.unknown()
+
+
+export const ListRealtorAgentsResponseItem = zod.object({
+  "id": zod.string(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "active": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "stats": zod.object({
+  "leads": zod.number().int(),
+  "activeLeads": zod.number().int(),
+  "deals": zod.number().int(),
+  "appointments": zod.number().int(),
+  "listings": zod.number().int()
+})
+})
+export const ListRealtorAgentsResponse = zod.array(ListRealtorAgentsResponseItem)
+
+
+export const createRealtorAgentBodyFullNameMin = 2;
+export const createRealtorAgentBodyFullNameMax = 120;
+
+export const createRealtorAgentBodyPhoneMax = 32;
+
+export const createRealtorAgentBodyEmailMax = 254;
+
+
+
+export const CreateRealtorAgentBody = zod.object({
+  "fullName": zod.string().min(createRealtorAgentBodyFullNameMin).max(createRealtorAgentBodyFullNameMax),
+  "phone": zod.string().max(createRealtorAgentBodyPhoneMax).optional(),
+  "email": zod.string().max(createRealtorAgentBodyEmailMax).optional(),
+  "active": zod.boolean().optional()
+})
+
+export const CreateRealtorAgentResponse = zod.object({
+  "id": zod.string(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "active": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "stats": zod.object({
+  "leads": zod.number().int(),
+  "activeLeads": zod.number().int(),
+  "deals": zod.number().int(),
+  "appointments": zod.number().int(),
+  "listings": zod.number().int()
+})
+})
+
+
+export const UpdateRealtorAgentParams = zod.object({
+  "agentId": zod.coerce.string().uuid()
+})
+
+export const updateRealtorAgentBodyFullNameMin = 2;
+export const updateRealtorAgentBodyFullNameMax = 120;
+
+export const updateRealtorAgentBodyPhoneMax = 32;
+
+export const updateRealtorAgentBodyEmailMax = 254;
+
+
+
+export const UpdateRealtorAgentBody = zod.object({
+  "fullName": zod.string().min(updateRealtorAgentBodyFullNameMin).max(updateRealtorAgentBodyFullNameMax),
+  "phone": zod.string().max(updateRealtorAgentBodyPhoneMax).optional(),
+  "email": zod.string().max(updateRealtorAgentBodyEmailMax).optional(),
+  "active": zod.boolean().optional()
+})
+
+export const UpdateRealtorAgentResponse = zod.object({
+  "id": zod.string(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "email": zod.string(),
+  "active": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "stats": zod.object({
+  "leads": zod.number().int(),
+  "activeLeads": zod.number().int(),
+  "deals": zod.number().int(),
+  "appointments": zod.number().int(),
+  "listings": zod.number().int()
+})
+})
+
+
+export const DeleteRealtorAgentParams = zod.object({
+  "agentId": zod.coerce.string().uuid()
+})
+
+export const DeleteRealtorAgentResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+export const listRealtorListingsResponseExternalLinksItemUrlMin = 8;
+export const listRealtorListingsResponseExternalLinksItemUrlMax = 500;
+
+
+
+export const ListRealtorListingsResponseItem = zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "floor": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "status": zod.enum(['active', 'pending', 'sold', 'archived']),
+  "description": zod.string(),
+  "externalLinks": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(listRealtorListingsResponseExternalLinksItemUrlMin).max(listRealtorListingsResponseExternalLinksItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "passportId": zod.string().nullable(),
+  "passportPublicId": zod.string().nullable(),
+  "passportStatus": zod.string().nullable(),
+  "trustLevel": zod.string().nullable(),
+  "views": zod.number().int(),
+  "leadCount": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListRealtorListingsResponse = zod.array(ListRealtorListingsResponseItem)
+
+
+export const createRealtorListingBodyTitleMin = 2;
+export const createRealtorListingBodyTitleMax = 160;
+
+export const createRealtorListingBodyDistrictMax = 120;
+
+export const createRealtorListingBodyAddressMax = 200;
+
+export const createRealtorListingBodyRoomsMin = 0;
+export const createRealtorListingBodyRoomsMax = 50;
+
+export const createRealtorListingBodyAreaM2Min = 0;
+export const createRealtorListingBodyAreaM2Max = 100000;
+
+export const createRealtorListingBodyFloorMax = 20;
+
+export const createRealtorListingBodyPriceMin = 0;
+
+export const createRealtorListingBodyDescriptionMax = 4000;
+
+export const createRealtorListingBodyExternalLinksItemUrlMin = 8;
+export const createRealtorListingBodyExternalLinksItemUrlMax = 500;
+
+export const createRealtorListingBodyExternalLinksMax = 6;
+
+export const createRealtorListingBodyPhotoIdsMax = 20;
+
+
+
+export const CreateRealtorListingBody = zod.object({
+  "agentId": zod.string().uuid().nullish(),
+  "title": zod.string().min(createRealtorListingBodyTitleMin).max(createRealtorListingBodyTitleMax),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string().min(1).max(createRealtorListingBodyDistrictMax),
+  "address": zod.string().max(createRealtorListingBodyAddressMax),
+  "rooms": zod.number().int().min(createRealtorListingBodyRoomsMin).max(createRealtorListingBodyRoomsMax).nullish(),
+  "areaM2": zod.number().min(createRealtorListingBodyAreaM2Min).max(createRealtorListingBodyAreaM2Max).nullish(),
+  "floor": zod.string().max(createRealtorListingBodyFloorMax),
+  "price": zod.number().min(createRealtorListingBodyPriceMin).nullish(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "status": zod.enum(['active', 'pending', 'sold', 'archived']),
+  "description": zod.string().max(createRealtorListingBodyDescriptionMax),
+  "externalLinks": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(createRealtorListingBodyExternalLinksItemUrlMin).max(createRealtorListingBodyExternalLinksItemUrlMax)
+})).max(createRealtorListingBodyExternalLinksMax),
+  "photoIds": zod.array(zod.string().uuid()).max(createRealtorListingBodyPhotoIdsMax)
+})
+
+export const createRealtorListingResponseExternalLinksItemUrlMin = 8;
+export const createRealtorListingResponseExternalLinksItemUrlMax = 500;
+
+
+
+export const CreateRealtorListingResponse = zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "floor": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "status": zod.enum(['active', 'pending', 'sold', 'archived']),
+  "description": zod.string(),
+  "externalLinks": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(createRealtorListingResponseExternalLinksItemUrlMin).max(createRealtorListingResponseExternalLinksItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "passportId": zod.string().nullable(),
+  "passportPublicId": zod.string().nullable(),
+  "passportStatus": zod.string().nullable(),
+  "trustLevel": zod.string().nullable(),
+  "views": zod.number().int(),
+  "leadCount": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const GetRealtorListingParams = zod.object({
+  "listingId": zod.coerce.string().uuid()
+})
+
+export const getRealtorListingResponseExternalLinksItemUrlMin = 8;
+export const getRealtorListingResponseExternalLinksItemUrlMax = 500;
+
+
+
+export const GetRealtorListingResponse = zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "floor": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "status": zod.enum(['active', 'pending', 'sold', 'archived']),
+  "description": zod.string(),
+  "externalLinks": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(getRealtorListingResponseExternalLinksItemUrlMin).max(getRealtorListingResponseExternalLinksItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "passportId": zod.string().nullable(),
+  "passportPublicId": zod.string().nullable(),
+  "passportStatus": zod.string().nullable(),
+  "trustLevel": zod.string().nullable(),
+  "views": zod.number().int(),
+  "leadCount": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const UpdateRealtorListingParams = zod.object({
+  "listingId": zod.coerce.string().uuid()
+})
+
+export const updateRealtorListingBodyTitleMin = 2;
+export const updateRealtorListingBodyTitleMax = 160;
+
+export const updateRealtorListingBodyDistrictMax = 120;
+
+export const updateRealtorListingBodyAddressMax = 200;
+
+export const updateRealtorListingBodyRoomsMin = 0;
+export const updateRealtorListingBodyRoomsMax = 50;
+
+export const updateRealtorListingBodyAreaM2Min = 0;
+export const updateRealtorListingBodyAreaM2Max = 100000;
+
+export const updateRealtorListingBodyFloorMax = 20;
+
+export const updateRealtorListingBodyPriceMin = 0;
+
+export const updateRealtorListingBodyDescriptionMax = 4000;
+
+export const updateRealtorListingBodyExternalLinksItemUrlMin = 8;
+export const updateRealtorListingBodyExternalLinksItemUrlMax = 500;
+
+export const updateRealtorListingBodyExternalLinksMax = 6;
+
+export const updateRealtorListingBodyPhotoIdsMax = 20;
+
+
+
+export const UpdateRealtorListingBody = zod.object({
+  "agentId": zod.string().uuid().nullish(),
+  "title": zod.string().min(updateRealtorListingBodyTitleMin).max(updateRealtorListingBodyTitleMax),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string().min(1).max(updateRealtorListingBodyDistrictMax),
+  "address": zod.string().max(updateRealtorListingBodyAddressMax),
+  "rooms": zod.number().int().min(updateRealtorListingBodyRoomsMin).max(updateRealtorListingBodyRoomsMax).nullish(),
+  "areaM2": zod.number().min(updateRealtorListingBodyAreaM2Min).max(updateRealtorListingBodyAreaM2Max).nullish(),
+  "floor": zod.string().max(updateRealtorListingBodyFloorMax),
+  "price": zod.number().min(updateRealtorListingBodyPriceMin).nullish(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "status": zod.enum(['active', 'pending', 'sold', 'archived']),
+  "description": zod.string().max(updateRealtorListingBodyDescriptionMax),
+  "externalLinks": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(updateRealtorListingBodyExternalLinksItemUrlMin).max(updateRealtorListingBodyExternalLinksItemUrlMax)
+})).max(updateRealtorListingBodyExternalLinksMax),
+  "photoIds": zod.array(zod.string().uuid()).max(updateRealtorListingBodyPhotoIdsMax)
+})
+
+export const updateRealtorListingResponseExternalLinksItemUrlMin = 8;
+export const updateRealtorListingResponseExternalLinksItemUrlMax = 500;
+
+
+
+export const UpdateRealtorListingResponse = zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "floor": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "status": zod.enum(['active', 'pending', 'sold', 'archived']),
+  "description": zod.string(),
+  "externalLinks": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(updateRealtorListingResponseExternalLinksItemUrlMin).max(updateRealtorListingResponseExternalLinksItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "passportId": zod.string().nullable(),
+  "passportPublicId": zod.string().nullable(),
+  "passportStatus": zod.string().nullable(),
+  "trustLevel": zod.string().nullable(),
+  "views": zod.number().int(),
+  "leadCount": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const DeleteRealtorListingParams = zod.object({
+  "listingId": zod.coerce.string().uuid()
+})
+
+export const DeleteRealtorListingResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+export const ListRealtorLeadsResponseItem = zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
+  "dealType": zod.string().nullable(),
+  "district": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "budgetMin": zod.number().nullable(),
+  "budgetMax": zod.number().nullable(),
+  "timeframe": zod.string(),
+  "notes": zod.string(),
+  "nextAction": zod.string(),
+  "nextActionAt": zod.string().datetime({"offset":true}).nullable(),
+  "lastContactAt": zod.string().datetime({"offset":true}).nullable(),
+  "readyForMeeting": zod.boolean(),
+  "botStep": zod.string().nullable(),
+  "overdue": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListRealtorLeadsResponse = zod.array(ListRealtorLeadsResponseItem)
+
+
+export const createRealtorLeadBodyFullNameMax = 120;
+
+export const createRealtorLeadBodyPhoneMax = 32;
+
+export const createRealtorLeadBodyDistrictMax = 120;
+
+export const createRealtorLeadBodyRoomsMin = 0;
+export const createRealtorLeadBodyRoomsMax = 50;
+
+export const createRealtorLeadBodyBudgetMinMin = 0;
+
+export const createRealtorLeadBodyBudgetMaxMin = 0;
+
+export const createRealtorLeadBodyTimeframeMax = 120;
+
+export const createRealtorLeadBodyNotesMax = 4000;
+
+export const createRealtorLeadBodyNextActionMax = 300;
+
+
+
+export const CreateRealtorLeadBody = zod.object({
+  "agentId": zod.string().uuid().nullish(),
+  "listingId": zod.string().uuid().nullish(),
+  "fullName": zod.string().min(1).max(createRealtorLeadBodyFullNameMax),
+  "phone": zod.string().max(createRealtorLeadBodyPhoneMax).optional(),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']).optional(),
+  "dealType": zod.union([zod.literal('sale'),zod.literal('rent'),zod.literal(null)]).nullish(),
+  "district": zod.string().max(createRealtorLeadBodyDistrictMax).optional(),
+  "rooms": zod.number().int().min(createRealtorLeadBodyRoomsMin).max(createRealtorLeadBodyRoomsMax).nullish(),
+  "budgetMin": zod.number().min(createRealtorLeadBodyBudgetMinMin).nullish(),
+  "budgetMax": zod.number().min(createRealtorLeadBodyBudgetMaxMin).nullish(),
+  "timeframe": zod.string().max(createRealtorLeadBodyTimeframeMax).optional(),
+  "notes": zod.string().max(createRealtorLeadBodyNotesMax).optional(),
+  "nextAction": zod.string().max(createRealtorLeadBodyNextActionMax).optional(),
+  "nextActionAt": zod.string().datetime({"offset":true}).nullish()
+})
+
+export const CreateRealtorLeadResponse = zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
+  "dealType": zod.string().nullable(),
+  "district": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "budgetMin": zod.number().nullable(),
+  "budgetMax": zod.number().nullable(),
+  "timeframe": zod.string(),
+  "notes": zod.string(),
+  "nextAction": zod.string(),
+  "nextActionAt": zod.string().datetime({"offset":true}).nullable(),
+  "lastContactAt": zod.string().datetime({"offset":true}).nullable(),
+  "readyForMeeting": zod.boolean(),
+  "botStep": zod.string().nullable(),
+  "overdue": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const UpdateRealtorLeadParams = zod.object({
+  "leadId": zod.coerce.string().uuid()
+})
+
+export const updateRealtorLeadBodyFullNameMax = 120;
+
+export const updateRealtorLeadBodyPhoneMax = 32;
+
+export const updateRealtorLeadBodyDistrictMax = 120;
+
+export const updateRealtorLeadBodyRoomsMin = 0;
+export const updateRealtorLeadBodyRoomsMax = 50;
+
+export const updateRealtorLeadBodyBudgetMinMin = 0;
+
+export const updateRealtorLeadBodyBudgetMaxMin = 0;
+
+export const updateRealtorLeadBodyTimeframeMax = 120;
+
+export const updateRealtorLeadBodyNotesMax = 4000;
+
+export const updateRealtorLeadBodyNextActionMax = 300;
+
+
+
+export const UpdateRealtorLeadBody = zod.object({
+  "agentId": zod.string().uuid().nullish(),
+  "listingId": zod.string().uuid().nullish(),
+  "fullName": zod.string().min(1).max(updateRealtorLeadBodyFullNameMax).optional(),
+  "phone": zod.string().max(updateRealtorLeadBodyPhoneMax).optional(),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']).optional(),
+  "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']).optional(),
+  "dealType": zod.union([zod.literal('sale'),zod.literal('rent'),zod.literal(null)]).nullish(),
+  "district": zod.string().max(updateRealtorLeadBodyDistrictMax).optional(),
+  "rooms": zod.number().int().min(updateRealtorLeadBodyRoomsMin).max(updateRealtorLeadBodyRoomsMax).nullish(),
+  "budgetMin": zod.number().min(updateRealtorLeadBodyBudgetMinMin).nullish(),
+  "budgetMax": zod.number().min(updateRealtorLeadBodyBudgetMaxMin).nullish(),
+  "timeframe": zod.string().max(updateRealtorLeadBodyTimeframeMax).optional(),
+  "notes": zod.string().max(updateRealtorLeadBodyNotesMax).optional(),
+  "nextAction": zod.string().max(updateRealtorLeadBodyNextActionMax).optional(),
+  "nextActionAt": zod.string().datetime({"offset":true}).nullish(),
+  "readyForMeeting": zod.boolean().optional()
+})
+
+export const UpdateRealtorLeadResponse = zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "fullName": zod.string(),
+  "phone": zod.string(),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
+  "dealType": zod.string().nullable(),
+  "district": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "budgetMin": zod.number().nullable(),
+  "budgetMax": zod.number().nullable(),
+  "timeframe": zod.string(),
+  "notes": zod.string(),
+  "nextAction": zod.string(),
+  "nextActionAt": zod.string().datetime({"offset":true}).nullable(),
+  "lastContactAt": zod.string().datetime({"offset":true}).nullable(),
+  "readyForMeeting": zod.boolean(),
+  "botStep": zod.string().nullable(),
+  "overdue": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const DeleteRealtorLeadParams = zod.object({
+  "leadId": zod.coerce.string().uuid()
+})
+
+export const DeleteRealtorLeadResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Active listings that fit the lead's deal type, district, rooms and budget
+ */
+export const ListRealtorLeadMatchesParams = zod.object({
+  "leadId": zod.coerce.string().uuid()
+})
+
+export const listRealtorLeadMatchesResponseExternalLinksItemUrlMin = 8;
+export const listRealtorLeadMatchesResponseExternalLinksItemUrlMax = 500;
+
+
+
+export const ListRealtorLeadMatchesResponseItem = zod.object({
+  "id": zod.string(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "floor": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "status": zod.enum(['active', 'pending', 'sold', 'archived']),
+  "description": zod.string(),
+  "externalLinks": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(listRealtorLeadMatchesResponseExternalLinksItemUrlMin).max(listRealtorLeadMatchesResponseExternalLinksItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "passportId": zod.string().nullable(),
+  "passportPublicId": zod.string().nullable(),
+  "passportStatus": zod.string().nullable(),
+  "trustLevel": zod.string().nullable(),
+  "views": zod.number().int(),
+  "leadCount": zod.number().int(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListRealtorLeadMatchesResponse = zod.array(ListRealtorLeadMatchesResponseItem)
+
+
+export const ListRealtorLeadMessagesParams = zod.object({
+  "leadId": zod.coerce.string().uuid()
+})
+
+export const ListRealtorLeadMessagesResponseItem = zod.object({
+  "id": zod.string(),
+  "leadId": zod.string().nullable(),
+  "leadName": zod.string().nullable(),
+  "direction": zod.enum(['in', 'out']),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "status": zod.enum(['received', 'sent', 'failed', 'manual']),
+  "error": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListRealtorLeadMessagesResponse = zod.array(ListRealtorLeadMessagesResponseItem)
+
+
+/**
+ * @summary Send through the WhatsApp Cloud API when connected; otherwise log it and return a click-to-chat link
+ */
+export const SendRealtorLeadMessageParams = zod.object({
+  "leadId": zod.coerce.string().uuid()
+})
+
+export const sendRealtorLeadMessageBodyBodyMax = 2000;
+
+
+
+export const SendRealtorLeadMessageBody = zod.object({
+  "body": zod.string().min(1).max(sendRealtorLeadMessageBodyBodyMax),
+  "kind": zod.enum(['manual', 'listing', 'slots', 'follow_up', 'reminder', 'question']).optional()
+})
+
+export const SendRealtorLeadMessageResponse = zod.object({
+  "message": zod.object({
+  "id": zod.string(),
+  "leadId": zod.string().nullable(),
+  "leadName": zod.string().nullable(),
+  "direction": zod.enum(['in', 'out']),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "status": zod.enum(['received', 'sent', 'failed', 'manual']),
+  "error": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+}),
+  "waLink": zod.string().nullable()
+})
+
+
+export const ListRealtorMessagesResponseItem = zod.object({
+  "id": zod.string(),
+  "leadId": zod.string().nullable(),
+  "leadName": zod.string().nullable(),
+  "direction": zod.enum(['in', 'out']),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "status": zod.enum(['received', 'sent', 'failed', 'manual']),
+  "error": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListRealtorMessagesResponse = zod.array(ListRealtorMessagesResponseItem)
+
+
+export const ListRealtorAppointmentsResponseItem = zod.object({
+  "id": zod.string(),
+  "leadId": zod.string().nullable(),
+  "leadName": zod.string().nullable(),
+  "leadPhone": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "listingAddress": zod.string().nullable(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "startsAt": zod.string().datetime({"offset":true}),
+  "durationMin": zod.number().int(),
+  "status": zod.enum(['planned', 'done', 'cancelled', 'rescheduled']),
+  "notes": zod.string(),
+  "reminderSentAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListRealtorAppointmentsResponse = zod.array(ListRealtorAppointmentsResponseItem)
+
+
+export const createRealtorAppointmentBodyDurationMinMin = 10;
+export const createRealtorAppointmentBodyDurationMinMax = 480;
+
+export const createRealtorAppointmentBodyNotesMax = 2000;
+
+
+
+export const CreateRealtorAppointmentBody = zod.object({
+  "leadId": zod.string().uuid().nullish(),
+  "listingId": zod.string().uuid().nullish(),
+  "agentId": zod.string().uuid().nullish(),
+  "startsAt": zod.string().datetime({"offset":true}),
+  "durationMin": zod.number().int().min(createRealtorAppointmentBodyDurationMinMin).max(createRealtorAppointmentBodyDurationMinMax).optional(),
+  "status": zod.enum(['planned', 'done', 'cancelled', 'rescheduled']).optional(),
+  "notes": zod.string().max(createRealtorAppointmentBodyNotesMax).optional()
+})
+
+export const CreateRealtorAppointmentResponse = zod.object({
+  "id": zod.string(),
+  "leadId": zod.string().nullable(),
+  "leadName": zod.string().nullable(),
+  "leadPhone": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "listingAddress": zod.string().nullable(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "startsAt": zod.string().datetime({"offset":true}),
+  "durationMin": zod.number().int(),
+  "status": zod.enum(['planned', 'done', 'cancelled', 'rescheduled']),
+  "notes": zod.string(),
+  "reminderSentAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
+export const UpdateRealtorAppointmentParams = zod.object({
+  "appointmentId": zod.coerce.string().uuid()
+})
+
+export const updateRealtorAppointmentBodyDurationMinMin = 10;
+export const updateRealtorAppointmentBodyDurationMinMax = 480;
+
+export const updateRealtorAppointmentBodyNotesMax = 2000;
+
+
+
+export const UpdateRealtorAppointmentBody = zod.object({
+  "leadId": zod.string().uuid().nullish(),
+  "listingId": zod.string().uuid().nullish(),
+  "agentId": zod.string().uuid().nullish(),
+  "startsAt": zod.string().datetime({"offset":true}).optional(),
+  "durationMin": zod.number().int().min(updateRealtorAppointmentBodyDurationMinMin).max(updateRealtorAppointmentBodyDurationMinMax).optional(),
+  "status": zod.enum(['planned', 'done', 'cancelled', 'rescheduled']).optional(),
+  "notes": zod.string().max(updateRealtorAppointmentBodyNotesMax).optional()
+})
+
+export const UpdateRealtorAppointmentResponse = zod.object({
+  "id": zod.string(),
+  "leadId": zod.string().nullable(),
+  "leadName": zod.string().nullable(),
+  "leadPhone": zod.string().nullable(),
+  "listingId": zod.string().nullable(),
+  "listingTitle": zod.string().nullable(),
+  "listingAddress": zod.string().nullable(),
+  "agentId": zod.string().nullable(),
+  "agentName": zod.string().nullable(),
+  "startsAt": zod.string().datetime({"offset":true}),
+  "durationMin": zod.number().int(),
+  "status": zod.enum(['planned', 'done', 'cancelled', 'rescheduled']),
+  "notes": zod.string(),
+  "reminderSentAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
+export const DeleteRealtorAppointmentParams = zod.object({
+  "appointmentId": zod.coerce.string().uuid()
+})
+
+export const DeleteRealtorAppointmentResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+export const listPropertyPassportsResponseListingUrlsItemUrlMin = 8;
+export const listPropertyPassportsResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const ListPropertyPassportsResponseItem = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "listingId": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(listPropertyPassportsResponseListingUrlsItemUrlMin).max(listPropertyPassportsResponseListingUrlsItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "ownerName": zod.string(),
+  "ownerPhone": zod.string(),
+  "ownerLinkActive": zod.boolean(),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "position": zod.number().int(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "contractorPhone": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotoIds": zod.array(zod.string()),
+  "afterPhotoIds": zod.array(zod.string()),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "contractorConfirmedName": zod.string().nullable(),
+  "contractorNote": zod.string().nullable(),
+  "contractorLinkActive": zod.boolean(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable(),
+  "ownerDecidedName": zod.string().nullable(),
+  "ownerNote": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "views": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "shares": zod.number().int(),
+  "leads": zod.number().int()
+}),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListPropertyPassportsResponse = zod.array(ListPropertyPassportsResponseItem)
+
+
+export const createPropertyPassportBodyTitleMin = 2;
+export const createPropertyPassportBodyTitleMax = 160;
+
+export const createPropertyPassportBodyDistrictMax = 120;
+
+export const createPropertyPassportBodyAddressMax = 200;
+
+export const createPropertyPassportBodyRoomsMin = 0;
+export const createPropertyPassportBodyRoomsMax = 50;
+
+export const createPropertyPassportBodyAreaM2Min = 0;
+export const createPropertyPassportBodyAreaM2Max = 100000;
+
+export const createPropertyPassportBodyPriceMin = 0;
+
+export const createPropertyPassportBodyListingUrlsItemUrlMin = 8;
+export const createPropertyPassportBodyListingUrlsItemUrlMax = 500;
+
+export const createPropertyPassportBodyListingUrlsMax = 6;
+
+export const createPropertyPassportBodyPhotoIdsMax = 20;
+
+export const createPropertyPassportBodyRealtorNameMin = 2;
+export const createPropertyPassportBodyRealtorNameMax = 120;
+
+export const createPropertyPassportBodyRealtorAgencyMax = 120;
+
+export const createPropertyPassportBodyRealtorPhoneMax = 32;
+
+export const createPropertyPassportBodyRealtorWhatsappMax = 32;
+
+export const createPropertyPassportBodyRealtorInstagramMax = 120;
+
+export const createPropertyPassportBodyOwnerNameMax = 120;
+
+export const createPropertyPassportBodyOwnerPhoneMax = 32;
+
+
+
+export const CreatePropertyPassportBody = zod.object({
+  "listingId": zod.string().uuid().nullish(),
+  "title": zod.string().min(createPropertyPassportBodyTitleMin).max(createPropertyPassportBodyTitleMax),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string().min(1).max(createPropertyPassportBodyDistrictMax),
+  "address": zod.string().max(createPropertyPassportBodyAddressMax),
+  "rooms": zod.number().int().min(createPropertyPassportBodyRoomsMin).max(createPropertyPassportBodyRoomsMax).nullish(),
+  "areaM2": zod.number().min(createPropertyPassportBodyAreaM2Min).max(createPropertyPassportBodyAreaM2Max).nullish(),
+  "price": zod.number().min(createPropertyPassportBodyPriceMin).nullish(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(createPropertyPassportBodyListingUrlsItemUrlMin).max(createPropertyPassportBodyListingUrlsItemUrlMax)
+})).max(createPropertyPassportBodyListingUrlsMax),
+  "photoIds": zod.array(zod.string().uuid()).max(createPropertyPassportBodyPhotoIdsMax),
+  "realtor": zod.object({
+  "name": zod.string().min(createPropertyPassportBodyRealtorNameMin).max(createPropertyPassportBodyRealtorNameMax),
+  "agency": zod.string().max(createPropertyPassportBodyRealtorAgencyMax),
+  "phone": zod.string().max(createPropertyPassportBodyRealtorPhoneMax),
+  "whatsapp": zod.string().max(createPropertyPassportBodyRealtorWhatsappMax),
+  "instagram": zod.string().max(createPropertyPassportBodyRealtorInstagramMax),
+  "photoMediaId": zod.string().uuid().nullish(),
+  "logoMediaId": zod.string().uuid().nullish()
+}),
+  "ownerName": zod.string().max(createPropertyPassportBodyOwnerNameMax),
+  "ownerPhone": zod.string().max(createPropertyPassportBodyOwnerPhoneMax)
+})
+
+export const createPropertyPassportResponseListingUrlsItemUrlMin = 8;
+export const createPropertyPassportResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const CreatePropertyPassportResponse = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "listingId": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(createPropertyPassportResponseListingUrlsItemUrlMin).max(createPropertyPassportResponseListingUrlsItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "ownerName": zod.string(),
+  "ownerPhone": zod.string(),
+  "ownerLinkActive": zod.boolean(),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "position": zod.number().int(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "contractorPhone": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotoIds": zod.array(zod.string()),
+  "afterPhotoIds": zod.array(zod.string()),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "contractorConfirmedName": zod.string().nullable(),
+  "contractorNote": zod.string().nullable(),
+  "contractorLinkActive": zod.boolean(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable(),
+  "ownerDecidedName": zod.string().nullable(),
+  "ownerNote": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "views": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "shares": zod.number().int(),
+  "leads": zod.number().int()
+}),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const GetPropertyPassportParams = zod.object({
+  "passportId": zod.coerce.string().uuid()
+})
+
+export const getPropertyPassportResponseListingUrlsItemUrlMin = 8;
+export const getPropertyPassportResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const GetPropertyPassportResponse = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "listingId": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(getPropertyPassportResponseListingUrlsItemUrlMin).max(getPropertyPassportResponseListingUrlsItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "ownerName": zod.string(),
+  "ownerPhone": zod.string(),
+  "ownerLinkActive": zod.boolean(),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "position": zod.number().int(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "contractorPhone": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotoIds": zod.array(zod.string()),
+  "afterPhotoIds": zod.array(zod.string()),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "contractorConfirmedName": zod.string().nullable(),
+  "contractorNote": zod.string().nullable(),
+  "contractorLinkActive": zod.boolean(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable(),
+  "ownerDecidedName": zod.string().nullable(),
+  "ownerNote": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "views": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "shares": zod.number().int(),
+  "leads": zod.number().int()
+}),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const UpdatePropertyPassportParams = zod.object({
+  "passportId": zod.coerce.string().uuid()
+})
+
+export const updatePropertyPassportBodyTitleMin = 2;
+export const updatePropertyPassportBodyTitleMax = 160;
+
+export const updatePropertyPassportBodyDistrictMax = 120;
+
+export const updatePropertyPassportBodyAddressMax = 200;
+
+export const updatePropertyPassportBodyRoomsMin = 0;
+export const updatePropertyPassportBodyRoomsMax = 50;
+
+export const updatePropertyPassportBodyAreaM2Min = 0;
+export const updatePropertyPassportBodyAreaM2Max = 100000;
+
+export const updatePropertyPassportBodyPriceMin = 0;
+
+export const updatePropertyPassportBodyListingUrlsItemUrlMin = 8;
+export const updatePropertyPassportBodyListingUrlsItemUrlMax = 500;
+
+export const updatePropertyPassportBodyListingUrlsMax = 6;
+
+export const updatePropertyPassportBodyPhotoIdsMax = 20;
+
+export const updatePropertyPassportBodyRealtorNameMin = 2;
+export const updatePropertyPassportBodyRealtorNameMax = 120;
+
+export const updatePropertyPassportBodyRealtorAgencyMax = 120;
+
+export const updatePropertyPassportBodyRealtorPhoneMax = 32;
+
+export const updatePropertyPassportBodyRealtorWhatsappMax = 32;
+
+export const updatePropertyPassportBodyRealtorInstagramMax = 120;
+
+export const updatePropertyPassportBodyOwnerNameMax = 120;
+
+export const updatePropertyPassportBodyOwnerPhoneMax = 32;
+
+
+
+export const UpdatePropertyPassportBody = zod.object({
+  "listingId": zod.string().uuid().nullish(),
+  "title": zod.string().min(updatePropertyPassportBodyTitleMin).max(updatePropertyPassportBodyTitleMax),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string().min(1).max(updatePropertyPassportBodyDistrictMax),
+  "address": zod.string().max(updatePropertyPassportBodyAddressMax),
+  "rooms": zod.number().int().min(updatePropertyPassportBodyRoomsMin).max(updatePropertyPassportBodyRoomsMax).nullish(),
+  "areaM2": zod.number().min(updatePropertyPassportBodyAreaM2Min).max(updatePropertyPassportBodyAreaM2Max).nullish(),
+  "price": zod.number().min(updatePropertyPassportBodyPriceMin).nullish(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(updatePropertyPassportBodyListingUrlsItemUrlMin).max(updatePropertyPassportBodyListingUrlsItemUrlMax)
+})).max(updatePropertyPassportBodyListingUrlsMax),
+  "photoIds": zod.array(zod.string().uuid()).max(updatePropertyPassportBodyPhotoIdsMax),
+  "realtor": zod.object({
+  "name": zod.string().min(updatePropertyPassportBodyRealtorNameMin).max(updatePropertyPassportBodyRealtorNameMax),
+  "agency": zod.string().max(updatePropertyPassportBodyRealtorAgencyMax),
+  "phone": zod.string().max(updatePropertyPassportBodyRealtorPhoneMax),
+  "whatsapp": zod.string().max(updatePropertyPassportBodyRealtorWhatsappMax),
+  "instagram": zod.string().max(updatePropertyPassportBodyRealtorInstagramMax),
+  "photoMediaId": zod.string().uuid().nullish(),
+  "logoMediaId": zod.string().uuid().nullish()
+}),
+  "ownerName": zod.string().max(updatePropertyPassportBodyOwnerNameMax),
+  "ownerPhone": zod.string().max(updatePropertyPassportBodyOwnerPhoneMax)
+})
+
+export const updatePropertyPassportResponseListingUrlsItemUrlMin = 8;
+export const updatePropertyPassportResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const UpdatePropertyPassportResponse = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "listingId": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(updatePropertyPassportResponseListingUrlsItemUrlMin).max(updatePropertyPassportResponseListingUrlsItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "ownerName": zod.string(),
+  "ownerPhone": zod.string(),
+  "ownerLinkActive": zod.boolean(),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "position": zod.number().int(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "contractorPhone": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotoIds": zod.array(zod.string()),
+  "afterPhotoIds": zod.array(zod.string()),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "contractorConfirmedName": zod.string().nullable(),
+  "contractorNote": zod.string().nullable(),
+  "contractorLinkActive": zod.boolean(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable(),
+  "ownerDecidedName": zod.string().nullable(),
+  "ownerNote": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "views": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "shares": zod.number().int(),
+  "leads": zod.number().int()
+}),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const DeletePropertyPassportParams = zod.object({
+  "passportId": zod.coerce.string().uuid()
+})
+
+export const DeletePropertyPassportResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+export const SetPropertyPassportStatusParams = zod.object({
+  "passportId": zod.coerce.string().uuid()
+})
+
+export const SetPropertyPassportStatusBody = zod.object({
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+
+export const setPropertyPassportStatusResponseListingUrlsItemUrlMin = 8;
+export const setPropertyPassportStatusResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const SetPropertyPassportStatusResponse = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "listingId": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(setPropertyPassportStatusResponseListingUrlsItemUrlMin).max(setPropertyPassportStatusResponseListingUrlsItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "ownerName": zod.string(),
+  "ownerPhone": zod.string(),
+  "ownerLinkActive": zod.boolean(),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "position": zod.number().int(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "contractorPhone": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotoIds": zod.array(zod.string()),
+  "afterPhotoIds": zod.array(zod.string()),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "contractorConfirmedName": zod.string().nullable(),
+  "contractorNote": zod.string().nullable(),
+  "contractorLinkActive": zod.boolean(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable(),
+  "ownerDecidedName": zod.string().nullable(),
+  "ownerNote": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "views": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "shares": zod.number().int(),
+  "leads": zod.number().int()
+}),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const CreatePassportWorkParams = zod.object({
+  "passportId": zod.coerce.string().uuid()
+})
+
+export const createPassportWorkBodyTitleMin = 2;
+export const createPassportWorkBodyTitleMax = 160;
+
+export const createPassportWorkBodyContractorNameMax = 120;
+
+export const createPassportWorkBodyContractorPhoneMax = 32;
+
+export const createPassportWorkBodyDescriptionMax = 3000;
+
+export const createPassportWorkBodyMaterialsMax = 2000;
+
+export const createPassportWorkBodyBeforePhotoIdsMax = 12;
+
+export const createPassportWorkBodyAfterPhotoIdsMax = 12;
+
+
+
+export const CreatePassportWorkBody = zod.object({
+  "title": zod.string().min(createPassportWorkBodyTitleMin).max(createPassportWorkBodyTitleMax),
+  "startDate": zod.string().date().nullish(),
+  "endDate": zod.string().date().nullish(),
+  "contractorName": zod.string().max(createPassportWorkBodyContractorNameMax),
+  "contractorPhone": zod.string().max(createPassportWorkBodyContractorPhoneMax),
+  "description": zod.string().max(createPassportWorkBodyDescriptionMax),
+  "materials": zod.string().max(createPassportWorkBodyMaterialsMax),
+  "beforePhotoIds": zod.array(zod.string().uuid()).max(createPassportWorkBodyBeforePhotoIdsMax),
+  "afterPhotoIds": zod.array(zod.string().uuid()).max(createPassportWorkBodyAfterPhotoIdsMax)
+})
+
+export const createPassportWorkResponseListingUrlsItemUrlMin = 8;
+export const createPassportWorkResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const CreatePassportWorkResponse = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "listingId": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(createPassportWorkResponseListingUrlsItemUrlMin).max(createPassportWorkResponseListingUrlsItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "ownerName": zod.string(),
+  "ownerPhone": zod.string(),
+  "ownerLinkActive": zod.boolean(),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "position": zod.number().int(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "contractorPhone": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotoIds": zod.array(zod.string()),
+  "afterPhotoIds": zod.array(zod.string()),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "contractorConfirmedName": zod.string().nullable(),
+  "contractorNote": zod.string().nullable(),
+  "contractorLinkActive": zod.boolean(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable(),
+  "ownerDecidedName": zod.string().nullable(),
+  "ownerNote": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "views": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "shares": zod.number().int(),
+  "leads": zod.number().int()
+}),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Edit a work. Changing its content clears contractor and owner confirmations.
+ */
+export const UpdatePassportWorkParams = zod.object({
+  "passportId": zod.coerce.string().uuid(),
+  "workId": zod.coerce.string().uuid()
+})
+
+export const updatePassportWorkBodyTitleMin = 2;
+export const updatePassportWorkBodyTitleMax = 160;
+
+export const updatePassportWorkBodyContractorNameMax = 120;
+
+export const updatePassportWorkBodyContractorPhoneMax = 32;
+
+export const updatePassportWorkBodyDescriptionMax = 3000;
+
+export const updatePassportWorkBodyMaterialsMax = 2000;
+
+export const updatePassportWorkBodyBeforePhotoIdsMax = 12;
+
+export const updatePassportWorkBodyAfterPhotoIdsMax = 12;
+
+
+
+export const UpdatePassportWorkBody = zod.object({
+  "title": zod.string().min(updatePassportWorkBodyTitleMin).max(updatePassportWorkBodyTitleMax),
+  "startDate": zod.string().date().nullish(),
+  "endDate": zod.string().date().nullish(),
+  "contractorName": zod.string().max(updatePassportWorkBodyContractorNameMax),
+  "contractorPhone": zod.string().max(updatePassportWorkBodyContractorPhoneMax),
+  "description": zod.string().max(updatePassportWorkBodyDescriptionMax),
+  "materials": zod.string().max(updatePassportWorkBodyMaterialsMax),
+  "beforePhotoIds": zod.array(zod.string().uuid()).max(updatePassportWorkBodyBeforePhotoIdsMax),
+  "afterPhotoIds": zod.array(zod.string().uuid()).max(updatePassportWorkBodyAfterPhotoIdsMax)
+})
+
+export const updatePassportWorkResponseListingUrlsItemUrlMin = 8;
+export const updatePassportWorkResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const UpdatePassportWorkResponse = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "listingId": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(updatePassportWorkResponseListingUrlsItemUrlMin).max(updatePassportWorkResponseListingUrlsItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "ownerName": zod.string(),
+  "ownerPhone": zod.string(),
+  "ownerLinkActive": zod.boolean(),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "position": zod.number().int(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "contractorPhone": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotoIds": zod.array(zod.string()),
+  "afterPhotoIds": zod.array(zod.string()),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "contractorConfirmedName": zod.string().nullable(),
+  "contractorNote": zod.string().nullable(),
+  "contractorLinkActive": zod.boolean(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable(),
+  "ownerDecidedName": zod.string().nullable(),
+  "ownerNote": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "views": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "shares": zod.number().int(),
+  "leads": zod.number().int()
+}),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const DeletePassportWorkParams = zod.object({
+  "passportId": zod.coerce.string().uuid(),
+  "workId": zod.coerce.string().uuid()
+})
+
+export const deletePassportWorkResponseListingUrlsItemUrlMin = 8;
+export const deletePassportWorkResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const DeletePassportWorkResponse = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "listingId": zod.string().nullable(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(deletePassportWorkResponseListingUrlsItemUrlMin).max(deletePassportWorkResponseListingUrlsItemUrlMax)
+})),
+  "photoIds": zod.array(zod.string()),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "logoMediaId": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "status": zod.enum(['draft', 'published', 'archived']),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "ownerName": zod.string(),
+  "ownerPhone": zod.string(),
+  "ownerLinkActive": zod.boolean(),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "position": zod.number().int(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "contractorPhone": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotoIds": zod.array(zod.string()),
+  "afterPhotoIds": zod.array(zod.string()),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "contractorConfirmedName": zod.string().nullable(),
+  "contractorNote": zod.string().nullable(),
+  "contractorLinkActive": zod.boolean(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable(),
+  "ownerDecidedName": zod.string().nullable(),
+  "ownerNote": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "views": zod.number().int(),
+  "qrScans": zod.number().int(),
+  "whatsappClicks": zod.number().int(),
+  "shares": zod.number().int(),
+  "leads": zod.number().int()
+}),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Create a fresh single-work confirmation link for the contractor (replaces the previous one)
+ */
+export const CreateContractorConfirmLinkParams = zod.object({
+  "passportId": zod.coerce.string().uuid(),
+  "workId": zod.coerce.string().uuid()
+})
+
+export const CreateContractorConfirmLinkResponse = zod.object({
+  "url": zod.string()
+})
+
+
+/**
+ * @summary Create a fresh handover acceptance link for the homeowner (replaces the previous one)
+ */
+export const CreateOwnerConfirmLinkParams = zod.object({
+  "passportId": zod.coerce.string().uuid()
+})
+
+export const CreateOwnerConfirmLinkResponse = zod.object({
+  "url": zod.string()
+})
+
+
+export const GetRealtorWhatsappResponse = zod.object({
+  "mode": zod.enum(['manual', 'cloud_api']),
+  "businessPhone": zod.string(),
+  "phoneNumberId": zod.string().nullable(),
+  "tokenSet": zod.boolean(),
+  "cloudApiAvailable": zod.boolean(),
+  "webhookUrl": zod.string(),
+  "autoReplyEnabled": zod.boolean(),
+  "greeting": zod.string(),
+  "followUpEnabled": zod.boolean(),
+  "followUpHours": zod.number().int(),
+  "followUpText": zod.string(),
+  "reminderEnabled": zod.boolean(),
+  "reminderHoursBefore": zod.number().int(),
+  "reminderText": zod.string(),
+  "workdayStartHour": zod.number().int(),
+  "workdayEndHour": zod.number().int(),
+  "followUpTemplate": zod.string(),
+  "reminderTemplate": zod.string(),
+  "templateLanguage": zod.string(),
+  "stats": zod.object({
+  "sent": zod.number().int(),
+  "received": zod.number().int(),
+  "failed": zod.number().int(),
+  "manual": zod.number().int()
+})
+})
+
+
+export const updateRealtorWhatsappBodyBusinessPhoneMax = 32;
+
+export const updateRealtorWhatsappBodyPhoneNumberIdMax = 64;
+
+
+export const updateRealtorWhatsappBodyPhoneNumberIdRegExp = new RegExp('^[0-9]*$');
+export const updateRealtorWhatsappBodyAccessTokenMax = 1000;
+
+export const updateRealtorWhatsappBodyGreetingMax = 1000;
+
+export const updateRealtorWhatsappBodyFollowUpHoursMin = 4;
+export const updateRealtorWhatsappBodyFollowUpHoursMax = 336;
+
+export const updateRealtorWhatsappBodyFollowUpTextMax = 1000;
+
+export const updateRealtorWhatsappBodyReminderHoursBeforeMax = 72;
+
+export const updateRealtorWhatsappBodyReminderTextMax = 1000;
+
+export const updateRealtorWhatsappBodyWorkdayStartHourMin = 0;
+export const updateRealtorWhatsappBodyWorkdayStartHourMax = 23;
+
+export const updateRealtorWhatsappBodyWorkdayEndHourMax = 24;
+
+export const updateRealtorWhatsappBodyFollowUpTemplateMax = 120;
+
+export const updateRealtorWhatsappBodyReminderTemplateMax = 120;
+
+export const updateRealtorWhatsappBodyTemplateLanguageMax = 12;
+
+
+
+export const UpdateRealtorWhatsappBody = zod.object({
+  "mode": zod.enum(['manual', 'cloud_api']),
+  "businessPhone": zod.string().max(updateRealtorWhatsappBodyBusinessPhoneMax),
+  "phoneNumberId": zod.string().max(updateRealtorWhatsappBodyPhoneNumberIdMax).regex(updateRealtorWhatsappBodyPhoneNumberIdRegExp).nullish(),
+  "accessToken": zod.string().max(updateRealtorWhatsappBodyAccessTokenMax).optional(),
+  "autoReplyEnabled": zod.boolean(),
+  "greeting": zod.string().max(updateRealtorWhatsappBodyGreetingMax),
+  "followUpEnabled": zod.boolean(),
+  "followUpHours": zod.number().int().min(updateRealtorWhatsappBodyFollowUpHoursMin).max(updateRealtorWhatsappBodyFollowUpHoursMax),
+  "followUpText": zod.string().max(updateRealtorWhatsappBodyFollowUpTextMax),
+  "reminderEnabled": zod.boolean(),
+  "reminderHoursBefore": zod.number().int().min(1).max(updateRealtorWhatsappBodyReminderHoursBeforeMax),
+  "reminderText": zod.string().max(updateRealtorWhatsappBodyReminderTextMax),
+  "workdayStartHour": zod.number().int().min(updateRealtorWhatsappBodyWorkdayStartHourMin).max(updateRealtorWhatsappBodyWorkdayStartHourMax),
+  "workdayEndHour": zod.number().int().min(1).max(updateRealtorWhatsappBodyWorkdayEndHourMax),
+  "followUpTemplate": zod.string().max(updateRealtorWhatsappBodyFollowUpTemplateMax),
+  "reminderTemplate": zod.string().max(updateRealtorWhatsappBodyReminderTemplateMax),
+  "templateLanguage": zod.string().max(updateRealtorWhatsappBodyTemplateLanguageMax)
+})
+
+export const UpdateRealtorWhatsappResponse = zod.object({
+  "mode": zod.enum(['manual', 'cloud_api']),
+  "businessPhone": zod.string(),
+  "phoneNumberId": zod.string().nullable(),
+  "tokenSet": zod.boolean(),
+  "cloudApiAvailable": zod.boolean(),
+  "webhookUrl": zod.string(),
+  "autoReplyEnabled": zod.boolean(),
+  "greeting": zod.string(),
+  "followUpEnabled": zod.boolean(),
+  "followUpHours": zod.number().int(),
+  "followUpText": zod.string(),
+  "reminderEnabled": zod.boolean(),
+  "reminderHoursBefore": zod.number().int(),
+  "reminderText": zod.string(),
+  "workdayStartHour": zod.number().int(),
+  "workdayEndHour": zod.number().int(),
+  "followUpTemplate": zod.string(),
+  "reminderTemplate": zod.string(),
+  "templateLanguage": zod.string(),
+  "stats": zod.object({
+  "sent": zod.number().int(),
+  "received": zod.number().int(),
+  "failed": zod.number().int(),
+  "manual": zod.number().int()
+})
+})
+
+
+export const ListRealtorNotificationsResponseItem = zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "href": zod.string(),
+  "read": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListRealtorNotificationsResponse = zod.array(ListRealtorNotificationsResponseItem)
+
+
+export const MarkRealtorNotificationsReadResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Buyer-facing passport, no sign-in. Each request counts one view.
+ */
+export const getPublicPassportPathPublicIdMin = 6;
+export const getPublicPassportPathPublicIdMax = 16;
+
+
+export const getPublicPassportPathPublicIdRegExp = new RegExp('^[a-z0-9]+$');
+
+
+export const GetPublicPassportParams = zod.object({
+  "publicId": zod.coerce.string().min(getPublicPassportPathPublicIdMin).max(getPublicPassportPathPublicIdMax).regex(getPublicPassportPathPublicIdRegExp)
+})
+
+export const getPublicPassportResponseListingUrlsItemUrlMin = 8;
+export const getPublicPassportResponseListingUrlsItemUrlMax = 500;
+
+
+
+export const GetPublicPassportResponse = zod.object({
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(getPublicPassportResponseListingUrlsItemUrlMin).max(getPublicPassportResponseListingUrlsItemUrlMax)
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable()
+})),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+export const recordPublicPassportEventPathPublicIdMin = 6;
+export const recordPublicPassportEventPathPublicIdMax = 16;
+
+
+export const recordPublicPassportEventPathPublicIdRegExp = new RegExp('^[a-z0-9]+$');
+
+
+export const RecordPublicPassportEventParams = zod.object({
+  "publicId": zod.coerce.string().min(recordPublicPassportEventPathPublicIdMin).max(recordPublicPassportEventPathPublicIdMax).regex(recordPublicPassportEventPathPublicIdRegExp)
+})
+
+export const RecordPublicPassportEventBody = zod.object({
+  "kind": zod.enum(['qr_scan', 'whatsapp_click', 'share'])
+})
+
+export const RecordPublicPassportEventResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Buyer contact request from the passport page; becomes a lead for the realtor
+ */
+export const createPublicPassportLeadPathPublicIdMin = 6;
+export const createPublicPassportLeadPathPublicIdMax = 16;
+
+
+export const createPublicPassportLeadPathPublicIdRegExp = new RegExp('^[a-z0-9]+$');
+
+
+export const CreatePublicPassportLeadParams = zod.object({
+  "publicId": zod.coerce.string().min(createPublicPassportLeadPathPublicIdMin).max(createPublicPassportLeadPathPublicIdMax).regex(createPublicPassportLeadPathPublicIdRegExp)
+})
+
+export const createPublicPassportLeadBodyNameMin = 2;
+export const createPublicPassportLeadBodyNameMax = 120;
+
+export const createPublicPassportLeadBodyPhoneMin = 7;
+export const createPublicPassportLeadBodyPhoneMax = 32;
+
+export const createPublicPassportLeadBodyMessageMax = 1000;
+
+
+
+export const CreatePublicPassportLeadBody = zod.object({
+  "name": zod.string().min(createPublicPassportLeadBodyNameMin).max(createPublicPassportLeadBodyNameMax),
+  "phone": zod.string().min(createPublicPassportLeadBodyPhoneMin).max(createPublicPassportLeadBodyPhoneMax),
+  "message": zod.string().max(createPublicPassportLeadBodyMessageMax).optional(),
+  "consent": zod.literal(true)
+})
+
+export const CreatePublicPassportLeadResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+export const getContractorConfirmationPathTokenMin = 20;
+export const getContractorConfirmationPathTokenMax = 64;
+
+
+export const getContractorConfirmationPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const GetContractorConfirmationParams = zod.object({
+  "token": zod.coerce.string().min(getContractorConfirmationPathTokenMin).max(getContractorConfirmationPathTokenMax).regex(getContractorConfirmationPathTokenRegExp)
+})
+
+export const GetContractorConfirmationResponse = zod.object({
+  "passportTitle": zod.string(),
+  "district": zod.string(),
+  "realtorName": zod.string(),
+  "agency": zod.string(),
+  "work": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable()
+}),
+  "confirmed": zod.boolean(),
+  "confirmedName": zod.string().nullable()
+})
+
+
+export const confirmContractorWorkPathTokenMin = 20;
+export const confirmContractorWorkPathTokenMax = 64;
+
+
+export const confirmContractorWorkPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const ConfirmContractorWorkParams = zod.object({
+  "token": zod.coerce.string().min(confirmContractorWorkPathTokenMin).max(confirmContractorWorkPathTokenMax).regex(confirmContractorWorkPathTokenRegExp)
+})
+
+export const confirmContractorWorkBodyNameMin = 2;
+export const confirmContractorWorkBodyNameMax = 120;
+
+export const confirmContractorWorkBodyNoteMax = 500;
+
+
+
+export const ConfirmContractorWorkBody = zod.object({
+  "name": zod.string().min(confirmContractorWorkBodyNameMin).max(confirmContractorWorkBodyNameMax),
+  "note": zod.string().max(confirmContractorWorkBodyNoteMax).optional(),
+  "confirm": zod.literal(true)
+})
+
+export const ConfirmContractorWorkResponse = zod.object({
+  "passportTitle": zod.string(),
+  "district": zod.string(),
+  "realtorName": zod.string(),
+  "agency": zod.string(),
+  "work": zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable()
+}),
+  "confirmed": zod.boolean(),
+  "confirmedName": zod.string().nullable()
+})
+
+
+export const getOwnerConfirmationPathTokenMin = 20;
+export const getOwnerConfirmationPathTokenMax = 64;
+
+
+export const getOwnerConfirmationPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const GetOwnerConfirmationParams = zod.object({
+  "token": zod.coerce.string().min(getOwnerConfirmationPathTokenMin).max(getOwnerConfirmationPathTokenMax).regex(getOwnerConfirmationPathTokenRegExp)
+})
+
+export const getOwnerConfirmationResponsePassportListingUrlsItemUrlMin = 8;
+export const getOwnerConfirmationResponsePassportListingUrlsItemUrlMax = 500;
+
+
+
+export const GetOwnerConfirmationResponse = zod.object({
+  "ownerName": zod.string(),
+  "passport": zod.object({
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(getOwnerConfirmationResponsePassportListingUrlsItemUrlMin).max(getOwnerConfirmationResponsePassportListingUrlsItemUrlMax)
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable()
+})),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "updatedAt": zod.string().datetime({"offset":true})
+}),
+  "published": zod.boolean()
+})
+
+
+export const decideOwnerWorkPathTokenMin = 20;
+export const decideOwnerWorkPathTokenMax = 64;
+
+
+export const decideOwnerWorkPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const DecideOwnerWorkParams = zod.object({
+  "token": zod.coerce.string().min(decideOwnerWorkPathTokenMin).max(decideOwnerWorkPathTokenMax).regex(decideOwnerWorkPathTokenRegExp),
+  "workId": zod.coerce.string().uuid()
+})
+
+export const decideOwnerWorkBodyNameMin = 2;
+export const decideOwnerWorkBodyNameMax = 120;
+
+export const decideOwnerWorkBodyNoteMax = 500;
+
+
+
+export const DecideOwnerWorkBody = zod.object({
+  "decision": zod.enum(['accepted', 'revision']),
+  "name": zod.string().min(decideOwnerWorkBodyNameMin).max(decideOwnerWorkBodyNameMax),
+  "note": zod.string().max(decideOwnerWorkBodyNoteMax).optional()
+})
+
+export const decideOwnerWorkResponsePassportListingUrlsItemUrlMin = 8;
+export const decideOwnerWorkResponsePassportListingUrlsItemUrlMax = 500;
+
+
+
+export const DecideOwnerWorkResponse = zod.object({
+  "ownerName": zod.string(),
+  "passport": zod.object({
+  "publicId": zod.string(),
+  "publicUrl": zod.string(),
+  "title": zod.string(),
+  "dealType": zod.enum(['sale', 'rent']),
+  "propertyKind": zod.enum(['apartment', 'villa', 'office', 'country_house', 'other']),
+  "district": zod.string(),
+  "address": zod.string(),
+  "rooms": zod.number().int().nullable(),
+  "areaM2": zod.number().nullable(),
+  "price": zod.number().nullable(),
+  "currency": zod.enum(['AZN', 'USD']),
+  "listingUrls": zod.array(zod.object({
+  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "url": zod.string().min(decideOwnerWorkResponsePassportListingUrlsItemUrlMin).max(decideOwnerWorkResponsePassportListingUrlsItemUrlMax)
+})),
+  "photos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "realtor": zod.object({
+  "name": zod.string(),
+  "agency": zod.string(),
+  "phone": zod.string(),
+  "whatsapp": zod.string(),
+  "instagram": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "logoUrl": zod.string().nullable()
+}),
+  "trustLevel": zod.enum(['basic', 'contractor', 'handover']),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "startDate": zod.string().date().nullable(),
+  "endDate": zod.string().date().nullable(),
+  "contractorName": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "beforePhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "afterPhotos": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "originalName": zod.string(),
+  "contentType": zod.string(),
+  "size": zod.number().int()
+})),
+  "contractorConfirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "handoverStatus": zod.enum(['pending', 'accepted', 'revision']),
+  "ownerDecidedAt": zod.string().datetime({"offset":true}).nullable()
+})),
+  "publishedAt": zod.string().datetime({"offset":true}).nullable(),
+  "updatedAt": zod.string().datetime({"offset":true})
+}),
+  "published": zod.boolean()
+})
+
+

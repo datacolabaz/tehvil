@@ -67,8 +67,15 @@ Leave `VITE_CLERK_PROXY_URL` unset for external Clerk. Do not copy Replit's mana
 | `BUCKET_SECRET_ACCESS_KEY` | Private bucket secret credential |
 | `BUCKET_REGION` | SDK region; defaults to `us-east-1` |
 | `BUCKET_FORCE_PATH_STYLE` | Set `true` only if the bucket Credentials tab requires path-style access |
+| `WHATSAPP_VERIFY_TOKEN` | Optional (realtor WhatsApp automation). Any long random string; enter the same value in the Meta app webhook settings |
+| `WHATSAPP_APP_SECRET` | Optional. Meta app secret; webhook signatures are rejected without it |
+| `WHATSAPP_TOKEN_KEY` | Optional. Long random secret used to encrypt realtors' WhatsApp access tokens at rest. Rotating it invalidates saved tokens |
+| `WHATSAPP_GRAPH_VERSION` | Optional, defaults to `v21.0` |
+| `REALTOR_SCHEDULER` | Set `off` on extra backend replicas if you want only one instance to run realtor reminders (duplicates are prevented either way) |
 
-Create a private **Railway Bucket**. Use Railway's credential references/auto-injection instead of putting credentials in GitHub. Configure bucket CORS for the frontend's exact origin, PUT uploads and the `Content-Type` header. Files are uploaded through 15-minute presigned URLs and read only through authenticated project media endpoints.
+Without the three `WHATSAPP_*` secrets the realtor panel works in one-tap mode (prepared messages opened via wa.me). The webhook URL to register in Meta is `https://<PUBLIC_APP_URL host>/api/whatsapp/webhook`.
+
+Create a private **Railway Bucket**. Use Railway's credential references/auto-injection instead of putting credentials in GitHub. Configure bucket CORS for the frontend's exact origin, PUT uploads and the `Content-Type` header. Files are uploaded through 15-minute presigned URLs and read only through authenticated project media endpoints. Realtor photos are served by `/api/realtor-media/{id}` to their owner, and publicly only while a published passport (or an active contractor/owner confirmation link) shows them.
 
 ## Clerk and data boundaries
 
