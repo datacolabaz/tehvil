@@ -4976,7 +4976,7 @@ export const getImportRealtorListingUrl = () => {
 }
 
 /**
- * @summary Read a Brokly.az, Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
+ * @summary Read a Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
  */
 export const importRealtorListing = async (listingImportInput: ListingImportInput, options?: Parameters<typeof customFetch>[1]): Promise<ListingImport> => {
 
@@ -5042,7 +5042,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type ImportRealtorListingMutationVariables = {data: BodyType<ListingImportInput>}
 
     /**
- * @summary Read a Brokly.az, Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
+ * @summary Read a Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
  */
 export const useImportRealtorListing = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importRealtorListing>>, TError,ImportRealtorListingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}

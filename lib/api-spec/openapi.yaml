@@ -1037,7 +1037,7 @@ paths:
     post:
       operationId: importRealtorListing
       tags: [realtor]
-      summary: Read a Brokly.az, Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
+      summary: Read a Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
       requestBody:
         required: true
         content:
@@ -2614,7 +2614,7 @@ components:
     ExternalLink:
       type: object
       properties:
-        portal: { type: string, enum: [brokly, tap, bina, yeniemlak, instagram, other] }
+        portal: { type: string, enum: [tap, bina, yeniemlak, instagram, other] }
         url: { type: string, minLength: 8, maxLength: 500 }
       required: [portal, url]
     RealtorListing:
@@ -2676,7 +2676,7 @@ components:
         listingTitle: { type: ["string", "null"] }
         fullName: { type: string }
         phone: { type: string }
-        source: { type: string, enum: [whatsapp, instagram, facebook, site, brokly, phone, other] }
+        source: { type: string, enum: [whatsapp, instagram, facebook, site, phone, other] }
         status: { type: string, enum: [new, contacted, interested, meeting, deal, lost] }
         dealType: { type: ["string", "null"] }
         district: { type: string }
@@ -2701,7 +2701,7 @@ components:
         listingId: { type: ["string", "null"], format: uuid }
         fullName: { type: string, minLength: 1, maxLength: 120 }
         phone: { type: string, maxLength: 32 }
-        source: { type: string, enum: [whatsapp, instagram, facebook, site, brokly, phone, other] }
+        source: { type: string, enum: [whatsapp, instagram, facebook, site, phone, other] }
         status: { type: string, enum: [new, contacted, interested, meeting, deal, lost] }
         dealType: { type: ["string", "null"], enum: [sale, rent, null] }
         district: { type: string, maxLength: 120 }
@@ -2720,7 +2720,7 @@ components:
         listingId: { type: ["string", "null"], format: uuid }
         fullName: { type: string, minLength: 1, maxLength: 120 }
         phone: { type: string, maxLength: 32 }
-        source: { type: string, enum: [whatsapp, instagram, facebook, site, brokly, phone, other] }
+        source: { type: string, enum: [whatsapp, instagram, facebook, site, phone, other] }
         status: { type: string, enum: [new, contacted, interested, meeting, deal, lost] }
         dealType: { type: ["string", "null"], enum: [sale, rent, null] }
         district: { type: string, maxLength: 120 }
@@ -3133,7 +3133,7 @@ components:
       type: object
       properties:
         url: { type: string }
-        portal: { type: string, enum: [brokly, tap, bina, yeniemlak, instagram, other] }
+        portal: { type: string, enum: [tap, bina, yeniemlak, instagram, other] }
         title: { type: ["string", "null"] }
         description: { type: ["string", "null"] }
         dealType: { type: ["string", "null"] }

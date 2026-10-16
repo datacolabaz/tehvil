@@ -25,6 +25,9 @@ export type MessageRow = typeof realtorMessagesTable.$inferSelect;
 export type TrustLevel = "basic" | "contractor" | "handover";
 
 export const iso = (d: Date | null | undefined) => (d ? d.toISOString() : null);
+/** Values removed from the product ("brokly") are shown as "other" for older rows. */
+const legacy = (v: string) => (v === "brokly" ? "other" : v);
+const links = (list: { portal: string; url: string }[]) => list.map((l) => ({ portal: legacy(l.portal) as "other", url: l.url }));
 export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
 export const newToken = () => randomBytes(24).toString("base64url");
 
@@ -142,7 +145,7 @@ export async function passportDtos(rows: PassportRow[], origin: string) {
       areaM2: p.areaM2,
       price: p.price,
       currency: p.currency as "AZN" | "USD",
-      listingUrls: p.listingUrls as { portal: "other"; url: string }[],
+      listingUrls: links(p.listingUrls),
       photoIds: p.photoIds,
       photos: pickMedia(media, p.photoIds),
       realtor: {
@@ -279,7 +282,7 @@ export async function listingDtos(rows: ListingRow[], userId: string) {
       currency: l.currency as "AZN" | "USD",
       status: l.status as "active" | "pending" | "sold" | "archived",
       description: l.description,
-      externalLinks: l.externalLinks as { portal: "other"; url: string }[],
+      externalLinks: links(l.externalLinks),
       photoIds: l.photoIds,
       photos: pickMedia(media, l.photoIds),
       passportId: p?.id ?? null,
@@ -314,7 +317,7 @@ export async function leadDtos(rows: LeadRow[], userId: string) {
     listingTitle: l.listingId ? listingTitle.get(l.listingId) ?? null : null,
     fullName: l.fullName,
     phone: l.phone,
-    source: l.source as "other",
+    source: legacy(l.source) as "other",
     status: l.status as "new",
     dealType: l.dealType,
     district: l.district,

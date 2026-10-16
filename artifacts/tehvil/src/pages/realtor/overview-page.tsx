@@ -146,7 +146,7 @@ export function RealtorOverviewPage() {
 
         <div className="rl-diff">
           <Sparkles size={17} />
-          <p><b>Brokly satışı idarə edir.</b> Təhvil satışı idarə edir və mənzilin etibarını sübut edir.</p>
+          <p><b>Adi CRM yalnız satışı idarə edir.</b> Təhvil satışı idarə edir və mənzilin etibarını sübut edir.</p>
           <Link href="/realtor/passports/new" className="button button-primary sm-btn-sm"><ShieldCheck size={14} />Pasport yarat</Link>
         </div>
       </aside>
@@ -197,7 +197,7 @@ function FirstWeek({ setup, compact = false }: { setup: RealtorSetup; compact?: 
   const [hidden, setHidden] = useState(() => readFlag(WEEK_KEY));
   const steps = [
     { done: setup.profileComplete, title: 'Profili tamamla', hint: 'Foto və WhatsApp nömrəsi pasportda görünür', href: '/realtor/profile', icon: UserRound },
-    { done: setup.listings > 0, title: 'İlk elanı əlavə et', hint: 'Brokly/Tap/Bina linkindən avtomatik doldurun', href: '/realtor/listings?new=1', icon: Megaphone },
+    { done: setup.listings > 0, title: 'İlk elanı əlavə et', hint: 'Tap.az / Bina.az linkindən avtomatik doldurun', href: '/realtor/listings?new=1', icon: Megaphone },
     { done: setup.leads > 0, title: 'İlk lead-i əlavə et', hint: 'Növbəti aksiya və vaxtı qeyd edin', href: '/realtor/leads?new=1', icon: UserPlus },
     { done: setup.whatsappConnected, title: 'WhatsApp-ı bağla', hint: 'Yeni leadlərə dərhal cavab', href: '/realtor/whatsapp?connect=1', icon: MessageCircle },
     { done: setup.passports > 0, title: 'İlk Təhvil Pasportunu yarat', hint: 'Təmir işləri, fotolar, təsdiqlər', href: '/realtor/passports/new', icon: ShieldCheck },

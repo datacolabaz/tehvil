@@ -33,7 +33,7 @@ export function RealtorListingsPage() {
       <label className="rl-search"><Search size={15} /><input value={q} onChange={e => setQ(e.target.value)} placeholder="Başlıq, rayon, ünvan" aria-label="Elan axtar" /></label>
     </div>
     {listings.isLoading ? <Skeleton rows={3} /> : rows.length ? <div className="rl-listing-grid">{rows.map(l => <ListingCard key={l.id} l={l} onEdit={() => setEditing(l)} onDescribe={() => setDescribe(l)} />)}</div>
-      : <Empty icon={<Building2 size={28} />} title={listings.data?.length ? 'Bu filtrdə elan yoxdur' : 'Hələ elan yoxdur'} text="İlk mənzilinizi əlavə edin. Brokly.az, Tap.az və ya Bina.az linkini də qeyd edə bilərsiniz." action={<button type="button" className="button button-primary" onClick={() => setEditing('new')}><Plus size={16} />Elan əlavə et</button>} />}
+      : <Empty icon={<Building2 size={28} />} title={listings.data?.length ? 'Bu filtrdə elan yoxdur' : 'Hələ elan yoxdur'} text="İlk mənzilinizi əlavə edin. Tap.az və ya Bina.az linkini də qeyd edə bilərsiniz." action={<button type="button" className="button button-primary" onClick={() => setEditing('new')}><Plus size={16} />Elan əlavə et</button>} />}
     {editing && <ListingDrawer listing={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
     <Modal open={!!describe} onClose={() => setDescribe(null)} eyebrow="Elan üçün hazır təsvir" title={describe?.title ?? ''} footer={describe && <CopyButton text={listingDescription(describe, describe.passportStatus === 'published' ? describe.passportPublicId : null)} label="Mətni kopyala" className="button button-primary" />}>
       {describe && <pre className="rl-pre">{listingDescription(describe, describe.passportStatus === 'published' ? describe.passportPublicId : null)}</pre>}
@@ -131,7 +131,7 @@ function ListingDrawer({ listing, onClose }: { listing: RealtorListing | null; o
 
   const propertyFields = <>
     {isNew && <div className="rl-import">
-      <div className="rl-import-head"><Wand2 size={16} /><div><b>Linkiniz var? Məlumatları avtomatik çəkək</b><small>Brokly.az, Tap.az, Bina.az, Yeniemlak.az elan linkini yapışdırın.</small></div></div>
+      <div className="rl-import-head"><Wand2 size={16} /><div><b>Linkiniz var? Məlumatları avtomatik çəkək</b><small>Tap.az, Bina.az, Yeniemlak.az elan linkini yapışdırın.</small></div></div>
       <div className="rl-import-row">
         <input value={importUrl} onChange={e => setImportUrl(e.target.value)} placeholder="https://bina.az/items/…" aria-label="Elan linki" inputMode="url" data-testid="input-import-url" />
         <button type="button" className="button button-secondary sm-btn-sm" disabled={importUrl.trim().length < 8 || importer.isPending} onClick={runImport} data-testid="button-import">{importer.isPending ? <LoaderCircle className="spin" size={14} /> : <Wand2 size={14} />}Çək</button>
@@ -163,13 +163,13 @@ function ListingDrawer({ listing, onClose }: { listing: RealtorListing | null; o
   </>;
   const linkFields = <>
     <div className="field"><span>Elan linkləri</span>
-      {isNew && <p className="rl-hint" style={{ marginTop: 0 }}>Mənzil Brokly.az, Tap.az, Bina.az və ya başqa portalda da yerləşibsə, linkləri əlavə edin — pasportda “portalda elan” kimi görünəcək.</p>}
+      {isNew && <p className="rl-hint" style={{ marginTop: 0 }}>Mənzil Tap.az, Bina.az və ya başqa portalda da yerləşibsə, linkləri əlavə edin — pasportda “portalda elan” kimi görünəcək.</p>}
       {links.map((x, i) => <div className="rl-link-row" key={i}>
         <select value={x.portal} onChange={e => setLinks(links.map((y, j) => j === i ? { ...y, portal: e.target.value as Ext['portal'] } : y))} aria-label="Portal">{Object.entries(PORTAL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
-        <input value={x.url} onChange={e => setLinks(links.map((y, j) => j === i ? { ...y, url: e.target.value } : y))} placeholder="https://brokly.az/…" aria-label="Link" />
+        <input value={x.url} onChange={e => setLinks(links.map((y, j) => j === i ? { ...y, url: e.target.value } : y))} placeholder="https://bina.az/…" aria-label="Link" />
         <button type="button" className="icon-button" aria-label="Linki sil" onClick={() => setLinks(links.filter((_, j) => j !== i))}><X size={15} /></button>
       </div>)}
-      {links.length < 6 && <button type="button" className="sm-link-btn" onClick={() => setLinks([...links, { portal: links.length ? 'tap' : 'brokly', url: '' }])}><ExternalLink size={13} />Brokly.az və ya digər portal linki əlavə et</button>}
+      {links.length < 6 && <button type="button" className="sm-link-btn" onClick={() => setLinks([...links, { portal: links.length ? 'tap' : 'bina', url: '' }])}><ExternalLink size={13} />Tap.az, Bina.az və ya digər portal linki əlavə et</button>}
     </div>
     {(agents.data?.length ?? 0) > 0 && <Field label="Məsul agent" name="listing-agent"><select value={form.agentId} onChange={e => f('agentId')(e.target.value)}><option value="">— Özüm —</option>{agents.data!.filter(a => a.active || a.id === form.agentId).map(a => <option key={a.id} value={a.id}>{a.fullName}</option>)}</select></Field>}
     <Field label="Təsvir" name="listing-description"><textarea value={form.description} onChange={e => f('description')(e.target.value)} rows={6} maxLength={4000} /></Field>
@@ -181,7 +181,7 @@ function ListingDrawer({ listing, onClose }: { listing: RealtorListing | null; o
       <div className="rl-offer">
         <span className="rl-offer-icon"><ShieldCheck size={26} /></span>
         <h3>Bu mənzil üçün “Təhvil Sertifikatlı Mənzil” pasportu yaratmaq istəyirsiniz?</h3>
-        <p>Təmir işləri, əvvəl/sonra fotoları, podratçı və ev sahibi təsdiqi — alıcı QR kodu skan edib hamısını yoxlayır. Brokly-də bu yoxdur.</p>
+        <p>Təmir işləri, əvvəl/sonra fotoları, podratçı və ev sahibi təsdiqi — alıcı QR kodu skan edib hamısını yoxlayır.</p>
         <button type="button" className="button button-primary full-button" onClick={() => { onClose(); setLocation(`/realtor/passports/new?listing=${created.id}`); }} data-testid="button-offer-yes"><ShieldCheck size={16} />Bəli, pasport yarat</button>
         <button type="button" className="button button-quiet full-button" onClick={() => { toast('Elan əlavə olundu'); onClose(); }} data-testid="button-offer-no">Xeyr, sonra yaradaram</button>
       </div>

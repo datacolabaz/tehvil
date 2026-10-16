@@ -10,7 +10,6 @@ export type ExternalLinkPortal = typeof ExternalLinkPortal[keyof typeof External
 
 
 export const ExternalLinkPortal = {
-  brokly: 'brokly',
   tap: 'tap',
   bina: 'bina',
   yeniemlak: 'yeniemlak',

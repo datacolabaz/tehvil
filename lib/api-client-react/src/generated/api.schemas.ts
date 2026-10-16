@@ -1741,7 +1741,6 @@ export type ExternalLinkPortal = typeof ExternalLinkPortal[keyof typeof External
 
 
 export const ExternalLinkPortal = {
-  brokly: 'brokly',
   tap: 'tap',
   bina: 'bina',
   yeniemlak: 'yeniemlak',
@@ -1924,7 +1923,6 @@ export const RealtorLeadSource = {
   instagram: 'instagram',
   facebook: 'facebook',
   site: 'site',
-  brokly: 'brokly',
   phone: 'phone',
   other: 'other',
 } as const;
@@ -1987,7 +1985,6 @@ export const RealtorLeadInputSource = {
   instagram: 'instagram',
   facebook: 'facebook',
   site: 'site',
-  brokly: 'brokly',
   phone: 'phone',
   other: 'other',
 } as const;
@@ -2067,7 +2064,6 @@ export const RealtorLeadPatchSource = {
   instagram: 'instagram',
   facebook: 'facebook',
   site: 'site',
-  brokly: 'brokly',
   phone: 'phone',
   other: 'other',
 } as const;
@@ -2915,7 +2911,6 @@ export type ListingImportPortal = typeof ListingImportPortal[keyof typeof Listin
 
 
 export const ListingImportPortal = {
-  brokly: 'brokly',
   tap: 'tap',
   bina: 'bina',
   yeniemlak: 'yeniemlak',
