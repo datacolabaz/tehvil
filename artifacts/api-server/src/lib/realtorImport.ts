@@ -6,7 +6,7 @@ import { ObjectStorageService } from "./objectStorage";
 import { mediaDto } from "./realtorMedia";
 
 /*
- * Prefills a listing from a public portal page (Brokly.az, Tap.az, Bina.az …).
+ * Prefills a listing from a public portal page (Tap.az, Bina.az …).
  * Best effort: reads OpenGraph tags, JSON-LD and common Azerbaijani wording
  * ("3 otaqlı", "96 m²", "185 000 AZN"). Portals change their markup, so every
  * field is optional and the realtor confirms the result.
@@ -15,8 +15,7 @@ import { mediaDto } from "./realtorMedia";
  * addresses. REALTOR_IMPORT_EXTRA_HOSTS (comma separated) adds hosts for local testing.
  */
 
-const PORTALS: { host: string; portal: "brokly" | "tap" | "bina" | "yeniemlak" | "other" }[] = [
-  { host: "brokly.az", portal: "brokly" },
+const PORTALS: { host: string; portal: "tap" | "bina" | "yeniemlak" | "other" }[] = [
   { host: "tap.az", portal: "tap" },
   { host: "bina.az", portal: "bina" },
   { host: "yeniemlak.az", portal: "yeniemlak" },
@@ -130,7 +129,7 @@ export function parseListingHtml(html: string, pageUrl: URL): ParsedListing {
   const ld = jsonLd(html);
   const titleTag = decode(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? "").trim();
   const h1 = decode((html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] ?? "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
-  const title = (meta("og:title", "twitter:title") ?? (h1 || titleTag) ?? null)?.replace(/\s*[|—–-]\s*(Brokly|Tap\.az|Bina\.az|Yeniemlak)[^|]*$/i, "").trim() || null;
+  const title = (meta("og:title", "twitter:title") ?? (h1 || titleTag) ?? null)?.replace(/\s*[|—–-]\s*(Tap\.az|Bina\.az|Yeniemlak)[^|]*$/i, "").trim() || null;
   const description = meta("og:description", "description", "twitter:description");
   const text = decode(html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ");
   const hay = `${title ?? ""} ${description ?? ""} ${text}`;
@@ -207,7 +206,7 @@ export async function importListing(userId: string, rawUrl: string) {
   let url: URL;
   try { url = new URL(/^https?:\/\//i.test(rawUrl.trim()) ? rawUrl.trim() : `https://${rawUrl.trim()}`); } catch { throw new ImportError("Link düzgün deyil"); }
   const portal = portalFor(url);
-  if (!portal) throw new ImportError("Hələlik Brokly.az, Tap.az, Bina.az, Yeniemlak.az və digər əsas Azərbaycan portalları dəstəklənir");
+  if (!portal) throw new ImportError("Hələlik Tap.az, Bina.az, Yeniemlak.az və digər əsas Azərbaycan portalları dəstəklənir");
   const page = await safeFetch(url.toString(), "text/html,application/xhtml+xml", MAX_PAGE, (u) => portalFor(u) !== null);
   if (!/html|xml/.test(page.contentType)) throw new ImportError("Bu link elan səhifəsi deyil");
   const parsed = parseListingHtml(page.body.toString("utf8"), page.url);

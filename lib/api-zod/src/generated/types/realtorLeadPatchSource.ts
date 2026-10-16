@@ -14,7 +14,6 @@ export const RealtorLeadPatchSource = {
   instagram: 'instagram',
   facebook: 'facebook',
   site: 'site',
-  brokly: 'brokly',
   phone: 'phone',
   other: 'other',
 } as const;

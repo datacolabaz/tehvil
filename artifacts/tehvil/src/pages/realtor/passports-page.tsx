@@ -13,7 +13,7 @@ export function RealtorPassportsPage() {
     <PageHeading eyebrow={COPY.certified} title="Mənzil Təhvil Pasportları" description="Təmir işləri, fotolar, podratçı təsdiqi və ev sahibi qəbulu — QR kod, link və PDF ilə alıcıya yoxlanıla bilən şəkildə." action={<Link href="/realtor/passports/new" className="button button-primary" data-testid="button-create-passport"><FilePlus2 size={16} />Pasport yarat</Link>} />
     {passports.isLoading ? <Skeleton rows={3} /> : !list.length ? <div className="rl-passport-intro surface">
       <div>
-        <div className="eyebrow"><ShieldCheck size={13} className="sm-ii" /> Brokly-də olmayan üstünlük</div>
+        <div className="eyebrow"><ShieldCheck size={13} className="sm-ii" /> Yalnız Təhvil-də olan üstünlük</div>
         <h2 className="font-display">Hər mənzili “Təhvil Sertifikatlı Mənzil” kimi təqdim edin</h2>
         <p>{COPY.triad}. Alıcı QR kodu skan edir və təmir tarixçəsini, əvvəl/sonra fotolarını, podratçı təsdiqini və ev sahibinin qəbulunu görür — login olmadan.</p>
         <Link href="/realtor/passports/new" className="button button-primary"><FilePlus2 size={16} />İlk pasportu yarat</Link>

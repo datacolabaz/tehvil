@@ -14,7 +14,6 @@ export const RealtorLeadSource = {
   instagram: 'instagram',
   facebook: 'facebook',
   site: 'site',
-  brokly: 'brokly',
   phone: 'phone',
   other: 'other',
 } as const;

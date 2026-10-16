@@ -10,7 +10,6 @@ export type ListingImportPortal = typeof ListingImportPortal[keyof typeof Listin
 
 
 export const ListingImportPortal = {
-  brokly: 'brokly',
   tap: 'tap',
   bina: 'bina',
   yeniemlak: 'yeniemlak',

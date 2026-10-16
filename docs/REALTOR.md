@@ -1,6 +1,6 @@
 # Realtor modulu — “Realtor üçün satış və etibar platforması”
 
-> **Brokly satışı idarə edir. Təhvil satışı idarə edir və mənzilin etibarını sübut edir.**
+> **Adi CRM yalnız satışı idarə edir. Təhvil satışı idarə edir və mənzilin etibarını sübut edir.**
 
 Siz leadləri, elanları və görüşləri Təhvil.az-da idarə edirsiniz; hər mənzilinizi QR kodlu, foto sübutlu və ev sahibi təsdiqli “Təhvil Sertifikatlı Mənzil” kimi təqdim edirsiniz.
 
@@ -9,7 +9,7 @@ Siz leadləri, elanları və görüşləri Təhvil.az-da idarə edirsiniz; hər 
 | Bölmə | Yol | Nə edir |
 |---|---|---|
 | İcmal | `/realtor` | Bugünkü leadlər, gözləyən müştərilər, görüşlər, aktiv elanlar, sertifikatlı mənzil sayı, QR skan; bildirişlər, nəticə paneli, satış qıfı. Profil yoxdursa, onboarding göstərilir. |
-| Elanlarım | `/realtor/listings` | Elanlar (Aktiv / Gözləmədə / Satılıb / Arxiv), şəkillər, Brokly/Tap/Bina linkləri, “Təhvil Pasportu var/yoxdur” badge-i, hazır təsvir. |
+| Elanlarım | `/realtor/listings` | Elanlar (Aktiv / Gözləmədə / Satılıb / Arxiv), şəkillər, Tap.az/Bina.az linkləri, “Təhvil Pasportu var/yoxdur” badge-i, hazır təsvir. |
 | Leadlər | `/realtor/leads` | Lövhə və siyahı; mənbə, status, büdcə, rayon, otaq, alqı/icarə, növbəti aksiya + vaxt, agent; uyğun elanlar; WhatsApp yazışması. |
 | Görüşlər | `/realtor/appointments` | Həftəlik təqvim, status (Planlandı / Baş tutdu / Ləğv edildi / Yenidən planlandı), WhatsApp xatırlatması. |
 | Təhvil Sertifikatlı Mənzil | `/realtor/passports` | 5 addımlı pasport wizardı, etibar səviyyəsi, təsdiq linkləri, paylaşım. |
@@ -25,14 +25,14 @@ Qeydiyyat: landing səhifəsindəki “Realtor kimi başla” → `/sign-up?real
 
 - Profil yaradılan kimi “Xoş gəlmisiniz, [Ad]!” pəncərəsi açılır: Elan əlavə et / Lead əlavə et / Təhvil Pasportu yarat.
 - Elan, lead və pasport yoxdursa, İcmal boş görünmür: 4 “Başlayın” kartı və 8 addımlı “İlk həftə planı” göstərilir (addımlar real məlumatdan avtomatik işarələnir).
-- Elan wizardı: 1) mənzil məlumatı (Brokly/Tap/Bina linkindən avtomatik doldurma ilə) → 2) portal linkləri → 3) “Təhvil Pasportu yaratmaq istəyirsiniz?” — “Bəli” birbaşa pasport wizardına aparır.
+- Elan wizardı: 1) mənzil məlumatı (Tap.az/Bina.az linkindən avtomatik doldurma ilə) → 2) portal linkləri → 3) “Təhvil Pasportu yaratmaq istəyirsiniz?” — “Bəli” birbaşa pasport wizardına aparır.
 - Lead forması: mənbə və alqı/icarə düymələri, növbəti aksiya presetləri (“Zəng edəcəyəm”, “Elan göndərəcəyəm”…), “Bu gün 18:00” kimi vaxt seçimi; yaradılanda “Növbəti aksiya: Bu gün 18:00 — …” göstərilir.
 - Pasport wizardı mövcud elanı seçməklə başlayır; etibar addımında hədəf səviyyə seçilir (səviyyə təsdiqlərlə avtomatik yüksəlir).
 - WhatsApp bağlama: nömrə → rejim → müştəri linki və QR (Instagram bio və elanlar üçün).
 
 ### Linkdən avtomatik doldurma
 
-`POST /api/realtor/listings/import` portal səhifəsini oxuyur (OpenGraph, JSON-LD, “3 otaqlı”, “96 m²”, “185 000 AZN” kimi ifadələr) və şəkilləri realtorun media yaddaşına köçürür. Yalnız dəstəklənən portallar açılır (brokly.az, tap.az, bina.az, yeniemlak.az, emlak.az, arenda.az, ev10.az, lalafo.az, unvan.az); hər yönləndirmə yoxlanılır, daxili/özəl IP ünvanlara müraciət bloklanır. Portallar dizaynını dəyişə bilər — tapılmayan sahələri realtor əl ilə doldurur. Real portal səhifələrində hələ sınaqdan keçirilməyib.
+`POST /api/realtor/listings/import` portal səhifəsini oxuyur (OpenGraph, JSON-LD, “3 otaqlı”, “96 m²”, “185 000 AZN” kimi ifadələr) və şəkilləri realtorun media yaddaşına köçürür. Yalnız dəstəklənən portallar açılır (tap.az, bina.az, yeniemlak.az, emlak.az, arenda.az, ev10.az, lalafo.az, unvan.az); hər yönləndirmə yoxlanılır, daxili/özəl IP ünvanlara müraciət bloklanır. Portallar dizaynını dəyişə bilər — tapılmayan sahələri realtor əl ilə doldurur. Real portal səhifələrində hələ sınaqdan keçirilməyib.
 
 ## Etibar səviyyələri
 

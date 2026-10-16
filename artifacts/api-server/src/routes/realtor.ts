@@ -762,7 +762,7 @@ router.get("/realtor/overview", async (req, res): Promise<void> => {
     upcoming: await appointmentDtos(upcomingRows, userId),
     notifications: notes.map(notificationDto),
     funnel: ["new", "contacted", "interested", "meeting", "deal", "lost"].map((key) => ({ key, count: leads.filter((l) => l.status === key).length })),
-    sources: ["whatsapp", "instagram", "facebook", "site", "brokly", "phone", "other"].map((key) => ({ key, count: leads.filter((l) => l.source === key).length })).filter((s) => s.count > 0),
+    sources: ["whatsapp", "instagram", "facebook", "site", "phone", "other"].map((key) => ({ key, count: leads.filter((l) => l.source === key).length })).filter((s) => s.count > 0),
     daily,
   });
 });

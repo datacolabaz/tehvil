@@ -160,13 +160,13 @@ function StepProperty({ draft, setDraft, onNext, saving, isNew }: { draft: Draft
       <Field label="Qiymət" name="pp-price" type="number" min="0" value={draft.price} onChange={f('price')} />
       <Field label="Valyuta" name="pp-currency"><select value={draft.currency} onChange={e => f('currency')(e.target.value)}><option>AZN</option><option>USD</option></select></Field>
     </div>
-    <div className="field"><span>Elan linki (Brokly.az, Tap.az, Bina.az…)</span>
+    <div className="field"><span>Elan linki (Tap.az, Bina.az…)</span>
       {draft.links.map((x, i) => <div className="rl-link-row" key={i}>
         <select value={x.portal} onChange={e => setDraft({ ...draft, links: draft.links.map((y, j) => j === i ? { ...y, portal: e.target.value as Ext['portal'] } : y) })} aria-label="Portal">{Object.entries(PORTAL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
         <input value={x.url} onChange={e => setDraft({ ...draft, links: draft.links.map((y, j) => j === i ? { ...y, url: e.target.value } : y) })} placeholder="https://" aria-label="Link" />
         <button type="button" className="icon-button" aria-label="Sil" onClick={() => setDraft({ ...draft, links: draft.links.filter((_, j) => j !== i) })}><X size={15} /></button>
       </div>)}
-      {draft.links.length < 6 && <button type="button" className="sm-link-btn" onClick={() => setDraft({ ...draft, links: [...draft.links, { portal: 'brokly', url: '' }] })}><Link2 size={13} />Link əlavə et</button>}
+      {draft.links.length < 6 && <button type="button" className="sm-link-btn" onClick={() => setDraft({ ...draft, links: [...draft.links, { portal: 'bina', url: '' }] })}><Link2 size={13} />Link əlavə et</button>}
     </div>
     <div className="field"><span>Əsas şəkillər</span><PhotoPicker media={draft.photos} onChange={photos => setDraft({ ...draft, photos })} max={20} hint="İlk şəkil pasportun üz qabığıdır." testId="pp-photos" /></div>
     <StepNav submit saving={saving} nextLabel={isNew ? 'Qaralama yarat' : 'Yadda saxla və davam et'} />

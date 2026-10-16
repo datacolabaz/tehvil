@@ -10,11 +10,11 @@ export const LISTING_TONE: Record<string, 'ok' | 'warn' | 'info' | 'neutral'> = 
 export const LEAD_STATUS: Record<string, string> = { new: 'Yeni', contacted: 'Əlaqə saxlanıldı', interested: 'Maraqlıdır', meeting: 'Görüş planlandı', deal: 'Saziş', lost: 'İtirildi' };
 export const LEAD_STATUSES = ['new', 'contacted', 'interested', 'meeting', 'deal', 'lost'] as const;
 export const LEAD_TONE: Record<string, 'ok' | 'warn' | 'info' | 'neutral' | 'risk'> = { new: 'warn', contacted: 'info', interested: 'info', meeting: 'ok', deal: 'ok', lost: 'neutral' };
-export const SOURCE: Record<string, string> = { whatsapp: 'WhatsApp', instagram: 'Instagram', facebook: 'Facebook', site: 'Sayt', brokly: 'Brokly', phone: 'Telefon', other: 'Digər' };
-export const SOURCES = ['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other'] as const;
+export const SOURCE: Record<string, string> = { whatsapp: 'WhatsApp', instagram: 'Instagram', facebook: 'Facebook', site: 'Sayt', phone: 'Telefon', other: 'Digər' };
+export const SOURCES = ['whatsapp', 'instagram', 'facebook', 'site', 'phone', 'other'] as const;
 export const APPT_STATUS: Record<string, string> = { planned: 'Planlandı', done: 'Baş tutdu', cancelled: 'Ləğv edildi', rescheduled: 'Yenidən planlandı' };
 export const APPT_TONE: Record<string, 'ok' | 'warn' | 'info' | 'neutral'> = { planned: 'info', done: 'ok', cancelled: 'neutral', rescheduled: 'warn' };
-export const PORTAL: Record<string, string> = { brokly: 'Brokly.az', tap: 'Tap.az', bina: 'Bina.az', yeniemlak: 'Yeniemlak.az', instagram: 'Instagram', other: 'Digər portal' };
+export const PORTAL: Record<string, string> = { tap: 'Tap.az', bina: 'Bina.az', yeniemlak: 'Yeniemlak.az', instagram: 'Instagram', other: 'Digər portal' };
 export const PASSPORT_STATUS: Record<string, string> = { draft: 'Qaralama', published: 'Dərc olunub', archived: 'Arxiv' };
 export const HANDOVER: Record<string, string> = { pending: 'Qəbul gözləyir', accepted: 'Ev sahibi qəbul edib', revision: 'Düzəliş istənib' };
 

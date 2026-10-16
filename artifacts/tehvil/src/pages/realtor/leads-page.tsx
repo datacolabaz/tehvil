@@ -63,7 +63,7 @@ export function RealtorLeadsPage() {
       </div>
     </div>
     {leads.isLoading ? <Skeleton rows={3} /> : !leads.data?.length
-      ? <Empty icon={<UserPlus size={28} />} title="Hələ lead yoxdur" text="WhatsApp, Instagram, Facebook, sayt, Brokly və ya telefondan gələn müştəriləri əlavə edin. Pasport səhifəsindən gələn sorğular avtomatik düşür." action={<button type="button" className="button button-primary" onClick={() => setCreating(true)}><Plus size={16} />İlk leadi əlavə et</button>} />
+      ? <Empty icon={<UserPlus size={28} />} title="Hələ lead yoxdur" text="WhatsApp, Instagram, Facebook, sayt və ya telefondan gələn müştəriləri əlavə edin. Pasport səhifəsindən gələn sorğular avtomatik düşür." action={<button type="button" className="button button-primary" onClick={() => setCreating(true)}><Plus size={16} />İlk leadi əlavə et</button>} />
       : view === 'board'
         ? <div className="rl-board">{LEAD_STATUSES.map(st => {
           const col = rows.filter(l => l.status === st);

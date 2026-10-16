@@ -104,7 +104,7 @@ export const realtorLeadsTable = pgTable("realtor_leads", {
   listingId: uuid("listing_id").references(() => realtorListingsTable.id, { onDelete: "set null" }),
   fullName: text("full_name").notNull(),
   phone: varchar("phone", { length: 32 }).notNull().default(""),
-  source: varchar("source", { length: 16 }).notNull(), // whatsapp | instagram | facebook | site | brokly | phone | other
+  source: varchar("source", { length: 16 }).notNull(), // whatsapp | instagram | facebook | site | phone | other
   status: varchar("status", { length: 16 }).notNull().default("new"), // new | contacted | interested | meeting | deal | lost
   dealType: varchar("deal_type", { length: 12 }), // sale | rent
   district: text("district").notNull().default(""),

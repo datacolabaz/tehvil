@@ -5890,7 +5890,7 @@ export const GetRealtorOverviewResponse = zod.object({
   "listingTitle": zod.string().nullable(),
   "fullName": zod.string(),
   "phone": zod.string(),
-  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'phone', 'other']),
   "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
   "dealType": zod.string().nullable(),
   "district": zod.string(),
@@ -5916,7 +5916,7 @@ export const GetRealtorOverviewResponse = zod.object({
   "listingTitle": zod.string().nullable(),
   "fullName": zod.string(),
   "phone": zod.string(),
-  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'phone', 'other']),
   "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
   "dealType": zod.string().nullable(),
   "district": zod.string(),
@@ -6204,7 +6204,7 @@ export const ListRealtorListingsResponseItem = zod.object({
   "status": zod.enum(['active', 'pending', 'sold', 'archived']),
   "description": zod.string(),
   "externalLinks": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(listRealtorListingsResponseExternalLinksItemUrlMin).max(listRealtorListingsResponseExternalLinksItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -6270,7 +6270,7 @@ export const CreateRealtorListingBody = zod.object({
   "status": zod.enum(['active', 'pending', 'sold', 'archived']),
   "description": zod.string().max(createRealtorListingBodyDescriptionMax),
   "externalLinks": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(createRealtorListingBodyExternalLinksItemUrlMin).max(createRealtorListingBodyExternalLinksItemUrlMax)
 })).max(createRealtorListingBodyExternalLinksMax),
   "photoIds": zod.array(zod.string().uuid()).max(createRealtorListingBodyPhotoIdsMax)
@@ -6298,7 +6298,7 @@ export const CreateRealtorListingResponse = zod.object({
   "status": zod.enum(['active', 'pending', 'sold', 'archived']),
   "description": zod.string(),
   "externalLinks": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(createRealtorListingResponseExternalLinksItemUrlMin).max(createRealtorListingResponseExternalLinksItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -6321,7 +6321,7 @@ export const CreateRealtorListingResponse = zod.object({
 
 
 /**
- * @summary Read a Brokly.az, Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
+ * @summary Read a Tap.az, Bina.az or other supported portal page and prefill a listing (best effort)
  */
 export const importRealtorListingBodyUrlMin = 8;
 export const importRealtorListingBodyUrlMax = 500;
@@ -6334,7 +6334,7 @@ export const ImportRealtorListingBody = zod.object({
 
 export const ImportRealtorListingResponse = zod.object({
   "url": zod.string(),
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "title": zod.string().nullable(),
   "description": zod.string().nullable(),
   "dealType": zod.string().nullable(),
@@ -6384,7 +6384,7 @@ export const GetRealtorListingResponse = zod.object({
   "status": zod.enum(['active', 'pending', 'sold', 'archived']),
   "description": zod.string(),
   "externalLinks": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(getRealtorListingResponseExternalLinksItemUrlMin).max(getRealtorListingResponseExternalLinksItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -6453,7 +6453,7 @@ export const UpdateRealtorListingBody = zod.object({
   "status": zod.enum(['active', 'pending', 'sold', 'archived']),
   "description": zod.string().max(updateRealtorListingBodyDescriptionMax),
   "externalLinks": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(updateRealtorListingBodyExternalLinksItemUrlMin).max(updateRealtorListingBodyExternalLinksItemUrlMax)
 })).max(updateRealtorListingBodyExternalLinksMax),
   "photoIds": zod.array(zod.string().uuid()).max(updateRealtorListingBodyPhotoIdsMax)
@@ -6481,7 +6481,7 @@ export const UpdateRealtorListingResponse = zod.object({
   "status": zod.enum(['active', 'pending', 'sold', 'archived']),
   "description": zod.string(),
   "externalLinks": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(updateRealtorListingResponseExternalLinksItemUrlMin).max(updateRealtorListingResponseExternalLinksItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -6521,7 +6521,7 @@ export const ListRealtorLeadsResponseItem = zod.object({
   "listingTitle": zod.string().nullable(),
   "fullName": zod.string(),
   "phone": zod.string(),
-  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'phone', 'other']),
   "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
   "dealType": zod.string().nullable(),
   "district": zod.string(),
@@ -6568,7 +6568,7 @@ export const CreateRealtorLeadBody = zod.object({
   "listingId": zod.string().uuid().nullish(),
   "fullName": zod.string().min(1).max(createRealtorLeadBodyFullNameMax),
   "phone": zod.string().max(createRealtorLeadBodyPhoneMax).optional(),
-  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'phone', 'other']),
   "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']).optional(),
   "dealType": zod.union([zod.literal('sale'),zod.literal('rent'),zod.literal(null)]).nullish(),
   "district": zod.string().max(createRealtorLeadBodyDistrictMax).optional(),
@@ -6589,7 +6589,7 @@ export const CreateRealtorLeadResponse = zod.object({
   "listingTitle": zod.string().nullable(),
   "fullName": zod.string(),
   "phone": zod.string(),
-  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'phone', 'other']),
   "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
   "dealType": zod.string().nullable(),
   "district": zod.string(),
@@ -6639,7 +6639,7 @@ export const UpdateRealtorLeadBody = zod.object({
   "listingId": zod.string().uuid().nullish(),
   "fullName": zod.string().min(1).max(updateRealtorLeadBodyFullNameMax).optional(),
   "phone": zod.string().max(updateRealtorLeadBodyPhoneMax).optional(),
-  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']).optional(),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'phone', 'other']).optional(),
   "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']).optional(),
   "dealType": zod.union([zod.literal('sale'),zod.literal('rent'),zod.literal(null)]).nullish(),
   "district": zod.string().max(updateRealtorLeadBodyDistrictMax).optional(),
@@ -6661,7 +6661,7 @@ export const UpdateRealtorLeadResponse = zod.object({
   "listingTitle": zod.string().nullable(),
   "fullName": zod.string(),
   "phone": zod.string(),
-  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'brokly', 'phone', 'other']),
+  "source": zod.enum(['whatsapp', 'instagram', 'facebook', 'site', 'phone', 'other']),
   "status": zod.enum(['new', 'contacted', 'interested', 'meeting', 'deal', 'lost']),
   "dealType": zod.string().nullable(),
   "district": zod.string(),
@@ -6720,7 +6720,7 @@ export const ListRealtorLeadMatchesResponseItem = zod.object({
   "status": zod.enum(['active', 'pending', 'sold', 'archived']),
   "description": zod.string(),
   "externalLinks": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(listRealtorLeadMatchesResponseExternalLinksItemUrlMin).max(listRealtorLeadMatchesResponseExternalLinksItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -6933,7 +6933,7 @@ export const ListPropertyPassportsResponseItem = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(listPropertyPassportsResponseListingUrlsItemUrlMin).max(listPropertyPassportsResponseListingUrlsItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -7060,7 +7060,7 @@ export const CreatePropertyPassportBody = zod.object({
   "price": zod.number().min(createPropertyPassportBodyPriceMin).nullish(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(createPropertyPassportBodyListingUrlsItemUrlMin).max(createPropertyPassportBodyListingUrlsItemUrlMax)
 })).max(createPropertyPassportBodyListingUrlsMax),
   "photoIds": zod.array(zod.string().uuid()).max(createPropertyPassportBodyPhotoIdsMax),
@@ -7097,7 +7097,7 @@ export const CreatePropertyPassportResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(createPropertyPassportResponseListingUrlsItemUrlMin).max(createPropertyPassportResponseListingUrlsItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -7196,7 +7196,7 @@ export const GetPropertyPassportResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(getPropertyPassportResponseListingUrlsItemUrlMin).max(getPropertyPassportResponseListingUrlsItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -7326,7 +7326,7 @@ export const UpdatePropertyPassportBody = zod.object({
   "price": zod.number().min(updatePropertyPassportBodyPriceMin).nullish(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(updatePropertyPassportBodyListingUrlsItemUrlMin).max(updatePropertyPassportBodyListingUrlsItemUrlMax)
 })).max(updatePropertyPassportBodyListingUrlsMax),
   "photoIds": zod.array(zod.string().uuid()).max(updatePropertyPassportBodyPhotoIdsMax),
@@ -7363,7 +7363,7 @@ export const UpdatePropertyPassportResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(updatePropertyPassportResponseListingUrlsItemUrlMin).max(updatePropertyPassportResponseListingUrlsItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -7476,7 +7476,7 @@ export const SetPropertyPassportStatusResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(setPropertyPassportStatusResponseListingUrlsItemUrlMin).max(setPropertyPassportStatusResponseListingUrlsItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -7604,7 +7604,7 @@ export const CreatePassportWorkResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(createPassportWorkResponseListingUrlsItemUrlMin).max(createPassportWorkResponseListingUrlsItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -7736,7 +7736,7 @@ export const UpdatePassportWorkResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(updatePassportWorkResponseListingUrlsItemUrlMin).max(updatePassportWorkResponseListingUrlsItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -7836,7 +7836,7 @@ export const DeletePassportWorkResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(deletePassportWorkResponseListingUrlsItemUrlMin).max(deletePassportWorkResponseListingUrlsItemUrlMax)
 })),
   "photoIds": zod.array(zod.string()),
@@ -8096,7 +8096,7 @@ export const GetPublicPassportResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(getPublicPassportResponseListingUrlsItemUrlMin).max(getPublicPassportResponseListingUrlsItemUrlMax)
 })),
   "photos": zod.array(zod.object({
@@ -8343,7 +8343,7 @@ export const GetOwnerConfirmationResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(getOwnerConfirmationResponsePassportListingUrlsItemUrlMin).max(getOwnerConfirmationResponsePassportListingUrlsItemUrlMax)
 })),
   "photos": zod.array(zod.object({
@@ -8441,7 +8441,7 @@ export const DecideOwnerWorkResponse = zod.object({
   "price": zod.number().nullable(),
   "currency": zod.enum(['AZN', 'USD']),
   "listingUrls": zod.array(zod.object({
-  "portal": zod.enum(['brokly', 'tap', 'bina', 'yeniemlak', 'instagram', 'other']),
+  "portal": zod.enum(['tap', 'bina', 'yeniemlak', 'instagram', 'other']),
   "url": zod.string().min(decideOwnerWorkResponsePassportListingUrlsItemUrlMin).max(decideOwnerWorkResponsePassportListingUrlsItemUrlMax)
 })),
   "photos": zod.array(zod.object({
