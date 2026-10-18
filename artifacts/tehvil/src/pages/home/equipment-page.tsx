@@ -7,7 +7,7 @@ import { Field, PageHeading } from '@/components/kit';
 import { Empty, HomeToaster, MediaUpload, Modal, Pill, Select, Skeleton, WorkerAvatar, opts, toast } from '@/components/home/ui';
 import { EQUIP_CATEGORY, WORK_STATUS, day, refreshHomeData, today } from '@/lib/home/labels';
 import { HomeMissing, useHome } from './home-pages';
-import { WorkFormModal } from './work-page';
+import { QuickWorkModal } from './quick-work';
 
 function warranty(e: Equipment) {
   if (!e.warrantyUntil) return null;
@@ -31,9 +31,9 @@ export function HomeEquipmentPage({ homeId }: { homeId: string }) {
   const canAdd = role === 'owner' || role === 'technician' || role === 'performer';
   const list = q.data ?? [];
   return <>
-    <PageHeading eyebrow={home.data.home.name} title="Avadanlıqlar" description="Kombi, kondisioner, su filtri, elektrik paneli… Marka, model, seriya nömrəsi, zəmanət, quraşdıran usta və texniki xidmət tarixçəsi."
+    <PageHeading eyebrow={home.data.home.name} title="Avadanlıqlar" description="Kombi, kondisioner, su filtri, elektrik paneli… Kim quraşdırıb, zəmanət nə vaxt bitir, nə vaxt baxımdan keçib."
       action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')} data-testid="button-add-equipment"><Plus size={16} />Avadanlıq əlavə et</button> : undefined} />
-    {!list.length ? <Empty icon={<Boxes size={28} />} title="Reyestr boşdur" text="Avadanlığı əlavə edin və quraşdırma işinə bağlayın — kim quraşdırıb və zəmanət nə vaxt bitir, həmişə görünəcək." />
+    {!list.length ? <Empty icon={<Boxes size={28} />} title="Hələ avadanlıq əlavə etməmisiniz" text="Kombi, kondisioner, su filtri — əlavə edin ki, kim quraşdırıb və zəmanət nə vaxt bitir, həmişə əlinizin altında olsun." />
       : <div className="hp-equip-grid">{list.map(e => <article key={e.id} className="surface hp-equip" data-testid={`card-equipment-${e.id}`}>
         <div className="hp-equip-photo">{e.photoUrl ? <img src={e.photoUrl} alt="" loading="lazy" /> : <Boxes size={26} />}</div>
         <div className="hp-equip-body">
@@ -44,16 +44,16 @@ export function HomeEquipmentPage({ homeId }: { homeId: string }) {
           {e.installWorkTitle && <p className="hp-kvline"><b>Quraşdırma:</b> <Link href={`/works/${e.installWorkId}`}>{e.installWorkTitle}</Link></p>}
           {e.installers.length > 0 && <div className="hp-installers">{e.installers.map(w => <Link key={w.id} href={w.registered ? `/workers/${w.id}` : '#'} className="hp-installer"><WorkerAvatar w={w} size={22} />{w.displayName}</Link>)}</div>}
           {e.notes && <p className="hp-text">{e.notes}</p>}
-          <div className="hp-services"><b><Wrench size={13} className="sm-ii" /> Xidmət tarixçəsi</b>{e.services.length ? <ul>{e.services.map(s => <li key={s.id}><Link href={`/works/${s.id}`}>{s.title}</Link><small>{day(s.startDate)} · {WORK_STATUS[s.status]}</small></li>)}</ul> : <small className="rl-hint">Qeyd yoxdur.</small>}</div>
+          <div className="hp-services"><b><Wrench size={13} className="sm-ii" /> Baxım və təmir</b>{e.services.length ? <ul>{e.services.map(s => <li key={s.id}><Link href={`/works/${s.id}`}>{s.title}</Link><small>{day(s.startDate)} · {WORK_STATUS[s.status]}</small></li>)}</ul> : <small className="rl-hint">Qeyd yoxdur.</small>}</div>
           <div className="hp-prow-actions">
-            {home.data!.home.permissions.addWorks && <button type="button" className="sm-link-btn" onClick={() => setService(e)}><Plus size={13} />Xidmət / təmir qeydi</button>}
+            {home.data!.home.permissions.addWorks && <button type="button" className="sm-link-btn" onClick={() => setService(e)}><Plus size={13} />Baxım və ya təmir qeyd et</button>}
             {(role === 'owner' || role === 'technician' || role === 'performer') && <button type="button" className="sm-link-btn" onClick={() => setEditing(e)}><Pencil size={13} />Dəyiş</button>}
             {role === 'owner' && <button type="button" className="sm-link-btn danger" onClick={() => remove.mutate({ equipmentId: e.id }, { onSuccess: () => { void refreshHomeData(qc); toast('Avadanlıq silindi'); } })}><Trash2 size={13} />Sil</button>}
           </div>
         </div>
       </article>)}</div>}
     {editing && <EquipmentModal homeId={homeId} item={editing === 'new' ? undefined : editing} performer={role === 'performer'} onClose={() => setEditing(null)} />}
-    {service && <WorkFormModal homeId={homeId} kind="maintenance" onClose={() => setService(null)} onSaved={id => setLocation(`/works/${id}`)} key={service.id} />}
+    {service && <QuickWorkModal homeId={homeId} equipmentId={service.id} roomId={service.roomId ?? undefined} category={service.category === 'air_conditioner' ? 'hvac' : service.category === 'boiler' || service.category === 'water_heater' ? 'heating' : 'other'} onClose={() => setService(null)} onSaved={id => setLocation(`/works/${id}`)} key={service.id} />}
     <HomeToaster />
   </>;
 }
@@ -72,7 +72,7 @@ function EquipmentModal({ homeId, item, performer, onClose }: { homeId: string; 
     const done = { onSuccess: () => { void refreshHomeData(qc); toast(item ? 'Avadanlıq yeniləndi' : 'Avadanlıq əlavə olundu'); onClose(); } };
     if (item) update.mutate({ equipmentId: item.id, data }, done); else create.mutate({ homeId, data }, done);
   };
-  return <Modal open onClose={onClose} eyebrow="Avadanlıq reyestri" title={item ? 'Avadanlığı dəyiş' : 'Yeni avadanlıq'} wide
+  return <Modal open onClose={onClose} eyebrow="Avadanlıqlar" title={item ? 'Avadanlığı dəyiş' : 'Yeni avadanlıq'} wide
     footer={<button type="button" className="button button-primary" onClick={save} disabled={!form.name.trim() || create.isPending || update.isPending || (performer && !form.installWorkId)} data-testid="button-save-equipment">Yadda saxla</button>}>
     <div className="rl-form">
       <div className="field-grid"><Field label="Ad" name="eq-name" required value={form.name} onChange={set('name')} placeholder="məs. Kombi" /><Select label="Kateqoriya" name="eq-category" value={form.category} onChange={set('category')} options={opts(EQUIP_CATEGORY)} /></div>
@@ -83,7 +83,7 @@ function EquipmentModal({ homeId, item, performer, onClose }: { homeId: string; 
       <Field label="Qeyd" name="eq-notes"><textarea rows={2} maxLength={3000} value={form.notes} onChange={e => set('notes')(e.target.value)} /></Field>
       <div className="field"><span>Foto (etiket, seriya nömrəsi)</span>{photoUrl && <img src={photoUrl} alt="" className="hp-eq-photo-preview" />}
         <MediaUpload target={performer ? { workId: form.installWorkId || undefined } : { homeId }} phases={false} videos={false} label={photoUrl ? 'Fotonu dəyiş' : 'Foto əlavə et'} onDone={m => { if (m[0]) { set('photoMediaId')(m[0].id); setPhotoUrl(m[0].url); } }} /></div>
-      <small className="rl-hint">Quraşdıran usta avtomatik olaraq quraşdırma işinin iştirakçılarından götürülür.</small>
+      <small className="rl-hint">Quraşdırma işini seçsəniz, quraşdıran usta avtomatik göstəriləcək.</small>
     </div>
   </Modal>;
 }

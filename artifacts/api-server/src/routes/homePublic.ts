@@ -113,7 +113,7 @@ async function publicHomeDto(home: HomeRow, opts: { mode: "qr" } | { mode: "shar
         const wk = workers.get(p.workerId)!;
         // A name typed by the owner for a non-registered person is not published.
         const registered = wk.status === "active" && p.status === "accepted";
-        return { id: registered ? wk.id : "", displayName: registered ? wk.displayName : "Qeydiyyatsız icraçı", kind: wk.kind, role: p.role, profilePublic: registered };
+        return { id: registered ? wk.id : "", displayName: registered ? wk.displayName : "Usta (hesabı yoxdur)", kind: wk.kind, role: p.role, profilePublic: registered };
       }),
       photos: media.filter((m) => m.workId === w.id && m.contentType.startsWith("image/") && (technical || m.phase !== "hidden" || !!share)).map((m) => homeMediaUrl(m.id, share?.token)),
       confirmed: w.status === "confirmed", inspected: !!w.inspectedAt, description: w.description, materials: share ? w.materials : "",

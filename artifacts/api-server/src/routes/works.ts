@@ -30,7 +30,7 @@ import {
   workParticipantsTable,
   workRecordsTable,
 } from "@workspace/db";
-import { audit, canManageWorker, diff, getWorkAccess, loadActor, workPermissions, type WorkAccess } from "../lib/homeAccess";
+import { audit, canManageWorker, diff, getWorkAccess, loadActor, manages, workPermissions, type WorkAccess } from "../lib/homeAccess";
 import { workDetail } from "../lib/homeDtos";
 import { bad, forbidden, noStore, notFound, workValues } from "./homes";
 
@@ -61,7 +61,7 @@ router.patch("/works/:workId", async (req, res): Promise<void> => {
   const a = await work(req, res, p.data.workId);
   if (!a) return;
   if (!workPermissions(a).edit) return forbidden(res, a.work.status === "confirmed" ? "Təsdiqlənmiş işi yalnız ev sahibi dəyişə bilər" : undefined);
-  const owner = a.homeAccess.memberRole === "owner";
+  const owner = manages(a.homeAccess.memberRole);
   const { status: _ignored, ...input } = body.data;
   const v = await workValues(a.work.homeId, uid(req), owner, owner ? input : { ...input, smetaProjectId: undefined });
   if ("error" in v) return bad(res, v.error);
@@ -153,7 +153,7 @@ router.post("/works/:workId/participants", async (req, res): Promise<void> => {
   if (!a) return;
   if (!workPermissions(a).manageParticipants) return forbidden(res);
   const userId = uid(req);
-  const owner = a.homeAccess.memberRole === "owner";
+  const owner = manages(a.homeAccess.memberRole);
   const d = body.data;
 
   if (!d.workerId && !d.placeholder) return bad(res, "Usta seçin və ya qeydiyyatsız ustanın adını yazın");
@@ -168,14 +168,22 @@ router.post("/works/:workId/participants", async (req, res): Promise<void> => {
         status: "placeholder", createdByUserId: userId,
       }).returning();
       await tx.insert(workParticipantsTable).values({ workId: a.work.id, workerId: w.id, role: d.role, status: "recorded", note: (d.note ?? "").trim(), addedByUserId: userId });
-      await audit({ homeId: a.work.homeId, workerId: w.id, actorUserId: userId, actorRole: "owner", action: "participant.recorded", entityType: "work", entityId: a.work.id, summary: `${w.displayName} — ${d.role} (qeydiyyatsız)` }, tx);
+      await audit({ homeId: a.work.homeId, workerId: w.id, actorUserId: userId, actorRole: a.role, action: "participant.recorded", entityType: "work", entityId: a.work.id, summary: `${w.displayName} — ${d.role} (qeydiyyatsız)` }, tx);
     });
     res.json(await detail(req, a.work.id));
     return;
   }
 
   const [worker] = await db.select().from(workersTable).where(eq(workersTable.id, d.workerId!));
-  if (!worker || worker.status !== "active") return bad(res, "Usta profili tapılmadı");
+  // A master without an account may be picked again, but only by the owner / a member of a home where they already worked.
+  let reusePlaceholder = false;
+  if (worker?.status === "placeholder" && owner) {
+    const [here] = await db.select({ id: workParticipantsTable.id }).from(workParticipantsTable)
+      .innerJoin(workRecordsTable, eq(workRecordsTable.id, workParticipantsTable.workId))
+      .where(and(eq(workParticipantsTable.workerId, worker.id), eq(workRecordsTable.homeId, a.work.homeId))).limit(1);
+    reusePlaceholder = !!here;
+  }
+  if (!worker || (worker.status !== "active" && !reusePlaceholder)) return bad(res, "Usta profili tapılmadı");
   let viaTeamId: string | null = null;
   if (!owner) {
     // A team leader / company representative adds only active members of their own team that already takes part.
@@ -192,7 +200,7 @@ router.post("/works/:workId/participants", async (req, res): Promise<void> => {
     viaTeamId = team.id;
   }
   // The invited performer confirms; only one's own profiles are accepted immediately.
-  const status = a.homeAccess.actor.actingIds.includes(worker.id) ? "accepted" : "invited";
+  const status = reusePlaceholder ? "recorded" : a.homeAccess.actor.actingIds.includes(worker.id) ? "accepted" : "invited";
   const [existing] = await db.select().from(workParticipantsTable).where(and(eq(workParticipantsTable.workId, a.work.id), eq(workParticipantsTable.workerId, worker.id)));
   if (existing && !["removed", "declined"].includes(existing.status)) return bad(res, "Bu usta artıq bu işdə qeyd olunub");
   await db.transaction(async (tx) => {
@@ -216,14 +224,20 @@ router.patch("/works/:workId/participants/:participantId", async (req, res): Pro
   if (!a) return;
   const [row] = await db.select().from(workParticipantsTable).where(and(eq(workParticipantsTable.id, p.data.participantId), eq(workParticipantsTable.workId, a.work.id)));
   if (!row) return notFound(res, "İştirakçı tapılmadı");
-  const owner = a.homeAccess.memberRole === "owner";
+  const owner = manages(a.homeAccess.memberRole);
   const teamManager = !!row.viaTeamId && a.homeAccess.actor.managed.some((m) => m.id === row.viaTeamId) && workPermissions(a).manageParticipants;
   if (!owner && !teamManager) return forbidden(res);
   const values: Partial<typeof row> = {};
   if (body.data.role) values.role = body.data.role;
   if (body.data.note !== undefined) values.note = body.data.note.trim();
   if (body.data.status === "removed") values.status = "removed";
-  const changes = diff(row as unknown as Record<string, unknown>, values, ["role", "note", "status"]);
+  // Per-work permissions: only the owner / a home member decides what a participant may change.
+  for (const k of ["canAddMedia", "canAddNotes", "canEdit"] as const) {
+    if (body.data[k] === undefined) continue;
+    if (!owner) return forbidden(res, "İcazələri yalnız ev sahibi və ya ev üzvü dəyişə bilər");
+    values[k] = body.data[k];
+  }
+  const changes = diff(row as unknown as Record<string, unknown>, values, ["role", "note", "status", "canAddMedia", "canAddNotes", "canEdit"]);
   if (Object.keys(changes).length) {
     await db.update(workParticipantsTable).set(values).where(eq(workParticipantsTable.id, row.id));
     const [w] = await db.select({ name: workersTable.displayName }).from(workersTable).where(eq(workersTable.id, row.workerId));

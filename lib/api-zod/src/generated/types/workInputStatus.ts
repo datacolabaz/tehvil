@@ -12,4 +12,5 @@ export type WorkInputStatus = typeof WorkInputStatus[keyof typeof WorkInputStatu
 export const WorkInputStatus = {
   planned: 'planned',
   in_progress: 'in_progress',
+  completed: 'completed',
 } as const;

@@ -62,7 +62,7 @@ S["HomeSummary"] = {"id": "str", "publicId": "str", "name": "str", "propertyType
 S["HomeRoom"] = {"id": "str", "name": "str", "kind": "str", "floor": "str", "areaM2": "int?", "condition": "str", "notes": "str", "position": "int", "works": "int", "equipment": "int", "infrastructure": "int", "photoUrl": "str?"}
 S["HomeRoomInput"] = {"name": "str(1,120)", "kind~": "enum:living|bedroom|kitchen|bathroom|toilet|hall|balcony|utility|other", "floor~": "str(0,20)", "areaM2~": "int?", "condition~": "enum:good|needs_repair|in_progress|unknown", "notes~": "str(0,2000)", "position~": "int"}
 S["WorkerRef"] = {"id": "str", "kind": "str", "displayName": "str", "status": "str", "photoUrl": "str?", "specialties": "[str]", "registered": "bool", "identityVerified": "bool"}
-S["Participant"] = {"id": "str", "worker": "WorkerRef", "role": "str", "status": "str", "viaTeamId": "str?", "viaTeamName": "str?", "note": "str", "invitedAt": "dt", "respondedAt": "dt?", "isMe": "bool", "phone": "str?"}
+S["Participant"] = {"id": "str", "worker": "WorkerRef", "role": "str", "status": "str", "viaTeamId": "str?", "viaTeamName": "str?", "note": "str", "invitedAt": "dt", "respondedAt": "dt?", "isMe": "bool", "phone": "str?", "canAddMedia": "bool", "canAddNotes": "bool", "canEdit": "bool"}
 S["ParticipantBrief"] = {"workerId": "str", "name": "str", "kind": "str", "role": "str", "status": "str"}
 S["WorkSummary"] = {"id": "str", "homeId": "str", "title": "str", "category": "str", "kind": "str", "status": "str", "startDate": "str?", "endDate": "str?", "roomId": "str?", "roomName": "str?", "participants": "[ParticipantBrief]", "mediaCount": "int", "openDefects": "int", "inspected": "bool", "visibility": "str", "updatedAt": "dt"}
 S["WorkNote"] = {"id": "str", "kind": "str", "body": "str", "result": "str?", "authorRole": "str", "authorIsMe": "bool", "createdAt": "dt"}
@@ -73,11 +73,11 @@ S["ReviewInput"] = {"workerId": "uuid", "rating": "int(1,5)", "body~": "str(0,20
 S["ReportInput"] = {"reason": "str(3,300)"}
 S["WorkPermissions"] = {"edit": "bool", "manageParticipants": "bool", "addMedia": "bool", "addNote": "bool", "start": "bool", "complete": "bool", "confirm": "bool", "requestRevision": "bool", "reopen": "bool", "inspect": "bool", "review": "bool"}
 S["WorkDetail"] = {"id": "str", "homeId": "str", "homeName": "str", "title": "str", "category": "str", "kind": "str", "status": "str", "description": "str", "materials": "str", "location": "str", "startDate": "str?", "endDate": "str?", "roomId": "str?", "roomName": "str?", "equipmentId": "str?", "equipmentName": "str?", "visibility": "str", "smetaProjectId": "str?", "smetaProjectName": "str?", "completedAt": "dt?", "confirmedAt": "dt?", "inspectedAt": "dt?", "participants": "[Participant]", "media": "[HomeMedia]", "notes": "[WorkNote]", "approvals": "[WorkApproval]", "reviews": "[Review]", "myRole": "str", "permissions": "WorkPermissions", "createdAt": "dt", "updatedAt": "dt"}
-S["WorkInput"] = {"title": "str(2,200)", "category~": "enum:electrical|plumbing|sewer|heating|tiling|plaster|painting|flooring|drywall|welding|carpentry|roofing|hvac|insulation|general|other", "kind~": "enum:construction|renovation|installation|maintenance|repair|inspection", "roomId~": "uuid?", "equipmentId~": "uuid?", "description~": "str(0,6000)", "materials~": "str(0,3000)", "location~": "str(0,2000)", "startDate~": "date?", "endDate~": "date?", "visibility~": "enum:public|private", "status~": "enum:planned|in_progress", "smetaProjectId~": "uuid?"}
+S["WorkInput"] = {"title": "str(2,200)", "category~": "enum:electrical|plumbing|waterproofing|plaster|painting|flooring|doors_windows|heating|hvac|sewer|tiling|drywall|welding|carpentry|roofing|insulation|general|other", "kind~": "enum:construction|renovation|installation|maintenance|repair|inspection", "roomId~": "uuid?", "equipmentId~": "uuid?", "description~": "str(0,6000)", "materials~": "str(0,3000)", "location~": "str(0,2000)", "startDate~": "date?", "endDate~": "date?", "visibility~": "enum:public|private", "status~": "enum:planned|in_progress|completed", "smetaProjectId~": "uuid?"}
 S["WorkStatusInput"] = {"action": "enum:start|complete|confirm|request_revision|reopen", "note~": "str(0,2000)"}
 S["PlaceholderInput"] = {"name": "str(2,120)", "phone~": "str(0,32)", "specialty~": "str(0,60)"}
 S["ParticipantInput"] = {"workerId~": "uuid?", "placeholder~": "PlaceholderInput", "role": "enum:lead|team_lead|team_member|assistant|supervisor|inspector", "viaTeamId~": "uuid?", "note~": "str(0,300)"}
-S["ParticipantPatch"] = {"role~": "enum:lead|team_lead|team_member|assistant|supervisor|inspector", "status~": "enum:removed", "note~": "str(0,300)"}
+S["ParticipantPatch"] = {"role~": "enum:lead|team_lead|team_member|assistant|supervisor|inspector", "status~": "enum:removed", "note~": "str(0,300)", "canAddMedia~": "bool", "canAddNotes~": "bool", "canEdit~": "bool"}
 S["RespondInput"] = {"accept": "bool"}
 S["HomePerformerWork"] = {"id": "str", "title": "str", "status": "str", "startDate": "str?", "role": "str"}
 S["HomePerformer"] = {"worker": "WorkerRef", "roles": "[str]", "works": "[HomePerformerWork]", "phone": "str?"}
@@ -91,7 +91,7 @@ S["InfrastructureInput"] = {"roomId~": "uuid?", "workId~": "uuid?", "mediaId~": 
 S["EquipmentService"] = {"id": "str", "title": "str", "status": "str", "startDate": "str?"}
 S["Equipment"] = {"id": "str", "roomId": "str?", "roomName": "str?", "installWorkId": "str?", "installWorkTitle": "str?", "installers": "[WorkerRef]", "name": "str", "category": "str", "brand": "str", "model": "str", "serialNumber": "str", "installedAt": "str?", "warrantyUntil": "str?", "photoMediaId": "str?", "photoUrl": "str?", "notes": "str", "services": "[EquipmentService]"}
 S["EquipmentInput"] = {"name": "str(1,160)", "category~": "enum:boiler|air_conditioner|water_filter|water_heater|electrical_panel|ventilation|appliance|other", "roomId~": "uuid?", "installWorkId~": "uuid?", "brand~": "str(0,80)", "model~": "str(0,120)", "serialNumber~": "str(0,120)", "installedAt~": "date?", "warrantyUntil~": "date?", "photoMediaId~": "uuid?", "notes~": "str(0,3000)"}
-S["HomeInvitationInput"] = {"kind": "enum:work|member", "workId~": "uuid?", "role": "enum:lead|team_lead|team_member|assistant|supervisor|inspector|technician|viewer", "name~": "str(0,120)", "contact~": "str(0,254)", "placeholderWorkerId~": "uuid?"}
+S["HomeInvitationInput"] = {"kind": "enum:work|member", "workId~": "uuid?", "role": "enum:lead|team_lead|team_member|assistant|supervisor|inspector|member|contributor|viewer", "name~": "str(0,120)", "contact~": "str(0,254)", "placeholderWorkerId~": "uuid?"}
 S["TeamInvitationInput"] = {"role": "enum:member|representative", "name~": "str(0,120)", "contact~": "str(0,254)"}
 S["InvitationLink"] = {"url": "str", "expiresAt": "dt"}
 S["InvitationPreview"] = {"kind": "str", "role": "str", "status": "str", "expired": "bool", "homeName": "str?", "workTitle": "str?", "groupName": "str?", "groupKind": "str?", "name": "str", "placeholderName": "str?"}
@@ -126,6 +126,9 @@ S["PublicEquipment"] = {"id": "str", "name": "str", "category": "str", "brand": 
 S["PublicInfrastructure"] = {"id": "str", "type": "str", "label": "str", "notes": "str", "roomName": "str?", "mediaUrl": "str?", "points": "[MarkerPoint]", "source": "str", "verified": "bool"}
 S["PublicHome"] = {"publicId": "str", "name": "str", "propertyType": "str", "city": "str", "district": "str", "address": "str?", "areaM2": "int?", "roomCount": "int?", "builtYear": "int?", "stage": "str", "coverUrl": "str?", "level": "str", "rooms": "[str]", "works": "[PublicWork]", "equipment": "[PublicEquipment]", "infrastructure": "[PublicInfrastructure]", "shareLabel": "str?", "updatedAt": "dt"}
 S["IdentityInput"] = {"verified": "bool"}
+S["HideInput"] = {"hidden": "bool"}
+S["HomeWorkItem"] = {"work": "WorkSummary", "homeName": "str", "myRole": "str"}
+S["MeRoles"] = {"staff": "bool", "hasHomes": "bool", "managesHomes": "bool", "isPerformer": "bool", "hasProjects": "bool"}
 
 def ok(desc, ref, status="200", array=False):
     sch = {"type": "array", "items": {"$ref": f"#/components/schemas/{ref}"}} if array else {"$ref": f"#/components/schemas/{ref}"}
@@ -185,6 +188,8 @@ op("/reviews/{reviewId}/report", "post", "reportReview", "Report a review as wro
 op("/participations/{participantId}/respond", "post", "respondParticipation", "Accept or decline an invitation to a work", ("ParticipantId",), "RespondInput", resp=AR)
 op("/memberships/{membershipId}/respond", "post", "respondMembership", "Accept or decline a team / company invitation", ("MembershipId",), "RespondInput", resp=AR)
 op("/me/inbox", "get", "getMyInbox", "Pending invitations and works waiting for my confirmation", resp=ok("Inbox", "Inbox"))
+op("/me/home-works", "get", "listMyHomeWorks", "Repair history across all homes I own or manage", resp=ok("Works", "HomeWorkItem", array=True))
+op("/me/roles", "get", "getMyRoles", "What the signed-in account is (for a menu that shows only relevant sections)", resp=ok("Roles", "MeRoles"))
 op("/me/works", "get", "listMyWorks", "Works I take part in through any of my profiles", resp=ok("Works", "MyWork", array=True))
 op("/me/workers", "get", "getMyWorkers", "My individual profile, teams/companies I manage and my memberships", resp=ok("Profiles", "MyWorkers"))
 op("/workers", "get", "searchWorkers", "Find registered individuals, teams and companies", resp=ok("Results", "WorkerCard", array=True))
@@ -206,6 +211,7 @@ op("/home-media/{mediaId}", "get", "getHomeMedia", "Media file, after access che
 op("/home-media/{mediaId}", "delete", "deleteHomeMedia", "Hide media (uploader or owner); the file record is kept for audit", ("MediaId",), resp=AR)
 op("/public/homes/{publicId}", "get", "getPublicHome", "QR page: only what the owner made public", ("HomePublicId",), resp=ok("Home", "PublicHome"))
 op("/public/home-shares/{token}", "get", "getSharedHome", "Secret share link view", ("ShareToken",), resp=ok("Home", "PublicHome"))
+op("/staff/reviews/{reviewId}/hide", "post", "hideReview", "Tehvil.az staff hides or restores a reported review", ("ReviewId",), "HideInput", ok("Done", "ActionResult"))
 op("/admin/workers/{workerId}/identity", "post", "setWorkerIdentity", "Administrator records a separate identity/business check", ("WorkerId",), "IdentityInput", ok("Saved", "Worker"))
 
 params = {}

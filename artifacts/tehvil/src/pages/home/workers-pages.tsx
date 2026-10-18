@@ -16,35 +16,35 @@ export function WorkersPage() {
   const mine = useGetMyWorkers();
   const respond = useRespondMembership();
   const qc = useQueryClient();
-  const [creating, setCreating] = useState<WorkerInput['kind'] | null>(null);
+  const [creating, setCreating] = useState<WorkerInput['kind'] | null>(() => { const k = new URLSearchParams(window.location.search).get('create'); return k === 'individual' || k === 'team' || k === 'company' ? k : null; });
   const [picked, setPicked] = useState<WorkerRef | null>(null);
   if (mine.isLoading) return <Skeleton rows={3} />;
   const d = mine.data!;
   const invites = d.memberships.filter(m => m.status === 'invited');
   return <>
-    <PageHeading eyebrow="Ustalar və briqadalar" title="Usta profilləri" description="Fərdi usta, briqada (qeyri-rəsmi komanda) və ya şirkət kimi profil yaradın. VÖEN tələb olunmur. Telefonunuz yalnız sizin icazənizlə və işlədiyiniz evlərin sahiblərinə görünür." />
+    <PageHeading eyebrow="Usta və şirkətlər" title="Usta və şirkətlər" description="Usta kimi işləyirsinizsə, özünüzə hesab yaradın. Briqadanız və ya şirkətiniz varsa, onu da əlavə edin. VÖEN tələb olunmur. Telefonunuzu yalnız sizinlə işləyən ev sahibləri görür." />
     {invites.map(m => <div key={m.id} className="hp-invite-banner"><UsersRound size={18} /><span><b>{m.group.displayName}</b> sizi {MEMBER_ROLE[m.role]?.toLowerCase()} kimi dəvət edir.</span>
       <div className="hp-actions"><button type="button" className="button button-primary" onClick={() => respond.mutate({ membershipId: m.id, data: { accept: true } }, { onSuccess: () => { void refreshHomeData(qc); toast('Komandaya qoşuldunuz'); } })}><Check size={15} />Qəbul et</button>
         <button type="button" className="button button-quiet" onClick={() => respond.mutate({ membershipId: m.id, data: { accept: false } }, { onSuccess: () => void refreshHomeData(qc) })}><X size={15} />İmtina</button></div></div>)}
     <div className="hp-two">
       <section className="surface hp-section">
-        <h2><UserRound size={15} className="sm-ii" /> Fərdi profilim</h2>
+        <h2><UserRound size={15} className="sm-ii" /> Usta kimi hesabım</h2>
         {d.individual ? <><WorkerLine w={d.individual as unknown as WorkerRef} href={`/workers/${d.individual.id}`} sub={[d.individual.specialties.join(', '), d.individual.city].filter(Boolean).join(' · ')} />
           <div className="hp-home-meta"><span><b>{d.individual.stats.works}</b> iş</span><span><b>{d.individual.stats.confirmedWorks}</b> qəbul edilmiş</span><span><b>{d.individual.stats.homes}</b> ev</span></div>
           <Link href={`/workers/${d.individual.id}`} className="button button-secondary sm-btn-sm">Profilə bax</Link></>
-          : <><p className="rl-hint">Usta kimi işləyirsinizsə, profil yaradın — ev sahibləri sizi işlərə dəvət edə biləcək, iş tarixçəniz isə avtomatik toplanacaq.</p>
-            <button type="button" className="button button-primary" onClick={() => setCreating('individual')} data-testid="button-create-individual"><Plus size={15} />Fərdi usta profili yarat</button></>}
+          : <><p className="rl-hint">Usta kimi işləyirsinizsə, hesab yaradın — ev sahibləri sizi işə əlavə edə biləcək, gördüyünüz işlər isə sizin tarixçənizdə toplanacaq.</p>
+            <button type="button" className="button button-primary" onClick={() => setCreating('individual')} data-testid="button-create-individual"><Plus size={15} />Usta kimi hesab yarat</button></>}
         {d.memberships.filter(m => m.status !== 'invited').length > 0 && <><h3 className="hp-mt">Komandalarım</h3>{d.memberships.filter(m => m.status !== 'invited').map(m => <div key={m.id} className="hp-kvline"><Link href={`/workers/${m.group.id}`}><b>{m.group.displayName}</b></Link><small>{MEMBER_ROLE[m.role]} · {MEMBER_STATUS[m.status]}{m.joinedAt ? ` · ${day(m.joinedAt)}-dən` : ''}{m.leftAt ? ` ${day(m.leftAt)}-dək` : ''}</small></div>)}</>}
       </section>
       <section className="surface hp-section">
-        <h2><UsersRound size={15} className="sm-ii" /> İdarə etdiyim briqada və şirkətlər</h2>
-        {d.managed.length ? d.managed.map(c => <WorkerLine key={c.worker.id} w={c.worker} href={`/workers/${c.worker.id}`} sub={`${c.stats.works} iş · ${c.stats.homes} ev`} />) : <p className="rl-hint">Briqadanız və ya şirkətiniz varsa, onu ayrıca profil kimi yaradın və üzvləri dəvət edin. Üzvlük işdə iştirak demək deyil — hər işdə kimin iştirak etdiyini ayrıca qeyd edirsiniz.</p>}
+        <h2><UsersRound size={15} className="sm-ii" /> Briqadam və şirkətim</h2>
+        {d.managed.length ? d.managed.map(c => <WorkerLine key={c.worker.id} w={c.worker} href={`/workers/${c.worker.id}`} sub={`${c.stats.works} iş · ${c.stats.homes} ev`} />) : <p className="rl-hint">Briqadanız və ya şirkətiniz varsa, onu əlavə edin və ustaları dəvət edin. Briqadanın hamısı avtomatik işə düşmür — hər işdə kimin işlədiyini ayrıca seçirsiniz.</p>}
         <div className="hp-actions"><button type="button" className="button button-secondary" onClick={() => setCreating('team')} data-testid="button-create-team"><UsersRound size={15} />Briqada yarat</button><button type="button" className="button button-secondary" onClick={() => setCreating('company')} data-testid="button-create-company"><Building size={15} />Şirkət yarat</button></div>
       </section>
     </div>
     <section className="surface hp-section">
-      <h2>Usta axtar</h2>
-      <p className="rl-hint">Yalnız Təhvil-də qeydiyyatdan keçmiş profillər göstərilir.</p>
+      <h2>Usta tap</h2>
+      <p className="rl-hint">Yalnız Təhvil-də hesabı olan ustalar göstərilir.</p>
       {picked ? <><WorkerLine w={picked} href={`/workers/${picked.id}`} right={<button type="button" className="icon-button" aria-label="Bağla" onClick={() => setPicked(null)}><X size={15} /></button>} /></> : <WorkerSearch onPick={setPicked} />}
     </section>
     {creating && <WorkerFormModal kind={creating} onClose={() => setCreating(null)} />}
@@ -66,16 +66,16 @@ export function WorkerFormModal({ kind, worker, onClose }: { kind: WorkerInput['
     const done = { onSuccess: () => { void refreshHomeData(qc); toast(worker ? 'Profil yeniləndi' : 'Profil yaradıldı'); onClose(); } };
     if (worker) update.mutate({ workerId: worker.id, data }, done); else create.mutate({ data: { ...data, kind } }, done);
   };
-  return <Modal open onClose={onClose} eyebrow={WORKER_KIND[kind]} title={worker ? 'Profili redaktə et' : `${WORKER_KIND[kind]} profili`} wide
+  return <Modal open onClose={onClose} eyebrow={WORKER_KIND[kind]} title={worker ? 'Məlumatları dəyiş' : kind === 'individual' ? 'Usta kimi hesab' : kind === 'team' ? 'Briqada əlavə et' : 'Şirkət əlavə et'} wide
     footer={<button type="submit" form="worker-form" className="button button-primary" disabled={form.displayName.trim().length < 2 || create.isPending || update.isPending} data-testid="button-save-worker">Yadda saxla</button>}>
     <form id="worker-form" className="rl-form" onSubmit={submit}>
       <Field label={kind === 'individual' ? 'Ad, soyad' : kind === 'team' ? 'Briqadanın adı' : 'Şirkətin adı'} name="worker-name" required value={form.displayName} onChange={set('displayName')} />
-      <div className="field-grid"><Field label="İxtisaslar (vergüllə)" name="worker-specialties" value={form.specialties} onChange={set('specialties')} placeholder="elektrik, santexnika" /><Field label="Təcrübə (il)" name="worker-exp" type="number" min="0" max="80" value={form.experienceYears} onChange={set('experienceYears')} /></div>
+      <div className="field-grid"><Field label="Hansı işləri görürsünüz? (vergüllə)" name="worker-specialties" value={form.specialties} onChange={set('specialties')} placeholder="məs. elektrik, santexnika" /><Field label="Təcrübə (il)" name="worker-exp" type="number" min="0" max="80" value={form.experienceYears} onChange={set('experienceYears')} /></div>
       <div className="field-grid"><Field label="Şəhər" name="worker-city" value={form.city} onChange={set('city')} /><Field label="Xidmət ərazisi" name="worker-area" value={form.serviceArea} onChange={set('serviceArea')} placeholder="məs. Bakı və Abşeron" /></div>
       <Field label="Haqqında" name="worker-about"><textarea rows={3} maxLength={3000} value={form.about} onChange={e => set('about')(e.target.value)} /></Field>
       <div className="field-grid"><Field label="Telefon" name="worker-phone" type="tel" value={form.phone} onChange={set('phone')} /><Field label="E-poçt" name="worker-email" type="email" value={form.email} onChange={set('email')} /></div>
-      <label className="rl-check"><input type="checkbox" checked={form.publicContact} onChange={e => set('publicContact')(e.target.checked)} /><span>Əlaqə məlumatlarımı açıq profildə göstər. <small>Seçilməsə, yalnız sizinlə işləyən ev sahibləri görür.</small></span></label>
-      {kind === 'company' && <div className="field-grid"><Field label="Hüquqi ad (istəyə görə)" name="worker-legal" value={form.legalName} onChange={set('legalName')} /><Field label="VÖEN (istəyə görə, açıq göstərilmir)" name="worker-tax" value={form.taxId} onChange={set('taxId')} /></div>}
+      <label className="rl-check"><input type="checkbox" checked={form.publicContact} onChange={e => set('publicContact')(e.target.checked)} /><span>Telefonum hamıya görünsün. <small>Seçməsəniz, telefonu yalnız sizinlə işləyən ev sahibləri görür.</small></span></label>
+      {kind === 'company' && <div className="field-grid"><Field label="Rəsmi adı (istəyə bağlı)" name="worker-legal" value={form.legalName} onChange={set('legalName')} /><Field label="VÖEN (istəyə bağlı, heç kimə göstərilmir)" name="worker-tax" value={form.taxId} onChange={set('taxId')} /></div>}
     </form>
   </Modal>;
 }
@@ -127,13 +127,13 @@ export function WorkerProfilePage({ workerId, publicView = false }: { workerId: 
     </div>
 
     {group && <section className="surface hp-section">
-      <div className="section-head"><h2>Üzvlər</h2>{manage && <div className="hp-actions"><button type="button" className="button button-secondary sm-btn-sm" onClick={() => setAdding(true)} data-testid="button-add-member"><UserPlus size={14} />Usta əlavə et</button></div>}</div>
+      <div className="section-head"><h2>Üzvlər</h2>{manage && <div className="hp-actions"><button type="button" className="button button-secondary sm-btn-sm" onClick={() => setAdding(true)} data-testid="button-add-member"><UserPlus size={14} />Briqadaya usta əlavə et</button></div>}</div>
       {!w.members.length && <p className="rl-hint">Üzv yoxdur.</p>}
       {w.members.map(m => <div key={m.id} className={`hp-prow ${m.status === 'active' ? '' : 'muted'}`}>
         <WorkerLine w={m.member} href={`/workers/${m.member.id}`} sub={`${MEMBER_ROLE[m.role]}${m.joinedAt ? ` · ${day(m.joinedAt)}-dən` : ''}${m.leftAt ? ` ${day(m.leftAt)}-dək` : ''}`} right={<Pill small tone={m.status === 'active' ? 'ok' : m.status === 'invited' ? 'warn' : 'neutral'}>{MEMBER_STATUS[m.status]}</Pill>} />
         {manage && (m.status === 'active' || m.status === 'invited') && m.role !== 'leader' && <div className="hp-prow-actions"><button type="button" className="sm-link-btn danger" onClick={() => updateMember.mutate({ workerId: w.id, membershipId: m.id, data: { status: 'removed' } }, { onSuccess: () => { refresh(); toast('Üzv çıxarıldı; keçmiş işləri tarixçədə qalır'); } })}><Trash2 size={12} />Komandadan çıxar</button></div>}
       </div>)}
-      {manage && (link ? <div className="hp-linkbox"><small>Qeydiyyatsız ustaya bu linki göndərin. Usta qeydiyyatdan keçib linki açanda komandaya qoşulacaq.</small><code>{link}</code><CopyButton text={link} /></div>
+      {manage && (link ? <div className="hp-linkbox"><small>Hesabı olmayan ustaya bu linki göndərin. Usta hesab açıb linki açanda briqadaya qoşulacaq.</small><code>{link}</code><CopyButton text={link} /></div>
         : <div className="hp-inline-form"><Seg label="Dəvət linki ilə" value={role} options={[['member', 'Üzv'], ['representative', 'Nümayəndə']]} onChange={setRole} /><button type="button" className="button button-quiet" onClick={() => invite.mutate({ workerId: w.id, data: { role } }, { onSuccess: r => setLink(r.url) })} data-testid="button-team-link"><Link2 size={14} />Link yarat</button></div>)}
       <p className="rl-hint">Üzvün komandadan ayrılması onun keçmiş işlərini silmir — həm üzvün, həm də komandanın tarixçəsində qalır.</p>
     </section>}
@@ -144,8 +144,8 @@ export function WorkerProfilePage({ workerId, publicView = false }: { workerId: 
     </section>}
 
     <section className="surface hp-section">
-      <div className="section-head"><h2><HardHat size={15} className="sm-ii" /> İş tarixçəsi</h2><span className="count-chip">{w.history.length}</span></div>
-      {!manage && <p className="rl-hint">Yalnız ev sahiblərinin qəbul etdiyi və paylaşmağa icazə verdiyi işlər göstərilir. Ünvanlar göstərilmir.</p>}
+      <div className="section-head"><h2><HardHat size={15} className="sm-ii" /> Gördüyü işlər</h2><span className="count-chip">{w.history.length}</span></div>
+      {!manage && <p className="rl-hint">Yalnız ev sahibinin təsdiqlədiyi və göstərməyə icazə verdiyi işlər. Ünvanlar göstərilmir.</p>}
       {!w.history.length ? <Empty icon={<HardHat size={24} />} title="Hələ iş yoxdur" text={manage ? 'Ev sahibi sizi işə dəvət edəndə və siz təsdiqləyəndə işlər burada görünəcək.' : 'Açıq göstərilən təsdiqlənmiş iş yoxdur.'} />
         : <ol className="hp-history">{w.history.map(h => <li key={h.workId}>
           <span className={`hp-wdot st-${h.status}`} aria-hidden />
@@ -159,7 +159,7 @@ export function WorkerProfilePage({ workerId, publicView = false }: { workerId: 
       {manage && !r.reported && (reporting === r.id ? <div className="hp-inline"><input className="hp-input" value={reason} onChange={e => setReason(e.target.value)} placeholder="Niyə yanlışdır?" maxLength={300} /><button type="button" className="button button-secondary sm-btn-sm" disabled={reason.trim().length < 3} onClick={() => report.mutate({ reviewId: r.id, data: { reason: reason.trim() } }, { onSuccess: () => { setReporting(null); refresh(); } })}>Göndər</button></div> : <button type="button" className="sm-link-btn" onClick={() => setReporting(r.id)}><ThumbsDown size={12} />Etiraz et</button>)}</div>)}</section>}
 
     {editing && <WorkerFormModal kind={w.kind as WorkerInput['kind']} worker={w} onClose={() => setEditing(false)} />}
-    {adding && <Modal open onClose={() => setAdding(false)} eyebrow={w.displayName} title="Qeydiyyatlı ustanı dəvət et" wide>
+    {adding && <Modal open onClose={() => setAdding(false)} eyebrow={w.displayName} title="Hesabı olan ustanı dəvət et" wide>
       <WorkerSearch kind="individual" exclude={w.members.filter(m => m.status === 'active' || m.status === 'invited').map(m => m.member.id)} onPick={x => addMember.mutate({ workerId: w.id, data: { memberWorkerId: x.id, role: 'member' } }, { onSuccess: () => { refresh(); setAdding(false); toast('Dəvət göndərildi'); } })} />
     </Modal>}
     <HomeToaster />

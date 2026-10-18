@@ -14,7 +14,7 @@ import {
   workRecordsTable,
 } from "@workspace/db";
 import { iso } from "./realtorCore";
-import { ownerSeesContact, workPermissions, type HomeAccess, type HomeRow, type WorkAccess, type WorkerRow, type WorkRow } from "./homeAccess";
+import { ownerSeesContact, participantCanEdit, workPermissions, type HomeAccess, type HomeRow, type WorkAccess, type WorkerRow, type WorkRow } from "./homeAccess";
 
 export type MediaRow = typeof homeMediaTable.$inferSelect;
 export type RoomRow = typeof homeRoomsTable.$inferSelect;
@@ -143,7 +143,7 @@ export async function workDetail(access: WorkAccess, userId: string) {
   ]);
   const [equipment] = work.equipmentId ? await db.select({ name: equipmentTable.name }).from(equipmentTable).where(eq(equipmentTable.id, work.equipmentId)) : [];
   const workers = await loadWorkers([...parts.map((p) => p.workerId), ...parts.map((p) => p.viaTeamId)]);
-  const owner = homeAccess.memberRole === "owner" || homeAccess.memberRole === "technician";
+  const owner = !!homeAccess.memberRole && homeAccess.memberRole !== "viewer";
   const acting = new Set(homeAccess.actor.actingIds);
   const visibleParts = parts.filter((p) => p.status !== "removed" || owner);
   return {
@@ -155,10 +155,11 @@ export async function workDetail(access: WorkAccess, userId: string) {
     participants: visibleParts.map((p) => {
       const w = workers.get(p.workerId)!;
       const isMe = acting.has(p.workerId);
-      // Contacts: only the home's owner / technician (and the profile itself) see them.
+      // Contacts: only the home's owner, members and contributors (and the profile itself) see them.
       const phone = (owner || isMe) && w.phone ? w.phone : null;
       return {
         id: p.id, worker: workerRef(w), role: p.role, status: p.status, viaTeamId: p.viaTeamId,
+        canAddMedia: p.canAddMedia, canAddNotes: p.canAddNotes, canEdit: participantCanEdit(p),
         viaTeamName: p.viaTeamId ? workers.get(p.viaTeamId)?.displayName ?? null : null, note: p.note,
         invitedAt: p.invitedAt.toISOString(), respondedAt: iso(p.respondedAt), isMe, phone,
       };

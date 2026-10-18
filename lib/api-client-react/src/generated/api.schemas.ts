@@ -3216,6 +3216,9 @@ export interface Participant {
   isMe: boolean;
   /** @nullable */
   phone: string | null;
+  canAddMedia: boolean;
+  canAddNotes: boolean;
+  canEdit: boolean;
 }
 
 export interface ParticipantBrief {
@@ -3401,17 +3404,19 @@ export type WorkInputCategory = typeof WorkInputCategory[keyof typeof WorkInputC
 export const WorkInputCategory = {
   electrical: 'electrical',
   plumbing: 'plumbing',
-  sewer: 'sewer',
-  heating: 'heating',
-  tiling: 'tiling',
+  waterproofing: 'waterproofing',
   plaster: 'plaster',
   painting: 'painting',
   flooring: 'flooring',
+  doors_windows: 'doors_windows',
+  heating: 'heating',
+  hvac: 'hvac',
+  sewer: 'sewer',
+  tiling: 'tiling',
   drywall: 'drywall',
   welding: 'welding',
   carpentry: 'carpentry',
   roofing: 'roofing',
-  hvac: 'hvac',
   insulation: 'insulation',
   general: 'general',
   other: 'other',
@@ -3443,6 +3448,7 @@ export type WorkInputStatus = typeof WorkInputStatus[keyof typeof WorkInputStatu
 export const WorkInputStatus = {
   planned: 'planned',
   in_progress: 'in_progress',
+  completed: 'completed',
 } as const;
 
 export interface WorkInput {
@@ -3573,6 +3579,9 @@ export interface ParticipantPatch {
      * @maxLength 300
      */
   note?: string;
+  canAddMedia?: boolean;
+  canAddNotes?: boolean;
+  canEdit?: boolean;
 }
 
 export interface RespondInput {
@@ -3817,7 +3826,8 @@ export const HomeInvitationInputRole = {
   assistant: 'assistant',
   supervisor: 'supervisor',
   inspector: 'inspector',
-  technician: 'technician',
+  member: 'member',
+  contributor: 'contributor',
   viewer: 'viewer',
 } as const;
 
@@ -4363,6 +4373,24 @@ export interface PublicHome {
 
 export interface IdentityInput {
   verified: boolean;
+}
+
+export interface HideInput {
+  hidden: boolean;
+}
+
+export interface HomeWorkItem {
+  work: WorkSummary;
+  homeName: string;
+  myRole: string;
+}
+
+export interface MeRoles {
+  staff: boolean;
+  hasHomes: boolean;
+  managesHomes: boolean;
+  isPerformer: boolean;
+  hasProjects: boolean;
 }
 
 export type GetSharedPassport200 = {

@@ -42,6 +42,15 @@ Marşrutlar: `/homes`, `/homes/:id[/history|/rooms|/rooms/:roomId|/map|/equipmen
 
 | Rol | Nə edə bilər |
 |---|---|
+| Ev sahibi (`owner`) | Hər şey, o cümlədən evə giriş vermək, paylaşım və arxiv |
+| Ev üzvü (`member`) | Ev sahibi kimi qeydləri idarə edir (otaq, iş, usta, təsdiq), amma giriş, paylaşım və arxiv yoxdur |
+| Məlumat əlavə edə bilər (`contributor`, köhnə `technician`) | Foto, qeyd, yoxlama, evdəki sistemlər, avadanlıq; xətti təsdiqləyir |
+| Yalnız baxa bilər (`viewer`) | Yalnız baxır |
+
+Köhnə sətirlər (aşağıda) ilk versiyanın təsviridir; yuxarıdakı cədvəl qüvvədədir. Ətraflı: [SIMPLE_UX.md](SIMPLE_UX.md).
+
+| Köhnə rol | |
+|---|---|
 | Ev sahibi | Hər şey: ev/otaq redaktəsi, iş yaratmaq, icraçı dəvət/qeyd/çıxarmaq, işi qəbul / düzəliş istəmək / yenidən açmaq, paylaşım, audit, arxiv |
 | Texniki mütəxəssis | Bütün texniki məlumatı görür, yoxlama qeydi yazır (işi “yoxlanılıb” edir), kommunikasiya xəttini təsdiqləyir, audit görür. Ev profilini və paylaşımı dəyişə bilməz |
 | Ailə üzvü | Baxır, təsdiqlənmiş işə rəy yaza bilər |

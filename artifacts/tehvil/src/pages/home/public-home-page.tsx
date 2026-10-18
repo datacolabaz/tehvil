@@ -6,12 +6,12 @@ import { EQUIP_CATEGORY, INFRA_COLOR, INFRA_SOURCE, INFRA_TYPE, PART_ROLE, PROPE
 
 export function PublicHomePage({ publicId }: { publicId: string }) {
   const q = useGetPublicHome(publicId, { query: { retry: false, queryKey: [`/api/public/homes/${publicId}`] } });
-  return <PublicFrame label="Evin rəqəmsal pasportu">{q.isLoading ? <Skeleton rows={3} /> : q.data ? <HomeView h={q.data} /> : <Gone text="Bu evin səhifəsi ictimai deyil və ya mövcud deyil." />}</PublicFrame>;
+  return <PublicFrame label="Evin məlumatları">{q.isLoading ? <Skeleton rows={3} /> : q.data ? <HomeView h={q.data} /> : <Gone text="Bu evin səhifəsi ictimai deyil və ya mövcud deyil." />}</PublicFrame>;
 }
 
 export function SharedHomePage({ token }: { token: string }) {
   const q = useGetSharedHome(token, { query: { retry: false, queryKey: [`/api/public/home-shares/${token}`] } });
-  return <PublicFrame label="Paylaşılan ev pasportu">{q.isLoading ? <Skeleton rows={3} /> : q.data ? <HomeView h={q.data} shared /> : <Gone text="Bu paylaşım linki aktiv deyil — ləğv edilib və ya müddəti bitib. Ev sahibindən yeni link istəyin." />}</PublicFrame>;
+  return <PublicFrame label="Paylaşılan ev məlumatları">{q.isLoading ? <Skeleton rows={3} /> : q.data ? <HomeView h={q.data} shared /> : <Gone text="Bu paylaşım linki aktiv deyil — ləğv edilib və ya müddəti bitib. Ev sahibindən yeni link istəyin." />}</PublicFrame>;
 }
 
 function PublicFrame({ label, children }: { label: string; children: React.ReactNode }) {
@@ -42,13 +42,13 @@ function HomeView({ h, shared }: { h: PublicHome; shared?: boolean }) {
           <div><dt>Tikinti ili</dt><dd>{h.builtYear ?? '—'}</dd></div>
           <div><dt>Mərhələ</dt><dd>{STAGE[h.stage]}</dd></div>
         </dl>
-        {h.works.length > 0 && <p className="hp-pub-summary"><ClipboardCheck size={15} /><b>{h.works.length}</b> iş qeydi{shared ? '' : ' — hamısı ev sahibi tərəfindən qəbul edilib'}{shared ? ` · ${confirmed} qəbul edilib` : ''}</p>}
+        {h.works.length > 0 && <p className="hp-pub-summary"><ClipboardCheck size={15} /><b>{h.works.length}</b> görülən iş{shared ? '' : ' — hamısını ev sahibi təsdiqləyib'}{shared ? ` · ${confirmed} təsdiqlənib` : ''}</p>}
       </div>
     </section>
     {h.rooms.length > 0 && <section className="surface hp-section"><h2>Otaqlar</h2><div className="hp-chips">{h.rooms.map(r => <span key={r} className="hp-chip">{r}</span>)}</div></section>}
-    {h.works.length > 0 && <section className="surface hp-section"><h2>Tikinti və təmir tarixçəsi</h2>
+    {h.works.length > 0 && <section className="surface hp-section"><h2>Təmir tarixçəsi</h2>
       <ol className="hp-pub-works">{h.works.map(w => <li key={w.id}>
-        <div className="hp-pub-work-head"><b>{w.title}</b>{w.confirmed ? <Pill small tone="ok" icon={<ClipboardCheck size={11} />}>Ev sahibi qəbul edib</Pill> : <Pill small tone="neutral">Qəbul gözləyir</Pill>}{w.inspected && <Pill small tone="ok" icon={<ShieldCheck size={11} />}>Mütəxəssis yoxlayıb</Pill>}</div>
+        <div className="hp-pub-work-head"><b>{w.title}</b>{w.confirmed ? <Pill small tone="ok" icon={<ClipboardCheck size={11} />}>Ev sahibi təsdiqləyib</Pill> : <Pill small tone="neutral">Təsdiq gözləyir</Pill>}{w.inspected && <Pill small tone="ok" icon={<ShieldCheck size={11} />}>Mütəxəssis yoxlayıb</Pill>}</div>
         <small>{[WORK_CATEGORY[w.category], WORK_KIND[w.kind], w.roomName, range(w.startDate, w.endDate)].filter(Boolean).join(' · ')}</small>
         {w.description && <p className="hp-text">{w.description}</p>}
         {w.materials && <p className="hp-text"><b>Materiallar:</b> {w.materials}</p>}
@@ -56,14 +56,14 @@ function HomeView({ h, shared }: { h: PublicHome; shared?: boolean }) {
         {w.photos.length > 0 && <div className="hp-pub-photos">{w.photos.map(u => <button key={u} type="button" onClick={() => setPhoto(u)}><img src={u} alt="" loading="lazy" /></button>)}</div>}
       </li>)}</ol></section>}
     {h.equipment.length > 0 && <section className="surface hp-section"><h2><Boxes size={15} className="sm-ii" /> Avadanlıqlar</h2>{h.equipment.map(e => <div key={e.id} className="hp-kvline"><b>{e.name}</b><small>{[EQUIP_CATEGORY[e.category], e.brand, e.model, e.roomName, e.installedAt ? `quraşdırılıb ${day(e.installedAt)}` : '', e.warrantyUntil ? `zəmanət ${day(e.warrantyUntil)}-dək` : ''].filter(Boolean).join(' · ')}</small></div>)}</section>}
-    {h.infrastructure.length > 0 && <section className="surface hp-section"><h2><Cable size={15} className="sm-ii" /> Kommunikasiya xətləri</h2>
+    {h.infrastructure.length > 0 && <section className="surface hp-section"><h2><Cable size={15} className="sm-ii" /> Evdəki sistemlər</h2>
       <div className="hp-pub-infra">{h.infrastructure.map(i => <article key={i.id} className="hp-line">
         <header><i style={{ background: INFRA_COLOR[i.type] }} /><b>{INFRA_TYPE[i.type]}</b>{i.verified && <Pill small tone="ok" icon={<BadgeCheck size={11} />}>Mütəxəssis təsdiqləyib</Pill>}</header>
         {i.label && <p><strong>{i.label}</strong></p>}{i.notes && <p className="hp-text">{i.notes}</p>}<small>{[INFRA_SOURCE[i.source], i.roomName].filter(Boolean).join(' · ')}</small>
         {i.mediaUrl && <div className="hp-photomap small"><img src={i.mediaUrl} alt="" /><svg viewBox="0 0 100 100" preserveAspectRatio="none">{i.points.length > 1 && <polyline points={i.points.map(p => `${p.x},${p.y}`).join(' ')} fill="none" stroke={INFRA_COLOR[i.type]} strokeWidth={1} vectorEffect="non-scaling-stroke" />}</svg></div>}
       </article>)}</div>
-      <p className="rl-hint">Qazma və ya sökmədən əvvəl xətlərin yerini yerində yoxlayın.</p></section>}
-    {!h.works.length && !h.equipment.length && !h.infrastructure.length && <p className="rl-hint">Ev sahibi bu səhifədə yalnız əsas məlumatı göstərir.</p>}
+      <p className="rl-hint">Divarı deşməzdən əvvəl naqil və boruların yerini yerində yoxlayın.</p></section>}
+    {!h.works.length && !h.equipment.length && !h.infrastructure.length && <p className="rl-hint">Ev sahibi burada yalnız evin ümumi məlumatlarını göstərir.</p>}
     {photo && <div className="hp-lightbox" role="dialog" aria-modal="true" onClick={() => setPhoto(null)}><img src={photo} alt="" /></div>}
   </>;
 }

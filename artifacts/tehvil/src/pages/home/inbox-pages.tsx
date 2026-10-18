@@ -2,26 +2,61 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
 import { Show } from '@clerk/react';
-import { BellRing, Check, ClipboardCheck, HardHat, Home, LoaderCircle, LogIn, UserPlus, UsersRound, X } from 'lucide-react';
-import { useAcceptHomeInvitation, useGetHomeInvitation, useGetMyInbox, useGetMyWorkers, useListMyWorks, useRespondMembership, useRespondParticipation } from '@workspace/api-client-react';
+import { BellRing, Camera, Check, ClipboardCheck, HardHat, Home, LoaderCircle, LogIn, Plus, UserPlus, UsersRound, X } from 'lucide-react';
+import { useAcceptHomeInvitation, useGetHomeInvitation, useGetMyInbox, useGetMyWorkers, useListMyHomeWorks, useListMyWorks, useRespondMembership, useRespondParticipation } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
 import { Empty, HomeToaster, Pill, Skeleton, WorkerLine, toast } from '@/components/home/ui';
 import { HOME_ROLE, MEMBER_ROLE, PART_ROLE, PART_STATUS, PART_TONE, WORKER_KIND, day, refreshHomeData } from '@/lib/home/labels';
 import { WorkRow } from './home-pages';
+import { QuickWorkModal } from './quick-work';
 
 export function MyWorksPage() {
   const q = useListMyWorks();
-  const [filter, setFilter] = useState<'all' | 'open' | 'done'>('all');
+  const [, setLocation] = useLocation();
+  const [filter, setFilter] = useState<'open' | 'done' | 'all'>(() => new URLSearchParams(window.location.search).get('tab') === 'done' ? 'done' : 'open');
+  const [adding, setAdding] = useState(false);
+  const [picking, setPicking] = useState<'' | 'photo' | 'master'>('');
   if (q.isLoading) return <Skeleton rows={3} />;
-  const list = (q.data ?? []).filter(x => filter === 'all' || (filter === 'done' ? x.work.status === 'confirmed' : x.work.status !== 'confirmed'));
+  const all = q.data ?? [];
+  const finished = (s: string) => s === 'confirmed' || s === 'completed';
+  const list = all.filter(x => filter === 'all' || (filter === 'done' ? finished(x.work.status) : !finished(x.work.status)));
+  const active = all.filter(x => x.participantStatus === 'accepted' && x.work.status !== 'confirmed');
   return <>
-    <PageHeading eyebrow="Usta paneli" title="Mənim işlərim" description="İştirak etdiyiniz bütün işlər — fərdi profilinizlə və ya idarə etdiyiniz briqada / şirkət adından, bütün evlər üzrə." />
-    <div className="rl-seg hp-tabs" role="tablist">{([['all', 'Hamısı'], ['open', 'Davam edir'], ['done', 'Qəbul edilib']] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={filter === k} className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>{l}</button>)}</div>
-    {!list.length ? <Empty icon={<HardHat size={28} />} title="İş yoxdur" text="Ev sahibi sizi işə dəvət edəndə burada görünəcək. Usta profiliniz yoxdursa, “Ustalar və briqadalar” bölməsindən yaradın." action={<Link href="/workers" className="button button-secondary">Usta profili</Link>} />
+    <PageHeading eyebrow="Usta hesabı" title="İşlərim" description="İştirak etdiyiniz bütün işlər — bütün evlər üzrə, öz adınızdan və ya briqadanız / şirkətiniz adından." />
+    <div className="hp-quick-actions">
+      <button type="button" className="hp-qa" onClick={() => setAdding(true)} data-testid="qa-new-work"><Plus size={20} /><b>Yeni iş əlavə et</b></button>
+      <button type="button" className="hp-qa" onClick={() => setPicking('photo')} disabled={!active.length} data-testid="qa-photo"><Camera size={20} /><b>Foto əlavə et</b></button>
+      <button type="button" className="hp-qa" onClick={() => setPicking('master')} disabled={!active.length}><UserPlus size={20} /><b>İşə usta əlavə et</b></button>
+    </div>
+    {picking && <section className="surface hp-section"><div className="section-head"><h2>{picking === 'photo' ? 'Hansı işə foto əlavə edirsiniz?' : 'Hansı işə usta əlavə edirsiniz?'}</h2><button type="button" className="icon-button" aria-label="Bağla" onClick={() => setPicking('')}><X size={16} /></button></div>
+      <div className="hp-wlist">{active.map(x => <button key={x.work.id} type="button" className="hp-pick" onClick={() => setLocation(`/works/${x.work.id}${picking === 'photo' ? '#photos' : '#people'}`)}><b>{x.work.title}</b><small>{x.homeName}</small></button>)}</div>
+    </section>}
+    <div className="rl-seg hp-tabs" role="tablist">{([['open', 'Davam edən'], ['done', 'Tamamlanmış işlər'], ['all', 'Hamısı']] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={filter === k} className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>{l}</button>)}</div>
+    {!list.length ? <Empty icon={<HardHat size={28} />} title={filter === 'done' ? 'Tamamlanmış iş yoxdur' : 'Hələ iş yoxdur'} text="Ev sahibi sizi işə dəvət edəndə və ya siz işə qoşulanda burada görünəcək. Dəvətlər “Mənə göndərilən dəvətlər” bölməsindədir." action={<Link href="/invitations" className="button button-secondary">Dəvətlərə bax</Link>} />
       : <div className="hp-wlist">{list.map(x => <div key={`${x.work.id}-${x.worker.id}`} className="hp-mywork">
         <WorkRow w={x.work} showHome={x.homeName} />
         <small className="hp-mywork-meta">{x.worker.displayName} ({WORKER_KIND[x.worker.kind]}) · {PART_ROLE[x.role] ?? x.role} · <Pill small tone={PART_TONE[x.participantStatus]}>{PART_STATUS[x.participantStatus]}</Pill></small>
       </div>)}</div>}
+    {adding && <QuickWorkModal onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
+    <HomeToaster />
+  </>;
+}
+
+/** "Təmir tarixçəsi" across all homes the account owns or manages. */
+export function AllHistoryPage() {
+  const q = useListMyHomeWorks();
+  const [adding, setAdding] = useState(false);
+  const [, setLocation] = useLocation();
+  if (q.isLoading) return <Skeleton rows={3} />;
+  const list = q.data ?? [];
+  const homes = new Set(list.map(x => x.homeName));
+  return <>
+    <PageHeading eyebrow="Bütün evlərim" title="Təmir tarixçəsi" description="Evlərinizdə görülən bütün işlər, tarix üzrə. İşə toxunun — fotolar, qeydlər və təsdiqlər açılacaq."
+      action={<button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-history-add"><Plus size={16} />Görülən işi əlavə et</button>} />
+    {!list.length ? <Empty icon={<ClipboardCheck size={28} />} title="Hələ görülən iş yoxdur" text="Evinizi əlavə edin, sonra görülən işləri bir neçə düymə ilə qeyd edin." action={<Link href="/homes?new=1" className="button button-primary"><Plus size={16} />Evimi əlavə et</Link>} />
+      : <div className="hp-wlist">{list.map(x => <WorkRow key={x.work.id} w={x.work} showHome={homes.size > 1 ? x.homeName : undefined} />)}</div>}
+    {adding && <QuickWorkModal onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
+    <HomeToaster />
   </>;
 }
 
@@ -34,13 +69,13 @@ export function InboxPage({ tab }: { tab: 'invitations' | 'approvals' }) {
   if (q.isLoading) return <Skeleton rows={3} />;
   const d = q.data!;
   return <>
-    <PageHeading eyebrow="Gələnlər" title={tab === 'invitations' ? 'Dəvətlər' : 'Təsdiq gözləyən qeydlər'} description={tab === 'invitations' ? 'Sizi işlərə və komandalara dəvət edənlər. Qəbul etdikdən sonra iş sizin tarixçənizə düşür.' : 'Ustaların tamamlandı kimi qeyd etdiyi işlər. Fotolara baxın, qəbul edin və ya düzəliş istəyin.'} />
-    <div className="rl-seg hp-tabs" role="tablist"><Link href="/invitations" className={tab === 'invitations' ? 'on' : ''}>Dəvətlər ({d.participations.length + d.memberships.length})</Link><Link href="/approvals" className={tab === 'approvals' ? 'on' : ''}>Təsdiq gözləyənlər ({d.approvals.length})</Link></div>
-    {tab === 'invitations' ? (!d.participations.length && !d.memberships.length ? <Empty icon={<BellRing size={28} />} title="Yeni dəvət yoxdur" text="Ev sahibi sizi işə və ya briqada rəhbəri komandaya dəvət edəndə burada görünəcək." />
+    <PageHeading eyebrow="Sizə gələnlər" title={tab === 'invitations' ? 'Mənə göndərilən dəvətlər' : 'Təsdiqinizi gözləyən işlər'} description={tab === 'invitations' ? 'Sizi işə və ya briqadaya dəvət edənlər. Təsdiqlədikdən sonra iş sizin tarixçənizə düşür.' : 'Ustanın “bitdi” dediyi işlər. Fotolara baxın, təsdiqləyin və ya düzəliş istəyin.'} />
+    <div className="rl-seg hp-tabs" role="tablist"><Link href="/invitations" className={tab === 'invitations' ? 'on' : ''}>Dəvətlər ({d.participations.length + d.memberships.length})</Link><Link href="/approvals" className={tab === 'approvals' ? 'on' : ''}>Təsdiqinizi gözləyən işlər ({d.approvals.length})</Link></div>
+    {tab === 'invitations' ? (!d.participations.length && !d.memberships.length ? <Empty icon={<BellRing size={28} />} title="Hələ dəvət yoxdur" text="Ev sahibi sizi işə və ya briqadir briqadaya dəvət edəndə burada görünəcək." />
       : <div className="hp-inbox">
         {d.participations.map(p => <article key={p.participantId} className="surface hp-inbox-item" data-testid={`invite-${p.participantId}`}>
           <HardHat size={18} /><div><b><Link href={`/works/${p.workId}`}>{p.workTitle}</Link></b><small>{p.homeName} · {PART_ROLE[p.role]} · {p.worker.displayName} ({WORKER_KIND[p.worker.kind]}) · {day(p.invitedAt)}</small></div>
-          <div className="hp-actions"><button type="button" className="button button-primary sm-btn-sm" disabled={respond.isPending} onClick={() => respond.mutate({ participantId: p.participantId, data: { accept: true } }, { onSuccess: () => { refresh(); toast('İştirak təsdiqləndi'); } })} data-testid={`accept-${p.participantId}`}><Check size={14} />Təsdiqləyirəm</button>
+          <div className="hp-actions"><button type="button" className="button button-primary sm-btn-sm" disabled={respond.isPending} onClick={() => respond.mutate({ participantId: p.participantId, data: { accept: true } }, { onSuccess: () => { refresh(); toast('İştirak təsdiqləndi'); } })} data-testid={`accept-${p.participantId}`}><Check size={14} />Bu işdə iştirak etmişəm</button>
             <button type="button" className="button button-quiet sm-btn-sm" onClick={() => respond.mutate({ participantId: p.participantId, data: { accept: false } }, { onSuccess: refresh })}><X size={14} />İmtina</button></div>
         </article>)}
         {d.memberships.map(m => <article key={m.membershipId} className="surface hp-inbox-item">
@@ -49,7 +84,7 @@ export function InboxPage({ tab }: { tab: 'invitations' | 'approvals' }) {
             <button type="button" className="button button-quiet sm-btn-sm" onClick={() => respondM.mutate({ membershipId: m.membershipId, data: { accept: false } }, { onSuccess: refresh })}><X size={14} />İmtina</button></div>
         </article>)}
       </div>)
-      : (!d.approvals.length ? <Empty icon={<ClipboardCheck size={28} />} title="Təsdiq gözləyən iş yoxdur" text="Usta işi tamamlandı kimi qeyd edəndə burada görünəcək." />
+      : (!d.approvals.length ? <Empty icon={<ClipboardCheck size={28} />} title="Təsdiqinizi gözləyən iş yoxdur" text="Usta işin bitdiyini qeyd edəndə burada görünəcək." />
         : <div className="hp-wlist">{d.approvals.map(a => <WorkRow key={a.work.id} w={a.work} showHome={a.homeName} />)}</div>)}
     <HomeToaster />
   </>;

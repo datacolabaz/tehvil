@@ -769,6 +769,9 @@ CREATE TABLE IF NOT EXISTS "work_participants" (
 	"status" varchar(12) DEFAULT 'invited' NOT NULL,
 	"via_team_id" uuid,
 	"note" varchar(300) DEFAULT '' NOT NULL,
+	"can_add_media" boolean DEFAULT true NOT NULL,
+	"can_add_notes" boolean DEFAULT true NOT NULL,
+	"can_edit" boolean,
 	"added_by_user_id" varchar(128) NOT NULL,
 	"invited_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"responded_at" timestamp with time zone,
@@ -2063,6 +2066,12 @@ ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "status" varchar(12) DE
 ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "via_team_id" uuid;
 --> statement
 ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "note" varchar(300) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "can_add_media" boolean DEFAULT true NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "can_add_notes" boolean DEFAULT true NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "can_edit" boolean;
 --> statement
 ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "added_by_user_id" varchar(128) NOT NULL;
 --> statement

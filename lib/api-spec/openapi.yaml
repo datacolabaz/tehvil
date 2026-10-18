@@ -2208,6 +2208,30 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Inbox'}
+  /me/home-works:
+    get:
+      operationId: listMyHomeWorks
+      tags: [home]
+      summary: Repair history across all homes I own or manage
+      responses:
+        '200':
+          description: Works
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/HomeWorkItem'}
+  /me/roles:
+    get:
+      operationId: getMyRoles
+      tags: [home]
+      summary: What the signed-in account is (for a menu that shows only relevant sections)
+      responses:
+        '200':
+          description: Roles
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MeRoles'}
   /me/works:
     get:
       operationId: listMyWorks
@@ -2458,6 +2482,24 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/PublicHome'}
+  /staff/reviews/{reviewId}/hide:
+    post:
+      operationId: hideReview
+      tags: [home]
+      summary: Tehvil.az staff hides or restores a reported review
+      parameters:
+      - {$ref: '#/components/parameters/ReviewId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HideInput'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
   /admin/workers/{workerId}/identity:
     post:
       operationId: setWorkerIdentity
@@ -4358,7 +4400,10 @@ components:
         isMe: {type: boolean}
         phone:
           type: [string, 'null']
-      required: [id, worker, role, status, viaTeamId, viaTeamName, note, invitedAt, respondedAt, isMe, phone]
+        canAddMedia: {type: boolean}
+        canAddNotes: {type: boolean}
+        canEdit: {type: boolean}
+      required: [id, worker, role, status, viaTeamId, viaTeamName, note, invitedAt, respondedAt, isMe, phone, canAddMedia, canAddNotes, canEdit]
     ParticipantBrief:
       type: object
       properties:
@@ -4534,7 +4579,7 @@ components:
         title: {type: string, minLength: 2, maxLength: 200}
         category:
           type: string
-          enum: [electrical, plumbing, sewer, heating, tiling, plaster, painting, flooring, drywall, welding, carpentry, roofing, hvac, insulation, general, other]
+          enum: [electrical, plumbing, waterproofing, plaster, painting, flooring, doors_windows, heating, hvac, sewer, tiling, drywall, welding, carpentry, roofing, insulation, general, other]
         kind:
           type: string
           enum: [construction, renovation, installation, maintenance, repair, inspection]
@@ -4558,7 +4603,7 @@ components:
           enum: [public, private]
         status:
           type: string
-          enum: [planned, in_progress]
+          enum: [planned, in_progress, completed]
         smetaProjectId:
           type: [string, 'null']
           format: uuid
@@ -4603,6 +4648,9 @@ components:
           type: string
           enum: [removed]
         note: {type: string, minLength: 0, maxLength: 300}
+        canAddMedia: {type: boolean}
+        canAddNotes: {type: boolean}
+        canEdit: {type: boolean}
     RespondInput:
       type: object
       properties:
@@ -4826,7 +4874,7 @@ components:
           format: uuid
         role:
           type: string
-          enum: [lead, team_lead, team_member, assistant, supervisor, inspector, technician, viewer]
+          enum: [lead, team_lead, team_member, assistant, supervisor, inspector, member, contributor, viewer]
         name: {type: string, minLength: 0, maxLength: 120}
         contact: {type: string, minLength: 0, maxLength: 254}
         placeholderWorkerId:
@@ -5316,4 +5364,25 @@ components:
       properties:
         verified: {type: boolean}
       required: [verified]
+    HideInput:
+      type: object
+      properties:
+        hidden: {type: boolean}
+      required: [hidden]
+    HomeWorkItem:
+      type: object
+      properties:
+        work: {$ref: '#/components/schemas/WorkSummary'}
+        homeName: {type: string}
+        myRole: {type: string}
+      required: [work, homeName, myRole]
+    MeRoles:
+      type: object
+      properties:
+        staff: {type: boolean}
+        hasHomes: {type: boolean}
+        managesHomes: {type: boolean}
+        isPerformer: {type: boolean}
+        hasProjects: {type: boolean}
+      required: [staff, hasHomes, managesHomes, isPerformer, hasProjects]
   # <<< HOME-PASSPORT schemas

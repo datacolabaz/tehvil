@@ -23,4 +23,7 @@ export interface Participant {
   isMe: boolean;
   /** @nullable */
   phone: string | null;
+  canAddMedia: boolean;
+  canAddNotes: boolean;
+  canEdit: boolean;
 }

@@ -22,8 +22,8 @@ export function WorkerAvatar({ w, size = 38 }: { w: Pick<WorkerRef, 'displayName
 export function WorkerBadges({ w }: { w: Pick<WorkerRef, 'kind' | 'registered' | 'identityVerified' | 'status'> }) {
   return <span className="hp-badges">
     <span className={`hp-kind kind-${w.kind}`}>{WORKER_KIND[w.kind] ?? w.kind}</span>
-    {w.registered ? <span className="hp-badge reg" title="Usta özü Təhvil-də profil yaradıb"><UserRound size={11} />Profil yaradılıb</span>
-      : <span className="hp-badge unreg" title="Ev sahibinin daxil etdiyi ad; usta hələ qeydiyyatdan keçməyib"><CircleDashed size={11} />Qeydiyyatsız</span>}
+    {w.registered ? <span className="hp-badge reg" title="Ustanın Təhvil-də öz hesabı var"><UserRound size={11} />Hesabı var</span>
+      : <span className="hp-badge unreg" title="Ev sahibinin yazdığı ad; ustanın hələ Təhvil-də hesabı yoxdur"><CircleDashed size={11} />Hesabı yoxdur</span>}
     {w.identityVerified && <span className="hp-badge id" title="Təhvil administratoru şəxsiyyəti / biznesi ayrıca yoxlayıb"><BadgeCheck size={11} />Şəxsiyyət yoxlanılıb</span>}
   </span>;
 }
@@ -40,9 +40,9 @@ export function WorkStatus({ status }: { status: string }) {
 /** Separate trust signals of a work: performer confirmation, owner confirmation, specialist inspection. */
 export function WorkTrust({ accepted, confirmed, inspected }: { accepted: boolean; confirmed: boolean; inspected: boolean }) {
   return <span className="hp-trust">
-    <span className={accepted ? 'on' : ''} title="İcraçı iştirakını öz hesabından təsdiqləyib"><HardHat size={12} />İcraçı təsdiqi</span>
-    <span className={confirmed ? 'on' : ''} title="Ev sahibi işi qəbul edib"><ClipboardCheck size={12} />Ev sahibi təsdiqi</span>
-    <span className={inspected ? 'on' : ''} title="Evə əlavə olunmuş texniki mütəxəssis yoxlayıb"><ShieldCheck size={12} />Mütəxəssis yoxlaması</span>
+    <span className={accepted ? 'on' : ''} title="Usta bu işdə iştirak etdiyini öz hesabından təsdiqləyib"><HardHat size={12} />Usta təsdiqləyib</span>
+    <span className={confirmed ? 'on' : ''} title="Ev sahibi işi qəbul edib"><ClipboardCheck size={12} />Ev sahibi təsdiqləyib</span>
+    <span className={inspected ? 'on' : ''} title="Ev sahibinin əlavə etdiyi mütəxəssis yoxlayıb"><ShieldCheck size={12} />Mütəxəssis yoxlayıb</span>
   </span>;
 }
 
@@ -66,7 +66,7 @@ export function MediaGrid({ media, onDelete, canDelete }: { media: HomeMedia[]; 
 }
 
 /** Upload photos / videos to a work, room, home or profile. */
-export function MediaUpload({ target, onDone, phases = true, videos = true, label = 'Foto / video əlavə et' }: { target: { homeId?: string; workId?: string; roomId?: string; workerId?: string }; onDone: (m: HomeMedia[]) => void; phases?: boolean; videos?: boolean; label?: string }) {
+export function MediaUpload({ target, onDone, phases = true, videos = true, label = 'Foto əlavə et' }: { target: { homeId?: string; workId?: string; roomId?: string; workerId?: string }; onDone: (m: HomeMedia[]) => void; phases?: boolean; videos?: boolean; label?: string }) {
   const { upload, busy, error } = useHomeUpload();
   const [phase, setPhase] = useState('after');
   const [caption, setCaption] = useState('');
@@ -80,7 +80,7 @@ export function MediaUpload({ target, onDone, phases = true, videos = true, labe
   };
   return <div className="hp-upload">
     {phases && <div className="hp-upload-opts">
-      <div className="rl-seg" role="radiogroup" aria-label="Mərhələ">{['before', 'during', 'hidden', 'after'].map(p => <button key={p} type="button" role="radio" aria-checked={phase === p} className={phase === p ? 'on' : ''} onClick={() => setPhase(p)}>{p === 'hidden' ? 'Gizli xətlər' : PHASE[p]}</button>)}</div>
+      <div className="rl-seg" role="radiogroup" aria-label="Mərhələ">{['before', 'during', 'hidden', 'after'].map(p => <button key={p} type="button" role="radio" aria-checked={phase === p} className={phase === p ? 'on' : ''} onClick={() => setPhase(p)}>{PHASE[p]}</button>)}</div>
       <input className="hp-input" value={caption} onChange={e => setCaption(e.target.value)} maxLength={300} placeholder="Qısa izah (istəyə görə)" aria-label="Foto izahı" />
     </div>}
     <div className="hp-upload-btns">
@@ -92,7 +92,7 @@ export function MediaUpload({ target, onDone, phases = true, videos = true, labe
         <input ref={camera} type="file" hidden accept="image/*" capture="environment" onChange={e => { void add(e.target.files); }} disabled={busy} /><Camera size={15} />Kamera
       </label>
     </div>
-    {phases && phase === 'hidden' && <small className="rl-hint">Divar, döşəmə və ya tavan bağlanmazdan əvvəl çəkilən foto — sonradan xətlərin yerini tapmaq üçün ən dəyərli sübutdur.</small>}
+    {phases && phase === 'hidden' && <small className="rl-hint">Divarlar bağlanmazdan əvvəl naqil və boruların fotosunu əlavə edin. Gələcəkdə təmir zamanı onların yerini tapmaq daha asan olacaq.</small>}
     {error && <small className="sm-field-error" role="alert">{error}</small>}
   </div>;
 }
@@ -110,7 +110,7 @@ export function WorkerSearch({ onPick, exclude = [], kind }: { onPick: (w: Worke
       <label className="field"><span>İxtisas</span><input value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="məs. elektrik" /></label>
     </div>
     {res.isFetching && <small className="rl-hint">Axtarılır…</small>}
-    {(q.trim().length >= 2 || specialty.trim().length >= 2) && !res.isFetching && !rows.length && <small className="rl-hint">Qeydiyyatdan keçmiş usta tapılmadı. Aşağıdan qeydiyyatsız usta kimi qeyd edin və ya dəvət linki göndərin.</small>}
+    {(q.trim().length >= 2 || specialty.trim().length >= 2) && !res.isFetching && !rows.length && <small className="rl-hint">Bu adla usta tapılmadı. Hesabı yoxdursa, “Hesabı olmayan usta” kimi əlavə edin və ya link göndərin.</small>}
     <div className="hp-search-list">{rows.map(c => <button type="button" key={c.worker.id} className="hp-search-item" onClick={() => onPick(c.worker)} data-testid={`pick-worker-${c.worker.id}`}>
       <WorkerAvatar w={c.worker} size={32} /><span><strong>{c.worker.displayName}</strong><small>{[WORKER_KIND[c.worker.kind], c.worker.specialties.join(', '), c.city, `${c.stats.confirmedWorks} təsdiqlənmiş iş`].filter(Boolean).join(' · ')}</small></span>
     </button>)}</div>
