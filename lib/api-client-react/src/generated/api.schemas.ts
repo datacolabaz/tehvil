@@ -2948,9 +2948,1441 @@ export interface ListingImport {
   warnings: string[];
 }
 
+export interface HomeMedia {
+  id: string;
+  url: string;
+  contentType: string;
+  originalName: string;
+  caption: string;
+  phase: string;
+  /** @nullable */
+  workId: string | null;
+  /** @nullable */
+  roomId: string | null;
+  uploadedByMe: boolean;
+  createdAt: string;
+}
+
+export type HomeMediaAttachInputPhase = typeof HomeMediaAttachInputPhase[keyof typeof HomeMediaAttachInputPhase];
+
+
+export const HomeMediaAttachInputPhase = {
+  before: 'before',
+  during: 'during',
+  after: 'after',
+  hidden: 'hidden',
+  other: 'other',
+} as const;
+
+export interface HomeMediaAttachInput {
+  /** @maxItems 20 */
+  files: MediaInput[];
+  /** @nullable */
+  homeId?: string | null;
+  /** @nullable */
+  workId?: string | null;
+  /** @nullable */
+  roomId?: string | null;
+  /** @nullable */
+  workerId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 300
+     */
+  caption?: string;
+  phase?: HomeMediaAttachInputPhase;
+}
+
+export interface HomePermissions {
+  edit: boolean;
+  manageMembers: boolean;
+  manageSharing: boolean;
+  addWorks: boolean;
+  confirmWorks: boolean;
+  inspect: boolean;
+  viewAudit: boolean;
+}
+
+export interface Home {
+  id: string;
+  publicId: string;
+  name: string;
+  propertyType: string;
+  city: string;
+  district: string;
+  address: string;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  roomCount: number | null;
+  floor: string;
+  /** @nullable */
+  builtYear: number | null;
+  stage: string;
+  /** @nullable */
+  coverMediaId: string | null;
+  /** @nullable */
+  coverUrl: string | null;
+  notes: string;
+  publicLevel: string;
+  publicShowAddress: boolean;
+  publicShowPhotos: boolean;
+  publicShowEquipment: boolean;
+  showOnWorkerProfiles: boolean;
+  myRole: string;
+  permissions: HomePermissions;
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type HomeInputPropertyType = typeof HomeInputPropertyType[keyof typeof HomeInputPropertyType];
+
+
+export const HomeInputPropertyType = {
+  apartment: 'apartment',
+  house: 'house',
+  villa: 'villa',
+  office: 'office',
+  commercial: 'commercial',
+  other: 'other',
+} as const;
+
+export type HomeInputStage = typeof HomeInputStage[keyof typeof HomeInputStage];
+
+
+export const HomeInputStage = {
+  construction: 'construction',
+  renovation: 'renovation',
+  living: 'living',
+} as const;
+
+export interface HomeInput {
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  name: string;
+  propertyType: HomeInputPropertyType;
+  /**
+     * @minLength 0
+     * @maxLength 100
+     */
+  city?: string;
+  /**
+     * @minLength 0
+     * @maxLength 120
+     */
+  district?: string;
+  /**
+     * @minLength 0
+     * @maxLength 240
+     */
+  address?: string;
+  /** @nullable */
+  areaM2?: number | null;
+  /** @nullable */
+  roomCount?: number | null;
+  /**
+     * @minLength 0
+     * @maxLength 20
+     */
+  floor?: string;
+  /** @nullable */
+  builtYear?: number | null;
+  stage?: HomeInputStage;
+  /** @nullable */
+  coverMediaId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 4000
+     */
+  notes?: string;
+}
+
+export interface HomeSummary {
+  id: string;
+  publicId: string;
+  name: string;
+  propertyType: string;
+  city: string;
+  district: string;
+  stage: string;
+  /** @nullable */
+  coverUrl: string | null;
+  myRole: string;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  roomCount: number | null;
+  works: number;
+  pendingApproval: number;
+  performers: number;
+  /** @nullable */
+  lastWorkAt: string | null;
+  updatedAt: string;
+}
+
+export interface HomeRoom {
+  id: string;
+  name: string;
+  kind: string;
+  floor: string;
+  /** @nullable */
+  areaM2: number | null;
+  condition: string;
+  notes: string;
+  position: number;
+  works: number;
+  equipment: number;
+  infrastructure: number;
+  /** @nullable */
+  photoUrl: string | null;
+}
+
+export type HomeRoomInputKind = typeof HomeRoomInputKind[keyof typeof HomeRoomInputKind];
+
+
+export const HomeRoomInputKind = {
+  living: 'living',
+  bedroom: 'bedroom',
+  kitchen: 'kitchen',
+  bathroom: 'bathroom',
+  toilet: 'toilet',
+  hall: 'hall',
+  balcony: 'balcony',
+  utility: 'utility',
+  other: 'other',
+} as const;
+
+export type HomeRoomInputCondition = typeof HomeRoomInputCondition[keyof typeof HomeRoomInputCondition];
+
+
+export const HomeRoomInputCondition = {
+  good: 'good',
+  needs_repair: 'needs_repair',
+  in_progress: 'in_progress',
+  unknown: 'unknown',
+} as const;
+
+export interface HomeRoomInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+  kind?: HomeRoomInputKind;
+  /**
+     * @minLength 0
+     * @maxLength 20
+     */
+  floor?: string;
+  /** @nullable */
+  areaM2?: number | null;
+  condition?: HomeRoomInputCondition;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  notes?: string;
+  position?: number;
+}
+
+export interface WorkerRef {
+  id: string;
+  kind: string;
+  displayName: string;
+  status: string;
+  /** @nullable */
+  photoUrl: string | null;
+  specialties: string[];
+  registered: boolean;
+  identityVerified: boolean;
+}
+
+export interface Participant {
+  id: string;
+  worker: WorkerRef;
+  role: string;
+  status: string;
+  /** @nullable */
+  viaTeamId: string | null;
+  /** @nullable */
+  viaTeamName: string | null;
+  note: string;
+  invitedAt: string;
+  /** @nullable */
+  respondedAt: string | null;
+  isMe: boolean;
+  /** @nullable */
+  phone: string | null;
+}
+
+export interface ParticipantBrief {
+  workerId: string;
+  name: string;
+  kind: string;
+  role: string;
+  status: string;
+}
+
+export interface WorkSummary {
+  id: string;
+  homeId: string;
+  title: string;
+  category: string;
+  kind: string;
+  status: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  /** @nullable */
+  roomId: string | null;
+  /** @nullable */
+  roomName: string | null;
+  participants: ParticipantBrief[];
+  mediaCount: number;
+  openDefects: number;
+  inspected: boolean;
+  visibility: string;
+  updatedAt: string;
+}
+
+export interface WorkNote {
+  id: string;
+  kind: string;
+  body: string;
+  /** @nullable */
+  result: string | null;
+  authorRole: string;
+  authorIsMe: boolean;
+  createdAt: string;
+}
+
+export type WorkNoteInputKind = typeof WorkNoteInputKind[keyof typeof WorkNoteInputKind];
+
+
+export const WorkNoteInputKind = {
+  note: 'note',
+  defect: 'defect',
+  fix: 'fix',
+  inspection: 'inspection',
+} as const;
+
+/**
+ * @nullable
+ */
+export type WorkNoteInputResult = typeof WorkNoteInputResult[keyof typeof WorkNoteInputResult] | null;
+
+
+export const WorkNoteInputResult = {
+  passed: 'passed',
+  issues: 'issues',
+} as const;
+
+export interface WorkNoteInput {
+  kind: WorkNoteInputKind;
+  /**
+     * @minLength 1
+     * @maxLength 4000
+     */
+  body: string;
+  /** @nullable */
+  result?: WorkNoteInputResult;
+}
+
+export interface WorkApproval {
+  id: string;
+  action: string;
+  fromStatus: string;
+  toStatus: string;
+  actorRole: string;
+  note: string;
+  createdAt: string;
+}
+
+export interface Review {
+  id: string;
+  workId: string;
+  workTitle: string;
+  workerId: string;
+  rating: number;
+  body: string;
+  createdAt: string;
+  reported: boolean;
+  mine: boolean;
+}
+
+export interface ReviewInput {
+  workerId: string;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  body?: string;
+}
+
+export interface ReportInput {
+  /**
+     * @minLength 3
+     * @maxLength 300
+     */
+  reason: string;
+}
+
+export interface WorkPermissions {
+  edit: boolean;
+  manageParticipants: boolean;
+  addMedia: boolean;
+  addNote: boolean;
+  start: boolean;
+  complete: boolean;
+  confirm: boolean;
+  requestRevision: boolean;
+  reopen: boolean;
+  inspect: boolean;
+  review: boolean;
+}
+
+export interface WorkDetail {
+  id: string;
+  homeId: string;
+  homeName: string;
+  title: string;
+  category: string;
+  kind: string;
+  status: string;
+  description: string;
+  materials: string;
+  location: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  /** @nullable */
+  roomId: string | null;
+  /** @nullable */
+  roomName: string | null;
+  /** @nullable */
+  equipmentId: string | null;
+  /** @nullable */
+  equipmentName: string | null;
+  visibility: string;
+  /** @nullable */
+  smetaProjectId: string | null;
+  /** @nullable */
+  smetaProjectName: string | null;
+  /** @nullable */
+  completedAt: string | null;
+  /** @nullable */
+  confirmedAt: string | null;
+  /** @nullable */
+  inspectedAt: string | null;
+  participants: Participant[];
+  media: HomeMedia[];
+  notes: WorkNote[];
+  approvals: WorkApproval[];
+  reviews: Review[];
+  myRole: string;
+  permissions: WorkPermissions;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type WorkInputCategory = typeof WorkInputCategory[keyof typeof WorkInputCategory];
+
+
+export const WorkInputCategory = {
+  electrical: 'electrical',
+  plumbing: 'plumbing',
+  sewer: 'sewer',
+  heating: 'heating',
+  tiling: 'tiling',
+  plaster: 'plaster',
+  painting: 'painting',
+  flooring: 'flooring',
+  drywall: 'drywall',
+  welding: 'welding',
+  carpentry: 'carpentry',
+  roofing: 'roofing',
+  hvac: 'hvac',
+  insulation: 'insulation',
+  general: 'general',
+  other: 'other',
+} as const;
+
+export type WorkInputKind = typeof WorkInputKind[keyof typeof WorkInputKind];
+
+
+export const WorkInputKind = {
+  construction: 'construction',
+  renovation: 'renovation',
+  installation: 'installation',
+  maintenance: 'maintenance',
+  repair: 'repair',
+  inspection: 'inspection',
+} as const;
+
+export type WorkInputVisibility = typeof WorkInputVisibility[keyof typeof WorkInputVisibility];
+
+
+export const WorkInputVisibility = {
+  public: 'public',
+  private: 'private',
+} as const;
+
+export type WorkInputStatus = typeof WorkInputStatus[keyof typeof WorkInputStatus];
+
+
+export const WorkInputStatus = {
+  planned: 'planned',
+  in_progress: 'in_progress',
+} as const;
+
+export interface WorkInput {
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  title: string;
+  category?: WorkInputCategory;
+  kind?: WorkInputKind;
+  /** @nullable */
+  roomId?: string | null;
+  /** @nullable */
+  equipmentId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 6000
+     */
+  description?: string;
+  /**
+     * @minLength 0
+     * @maxLength 3000
+     */
+  materials?: string;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  location?: string;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
+  visibility?: WorkInputVisibility;
+  status?: WorkInputStatus;
+  /** @nullable */
+  smetaProjectId?: string | null;
+}
+
+export type WorkStatusInputAction = typeof WorkStatusInputAction[keyof typeof WorkStatusInputAction];
+
+
+export const WorkStatusInputAction = {
+  start: 'start',
+  complete: 'complete',
+  confirm: 'confirm',
+  request_revision: 'request_revision',
+  reopen: 'reopen',
+} as const;
+
+export interface WorkStatusInput {
+  action: WorkStatusInputAction;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  note?: string;
+}
+
+export interface PlaceholderInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  /**
+     * @minLength 0
+     * @maxLength 32
+     */
+  phone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 60
+     */
+  specialty?: string;
+}
+
+export type ParticipantInputRole = typeof ParticipantInputRole[keyof typeof ParticipantInputRole];
+
+
+export const ParticipantInputRole = {
+  lead: 'lead',
+  team_lead: 'team_lead',
+  team_member: 'team_member',
+  assistant: 'assistant',
+  supervisor: 'supervisor',
+  inspector: 'inspector',
+} as const;
+
+export interface ParticipantInput {
+  /** @nullable */
+  workerId?: string | null;
+  placeholder?: PlaceholderInput;
+  role: ParticipantInputRole;
+  /** @nullable */
+  viaTeamId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 300
+     */
+  note?: string;
+}
+
+export type ParticipantPatchRole = typeof ParticipantPatchRole[keyof typeof ParticipantPatchRole];
+
+
+export const ParticipantPatchRole = {
+  lead: 'lead',
+  team_lead: 'team_lead',
+  team_member: 'team_member',
+  assistant: 'assistant',
+  supervisor: 'supervisor',
+  inspector: 'inspector',
+} as const;
+
+export type ParticipantPatchStatus = typeof ParticipantPatchStatus[keyof typeof ParticipantPatchStatus];
+
+
+export const ParticipantPatchStatus = {
+  removed: 'removed',
+} as const;
+
+export interface ParticipantPatch {
+  role?: ParticipantPatchRole;
+  status?: ParticipantPatchStatus;
+  /**
+     * @minLength 0
+     * @maxLength 300
+     */
+  note?: string;
+}
+
+export interface RespondInput {
+  accept: boolean;
+}
+
+export interface HomePerformerWork {
+  id: string;
+  title: string;
+  status: string;
+  /** @nullable */
+  startDate: string | null;
+  role: string;
+}
+
+export interface HomePerformer {
+  worker: WorkerRef;
+  roles: string[];
+  works: HomePerformerWork[];
+  /** @nullable */
+  phone: string | null;
+}
+
+export interface HomeMember {
+  id: string;
+  role: string;
+  displayName: string;
+  isMe: boolean;
+  createdAt: string;
+}
+
+export interface HomeOverviewStats {
+  works: number;
+  completed: number;
+  confirmed: number;
+  pendingApproval: number;
+  equipment: number;
+  infrastructure: number;
+  performers: number;
+  media: number;
+  openDefects: number;
+}
+
+export interface HomeOverview {
+  home: Home;
+  rooms: HomeRoom[];
+  stats: HomeOverviewStats;
+  recentWorks: WorkSummary[];
+  performers: HomePerformer[];
+}
+
+export interface EquipmentService {
+  id: string;
+  title: string;
+  status: string;
+  /** @nullable */
+  startDate: string | null;
+}
+
+export interface Equipment {
+  id: string;
+  /** @nullable */
+  roomId: string | null;
+  /** @nullable */
+  roomName: string | null;
+  /** @nullable */
+  installWorkId: string | null;
+  /** @nullable */
+  installWorkTitle: string | null;
+  installers: WorkerRef[];
+  name: string;
+  category: string;
+  brand: string;
+  model: string;
+  serialNumber: string;
+  /** @nullable */
+  installedAt: string | null;
+  /** @nullable */
+  warrantyUntil: string | null;
+  /** @nullable */
+  photoMediaId: string | null;
+  /** @nullable */
+  photoUrl: string | null;
+  notes: string;
+  services: EquipmentService[];
+}
+
+export interface MarkerPoint {
+  x: number;
+  y: number;
+}
+
+export interface InfrastructureItem {
+  id: string;
+  /** @nullable */
+  roomId: string | null;
+  /** @nullable */
+  roomName: string | null;
+  /** @nullable */
+  workId: string | null;
+  /** @nullable */
+  workTitle: string | null;
+  /** @nullable */
+  mediaId: string | null;
+  /** @nullable */
+  mediaUrl: string | null;
+  type: string;
+  label: string;
+  notes: string;
+  points: MarkerPoint[];
+  source: string;
+  createdByMe: boolean;
+  verified: boolean;
+  /** @nullable */
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+export interface HomeRoomDetail {
+  room: HomeRoom;
+  works: WorkSummary[];
+  equipment: Equipment[];
+  infrastructure: InfrastructureItem[];
+  media: HomeMedia[];
+}
+
+export type InfrastructureInputType = typeof InfrastructureInputType[keyof typeof InfrastructureInputType];
+
+
+export const InfrastructureInputType = {
+  electric: 'electric',
+  water: 'water',
+  sewer: 'sewer',
+  heating: 'heating',
+  gas: 'gas',
+  ventilation: 'ventilation',
+  internet: 'internet',
+  other: 'other',
+} as const;
+
+export type InfrastructureInputSource = typeof InfrastructureInputSource[keyof typeof InfrastructureInputSource];
+
+
+export const InfrastructureInputSource = {
+  owner: 'owner',
+  worker: 'worker',
+  plan: 'plan',
+  specialist: 'specialist',
+} as const;
+
+export interface InfrastructureInput {
+  /** @nullable */
+  roomId?: string | null;
+  /** @nullable */
+  workId?: string | null;
+  /** @nullable */
+  mediaId?: string | null;
+  type: InfrastructureInputType;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  label?: string;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  notes?: string;
+  /** @maxItems 200 */
+  points?: MarkerPoint[];
+  source?: InfrastructureInputSource;
+}
+
+export type EquipmentInputCategory = typeof EquipmentInputCategory[keyof typeof EquipmentInputCategory];
+
+
+export const EquipmentInputCategory = {
+  boiler: 'boiler',
+  air_conditioner: 'air_conditioner',
+  water_filter: 'water_filter',
+  water_heater: 'water_heater',
+  electrical_panel: 'electrical_panel',
+  ventilation: 'ventilation',
+  appliance: 'appliance',
+  other: 'other',
+} as const;
+
+export interface EquipmentInput {
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  name: string;
+  category?: EquipmentInputCategory;
+  /** @nullable */
+  roomId?: string | null;
+  /** @nullable */
+  installWorkId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 80
+     */
+  brand?: string;
+  /**
+     * @minLength 0
+     * @maxLength 120
+     */
+  model?: string;
+  /**
+     * @minLength 0
+     * @maxLength 120
+     */
+  serialNumber?: string;
+  /** @nullable */
+  installedAt?: string | null;
+  /** @nullable */
+  warrantyUntil?: string | null;
+  /** @nullable */
+  photoMediaId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 3000
+     */
+  notes?: string;
+}
+
+export type HomeInvitationInputKind = typeof HomeInvitationInputKind[keyof typeof HomeInvitationInputKind];
+
+
+export const HomeInvitationInputKind = {
+  work: 'work',
+  member: 'member',
+} as const;
+
+export type HomeInvitationInputRole = typeof HomeInvitationInputRole[keyof typeof HomeInvitationInputRole];
+
+
+export const HomeInvitationInputRole = {
+  lead: 'lead',
+  team_lead: 'team_lead',
+  team_member: 'team_member',
+  assistant: 'assistant',
+  supervisor: 'supervisor',
+  inspector: 'inspector',
+  technician: 'technician',
+  viewer: 'viewer',
+} as const;
+
+export interface HomeInvitationInput {
+  kind: HomeInvitationInputKind;
+  /** @nullable */
+  workId?: string | null;
+  role: HomeInvitationInputRole;
+  /**
+     * @minLength 0
+     * @maxLength 120
+     */
+  name?: string;
+  /**
+     * @minLength 0
+     * @maxLength 254
+     */
+  contact?: string;
+  /** @nullable */
+  placeholderWorkerId?: string | null;
+}
+
+export type TeamInvitationInputRole = typeof TeamInvitationInputRole[keyof typeof TeamInvitationInputRole];
+
+
+export const TeamInvitationInputRole = {
+  member: 'member',
+  representative: 'representative',
+} as const;
+
+export interface TeamInvitationInput {
+  role: TeamInvitationInputRole;
+  /**
+     * @minLength 0
+     * @maxLength 120
+     */
+  name?: string;
+  /**
+     * @minLength 0
+     * @maxLength 254
+     */
+  contact?: string;
+}
+
+export interface InvitationLink {
+  url: string;
+  expiresAt: string;
+}
+
+export interface InvitationPreview {
+  kind: string;
+  role: string;
+  status: string;
+  expired: boolean;
+  /** @nullable */
+  homeName: string | null;
+  /** @nullable */
+  workTitle: string | null;
+  /** @nullable */
+  groupName: string | null;
+  /** @nullable */
+  groupKind: string | null;
+  name: string;
+  /** @nullable */
+  placeholderName: string | null;
+}
+
+export interface WorkerProfileDraft {
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  displayName: string;
+  /** @maxItems 20 */
+  specialties?: string[];
+  /**
+     * @minLength 0
+     * @maxLength 100
+     */
+  city?: string;
+  /**
+     * @minLength 0
+     * @maxLength 32
+     */
+  phone?: string;
+}
+
+export interface HomeInvitationAcceptInput {
+  /** @nullable */
+  workerId?: string | null;
+  createProfile?: WorkerProfileDraft;
+}
+
+export interface InvitationAcceptResult {
+  redirect: string;
+}
+
+export interface InboxParticipation {
+  participantId: string;
+  workId: string;
+  workTitle: string;
+  homeId: string;
+  homeName: string;
+  role: string;
+  worker: WorkerRef;
+  invitedAt: string;
+}
+
+export interface InboxMembership {
+  membershipId: string;
+  group: WorkerRef;
+  role: string;
+  member: WorkerRef;
+  createdAt: string;
+}
+
+export interface InboxApproval {
+  work: WorkSummary;
+  homeName: string;
+}
+
+export interface Inbox {
+  participations: InboxParticipation[];
+  memberships: InboxMembership[];
+  approvals: InboxApproval[];
+}
+
+export interface MyWork {
+  work: WorkSummary;
+  homeName: string;
+  role: string;
+  participantStatus: string;
+  worker: WorkerRef;
+}
+
+export interface WorkerHistoryItem {
+  workId: string;
+  title: string;
+  category: string;
+  kind: string;
+  status: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  role: string;
+  /** @nullable */
+  viaTeamName: string | null;
+  city: string;
+  /** @nullable */
+  homeId: string | null;
+  /** @nullable */
+  homeName: string | null;
+  /** @nullable */
+  homePublicId: string | null;
+}
+
+export interface Membership {
+  id: string;
+  group: WorkerRef;
+  member: WorkerRef;
+  role: string;
+  status: string;
+  /** @nullable */
+  joinedAt: string | null;
+  /** @nullable */
+  leftAt: string | null;
+  createdAt: string;
+}
+
+export interface WorkerStats {
+  works: number;
+  confirmedWorks: number;
+  homes: number;
+  reviews: number;
+  /** @nullable */
+  avgRating: number | null;
+}
+
+export interface Worker {
+  id: string;
+  kind: string;
+  displayName: string;
+  specialties: string[];
+  city: string;
+  serviceArea: string;
+  about: string;
+  /** @nullable */
+  experienceYears: number | null;
+  /** @nullable */
+  photoMediaId: string | null;
+  /** @nullable */
+  photoUrl: string | null;
+  status: string;
+  registered: boolean;
+  identityVerified: boolean;
+  /** @nullable */
+  phone: string | null;
+  /** @nullable */
+  email: string | null;
+  publicContact: boolean;
+  legalName: string;
+  /** @nullable */
+  taxId: string | null;
+  createdAt: string;
+  canManage: boolean;
+  isMine: boolean;
+  members: Membership[];
+  groups: Membership[];
+  stats: WorkerStats;
+  history: WorkerHistoryItem[];
+  reviews: Review[];
+}
+
+export interface WorkerCard {
+  worker: WorkerRef;
+  city: string;
+  stats: WorkerStats;
+}
+
+export type WorkerInputKind = typeof WorkerInputKind[keyof typeof WorkerInputKind];
+
+
+export const WorkerInputKind = {
+  individual: 'individual',
+  team: 'team',
+  company: 'company',
+} as const;
+
+export interface WorkerInput {
+  kind: WorkerInputKind;
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  displayName: string;
+  /** @maxItems 20 */
+  specialties?: string[];
+  /**
+     * @minLength 0
+     * @maxLength 100
+     */
+  city?: string;
+  /**
+     * @minLength 0
+     * @maxLength 200
+     */
+  serviceArea?: string;
+  /**
+     * @minLength 0
+     * @maxLength 3000
+     */
+  about?: string;
+  /** @nullable */
+  experienceYears?: number | null;
+  /** @nullable */
+  photoMediaId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 32
+     */
+  phone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 254
+     */
+  email?: string;
+  publicContact?: boolean;
+  /**
+     * @minLength 0
+     * @maxLength 200
+     */
+  legalName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 20
+     */
+  taxId?: string;
+}
+
+export interface WorkerPatch {
+  /**
+     * @minLength 2
+     * @maxLength 160
+     */
+  displayName?: string;
+  /** @maxItems 20 */
+  specialties?: string[];
+  /**
+     * @minLength 0
+     * @maxLength 100
+     */
+  city?: string;
+  /**
+     * @minLength 0
+     * @maxLength 200
+     */
+  serviceArea?: string;
+  /**
+     * @minLength 0
+     * @maxLength 3000
+     */
+  about?: string;
+  /** @nullable */
+  experienceYears?: number | null;
+  /** @nullable */
+  photoMediaId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 32
+     */
+  phone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 254
+     */
+  email?: string;
+  publicContact?: boolean;
+  /**
+     * @minLength 0
+     * @maxLength 200
+     */
+  legalName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 20
+     */
+  taxId?: string;
+}
+
+export interface MyWorkers {
+  individual: Worker | null;
+  managed: WorkerCard[];
+  memberships: Membership[];
+}
+
+export type MembershipInputRole = typeof MembershipInputRole[keyof typeof MembershipInputRole];
+
+
+export const MembershipInputRole = {
+  member: 'member',
+  representative: 'representative',
+} as const;
+
+export interface MembershipInput {
+  memberWorkerId: string;
+  role?: MembershipInputRole;
+}
+
+export type MembershipPatchStatus = typeof MembershipPatchStatus[keyof typeof MembershipPatchStatus];
+
+
+export const MembershipPatchStatus = {
+  left: 'left',
+  removed: 'removed',
+} as const;
+
+export type MembershipPatchRole = typeof MembershipPatchRole[keyof typeof MembershipPatchRole];
+
+
+export const MembershipPatchRole = {
+  leader: 'leader',
+  member: 'member',
+  representative: 'representative',
+} as const;
+
+export interface MembershipPatch {
+  status?: MembershipPatchStatus;
+  role?: MembershipPatchRole;
+}
+
+export interface ShareScope {
+  roomIds: string[];
+  workIds: string[];
+  equipmentIds: string[];
+  includePhotos: boolean;
+  includeInfrastructure: boolean;
+}
+
+export interface HomeShare {
+  id: string;
+  label: string;
+  level: string;
+  scope: ShareScope;
+  /** @nullable */
+  expiresAt: string | null;
+  /** @nullable */
+  revokedAt: string | null;
+  active: boolean;
+  openCount: number;
+  /** @nullable */
+  lastOpenedAt: string | null;
+  createdAt: string;
+}
+
+export type HomeShareInputLevel = typeof HomeShareInputLevel[keyof typeof HomeShareInputLevel];
+
+
+export const HomeShareInputLevel = {
+  selected: 'selected',
+  technical: 'technical',
+} as const;
+
+export interface HomeShareInput {
+  /**
+     * @minLength 0
+     * @maxLength 120
+     */
+  label?: string;
+  level: HomeShareInputLevel;
+  scope: ShareScope;
+  /** @nullable */
+  expiresInDays?: number | null;
+}
+
+export interface HomeShareCreated {
+  share: HomeShare;
+  url: string;
+}
+
+export interface HomeSharing {
+  publicLevel: string;
+  publicShowAddress: boolean;
+  publicShowPhotos: boolean;
+  publicShowEquipment: boolean;
+  showOnWorkerProfiles: boolean;
+  publicUrl: string;
+  shares: HomeShare[];
+}
+
+export type HomeSharingInputPublicLevel = typeof HomeSharingInputPublicLevel[keyof typeof HomeSharingInputPublicLevel];
+
+
+export const HomeSharingInputPublicLevel = {
+  off: 'off',
+  basic: 'basic',
+  history: 'history',
+} as const;
+
+export interface HomeSharingInput {
+  publicLevel: HomeSharingInputPublicLevel;
+  publicShowAddress: boolean;
+  publicShowPhotos: boolean;
+  publicShowEquipment: boolean;
+  showOnWorkerProfiles: boolean;
+}
+
+export interface AuditEntry {
+  id: string;
+  action: string;
+  entityType: string;
+  /** @nullable */
+  entityId: string | null;
+  summary: string;
+  actorRole: string;
+  actorIsMe: boolean;
+  changes: unknown;
+  createdAt: string;
+}
+
+export interface PublicPerformer {
+  id: string;
+  displayName: string;
+  kind: string;
+  role: string;
+  profilePublic: boolean;
+}
+
+export interface PublicWork {
+  id: string;
+  title: string;
+  category: string;
+  kind: string;
+  status: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  /** @nullable */
+  roomName: string | null;
+  performers: PublicPerformer[];
+  photos: string[];
+  confirmed: boolean;
+  inspected: boolean;
+  description: string;
+  materials: string;
+}
+
+export interface PublicEquipment {
+  id: string;
+  name: string;
+  category: string;
+  brand: string;
+  model: string;
+  /** @nullable */
+  installedAt: string | null;
+  /** @nullable */
+  warrantyUntil: string | null;
+  /** @nullable */
+  roomName: string | null;
+}
+
+export interface PublicInfrastructure {
+  id: string;
+  type: string;
+  label: string;
+  notes: string;
+  /** @nullable */
+  roomName: string | null;
+  /** @nullable */
+  mediaUrl: string | null;
+  points: MarkerPoint[];
+  source: string;
+  verified: boolean;
+}
+
+export interface PublicHome {
+  publicId: string;
+  name: string;
+  propertyType: string;
+  city: string;
+  district: string;
+  /** @nullable */
+  address: string | null;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  roomCount: number | null;
+  /** @nullable */
+  builtYear: number | null;
+  stage: string;
+  /** @nullable */
+  coverUrl: string | null;
+  level: string;
+  rooms: string[];
+  works: PublicWork[];
+  equipment: PublicEquipment[];
+  infrastructure: PublicInfrastructure[];
+  /** @nullable */
+  shareLabel: string | null;
+  updatedAt: string;
+}
+
+export interface IdentityInput {
+  verified: boolean;
+}
+
 export type GetSharedPassport200 = {
   passport: Passport;
   includeFinancial: boolean;
   expiresAt: string;
+};
+
+export type SearchWorkersParams = {
+/**
+ * @maxLength 80
+ */
+q?: string;
+/**
+ * @maxLength 30
+ */
+specialty?: string;
+/**
+ * @maxLength 60
+ */
+city?: string;
 };
 

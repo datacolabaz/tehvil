@@ -22,7 +22,7 @@ app.use(
         return {
           id: req.id,
           method: req.method,
-          url: req.url?.split("?")[0]?.replace(/(\/shared-(?:passports|estimates)\/|\/passport-confirm\/(?:contractor|owner)\/)[^/]+/, "$1[redacted]"),
+          url: req.url?.split("?")[0]?.replace(/(\/shared-(?:passports|estimates)\/|\/passport-confirm\/(?:contractor|owner)\/|\/public\/home-shares\/|\/invitations\/)[^/]+/, "$1[redacted]"),
         };
       },
       res(res) {

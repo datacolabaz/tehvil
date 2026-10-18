@@ -5,7 +5,7 @@ import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { Route, Switch, Link, Redirect, Router as WouterRouter, useLocation } from 'wouter';
 import {
-  ArrowDownLeft, ArrowRight, ArrowUpRight, Building2, CalendarClock, Calculator, Megaphone, MessageCircle, QrCode, UserRound, Users, UsersRound, Check, CheckCircle2, ChevronDown, ChevronRight,
+  ArrowDownLeft, ArrowRight, ArrowUpRight, BellRing, Boxes, Cable, ClipboardList, HardHat, History, House, Building2, CalendarClock, Calculator, Megaphone, MessageCircle, QrCode, UserRound, Users, UsersRound, Check, CheckCircle2, ChevronDown, ChevronRight,
   ClipboardCheck, Clock3, DoorOpen, FileCheck2, FilePlus2, FileText, Home, ImagePlus,
   LayoutDashboard, ListChecks, LoaderCircle, LogOut, Menu, Plus, ShieldCheck,
   WalletCards, X,
@@ -20,7 +20,7 @@ import {
   useGetRenovationPassport, getListProjectsQueryKey, getGetProjectDashboardQueryKey,
   getListRoomsQueryKey, getListScopeItemsQueryKey, getListChangeOrdersQueryKey,
   getListMilestonesQueryKey, getListPaymentsQueryKey,
-  getListTimelineQueryKey, getGetRenovationPassportQueryKey,
+  getListTimelineQueryKey, getGetRenovationPassportQueryKey, useGetHomeOverview, useGetWork,
 } from '@workspace/api-client-react';
 import type { Project, ProjectInput, Room, ScopeItem } from '@workspace/api-client-react';
 import { copy, type Lang, type TKey } from '@/lib/i18n';
@@ -43,6 +43,7 @@ import NotFound from '@/pages/not-found';
 import './index.css';
 import './smeta.css';
 import './realtor.css';
+import './home.css';
 
 const SmetaDashboardPage = lazy(() => import('@/pages/smeta/dashboard-page').then(m => ({ default: m.SmetaDashboardPage })));
 const NewEstimatePage = lazy(() => import('@/pages/smeta/new-estimate-page').then(m => ({ default: m.NewEstimatePage })));
@@ -62,6 +63,37 @@ const PublicPassportPage = lazy(() => import('@/pages/realtor/public-passport-pa
 const PrintPassportPage = lazy(() => import('@/pages/realtor/public-passport-page').then(m => ({ default: m.PrintPassportPage })));
 const ContractorConfirmPage = lazy(() => import('@/pages/realtor/confirm-pages').then(m => ({ default: m.ContractorConfirmPage })));
 const OwnerConfirmPage = lazy(() => import('@/pages/realtor/confirm-pages').then(m => ({ default: m.OwnerConfirmPage })));
+const HomesPage = lazy(() => import('@/pages/home/homes-page').then(m => ({ default: m.HomesPage })));
+const HomeProfilePage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeProfilePage })));
+const HomeHistoryPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeHistoryPage })));
+const HomeRoomsPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeRoomsPage })));
+const RoomPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.RoomPage })));
+const HomePerformersPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomePerformersPage })));
+const HomeAuditPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeAuditPage })));
+const HomeMapPage = lazy(() => import('@/pages/home/map-page').then(m => ({ default: m.HomeMapPage })));
+const HomeEquipmentPage = lazy(() => import('@/pages/home/equipment-page').then(m => ({ default: m.HomeEquipmentPage })));
+const HomeSharingPage = lazy(() => import('@/pages/home/sharing-page').then(m => ({ default: m.HomeSharingPage })));
+const WorkPage = lazy(() => import('@/pages/home/work-page').then(m => ({ default: m.WorkPage })));
+const WorkersPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.WorkersPage })));
+const WorkerProfilePage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.WorkerProfilePage })));
+const PublicWorkerPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.PublicWorkerPage })));
+const MyWorksPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.MyWorksPage })));
+const InboxPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.InboxPage })));
+const InviteAcceptPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.InviteAcceptPage })));
+const PublicHomePage = lazy(() => import('@/pages/home/public-home-page').then(m => ({ default: m.PublicHomePage })));
+const SharedHomePage = lazy(() => import('@/pages/home/public-home-page').then(m => ({ default: m.SharedHomePage })));
+
+/** Sections of one home in the digital home passport (Azerbaijani, like the brief). */
+const HOME_NAV = [
+  { path: '', key: 'profile', label: 'Ev profili', icon: House },
+  { path: '/history', key: 'history', label: 'Tikinti və təmir tarixçəsi', icon: History },
+  { path: '/rooms', key: 'rooms', label: 'Otaqlar', icon: DoorOpen },
+  { path: '/map', key: 'map', label: 'Kommunikasiya xəritəsi', icon: Cable },
+  { path: '/equipment', key: 'equipment', label: 'Avadanlıqlar', icon: Boxes },
+  { path: '/performers', key: 'performers', label: 'Ustalar və briqadalar', icon: HardHat },
+  { path: '/sharing', key: 'sharing', label: 'QR və paylaşım', icon: QrCode },
+  { path: '/audit', key: 'audit', label: 'Audit jurnalı', icon: ClipboardList },
+] as const;
 
 /** Realtor panel sections (the brief's sidebar). Labels are Azerbaijani, like the AI Smeta module. */
 const REALTOR_NAV = [
@@ -98,10 +130,14 @@ function Brand({ inverse = false }: { inverse?: boolean }) {
   return <Link href="/" className={`brand ${inverse ? 'inverse' : ''}`} data-testid="link-brand"><span className="brand-mark">t.</span><span>Təhvil</span></Link>;
 }
 type Crumb = { label: string; href?: string };
-function AppShell({ children, project, projectId, active, crumbs, lang, change, t, realtorSection }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string; realtorSection?: string }) {
+function AppShell({ children, project, projectId, active, crumbs, lang, change, t, realtorSection, home }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string; realtorSection?: string; home?: { id: string; name: string; section: string; owner: boolean; audit: boolean } }) {
   const [open, setOpen] = useState(false);
   const { signOut } = useClerk(); const { user } = useUser();
   const nav: { href: string; icon: typeof Home; key: TKey; badge?: boolean }[] = [
+    { href: '/homes', icon: House, key: 'myHomes' as const },
+    { href: '/my-works', icon: HardHat, key: 'myWorks' as const },
+    { href: '/workers', icon: UsersRound, key: 'workersNav' as const },
+    { href: '/invitations', icon: BellRing, key: 'inboxNav' as const },
     { href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' as const },
     { href: '/smeta', icon: Calculator, key: 'smeta' as const, badge: true },
     { href: '/realtor', icon: Building2, key: 'realtor' as const, badge: true },
@@ -120,6 +156,7 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
       {project && <div className="project-switcher"><span className="project-symbol">⌂</span><div><small>{t('projects')}</small><strong>{project.name}</strong></div><ChevronDown size={14}/></div>}
       <div className="sidebar-label">{projectId ? project?.name || t('projects') : t('dashboard')}</div>
       <nav className="side-nav">{nav.map(({ href, icon: Icon, key, badge }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${active === key || (!active && key === 'dashboard') ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{t(key)}</span>{badge && <span className="nav-badge">{t('newBadge')}</span>}{active === key && <span className="nav-active-dot"/>}</Link>)}</nav>
+      {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => (n.key !== 'sharing' || home.owner) && (n.key !== 'audit' || home.audit)).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${home.section === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{home.section === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       {realtorSection && <><div className="sidebar-label">{t('realtor')}</div><nav className="side-nav rl-side-nav">{REALTOR_NAV.map(({ href, key, label, icon: Icon }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${realtorSection === key ? 'selected' : ''}`} data-testid={`nav-realtor-${key}`}><Icon size={17}/><span>{label}</span>{realtorSection === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       <div className="sidebar-bottom"><div className="privacy-note"><ShieldCheck size={17}/><p>{t('disclaimer')}</p></div><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
     </aside>
@@ -271,6 +308,31 @@ function RealtorShell({ section, crumbs, children, ...shell }: ShellProps & { se
   const label = REALTOR_NAV.find(n => n.key === section)?.label;
   return <Protected t={shell.t}><AppShell {...shell} active="realtor" realtorSection={section} crumbs={[{ label: shell.t('realtor'), href: section === 'overview' && !crumbs?.length ? undefined : '/realtor' }, ...(section !== 'overview' && label ? [{ label, href: crumbs?.length ? REALTOR_NAV.find(n => n.key === section)?.href : undefined }] : []), ...(crumbs || [])]}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
 }
+function HomeShell({ homeId, section, crumbs, children, ...shell }: ShellProps & { homeId: string; section: string; crumbs?: Crumb[]; children: ReactNode }) {
+  return <Protected t={shell.t}><HomeShellInner homeId={homeId} section={section} crumbs={crumbs} {...shell}>{children}</HomeShellInner></Protected>;
+}
+function HomeShellInner({ homeId, section, crumbs, children, ...shell }: ShellProps & { homeId: string; section: string; crumbs?: Crumb[]; children: ReactNode }) {
+  const q = useGetHomeOverview(homeId);
+  const h = q.data?.home;
+  const label = HOME_NAV.find(n => n.key === section)?.label;
+  return <AppShell {...shell} active="myHomes" home={h ? { id: homeId, name: h.name, section, owner: h.permissions.manageSharing, audit: h.permissions.viewAudit } : undefined}
+    crumbs={[{ label: shell.t('myHomes'), href: '/homes' }, ...(h ? [{ label: h.name, href: section === 'profile' && !crumbs?.length ? undefined : `/homes/${homeId}` }] : []), ...(section !== 'profile' && label ? [{ label }] : []), ...(crumbs || [])]}>
+    <Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell>;
+}
+function WorkShell({ workId, ...shell }: ShellProps & { workId: string }) {
+  return <Protected t={shell.t}><WorkShellInner workId={workId} {...shell}/></Protected>;
+}
+function WorkShellInner({ workId, ...shell }: ShellProps & { workId: string }) {
+  const w = useGetWork(workId);
+  const h = useGetHomeOverview(w.data?.homeId ?? '', { query: { enabled: !!w.data?.homeId, queryKey: [`/api/homes/${w.data?.homeId}`] } });
+  const home = h.data?.home;
+  return <AppShell {...shell} active="myHomes" home={home ? { id: home.id, name: home.name, section: 'history', owner: home.permissions.manageSharing, audit: home.permissions.viewAudit } : undefined}
+    crumbs={[{ label: shell.t('myHomes'), href: '/homes' }, ...(w.data ? [{ label: w.data.homeName, href: `/homes/${w.data.homeId}` }, { label: w.data.title }] : [])]}>
+    <Suspense fallback={<Loading t={shell.t}/>}><WorkPage workId={workId}/></Suspense></AppShell>;
+}
+function PlainShell({ active, crumbs, children, ...shell }: ShellProps & { active: string; crumbs: Crumb[]; children: ReactNode }) {
+  return <Protected t={shell.t}><AppShell {...shell} active={active} crumbs={crumbs}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
+}
 function PublicSuspense({ children, t }: { children: ReactNode; t: (k: TKey) => string }) { return <Suspense fallback={<Loading t={t}/>}>{children}</Suspense>; }
 function InvitationPage({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) {
   const accept=useAcceptInvitation();const [,setLocation]=useLocation();const token=new URLSearchParams(window.location.search).get('token')||'';const [typed,setTyped]=useState(token);
@@ -288,9 +350,15 @@ const clerkCopy: Record<Lang, Record<string, unknown>> = {
 function authTag() { const l=(localStorage.getItem('tehvil-language') as Lang)||'az'; return l==='ru'?'БАКУ · ПРОСТРАНСТВО ПРОЕКТА':l==='en'?'BAKU · PROJECT SPACE':'BAKI · LAYİHƏ MƏKANI'; }
 function authCopy() { return copy[((localStorage.getItem('tehvil-language') as Lang) || 'az')]; }
 function SignInPage() { const c=authCopy(); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} {...realtorRedirect()}/></div></div>; }
-function realtorRedirect() { return new URLSearchParams(window.location.search).get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {}; }
+function realtorRedirect() {
+  const qs = new URLSearchParams(window.location.search);
+  // Only same-site paths (e.g. an invitation link) are accepted as a redirect target.
+  const next = qs.get('redirect');
+  if (next && /^\/(invite|works|homes|workers)\/[A-Za-z0-9_/-]{1,80}$/.test(next)) return { forceRedirectUrl: `${basePath}${next}` };
+  return qs.get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {};
+}
 function SignUpPage() { const c=authCopy(); const realtor=!!realtorRedirect().forceRedirectUrl; return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${realtor?'?realtor=1':''}`} {...realtorRedirect()}/></div></div>; }
-function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/dashboard"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
+function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/homes"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
 function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   const [msg, setMsg] = useState<FeedbackMsg | null>(null);
   useEffect(() => onFeedback(m => setMsg(m)), []);
@@ -318,6 +386,26 @@ function ClerkRoutes() {
       <Route path="/p/confirm/owner/:token">{params => <PublicSuspense t={t}><OwnerConfirmPage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/p/:publicId/print">{params => <PublicSuspense t={t}><PrintPassportPage publicId={params.publicId}/></PublicSuspense>}</Route>
       <Route path="/p/:publicId">{params => <PublicSuspense t={t}><PublicPassportPage publicId={params.publicId}/></PublicSuspense>}</Route>
+      <Route path="/h/s/:token">{params => <PublicSuspense t={t}><SharedHomePage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/h/:publicId">{params => <PublicSuspense t={t}><PublicHomePage publicId={params.publicId}/></PublicSuspense>}</Route>
+      <Route path="/w/:workerId">{params => <PublicSuspense t={t}><PublicWorkerPage workerId={params.workerId}/></PublicSuspense>}</Route>
+      <Route path="/invite/:token">{params => <PublicSuspense t={t}><InviteAcceptPage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/homes">{() => <PlainShell active="myHomes" crumbs={[{ label: t('myHomes') }]} lang={lang} change={changeLang} t={t}><HomesPage/></PlainShell>}</Route>
+      <Route path="/homes/:homeId/history">{params => <HomeShell homeId={params.homeId} section="history" lang={lang} change={changeLang} t={t}><HomeHistoryPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/rooms/:roomId">{params => <HomeShell homeId={params.homeId} section="rooms" lang={lang} change={changeLang} t={t}><RoomPage homeId={params.homeId} roomId={params.roomId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/rooms">{params => <HomeShell homeId={params.homeId} section="rooms" lang={lang} change={changeLang} t={t}><HomeRoomsPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/map">{params => <HomeShell homeId={params.homeId} section="map" lang={lang} change={changeLang} t={t}><HomeMapPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/equipment">{params => <HomeShell homeId={params.homeId} section="equipment" lang={lang} change={changeLang} t={t}><HomeEquipmentPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/performers">{params => <HomeShell homeId={params.homeId} section="performers" lang={lang} change={changeLang} t={t}><HomePerformersPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/sharing">{params => <HomeShell homeId={params.homeId} section="sharing" lang={lang} change={changeLang} t={t}><HomeSharingPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/audit">{params => <HomeShell homeId={params.homeId} section="audit" lang={lang} change={changeLang} t={t}><HomeAuditPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId">{params => <HomeShell homeId={params.homeId} section="profile" lang={lang} change={changeLang} t={t}><HomeProfilePage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/works/:workId">{params => <WorkShell workId={params.workId} lang={lang} change={changeLang} t={t}/>}</Route>
+      <Route path="/my-works">{() => <PlainShell active="myWorks" crumbs={[{ label: t('myWorks') }]} lang={lang} change={changeLang} t={t}><MyWorksPage/></PlainShell>}</Route>
+      <Route path="/workers/:workerId">{params => <PlainShell active="workersNav" crumbs={[{ label: t('workersNav'), href: '/workers' }, { label: 'Profil' }]} lang={lang} change={changeLang} t={t}><WorkerProfilePage workerId={params.workerId}/></PlainShell>}</Route>
+      <Route path="/workers">{() => <PlainShell active="workersNav" crumbs={[{ label: t('workersNav') }]} lang={lang} change={changeLang} t={t}><WorkersPage/></PlainShell>}</Route>
+      <Route path="/invitations">{() => <PlainShell active="inboxNav" crumbs={[{ label: 'Dəvətlər' }]} lang={lang} change={changeLang} t={t}><InboxPage tab="invitations"/></PlainShell>}</Route>
+      <Route path="/approvals">{() => <PlainShell active="inboxNav" crumbs={[{ label: 'Təsdiq gözləyən qeydlər' }]} lang={lang} change={changeLang} t={t}><InboxPage tab="approvals"/></PlainShell>}</Route>
       <Route path="/" component={()=> <HomeRedirect lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/sign-in/*?" component={SignInPage}/><Route path="/sign-up/*?" component={SignUpPage}/>
       <Route path="/dashboard" component={()=> <DashboardPage lang={lang} change={changeLang} t={t}/>}/>

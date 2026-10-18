@@ -1,6 +1,7 @@
 -- Idempotent schema for Təhvil (generated from lib/db/src/schema with drizzle-kit generate).
 -- Safe to run repeatedly: creates missing tables, columns, indexes and foreign keys; never drops anything.
 -- Apply with: DATABASE_URL=... pnpm --filter @workspace/db run apply-schema
+-- Regenerate after schema changes with: pnpm --filter @workspace/db run build-schema-sql
 CREATE TABLE IF NOT EXISTS "change_orders" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"project_id" uuid NOT NULL,
@@ -583,6 +584,269 @@ CREATE TABLE IF NOT EXISTS "realtor_whatsapp_settings" (
 	"follow_up_template" varchar(120) DEFAULT '' NOT NULL,
 	"reminder_template" varchar(120) DEFAULT '' NOT NULL,
 	"template_language" varchar(12) DEFAULT 'az' NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "equipment" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid NOT NULL,
+	"room_id" uuid,
+	"install_work_id" uuid,
+	"name" varchar(160) NOT NULL,
+	"category" varchar(20) DEFAULT 'other' NOT NULL,
+	"brand" varchar(80) DEFAULT '' NOT NULL,
+	"model" varchar(120) DEFAULT '' NOT NULL,
+	"serial_number" varchar(120) DEFAULT '' NOT NULL,
+	"installed_at" date,
+	"warranty_until" date,
+	"photo_media_id" uuid,
+	"notes" text DEFAULT '' NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "home_audit" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid,
+	"worker_id" uuid,
+	"actor_user_id" varchar(128) NOT NULL,
+	"actor_role" varchar(16) NOT NULL,
+	"action" varchar(40) NOT NULL,
+	"entity_type" varchar(24) NOT NULL,
+	"entity_id" uuid,
+	"summary" varchar(300) DEFAULT '' NOT NULL,
+	"changes" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "home_invitations" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"kind" varchar(8) NOT NULL,
+	"token_hash" varchar(64) NOT NULL,
+	"home_id" uuid,
+	"work_id" uuid,
+	"group_id" uuid,
+	"placeholder_worker_id" uuid,
+	"role" varchar(16) NOT NULL,
+	"name" varchar(120) DEFAULT '' NOT NULL,
+	"contact" varchar(254) DEFAULT '' NOT NULL,
+	"status" varchar(10) DEFAULT 'pending' NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"accepted_by_user_id" varchar(128),
+	"accepted_at" timestamp with time zone,
+	"expires_at" timestamp with time zone NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "home_media" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid,
+	"work_id" uuid,
+	"room_id" uuid,
+	"worker_id" uuid,
+	"object_path" text NOT NULL,
+	"original_name" varchar(255) NOT NULL,
+	"content_type" varchar(120) NOT NULL,
+	"size" integer NOT NULL,
+	"caption" varchar(300) DEFAULT '' NOT NULL,
+	"phase" varchar(12) DEFAULT 'other' NOT NULL,
+	"uploaded_by_user_id" varchar(128) NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "home_members" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid NOT NULL,
+	"user_id" varchar(128) NOT NULL,
+	"role" varchar(16) NOT NULL,
+	"display_name" varchar(120) DEFAULT '' NOT NULL,
+	"added_by_user_id" varchar(128),
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "home_rooms" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid NOT NULL,
+	"name" varchar(120) NOT NULL,
+	"kind" varchar(24) DEFAULT 'other' NOT NULL,
+	"floor" varchar(20) DEFAULT '' NOT NULL,
+	"area_m2" integer,
+	"condition" varchar(16) DEFAULT 'unknown' NOT NULL,
+	"notes" text DEFAULT '' NOT NULL,
+	"position" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "home_shares" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid NOT NULL,
+	"token_hash" varchar(64) NOT NULL,
+	"label" varchar(120) DEFAULT '' NOT NULL,
+	"level" varchar(12) NOT NULL,
+	"scope" jsonb NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"expires_at" timestamp with time zone,
+	"revoked_at" timestamp with time zone,
+	"last_opened_at" timestamp with time zone,
+	"open_count" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "homes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"public_id" varchar(16) NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"name" varchar(160) NOT NULL,
+	"property_type" varchar(24) NOT NULL,
+	"city" varchar(100) DEFAULT '' NOT NULL,
+	"district" varchar(120) DEFAULT '' NOT NULL,
+	"address" varchar(240) DEFAULT '' NOT NULL,
+	"area_m2" integer,
+	"room_count" integer,
+	"floor" varchar(20) DEFAULT '' NOT NULL,
+	"built_year" integer,
+	"stage" varchar(16) DEFAULT 'living' NOT NULL,
+	"cover_media_id" uuid,
+	"notes" text DEFAULT '' NOT NULL,
+	"public_level" varchar(12) DEFAULT 'basic' NOT NULL,
+	"public_show_address" boolean DEFAULT false NOT NULL,
+	"public_show_photos" boolean DEFAULT false NOT NULL,
+	"public_show_equipment" boolean DEFAULT false NOT NULL,
+	"show_on_worker_profiles" boolean DEFAULT true NOT NULL,
+	"archived_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "infrastructure_items" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid NOT NULL,
+	"room_id" uuid,
+	"work_id" uuid,
+	"media_id" uuid,
+	"type" varchar(16) NOT NULL,
+	"label" varchar(160) DEFAULT '' NOT NULL,
+	"notes" text DEFAULT '' NOT NULL,
+	"points" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"source" varchar(12) NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"verified_by_user_id" varchar(128),
+	"verified_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "work_approvals" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"work_id" uuid NOT NULL,
+	"action" varchar(20) NOT NULL,
+	"from_status" varchar(16) NOT NULL,
+	"to_status" varchar(16) NOT NULL,
+	"actor_user_id" varchar(128) NOT NULL,
+	"actor_role" varchar(16) NOT NULL,
+	"note" text DEFAULT '' NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "work_notes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"work_id" uuid NOT NULL,
+	"kind" varchar(12) NOT NULL,
+	"body" text NOT NULL,
+	"result" varchar(8),
+	"author_user_id" varchar(128) NOT NULL,
+	"author_role" varchar(16) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "work_participants" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"work_id" uuid NOT NULL,
+	"worker_id" uuid NOT NULL,
+	"role" varchar(16) DEFAULT 'lead' NOT NULL,
+	"status" varchar(12) DEFAULT 'invited' NOT NULL,
+	"via_team_id" uuid,
+	"note" varchar(300) DEFAULT '' NOT NULL,
+	"added_by_user_id" varchar(128) NOT NULL,
+	"invited_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"responded_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "work_records" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid NOT NULL,
+	"room_id" uuid,
+	"equipment_id" uuid,
+	"title" varchar(200) NOT NULL,
+	"category" varchar(20) DEFAULT 'general' NOT NULL,
+	"kind" varchar(16) DEFAULT 'renovation' NOT NULL,
+	"description" text DEFAULT '' NOT NULL,
+	"materials" text DEFAULT '' NOT NULL,
+	"location" text DEFAULT '' NOT NULL,
+	"start_date" date,
+	"end_date" date,
+	"status" varchar(16) DEFAULT 'planned' NOT NULL,
+	"completed_at" timestamp with time zone,
+	"confirmed_at" timestamp with time zone,
+	"inspected_at" timestamp with time zone,
+	"visibility" varchar(8) DEFAULT 'public' NOT NULL,
+	"smeta_project_id" uuid,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "worker_memberships" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"group_id" uuid NOT NULL,
+	"member_id" uuid NOT NULL,
+	"role" varchar(16) DEFAULT 'member' NOT NULL,
+	"status" varchar(12) DEFAULT 'invited' NOT NULL,
+	"invited_by_user_id" varchar(128),
+	"joined_at" timestamp with time zone,
+	"left_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "worker_reviews" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"work_id" uuid NOT NULL,
+	"worker_id" uuid NOT NULL,
+	"author_user_id" varchar(128) NOT NULL,
+	"rating" smallint NOT NULL,
+	"body" text DEFAULT '' NOT NULL,
+	"reported_at" timestamp with time zone,
+	"report_reason" varchar(300),
+	"hidden_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "workers" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"kind" varchar(12) NOT NULL,
+	"user_id" varchar(128),
+	"manager_user_id" varchar(128),
+	"display_name" varchar(160) NOT NULL,
+	"specialties" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"city" varchar(100) DEFAULT '' NOT NULL,
+	"service_area" varchar(200) DEFAULT '' NOT NULL,
+	"about" text DEFAULT '' NOT NULL,
+	"experience_years" integer,
+	"photo_media_id" uuid,
+	"phone" varchar(32) DEFAULT '' NOT NULL,
+	"email" varchar(254) DEFAULT '' NOT NULL,
+	"public_contact" boolean DEFAULT false NOT NULL,
+	"legal_name" varchar(200) DEFAULT '' NOT NULL,
+	"tax_id" varchar(20) DEFAULT '' NOT NULL,
+	"status" varchar(16) DEFAULT 'active' NOT NULL,
+	"merged_into_id" uuid,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"identity_verified_at" timestamp with time zone,
+	"identity_verified_by" varchar(128),
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement
@@ -1504,6 +1768,436 @@ ALTER TABLE "realtor_whatsapp_settings" ADD COLUMN IF NOT EXISTS "template_langu
 --> statement
 ALTER TABLE "realtor_whatsapp_settings" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "room_id" uuid;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "install_work_id" uuid;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "name" varchar(160) NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "category" varchar(20) DEFAULT 'other' NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "brand" varchar(80) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "model" varchar(120) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "serial_number" varchar(120) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "installed_at" date;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "warranty_until" date;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "photo_media_id" uuid;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "notes" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "home_id" uuid;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "worker_id" uuid;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "actor_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "actor_role" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "action" varchar(40) NOT NULL;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "entity_type" varchar(24) NOT NULL;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "entity_id" uuid;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "summary" varchar(300) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "changes" jsonb;
+--> statement
+ALTER TABLE "home_audit" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "kind" varchar(8) NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "token_hash" varchar(64) NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "home_id" uuid;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "work_id" uuid;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "group_id" uuid;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "placeholder_worker_id" uuid;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "role" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "name" varchar(120) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "contact" varchar(254) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "status" varchar(10) DEFAULT 'pending' NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "accepted_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "accepted_at" timestamp with time zone;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone NOT NULL;
+--> statement
+ALTER TABLE "home_invitations" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "home_id" uuid;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "work_id" uuid;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "room_id" uuid;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "worker_id" uuid;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "object_path" text NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "original_name" varchar(255) NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "content_type" varchar(120) NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "size" integer NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "caption" varchar(300) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "phase" varchar(12) DEFAULT 'other' NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "uploaded_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "deleted_at" timestamp with time zone;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "role" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "display_name" varchar(120) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "added_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "name" varchar(120) NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "kind" varchar(24) DEFAULT 'other' NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "floor" varchar(20) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "area_m2" integer;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "condition" varchar(16) DEFAULT 'unknown' NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "notes" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "position" integer DEFAULT 0 NOT NULL;
+--> statement
+ALTER TABLE "home_rooms" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "token_hash" varchar(64) NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "label" varchar(120) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "level" varchar(12) NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "scope" jsonb NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "revoked_at" timestamp with time zone;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "last_opened_at" timestamp with time zone;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "open_count" integer DEFAULT 0 NOT NULL;
+--> statement
+ALTER TABLE "home_shares" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "public_id" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "name" varchar(160) NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "property_type" varchar(24) NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "city" varchar(100) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "district" varchar(120) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "address" varchar(240) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "area_m2" integer;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "room_count" integer;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "floor" varchar(20) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "built_year" integer;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "stage" varchar(16) DEFAULT 'living' NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "cover_media_id" uuid;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "notes" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "public_level" varchar(12) DEFAULT 'basic' NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "public_show_address" boolean DEFAULT false NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "public_show_photos" boolean DEFAULT false NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "public_show_equipment" boolean DEFAULT false NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "show_on_worker_profiles" boolean DEFAULT true NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "archived_at" timestamp with time zone;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "room_id" uuid;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "work_id" uuid;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "media_id" uuid;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "type" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "label" varchar(160) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "notes" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "points" jsonb DEFAULT '[]'::jsonb NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "source" varchar(12) NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "verified_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "verified_at" timestamp with time zone;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "work_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "action" varchar(20) NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "from_status" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "to_status" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "actor_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "actor_role" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "work_notes" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "work_notes" ADD COLUMN IF NOT EXISTS "work_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "work_notes" ADD COLUMN IF NOT EXISTS "kind" varchar(12) NOT NULL;
+--> statement
+ALTER TABLE "work_notes" ADD COLUMN IF NOT EXISTS "body" text NOT NULL;
+--> statement
+ALTER TABLE "work_notes" ADD COLUMN IF NOT EXISTS "result" varchar(8);
+--> statement
+ALTER TABLE "work_notes" ADD COLUMN IF NOT EXISTS "author_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "work_notes" ADD COLUMN IF NOT EXISTS "author_role" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "work_notes" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "work_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "worker_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "role" varchar(16) DEFAULT 'lead' NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "status" varchar(12) DEFAULT 'invited' NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "via_team_id" uuid;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "note" varchar(300) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "added_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "invited_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "responded_at" timestamp with time zone;
+--> statement
+ALTER TABLE "work_participants" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "room_id" uuid;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "equipment_id" uuid;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "title" varchar(200) NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "category" varchar(20) DEFAULT 'general' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "kind" varchar(16) DEFAULT 'renovation' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "description" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "materials" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "location" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "start_date" date;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "end_date" date;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "status" varchar(16) DEFAULT 'planned' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "completed_at" timestamp with time zone;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "confirmed_at" timestamp with time zone;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "inspected_at" timestamp with time zone;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "visibility" varchar(8) DEFAULT 'public' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "smeta_project_id" uuid;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "group_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "member_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "role" varchar(16) DEFAULT 'member' NOT NULL;
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "status" varchar(12) DEFAULT 'invited' NOT NULL;
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "invited_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "joined_at" timestamp with time zone;
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "left_at" timestamp with time zone;
+--> statement
+ALTER TABLE "worker_memberships" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "work_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "worker_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "author_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "rating" smallint NOT NULL;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "body" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "reported_at" timestamp with time zone;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "report_reason" varchar(300);
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "hidden_at" timestamp with time zone;
+--> statement
+ALTER TABLE "worker_reviews" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "kind" varchar(12) NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "user_id" varchar(128);
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "manager_user_id" varchar(128);
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "display_name" varchar(160) NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "specialties" jsonb DEFAULT '[]'::jsonb NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "city" varchar(100) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "service_area" varchar(200) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "about" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "experience_years" integer;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "photo_media_id" uuid;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "phone" varchar(32) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "email" varchar(254) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "public_contact" boolean DEFAULT false NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "legal_name" varchar(200) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "tax_id" varchar(20) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "status" varchar(16) DEFAULT 'active' NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "merged_into_id" uuid;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "identity_verified_at" timestamp with time zone;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "identity_verified_by" varchar(128);
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "workers" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
 DO $$ BEGIN
   ALTER TABLE "change_orders" ADD CONSTRAINT "change_orders_project_id_renovation_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."renovation_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
@@ -1704,6 +2398,136 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 --> statement
+DO $$ BEGIN
+  ALTER TABLE "equipment" ADD CONSTRAINT "equipment_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "equipment" ADD CONSTRAINT "equipment_room_id_home_rooms_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."home_rooms"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "equipment" ADD CONSTRAINT "equipment_install_work_id_work_records_id_fk" FOREIGN KEY ("install_work_id") REFERENCES "public"."work_records"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_audit" ADD CONSTRAINT "home_audit_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_invitations" ADD CONSTRAINT "home_invitations_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_invitations" ADD CONSTRAINT "home_invitations_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_invitations" ADD CONSTRAINT "home_invitations_group_id_workers_id_fk" FOREIGN KEY ("group_id") REFERENCES "public"."workers"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_invitations" ADD CONSTRAINT "home_invitations_placeholder_worker_id_workers_id_fk" FOREIGN KEY ("placeholder_worker_id") REFERENCES "public"."workers"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_media" ADD CONSTRAINT "home_media_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_members" ADD CONSTRAINT "home_members_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_rooms" ADD CONSTRAINT "home_rooms_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_shares" ADD CONSTRAINT "home_shares_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "infrastructure_items" ADD CONSTRAINT "infrastructure_items_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "infrastructure_items" ADD CONSTRAINT "infrastructure_items_room_id_home_rooms_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."home_rooms"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "infrastructure_items" ADD CONSTRAINT "infrastructure_items_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "infrastructure_items" ADD CONSTRAINT "infrastructure_items_media_id_home_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."home_media"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "work_approvals" ADD CONSTRAINT "work_approvals_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "work_notes" ADD CONSTRAINT "work_notes_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "work_participants" ADD CONSTRAINT "work_participants_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "work_participants" ADD CONSTRAINT "work_participants_worker_id_workers_id_fk" FOREIGN KEY ("worker_id") REFERENCES "public"."workers"("id") ON DELETE restrict ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "work_records" ADD CONSTRAINT "work_records_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "work_records" ADD CONSTRAINT "work_records_room_id_home_rooms_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."home_rooms"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "worker_memberships" ADD CONSTRAINT "worker_memberships_group_id_workers_id_fk" FOREIGN KEY ("group_id") REFERENCES "public"."workers"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "worker_memberships" ADD CONSTRAINT "worker_memberships_member_id_workers_id_fk" FOREIGN KEY ("member_id") REFERENCES "public"."workers"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "worker_reviews" ADD CONSTRAINT "worker_reviews_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "worker_reviews" ADD CONSTRAINT "worker_reviews_worker_id_workers_id_fk" FOREIGN KEY ("worker_id") REFERENCES "public"."workers"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
 CREATE INDEX IF NOT EXISTS "change_orders_project_idx" ON "change_orders" USING btree ("project_id");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "change_orders_project_number_idx" ON "change_orders" USING btree ("project_id","number");
@@ -1787,3 +2611,61 @@ CREATE INDEX IF NOT EXISTS "realtor_messages_owner_idx" ON "realtor_messages" US
 CREATE INDEX IF NOT EXISTS "realtor_notifications_owner_idx" ON "realtor_notifications" USING btree ("owner_user_id","created_at");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "realtor_whatsapp_phone_number_idx" ON "realtor_whatsapp_settings" USING btree ("phone_number_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "equipment_home_idx" ON "equipment" USING btree ("home_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_audit_home_idx" ON "home_audit" USING btree ("home_id","created_at");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_audit_worker_idx" ON "home_audit" USING btree ("worker_id","created_at");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "home_invitations_token_idx" ON "home_invitations" USING btree ("token_hash");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_invitations_home_idx" ON "home_invitations" USING btree ("home_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "home_media_object_idx" ON "home_media" USING btree ("object_path");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_media_home_idx" ON "home_media" USING btree ("home_id","created_at");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_media_work_idx" ON "home_media" USING btree ("work_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "home_members_home_user_idx" ON "home_members" USING btree ("home_id","user_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_members_user_idx" ON "home_members" USING btree ("user_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_rooms_home_idx" ON "home_rooms" USING btree ("home_id","position");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "home_shares_token_idx" ON "home_shares" USING btree ("token_hash");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_shares_home_idx" ON "home_shares" USING btree ("home_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "homes_public_id_idx" ON "homes" USING btree ("public_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "homes_creator_idx" ON "homes" USING btree ("created_by_user_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "infrastructure_items_home_idx" ON "infrastructure_items" USING btree ("home_id","type");
+--> statement
+CREATE INDEX IF NOT EXISTS "work_approvals_work_idx" ON "work_approvals" USING btree ("work_id","created_at");
+--> statement
+CREATE INDEX IF NOT EXISTS "work_notes_work_idx" ON "work_notes" USING btree ("work_id","created_at");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "work_participants_work_worker_idx" ON "work_participants" USING btree ("work_id","worker_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "work_participants_worker_idx" ON "work_participants" USING btree ("worker_id","status");
+--> statement
+CREATE INDEX IF NOT EXISTS "work_records_home_idx" ON "work_records" USING btree ("home_id","start_date");
+--> statement
+CREATE INDEX IF NOT EXISTS "work_records_room_idx" ON "work_records" USING btree ("room_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "worker_memberships_group_idx" ON "worker_memberships" USING btree ("group_id","status");
+--> statement
+CREATE INDEX IF NOT EXISTS "worker_memberships_member_idx" ON "worker_memberships" USING btree ("member_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "worker_reviews_unique_idx" ON "worker_reviews" USING btree ("work_id","worker_id","author_user_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "worker_reviews_worker_idx" ON "worker_reviews" USING btree ("worker_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "workers_individual_user_idx" ON "workers" USING btree ("user_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "workers_manager_idx" ON "workers" USING btree ("manager_user_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "workers_kind_idx" ON "workers" USING btree ("kind","status");

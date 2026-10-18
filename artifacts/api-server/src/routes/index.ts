@@ -13,12 +13,17 @@ import sharedEstimatesRouter from "./sharedEstimates";
 import smetaRouter from "./smeta";
 import realtorRouter from "./realtor";
 import realtorPublicRouter from "./realtorPublic";
+import homePublicRouter from "./homePublic";
+import homesRouter from "./homes";
+import worksRouter from "./works";
+import workersRouter from "./workers";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(sharedEstimatesRouter);
 router.use(realtorPublicRouter);
+router.use(homePublicRouter);
 router.use(storageRouter);
 router.use(lifecycleRouter);
 router.use(requireAuth);
@@ -30,5 +35,8 @@ router.use(paymentsRouter);
 router.use(activityRouter);
 router.use(smetaRouter);
 router.use(realtorRouter);
+router.use(homesRouter);
+router.use(worksRouter);
+router.use(workersRouter);
 
 export default router;
