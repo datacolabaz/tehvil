@@ -22,7 +22,7 @@ export function HomeMapPage({ homeId }: { homeId: string }) {
   const verify = useVerifyInfrastructure();
   const remove = useDeleteInfrastructure();
   const [photoId, setPhotoId] = useState<string | null>(null);
-  const [type, setType] = useState('');
+  const [type, setType] = useState(() => new URLSearchParams(window.location.search).get('type') ?? '');
   const [editing, setEditing] = useState<InfrastructureItem | 'new' | null>(null);
   if (home.isLoading || items.isLoading) return <Skeleton rows={3} />;
   if (!home.data) return <HomeMissing />;
@@ -34,10 +34,10 @@ export function HomeMapPage({ homeId }: { homeId: string }) {
   const onPhoto = list.filter(i => current && i.mediaId === current.id);
   const refresh = () => void refreshHomeData(qc);
   return <>
-    <PageHeading eyebrow={home.data.home.name} title="Kommunikasiya xəritəsi" description="Divarın, döşəmənin və tavanın içindən keçən elektrik, su, kanalizasiya, istilik və digər xətlər — real fotolar üzərində. Mənbə və təsdiq hər xəttdə göstərilir."
-      action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')} data-testid="button-add-line"><Plus size={16} />Xətt qeyd et</button> : undefined} />
+    <PageHeading eyebrow={home.data.home.name} title="Evdəki sistemlər" description="Elektrik naqilləri, su və kanalizasiya boruları, istilik xətləri divarın içindən harada keçir — fotonun üzərində göstərin. Gələcəkdə təmir zamanı yerini tapmaq asan olacaq."
+      action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')} data-testid="button-add-line"><Plus size={16} />Naqil və ya boru qeyd et</button> : undefined} />
     <div className="hp-legend">{Object.entries(INFRA_TYPE).map(([k, l]) => <button key={k} type="button" className={type === k ? 'on' : ''} onClick={() => setType(type === k ? '' : k)}><i style={{ background: INFRA_COLOR[k] }} />{l}<small>{(items.data ?? []).filter(i => i.type === k).length}</small></button>)}</div>
-    {!(items.data ?? []).length && !photos.length ? <Empty icon={<Cable size={28} />} title="Xəritə hələ boşdur" text="Divar bağlanmazdan əvvəl xətlərin fotosunu çəkin, sonra foto üzərində xəttin keçdiyi yeri barmağınızla işarələyin. Gələcəkdə divarı deşəndə bu xəritə sizi qoruyacaq." action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')}><Plus size={16} />İlk xətti qeyd et</button> : undefined} />
+    {!(items.data ?? []).length && !photos.length ? <Empty icon={<Cable size={28} />} title="Hələ heç nə qeyd olunmayıb" text="Divarlar bağlanmazdan əvvəl naqil və boruların fotosunu çəkin, sonra fotonun üzərində barmağınızla yerini göstərin. Gələcəkdə təmir zamanı onların yerini tapmaq asan olacaq." action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')}><Plus size={16} />İlk qeydi et</button> : undefined} />
       : <div className="hp-map-layout">
         <section className="surface hp-section">
           {current ? <PhotoMap photo={current} items={onPhoto} /> : <p className="rl-hint">Fotosu olan xətt yoxdur. Xətt qeyd edərkən foto seçin.</p>}
@@ -45,7 +45,7 @@ export function HomeMapPage({ homeId }: { homeId: string }) {
             <img src={p.url} alt="" loading="lazy" />{(items.data ?? []).some(i => i.mediaId === p.id) && <span className="hp-thumb-dot" />}</button>)}</div>}
         </section>
         <section className="hp-lines">{list.map(i => <article key={i.id} className={`surface hp-line ${current && i.mediaId === current.id ? 'on-photo' : ''}`}>
-          <header><i style={{ background: INFRA_COLOR[i.type] }} /><b>{INFRA_TYPE[i.type]}</b>{i.verified ? <Pill small tone="ok" icon={<BadgeCheck size={11} />}>Mütəxəssis təsdiqləyib</Pill> : <Pill small tone="neutral">Təsdiqlənməyib</Pill>}</header>
+          <header><i style={{ background: INFRA_COLOR[i.type] }} /><b>{INFRA_TYPE[i.type]}</b>{i.verified ? <Pill small tone="ok" icon={<BadgeCheck size={11} />}>Mütəxəssis təsdiqləyib</Pill> : <Pill small tone="neutral">Mütəxəssis yoxlamayıb</Pill>}</header>
           {i.label && <p><strong>{i.label}</strong></p>}
           {i.notes && <p className="hp-text">{i.notes}</p>}
           <small>{[INFRA_SOURCE[i.source], i.roomName, i.workTitle ? `İş: ${i.workTitle}` : '', dayTime(i.createdAt)].filter(Boolean).join(' · ')}</small>
@@ -57,8 +57,8 @@ export function HomeMapPage({ homeId }: { homeId: string }) {
           </div>
         </article>)}</section>
       </div>}
-    <p className="rl-hint hp-mt">Xəritə ev sahibinin, ustanın və ya mütəxəssisin qeydinə əsaslanır; “Mütəxəssis təsdiqləyib” nişanı yalnız evə əlavə olunmuş texniki mütəxəssis yoxladıqdan sonra görünür. Qazma və ya sökmə işindən əvvəl yerində yoxlayın.</p>
-    {editing && <LineModal homeId={homeId} item={editing === 'new' ? undefined : editing} photos={photos} role={role} defaultPhoto={current?.id} onClose={() => setEditing(null)} onSaved={id => { setEditing(null); refresh(); if (id) setPhotoId(id); }} />}
+    <p className="rl-hint hp-mt">Bu qeydləri ev sahibi, usta və ya mütəxəssis edib. “Mütəxəssis təsdiqləyib” yalnız sizin əlavə etdiyiniz mütəxəssis yoxladıqdan sonra görünür. Divarı deşməzdən əvvəl yerində yoxlayın.</p>
+    {editing && <LineModal homeId={homeId} item={editing === 'new' ? undefined : editing} photos={photos} role={role} defaultPhoto={current?.id} defaultType={type || undefined} onClose={() => setEditing(null)} onSaved={id => { setEditing(null); refresh(); if (id) setPhotoId(id); }} />}
     <HomeToaster />
   </>;
 }
@@ -88,12 +88,12 @@ function PhotoMap({ photo, items, draft, onTap }: { photo: HomeMedia; items: Inf
   </div>;
 }
 
-function LineModal({ homeId, item, photos, role, defaultPhoto, onClose, onSaved }: { homeId: string; item?: InfrastructureItem; photos: HomeMedia[]; role: string; defaultPhoto?: string; onClose: () => void; onSaved: (photoId: string | null) => void }) {
+function LineModal({ homeId, item, photos, role, defaultPhoto, defaultType, onClose, onSaved }: { homeId: string; item?: InfrastructureItem; photos: HomeMedia[]; role: string; defaultPhoto?: string; defaultType?: string; onClose: () => void; onSaved: (photoId: string | null) => void }) {
   const home = useHome(homeId);
   const works = useListWorks(homeId);
   const create = useCreateInfrastructure();
   const update = useUpdateInfrastructure();
-  const [form, setForm] = useState({ type: item?.type ?? 'electric', label: item?.label ?? '', notes: item?.notes ?? '', roomId: item?.roomId ?? '', workId: item?.workId ?? '', mediaId: item?.mediaId ?? defaultPhoto ?? '', source: item?.source === 'plan' ? 'plan' : 'owner' });
+  const [form, setForm] = useState({ type: item?.type ?? defaultType ?? 'electric', label: item?.label ?? '', notes: item?.notes ?? '', roomId: item?.roomId ?? '', workId: item?.workId ?? '', mediaId: item?.mediaId ?? defaultPhoto ?? '', source: item?.source === 'plan' ? 'plan' : 'owner' });
   const [points, setPoints] = useState<MarkerPoint[]>(item?.points ?? []);
   const [extra, setExtra] = useState<HomeMedia[]>([]);
   const set = (k: keyof typeof form) => (v: string) => setForm(o => ({ ...o, [k]: v }));
@@ -106,12 +106,12 @@ function LineModal({ homeId, item, photos, role, defaultPhoto, onClose, onSaved 
     const done = { onSuccess: () => { toast(item ? 'Xətt yeniləndi' : 'Xətt qeyd olundu'); onSaved(form.mediaId || null); } };
     if (item) update.mutate({ itemId: item.id, data }, done); else create.mutate({ homeId, data }, done);
   };
-  return <Modal open onClose={onClose} eyebrow="Kommunikasiya xəritəsi" title={item ? 'Xətti dəyiş' : 'Yeni xətt'} wide
+  return <Modal open onClose={onClose} eyebrow="Evdəki sistemlər" title={item ? 'Qeydi dəyiş' : 'Naqil və ya boru qeyd et'} wide
     footer={<button type="button" className="button button-primary" onClick={save} disabled={create.isPending || update.isPending || (performer && !form.workId)} data-testid="button-save-line">Yadda saxla</button>}>
     <div className="rl-form">
       {item?.verified && <p className="rl-warn">Bu xətt mütəxəssis tərəfindən təsdiqlənib. Dəyişiklik etsəniz təsdiq sıfırlanacaq.</p>}
       <div className="field-grid three">
-        <Select label="Xəttin növü" name="line-type" value={form.type} onChange={set('type')} options={opts(INFRA_TYPE)} />
+        <Select label="Nə keçir?" name="line-type" value={form.type} onChange={set('type')} options={opts(INFRA_TYPE)} />
         <Select label="Otaq" name="line-room" value={form.roomId} onChange={set('roomId')} empty="Seçilməyib" options={(home.data?.rooms ?? []).map(r => [r.id, r.name])} />
         <Select label={performer ? 'İş (mütləq)' : 'İş'} name="line-work" value={form.workId} onChange={set('workId')} empty={performer ? 'İşi seçin' : 'Seçilməyib'} options={myWorks.map(w => [w.id, w.title])} />
       </div>
@@ -124,10 +124,10 @@ function LineModal({ homeId, item, photos, role, defaultPhoto, onClose, onSaved 
       <div className="field"><span>Foto</span>
         <div className="hp-thumbs">{allPhotos.map(p => <button key={p.id} type="button" className={form.mediaId === p.id ? 'on' : ''} onClick={() => { set('mediaId')(p.id); setPoints([]); }}><img src={p.url} alt="" loading="lazy" /></button>)}</div>
         <MediaUpload target={performer ? { workId: form.workId || undefined } : { homeId, ...(form.workId ? { workId: form.workId } : {}), ...(form.roomId ? { roomId: form.roomId } : {}) }} videos={false} label="Yeni foto" onDone={m => { setExtra(e => [...m, ...e]); if (m[0]) { set('mediaId')(m[0].id); setPoints([]); } }} />
-        {performer && !form.workId && <small className="rl-hint">Usta kimi foto və xətt yalnız iştirak etdiyiniz işə bağlana bilər — əvvəlcə işi seçin.</small>}
+        {performer && !form.workId && <small className="rl-hint">Usta kimi yalnız öz işinizə aid qeyd edə bilərsiniz — əvvəlcə işi seçin.</small>}
       </div>
       {photo && <>
-        <p className="rl-hint"><b>Fotoya toxunaraq</b> xəttin keçdiyi nöqtələri ardıcıl işarələyin.</p>
+        <p className="rl-hint"><b>Fotonun üzərinə toxunun</b> — naqil və ya borunun keçdiyi yerləri ardıcıl göstərin.</p>
         <PhotoMap photo={photo} items={[]} draft={{ points, color: INFRA_COLOR[form.type] }} onTap={p => setPoints(ps => [...ps, p].slice(0, 200))} />
         <div className="hp-actions"><button type="button" className="button button-quiet sm-btn-sm" disabled={!points.length} onClick={() => setPoints(ps => ps.slice(0, -1))}><Undo2 size={14} />Geri al</button><button type="button" className="button button-quiet sm-btn-sm" disabled={!points.length} onClick={() => setPoints([])}><Eraser size={14} />Təmizlə</button><small>{points.length} nöqtə</small></div>
       </>}

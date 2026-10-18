@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Download, ExternalLink, Link2, LoaderCircle, Plus, QrCode as QrIcon, ShieldOff } from 'lucide-react';
 import {
-  useCreateHomeShare, useGetHomeSharing, useListEquipment, useListWorks, useRevokeHomeShare, useUpdateHomeSharing, type HomeShareInputLevel, type HomeSharingInput,
+  useCreateHomeShare, useGetHomeSharing, useListEquipment, useListWorks, useRevokeHomeShare, useUpdateHomeSharing, type HomeShare, type HomeShareInputLevel, type HomeSharingInput,
 } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
 import { CopyButton, HomeToaster, Modal, Pill, QrCode, Seg, Skeleton, qrDataUrl, toast } from '@/components/home/ui';
@@ -29,37 +29,49 @@ export function HomeSharingPage({ homeId }: { homeId: string }) {
   const dirty = JSON.stringify(form) !== JSON.stringify({ publicLevel: s.publicLevel, publicShowAddress: s.publicShowAddress, publicShowPhotos: s.publicShowPhotos, publicShowEquipment: s.publicShowEquipment, showOnWorkerProfiles: s.showOnWorkerProfiles });
   const toggle = (k: keyof HomeSharingInput, label: string, hint: string) => <label className="rl-check"><input type="checkbox" checked={!!form[k]} onChange={e => setForm({ ...form, [k]: e.target.checked })} disabled={form.publicLevel === 'off' && k !== 'showOnWorkerProfiles'} /><span><b>{label}</b><br /><small>{hint}</small></span></label>;
   return <>
-    <PageHeading eyebrow={home.data.home.name} title="QR və paylaşım" description="QR kod evin daimi identifikatorudur və yalnız sizin icazə verdiyinizi göstərir. Konkret şəxsə daha çox məlumat göstərmək üçün ayrıca, istənilən vaxt ləğv edilə bilən gizli link yaradın." />
-    <div className="hp-two">
-      <section className="surface hp-section hp-qr-card">
-        <QrCode value={qrValue} size={190} label={home.data.home.name} />
-        <div className="hp-actions"><button type="button" className="button button-secondary" onClick={() => void download()}><Download size={15} />QR-ı yüklə (PNG)</button><a className="button button-quiet" href={s.publicUrl} target="_blank" rel="noreferrer"><ExternalLink size={15} />Səhifəyə bax</a></div>
-        <code className="hp-code">{s.publicUrl}</code>
-        <p className="rl-hint">Bu link gizli deyil — QR-ı skan edən hər kəs onu aça bilər. Ona görə də yalnız ümumi məlumat göstərin.</p>
-      </section>
-      <section className="surface hp-section">
-        <h2><QrIcon size={15} className="sm-ii" /> QR səhifəsində nə görünür</h2>
-        <Seg label="Səviyyə" value={form.publicLevel} options={Object.entries(PUBLIC_LEVEL) as [HomeSharingInput['publicLevel'], string][]} onChange={v => setForm({ ...form, publicLevel: v })} />
-        {toggle('publicShowAddress', 'Ünvanı göstər', 'Default bağlıdır. Rayon və şəhər hər zaman görünür.')}
-        {toggle('publicShowPhotos', 'Təsdiqlənmiş işlərin fotolarını göstər', '“Gizli xətlər” fotoları heç vaxt QR-da göstərilmir.')}
-        {toggle('publicShowEquipment', 'Avadanlıq siyahısını göstər', 'Seriya nömrəsi göstərilmir.')}
-        {toggle('showOnWorkerProfiles', 'Ustaların profilində bu evdəki işləri göstər', 'Ünvansız, yalnız siz qəbul etdiyiniz işlər. Ustaların portfolio-su üçün.')}
-        <p className="rl-hint">Kommunikasiya xəritəsi, audit jurnalı, ustaların telefonları və şəxsi qeydlər QR səhifəsində heç vaxt göstərilmir.</p>
-        <button type="button" className="button button-primary" disabled={!dirty || save.isPending} onClick={() => save.mutate({ homeId, data: form }, { onSuccess: () => { void refreshHomeData(qc); toast('Ayarlar yadda saxlanıldı'); } })} data-testid="button-save-sharing">{save.isPending && <LoaderCircle className="spin" size={15} />}Yadda saxla</button>
-      </section>
-    </div>
+    <PageHeading eyebrow={home.data.home.name} title="Məlumatları paylaş" description="Alıcıya, ustaya və ya mütəxəssisə yalnız seçdiyiniz məlumatları göstərin. Linkin müddətini seçin və istədiyiniz vaxt bağlayın."
+      action={<button type="button" className="button button-primary" onClick={() => { setCreated(''); setCreating(true); }} data-testid="button-create-share"><Link2 size={16} />Paylaşım linki yarat</button>} />
     <section className="surface hp-section">
-      <div className="section-head"><h2><Link2 size={15} className="sm-ii" /> Gizli paylaşım linkləri</h2><button type="button" className="button button-secondary sm-btn-sm" onClick={() => { setCreated(''); setCreating(true); }} data-testid="button-create-share"><Plus size={14} />Link yarat</button></div>
-      {!s.shares.length ? <p className="rl-hint">Məsələn: alıcıya yalnız hamam və mətbəx işlərini, santexnikə isə texniki məlumatı və kommunikasiya xəritəsini göstərin.</p>
+      <h2><Link2 size={15} className="sm-ii" /> Paylaşdığım linklər</h2>
+      {!s.shares.length ? <p className="rl-hint">Hələ link yaratmamısınız. Məsələn: alıcıya yalnız hamam və mətbəxdə görülən işləri, santexnikə isə su və kanalizasiya borularının yerini göstərin.</p>
         : <div className="hp-shares">{s.shares.map(sh => <div key={sh.id} className={`hp-share ${sh.active ? '' : 'off'}`}>
-          <div><b>{sh.label || SHARE_LEVEL[sh.level]}</b><small>{SHARE_LEVEL[sh.level]}{sh.level === 'selected' ? ` · ${sh.scope.roomIds.length} otaq, ${sh.scope.workIds.length} iş, ${sh.scope.equipmentIds.length} avadanlıq` : ''}{sh.scope.includePhotos ? ' · fotolarla' : ''}{sh.scope.includeInfrastructure ? ' · xəritə ilə' : ''}</small>
-            <small>{sh.openCount} dəfə açılıb{sh.lastOpenedAt ? ` · son: ${dayTime(sh.lastOpenedAt)}` : ''}{sh.expiresAt ? ` · ${dayTime(sh.expiresAt)}-dək` : ' · müddətsiz'}</small></div>
-          {sh.active ? <button type="button" className="button button-quiet sm-btn-sm" onClick={() => revoke.mutate({ homeId, shareId: sh.id }, { onSuccess: () => { void refreshHomeData(qc); toast('Link ləğv edildi'); } })} data-testid={`button-revoke-${sh.id}`}><ShieldOff size={14} />Ləğv et</button> : <Pill small tone="neutral">{sh.revokedAt ? 'Ləğv edilib' : 'Müddəti bitib'}</Pill>}
+          <div><b>{sh.label || SHARE_LEVEL[sh.level]}</b><small>{shareSummary(sh)}</small>
+            <small>{sh.openCount ? `${sh.openCount} dəfə baxılıb` : 'Hələ baxılmayıb'}{sh.lastOpenedAt ? ` · son baxış: ${dayTime(sh.lastOpenedAt)}` : ''}{sh.active ? (sh.expiresAt ? ` · ${dayTime(sh.expiresAt)}-dək` : ' · müddətsiz') : ''}</small></div>
+          {sh.active ? <button type="button" className="button button-quiet sm-btn-sm" onClick={() => revoke.mutate({ homeId, shareId: sh.id }, { onSuccess: () => { void refreshHomeData(qc); toast('Link bağlandı — artıq açılmır'); } })} data-testid={`button-revoke-${sh.id}`}><ShieldOff size={14} />Linki bağla</button> : <Pill small tone="neutral">{sh.revokedAt ? 'Bağlanıb' : 'Müddəti bitib'}</Pill>}
         </div>)}</div>}
     </section>
+    <div className="hp-two">
+      <section className="surface hp-section hp-qr-card">
+        <h2><QrIcon size={15} className="sm-ii" /> Evin QR kodu</h2>
+        <QrCode value={qrValue} size={190} label={home.data.home.name} />
+        <div className="hp-actions"><button type="button" className="button button-secondary" onClick={() => void download()}><Download size={15} />QR kodu yüklə</button><a className="button button-quiet" href={s.publicUrl} target="_blank" rel="noreferrer"><ExternalLink size={15} />Necə görünür?</a></div>
+        <p className="rl-hint">Bu QR kodu məsələn, elektrik paneli və ya kombinin yanına yapışdıra bilərsiniz. Onu skan edən hər kəs yalnız “QR kodla kim baxsa, nə görsün?” bölməsində seçdiyinizi görür — ona görə şəxsi məlumatı burada göstərməyin.</p>
+      </section>
+      <section className="surface hp-section">
+        <h2>QR kodla kim baxsa, nə görsün?</h2>
+        <Seg label="Göstər" value={form.publicLevel} options={Object.entries(PUBLIC_LEVEL) as [HomeSharingInput['publicLevel'], string][]} onChange={v => setForm({ ...form, publicLevel: v })} />
+        {toggle('publicShowAddress', 'Ünvan', 'Rayon və şəhər həmişə görünür, dəqiq ünvan yalnız seçsəniz.')}
+        {toggle('publicShowPhotos', 'Təsdiqlənmiş işlərin fotoları', 'Divar bağlanmazdan əvvəl çəkilmiş fotolar QR-da heç vaxt göstərilmir.')}
+        {toggle('publicShowEquipment', 'Avadanlıqlar', 'Seriya nömrəsi göstərilmir.')}
+        {toggle('showOnWorkerProfiles', 'Ustaların profilində bu evdə gördükləri işlər görünsün', 'Ünvan göstərilmir. Yalnız sizin təsdiqlədiyiniz işlər.')}
+        <p className="rl-hint">Naqil və boruların yeri, ustaların telefonları, dəyişikliklər tarixçəsi və şəxsi qeydlər QR kodla heç vaxt görünmür.</p>
+        <button type="button" className="button button-primary" disabled={!dirty || save.isPending} onClick={() => save.mutate({ homeId, data: form }, { onSuccess: () => { void refreshHomeData(qc); toast('Yadda saxlanıldı'); } })} data-testid="button-save-sharing">{save.isPending && <LoaderCircle className="spin" size={15} />}Yadda saxla</button>
+      </section>
+    </div>
     {creating && <ShareModal homeId={homeId} created={created} onCreated={url => { setCreated(url); void refreshHomeData(qc); }} onClose={() => setCreating(false)} />}
     <HomeToaster />
   </>;
+}
+
+function shareSummary(sh: HomeShare) {
+  if (sh.level === 'technical') return 'Tam məlumatlar';
+  const parts = ['Ümumi məlumat'];
+  if (sh.scope.roomIds.length) parts.push(`${sh.scope.roomIds.length} otaq`);
+  if (sh.scope.workIds.length) parts.push(`${sh.scope.workIds.length} iş`);
+  if (sh.scope.equipmentIds.length) parts.push('avadanlıqlar');
+  if (sh.scope.includeInfrastructure) parts.push('evdəki sistemlər');
+  if (sh.scope.includePhotos) parts.push('fotolar');
+  return parts.join(' · ');
 }
 
 function ShareModal({ homeId, created, onCreated, onClose }: { homeId: string; created: string; onCreated: (url: string) => void; onClose: () => void }) {
@@ -68,27 +80,42 @@ function ShareModal({ homeId, created, onCreated, onClose }: { homeId: string; c
   const equipment = useListEquipment(homeId);
   const create = useCreateHomeShare();
   const [label, setLabel] = useState('');
-  const [level, setLevel] = useState<HomeShareInputLevel>('selected');
   const [days, setDays] = useState('30');
-  const [scope, setScope] = useState({ roomIds: [] as string[], workIds: [] as string[], equipmentIds: [] as string[], includePhotos: true, includeInfrastructure: false });
-  const flip = (k: 'roomIds' | 'workIds' | 'equipmentIds', id: string) => setScope(s => ({ ...s, [k]: s[k].includes(id) ? s[k].filter(x => x !== id) : [...s[k], id] }));
-  if (created) return <Modal open onClose={onClose} eyebrow="Paylaşım" title="Link hazırdır">
-    <div className="hp-linkbox"><small>Bu linki yalnız göstərmək istədiyiniz şəxsə göndərin. Ehtiyac olmayanda “Ləğv et” düyməsi ilə dərhal bağlayın.</small><code>{created}</code><CopyButton text={created} /></div>
+  const [pick, setPick] = useState({ rooms: false, works: false, equipment: false, systems: false, photos: true, full: false });
+  const [roomIds, setRoomIds] = useState<string[]>([]);
+  const [workIds, setWorkIds] = useState<string[]>([]);
+  const flip = (list: string[], set: (v: string[]) => void, id: string) => set(list.includes(id) ? list.filter(x => x !== id) : [...list, id]);
+  if (created) return <Modal open onClose={onClose} eyebrow="Məlumatları paylaş" title="Link hazırdır">
+    <div className="hp-share-done">
+      <QrCode value={created} size={170} label="Paylaşım linkinin QR kodu" />
+      <div className="hp-linkbox"><small>Linki və ya QR kodu yalnız göstərmək istədiyiniz şəxsə göndərin. Ehtiyac qalmayanda “Linki bağla” düyməsi ilə dərhal bağlayın.</small><code>{created}</code>
+        <div className="hp-actions"><CopyButton text={created} /><a className="button button-secondary" target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`${home.data?.home.name ?? 'Evim'} haqqında məlumat: ${created}`)}`}>WhatsApp ilə göndər</a></div></div>
+    </div>
   </Modal>;
-  const empty = level === 'selected' && !scope.roomIds.length && !scope.workIds.length && !scope.equipmentIds.length;
-  return <Modal open onClose={onClose} eyebrow="Paylaşım" title="Gizli link yarat" wide
-    footer={<button type="button" className="button button-primary" disabled={empty || create.isPending} data-testid="button-save-share" onClick={() => create.mutate({ homeId, data: { label: label.trim(), level, scope, expiresInDays: days ? Number(days) : null } }, { onSuccess: r => onCreated(r.url) })}>Link yarat</button>}>
+  const level: HomeShareInputLevel = pick.full ? 'technical' : 'selected';
+  const check = (k: keyof typeof pick, title: string, hint: string, testId: string) => <label className={`hp-sharecheck ${pick[k] ? 'on' : ''}`}>
+    <input type="checkbox" checked={pick[k]} disabled={pick.full && k !== 'full'} data-testid={testId} onChange={e => setPick({ ...pick, [k]: e.target.checked })} /><span><b>{title}</b><small>{hint}</small></span>
+  </label>;
+  const submit = () => create.mutate({ homeId, data: { label: label.trim(), level, expiresInDays: days ? Number(days) : null, scope: {
+    roomIds: pick.rooms ? roomIds : [], workIds: pick.works ? workIds : [], equipmentIds: pick.equipment ? (equipment.data ?? []).map(e => e.id) : [],
+    includePhotos: pick.photos, includeInfrastructure: pick.systems,
+  } } }, { onSuccess: r => onCreated(r.url) });
+  return <Modal open onClose={onClose} eyebrow="Məlumatları paylaş" title="Nəyi paylaşırsınız?" wide
+    footer={<button type="button" className="button button-primary hp-big" disabled={create.isPending} data-testid="button-save-share" onClick={submit}>Link yarat</button>}>
     <div className="rl-form">
-      <div className="field-grid"><Field label="Kimin üçün (qeyd)" name="share-label" value={label} onChange={setLabel} placeholder="məs. Alıcı — Murad" />
-        <label className="field"><span>Müddət</span><select value={days} onChange={e => setDays(e.target.value)}><option value="7">7 gün</option><option value="30">30 gün</option><option value="90">90 gün</option><option value="">Müddətsiz (ləğv edənə qədər)</option></select></label></div>
-      <Seg label="Səviyyə" value={level} options={Object.entries(SHARE_LEVEL) as [HomeShareInputLevel, string][]} onChange={setLevel} />
-      {level === 'technical' ? <p className="rl-warn">Texniki link bütün işləri, materialları, avadanlıqları və kommunikasiya xəritəsini göstərir. Yalnız etibar etdiyiniz usta və ya mütəxəssislə paylaşın.</p> : <>
-        <div className="field"><span>Otaqlar (otaqdakı bütün işlər daxil olur)</span><div className="rl-chips">{(home.data?.rooms ?? []).map(r => <button key={r.id} type="button" className={scope.roomIds.includes(r.id) ? 'on' : ''} onClick={() => flip('roomIds', r.id)}>{r.name}</button>)}</div></div>
-        <div className="field"><span>Ayrı-ayrı işlər</span><div className="rl-chips">{(works.data ?? []).map(w => <button key={w.id} type="button" className={scope.workIds.includes(w.id) ? 'on' : ''} onClick={() => flip('workIds', w.id)}>{w.title}</button>)}</div></div>
-        <div className="field"><span>Avadanlıqlar</span><div className="rl-chips">{(equipment.data ?? []).map(e => <button key={e.id} type="button" className={scope.equipmentIds.includes(e.id) ? 'on' : ''} onClick={() => flip('equipmentIds', e.id)}>{e.name}</button>)}</div></div>
-        <label className="rl-check"><input type="checkbox" checked={scope.includeInfrastructure} onChange={e => setScope({ ...scope, includeInfrastructure: e.target.checked })} /><span>Seçilmiş otaq / işlərin kommunikasiya xətlərini göstər</span></label>
-      </>}
-      <label className="rl-check"><input type="checkbox" checked={scope.includePhotos} onChange={e => setScope({ ...scope, includePhotos: e.target.checked })} /><span>Fotoları göstər</span></label>
+      <label className="hp-sharecheck on"><input type="checkbox" checked disabled /><span><b>Evin ümumi məlumatları</b><small>Ad, növ, sahə, ünvan.</small></span></label>
+      {check('rooms', 'Seçilmiş otaqlar', 'Otaqda görülən bütün işlər də görünür.', 'share-rooms')}
+      {pick.rooms && !pick.full && <div className="hp-chipset">{(home.data?.rooms ?? []).map(r => <button key={r.id} type="button" className={roomIds.includes(r.id) ? 'on' : ''} onClick={() => flip(roomIds, setRoomIds, r.id)}>{r.name}</button>)}</div>}
+      {check('works', 'Seçilmiş təmir işləri', 'Yalnız seçdiyiniz işlər.', 'share-works')}
+      {pick.works && !pick.full && <div className="hp-chipset">{(works.data ?? []).map(w => <button key={w.id} type="button" className={workIds.includes(w.id) ? 'on' : ''} onClick={() => flip(workIds, setWorkIds, w.id)}>{w.title}</button>)}</div>}
+      {check('equipment', 'Avadanlıqlar', 'Kombi, kondisioner və s. — marka, model, zəmanət.', 'share-equipment')}
+      {check('systems', 'Evin texniki sistemləri', 'Naqil və boruların harada keçdiyi (seçilmiş otaq və işlər üzrə).', 'share-systems')}
+      {check('photos', 'Fotolar', 'Seçilmiş işlərin fotoları.', 'share-photos')}
+      {check('full', 'Tam məlumatlar', 'Bütün işlər, materiallar, avadanlıqlar və evdəki sistemlər. Yalnız etibar etdiyiniz usta və ya mütəxəssis üçün.', 'share-full')}
+      <div className="field-grid">
+        <Field label="Kimin üçün (özünüz üçün qeyd)" name="share-label" value={label} onChange={setLabel} placeholder="məs. Alıcı — Murad" />
+        <label className="field"><span>Nə qədər açıq qalsın?</span><select value={days} onChange={e => setDays(e.target.value)}><option value="7">7 gün</option><option value="30">30 gün</option><option value="90">90 gün</option><option value="">Mən bağlayana qədər</option></select></label>
+      </div>
     </div>
   </Modal>;
 }

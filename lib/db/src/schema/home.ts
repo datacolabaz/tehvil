@@ -76,7 +76,7 @@ export const homeMembersTable = pgTable("home_members", {
   id: uuid("id").primaryKey().defaultRandom(),
   homeId: uuid("home_id").notNull().references(() => homesTable.id, { onDelete: "cascade" }),
   userId: user("user_id").notNull(),
-  role: varchar("role", { length: 16 }).notNull(), // owner | technician | viewer
+  role: varchar("role", { length: 16 }).notNull(), // owner | member | contributor | viewer (legacy: technician = contributor)
   displayName: varchar("display_name", { length: 120 }).notNull().default(""),
   addedByUserId: user("added_by_user_id"),
   createdAt: createdAt(),
@@ -216,6 +216,10 @@ export const workParticipantsTable = pgTable("work_participants", {
   /** Set when a team leader added this member as part of the team's work. */
   viaTeamId: uuid("via_team_id"),
   note: varchar("note", { length: 300 }).notNull().default(""),
+  /** Per-work permissions set by the home owner. canEdit null = default by role (lead / team_lead may edit). */
+  canAddMedia: boolean("can_add_media").notNull().default(true),
+  canAddNotes: boolean("can_add_notes").notNull().default(true),
+  canEdit: boolean("can_edit"),
   addedByUserId: user("added_by_user_id").notNull(),
   invitedAt: timestamp("invited_at", { withTimezone: true }).notNull().defaultNow(),
   respondedAt: timestamp("responded_at", { withTimezone: true }),

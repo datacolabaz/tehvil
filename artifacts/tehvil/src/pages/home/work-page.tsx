@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -17,14 +17,14 @@ import {
 } from '@/lib/home/labels';
 
 const STATUS_ACTIONS: { action: WorkStatusInputAction; perm: keyof WorkDetail['permissions']; label: string; icon: typeof Play; tone: string }[] = [
-  { action: 'start', perm: 'start', label: 'İşə başlanıldı', icon: Play, tone: 'secondary' },
-  { action: 'complete', perm: 'complete', label: 'Tamamlandı kimi işarələ', icon: CheckCircle2, tone: 'primary' },
-  { action: 'confirm', perm: 'confirm', label: 'İşi qəbul edirəm', icon: ClipboardCheck, tone: 'primary' },
+  { action: 'start', perm: 'start', label: 'İşə başladım', icon: Play, tone: 'secondary' },
+  { action: 'complete', perm: 'complete', label: 'İş bitdi', icon: CheckCircle2, tone: 'primary' },
+  { action: 'confirm', perm: 'confirm', label: 'Təsdiqləyirəm', icon: ClipboardCheck, tone: 'primary' },
   { action: 'request_revision', perm: 'requestRevision', label: 'Düzəliş istə', icon: AlertTriangle, tone: 'secondary' },
   { action: 'reopen', perm: 'reopen', label: 'Yenidən aç', icon: RotateCcw, tone: 'quiet' },
 ];
 const APPROVAL_LABEL: Record<string, string> = { created: 'Qeyd yaradıldı', start: 'İşə başlanıldı', complete: 'Tamamlandı', confirm: 'Ev sahibi qəbul etdi', request_revision: 'Düzəliş istənildi', reopen: 'Yenidən açıldı', inspected: 'Mütəxəssis yoxladı — qüsur yoxdur', inspection_issues: 'Mütəxəssis yoxladı — iradlar var' };
-const ROLE_OF: Record<string, string> = { owner: 'Ev sahibi', technician: 'Texniki mütəxəssis', viewer: 'Ailə üzvü', performer: 'İcraçı' };
+const ROLE_OF: Record<string, string> = { owner: 'Ev sahibi', member: 'Ev üzvü', contributor: 'Mütəxəssis', technician: 'Mütəxəssis', viewer: 'Ev üzvü', performer: 'Usta', staff: 'Tehvil.az' };
 
 export function WorkPage({ workId }: { workId: string }) {
   const q = useGetWork(workId);
@@ -36,11 +36,13 @@ export function WorkPage({ workId }: { workId: string }) {
   const [adding, setAdding] = useState(false);
   const [statusNote, setStatusNote] = useState<WorkStatusInputAction | null>(null);
   const refresh = () => void refreshHomeData(qc);
+  // "Foto əlavə et" / "İşə usta əlavə et" from İşlərim open the right section.
+  useEffect(() => { if (q.data && window.location.hash) document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ block: 'start' }); }, [q.data]);
   if (q.isLoading) return <Skeleton rows={4} />;
   const w = q.data;
   if (!w) return <div className="notice error-notice" role="alert"><p>İş tapılmadı və ya baxmaq icazəniz yoxdur.</p><Link href="/homes" className="button button-secondary">Mənim evlərim</Link></div>;
   const p = w.permissions;
-  const owner = w.myRole === 'owner';
+  const owner = w.myRole === 'owner' || w.myRole === 'member';
   const myInvites = w.participants.filter(x => x.isMe && x.status === 'invited');
   const accepted = w.participants.some(x => x.status === 'accepted');
   const doStatus = (action: WorkStatusInputAction, note?: string) => status.mutate({ workId, data: { action, note } }, { onSuccess: () => { refresh(); setStatusNote(null); toast(action === 'confirm' ? 'İş qəbul edildi' : action === 'complete' ? 'Ev sahibinin təsdiqinə göndərildi' : 'Status yeniləndi'); } });
@@ -48,12 +50,12 @@ export function WorkPage({ workId }: { workId: string }) {
     <Link href={`/homes/${w.homeId}/history`} className="hp-back"><ArrowLeft size={14} />{w.homeName} · tarixçə</Link>
     <PageHeading eyebrow={`${WORK_CATEGORY[w.category] ?? w.category} · ${WORK_KIND[w.kind] ?? w.kind}`} title={w.title}
       description={[range(w.startDate, w.endDate), w.roomName, w.visibility === 'private' ? 'Şəxsi qeyd (QR-da göstərilmir)' : ''].filter(Boolean).join(' · ')}
-      action={p.edit ? <button type="button" className="button button-secondary" onClick={() => setEditing(true)} data-testid="button-edit-work"><Pencil size={15} />Redaktə et</button> : undefined} />
+      action={p.edit ? <button type="button" className="button button-secondary" onClick={() => setEditing(true)} data-testid="button-edit-work"><Pencil size={15} />Məlumatı dəyiş</button> : undefined} />
     <div className="hp-work-status surface">
       <div><WorkStatus status={w.status} /><WorkTrust accepted={accepted} confirmed={w.status === 'confirmed'} inspected={!!w.inspectedAt} /></div>
       <div className="hp-actions">{STATUS_ACTIONS.filter(a => p[a.perm]).map(a => <button key={a.action} type="button" className={`button button-${a.tone}`} disabled={status.isPending} data-testid={`button-status-${a.action}`}
         onClick={() => (a.action === 'request_revision' || a.action === 'reopen') ? setStatusNote(a.action) : doStatus(a.action)}><a.icon size={15} />{a.label}</button>)}</div>
-      {w.status === 'completed' && owner && <p className="rl-hint">İcraçı işi tamamlandı kimi qeyd edib. Fotoları və qeydləri yoxlayıb qəbul edin və ya düzəliş istəyin. Qəbul etdikdən sonra icraçılar bu işi dəyişə bilməz.</p>}
+      {w.status === 'completed' && owner && <p className="rl-hint">Usta işin bitdiyini qeyd edib. Fotolara baxın və təsdiqləyin və ya düzəliş istəyin. Təsdiqlədikdən sonra icraçılar bu işi dəyişə bilməz.</p>}
       {w.status === 'completed' && !owner && <p className="rl-hint">Ev sahibinin təsdiqini gözləyir.</p>}
     </div>
     {myInvites.map(inv => <div key={inv.id} className="hp-invite-banner"><UserPlus size={18} /><span><b>{inv.worker.displayName}</b> adından <b>{PART_ROLE[inv.role]}</b> kimi dəvət olunmusunuz. İştirakınızı təsdiqləyin.</span>
@@ -70,8 +72,8 @@ export function WorkPage({ workId }: { workId: string }) {
         </section>}
 
         <section className="surface hp-section">
-          <div className="section-head"><h2>Foto və video sübutlar</h2><span className="count-chip">{w.media.length}</span></div>
-          {!w.media.length && <p className="rl-hint">Hələ foto yoxdur. “Əvvəl”, “iş zamanı”, “gizli xətlər” və “sonra” fotoları işin ən güclü sübutudur.</p>}
+          <div className="section-head"><h2 id="photos">Fotolar</h2><span className="count-chip">{w.media.length}</span></div>
+          {!w.media.length && <p className="rl-hint">Hələ foto yoxdur. İşdən əvvəl, iş zamanı və işdən sonra çəkilmiş fotolar işin ən yaxşı sübutudur.</p>}
           <MediaGrid media={w.media} canDelete={m => m.uploadedByMe || owner} onDelete={m => removeMedia.mutate({ mediaId: m.id }, { onSuccess: () => { refresh(); toast('Fayl gizlədildi'); } })} />
           {p.addMedia && <MediaUpload target={{ workId }} onDone={() => { refresh(); toast('Fayllar əlavə olundu'); }} />}
         </section>
@@ -82,22 +84,22 @@ export function WorkPage({ workId }: { workId: string }) {
 
       <aside className="hp-work-aside">
         <section className="surface hp-section">
-          <div className="section-head"><h2>İştirakçılar</h2>{p.manageParticipants && <button type="button" className="button button-secondary sm-btn-sm" onClick={() => setAdding(true)} data-testid="button-add-participant"><Plus size={14} />Əlavə et</button>}</div>
-          {!w.participants.length && <p className="rl-hint">Hələ icraçı qeyd olunmayıb.</p>}
+          <div className="section-head"><h2 id="people">Usta və şirkətlər</h2>{p.manageParticipants && <button type="button" className="button button-secondary sm-btn-sm" onClick={() => setAdding(true)} data-testid="button-add-participant"><Plus size={14} />Ustanı işə əlavə et</button>}</div>
+          {!w.participants.length && <p className="rl-hint">Bu işə hələ usta əlavə olunmayıb.</p>}
           <div className="hp-plist">{w.participants.map(x => <ParticipantRow key={x.id} w={w} x={x} onChanged={refresh} />)}</div>
-          <p className="rl-hint">Komanda üzvlüyü avtomatik iştirak demək deyil: hər iştirakçı bu işdə öz rolu ilə ayrıca qeyd olunur.</p>
+          <p className="rl-hint">Briqadanın hamısı avtomatik əlavə olunmur — yalnız bu işdə həqiqətən işləyənləri əlavə edin.</p>
         </section>
         <section className="surface hp-section">
-          <h2>Əlaqələr</h2>
+          <h2>Bağlı məlumatlar</h2>
           <ul className="hp-links">
             {w.roomName && w.roomId && <li><Link href={`/homes/${w.homeId}/rooms/${w.roomId}`}><Hammer size={14} />Otaq: {w.roomName}</Link></li>}
             {w.equipmentName && <li><Link href={`/homes/${w.homeId}/equipment`}><Wrench size={14} />Avadanlıq: {w.equipmentName}</Link></li>}
             {w.smetaProjectId && <li><Link href={`/smeta/${w.smetaProjectId}`}><Calculator size={14} />AI Smeta: {w.smetaProjectName}</Link></li>}
-            {!w.roomName && !w.equipmentName && !w.smetaProjectId && <li className="rl-hint">Otaq, avadanlıq və ya smeta bağlanmayıb.</li>}
+            {!w.roomName && !w.equipmentName && !w.smetaProjectId && <li className="rl-hint">Otaq, avadanlıq və ya smeta seçilməyib.</li>}
           </ul>
         </section>
         <section className="surface hp-section">
-          <h2><History size={15} className="sm-ii" /> Status tarixçəsi</h2>
+          <h2><History size={15} className="sm-ii" /> İşin gedişi</h2>
           <ol className="hp-approvals">{w.approvals.map(a => <li key={a.id}><b>{APPROVAL_LABEL[a.action] ?? a.action}</b><small>{ROLE_OF[a.actorRole] ?? a.actorRole} · {dayTime(a.createdAt)}</small>{a.note && <p>{a.note}</p>}</li>)}</ol>
           <p className="rl-hint">Təsdiqlər hesab səviyyəsində qeyd olunur; bu, hüquqi elektron imza deyil.</p>
         </section>
@@ -124,7 +126,7 @@ function ParticipantRow({ w, x, onChanged }: { w: WorkDetail; x: WorkDetail['par
   const update = useUpdateWorkParticipant();
   const invite = useCreateHomeInvitation();
   const [link, setLink] = useState('');
-  const owner = w.myRole === 'owner';
+  const owner = w.myRole === 'owner' || w.myRole === 'member';
   const removed = x.status === 'removed' || x.status === 'declined';
   return <div className={`hp-prow ${removed ? 'muted' : ''}`}>
     <WorkerLine w={x.worker} href={x.worker.registered ? `/workers/${x.worker.id}` : null}
@@ -133,17 +135,22 @@ function ParticipantRow({ w, x, onChanged }: { w: WorkDetail; x: WorkDetail['par
     {x.note && <small className="rl-hint">{x.note}</small>}
     {owner && !removed && <div className="hp-prow-actions">
       <select aria-label="Rol" value={x.role} onChange={e => update.mutate({ workId: w.id, participantId: x.id, data: { role: e.target.value as ParticipantInputRole } }, { onSuccess: onChanged })}>{PART_ROLES.map(r => <option key={r} value={r}>{PART_ROLE[r]}</option>)}</select>
-      {x.status === 'recorded' && <button type="button" className="sm-link-btn" data-testid="button-claim-link" onClick={() => invite.mutate({ homeId: w.homeId, data: { kind: 'work', workId: w.id, role: x.role as ParticipantInputRole, name: x.worker.displayName, placeholderWorkerId: x.worker.id } }, { onSuccess: r => setLink(r.url) })}><Link2 size={13} />Profilə bağlamaq üçün link</button>}
-      <button type="button" className="sm-link-btn danger" onClick={() => update.mutate({ workId: w.id, participantId: x.id, data: { status: 'removed' } }, { onSuccess: () => { onChanged(); toast('İştirakçı çıxarıldı (tarixçədə qalır)'); } })}><Trash2 size={13} />Çıxar</button>
+      {x.status === 'recorded' && <button type="button" className="sm-link-btn" data-testid="button-claim-link" onClick={() => invite.mutate({ homeId: w.homeId, data: { kind: 'work', workId: w.id, role: x.role as ParticipantInputRole, name: x.worker.displayName, placeholderWorkerId: x.worker.id } }, { onSuccess: r => setLink(r.url) })}><Link2 size={13} />Ustaya link göndər</button>}
+      <button type="button" className="sm-link-btn danger" onClick={() => update.mutate({ workId: w.id, participantId: x.id, data: { status: 'removed' } }, { onSuccess: () => { onChanged(); toast('Usta işdən çıxarıldı (tarixçədə qalır)'); } })}><Trash2 size={13} />Çıxar</button>
     </div>}
-    {link && <div className="hp-linkbox"><small>Bu linki {x.worker.displayName} ilə paylaşın. Usta öz hesabı ilə açıb təsdiqləyəndə bu qeyd onun profilinə bağlanacaq. Eyni adlı başqa profillər avtomatik birləşdirilmir.</small><code>{link}</code><CopyButton text={link} /></div>}
+    {owner && !removed && x.status !== 'recorded' && <div className="hp-perms" role="group" aria-label="Bu işdə icazələr">
+      {([['canAddMedia', 'Foto əlavə edə bilər'], ['canAddNotes', 'Qeyd yaza bilər'], ['canEdit', 'İşin məlumatını dəyişə bilər']] as const).map(([k, l]) => <label key={k} className="hp-perm">
+        <input type="checkbox" checked={x[k]} data-testid={`perm-${k}-${x.id}`} onChange={e => update.mutate({ workId: w.id, participantId: x.id, data: { [k]: e.target.checked } }, { onSuccess: () => { onChanged(); toast('İcazə yeniləndi'); } })} />{l}
+      </label>)}
+    </div>}
+    {link && <div className="hp-linkbox"><small>Linki {x.worker.displayName} ilə paylaşın. Usta hesab açıb linki təsdiqləyəndə bu qeyd onun hesabına bağlanacaq. Eyni adlı başqa hesablar avtomatik birləşdirilmir.</small><code>{link}</code><CopyButton text={link} /></div>}
   </div>;
 }
 
 function AddParticipantModal({ w, onClose, onChanged }: { w: WorkDetail; onClose: () => void; onChanged: () => void }) {
   const add = useAddWorkParticipant();
   const invite = useCreateHomeInvitation();
-  const owner = w.myRole === 'owner';
+  const owner = w.myRole === 'owner' || w.myRole === 'member';
   const myTeam = w.participants.find(x => x.isMe && x.status === 'accepted' && x.worker.kind !== 'individual');
   const team = useGetWorker(myTeam?.worker.id ?? '', { query: { enabled: !owner && !!myTeam, queryKey: [`/api/workers/${myTeam?.worker.id}`] } });
   const [tab, setTab] = useState<'registered' | 'placeholder' | 'link'>(owner ? 'registered' : 'registered');
@@ -153,10 +160,10 @@ function AddParticipantModal({ w, onClose, onChanged }: { w: WorkDetail; onClose
   const [inv, setInv] = useState({ name: '', contact: '' });
   const [link, setLink] = useState('');
   const existing = w.participants.filter(x => x.status !== 'removed' && x.status !== 'declined').map(x => x.worker.id);
-  const done = () => { onChanged(); toast('İştirakçı əlavə olundu'); onClose(); };
+  const done = () => { onChanged(); toast('Usta işə əlavə olundu'); onClose(); };
   const roles = (owner ? PART_ROLES : ['team_lead', 'team_member', 'assistant'] as const).map(r => [r, PART_ROLE[r]] as [ParticipantInputRole, string]);
-  return <Modal open onClose={onClose} eyebrow={w.title} title="İştirakçı əlavə et" wide>
-    {owner && <div className="rl-seg hp-tabs" role="tablist">{([['registered', 'Qeydiyyatlı usta'], ['placeholder', 'Qeydiyyatsız usta'], ['link', 'Dəvət linki']] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>}
+  return <Modal open onClose={onClose} eyebrow={w.title} title="Ustanı işə əlavə et" wide>
+    {owner && <div className="rl-seg hp-tabs" role="tablist">{([['registered', 'Hesabı olan usta'], ['placeholder', 'Hesabı olmayan usta'], ['link', 'Link göndər']] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>}
     <Select label="Bu işdəki rolu" name="participant-role" value={role} onChange={v => setRole(v as ParticipantInputRole)} options={roles} />
     {!owner && myTeam && <>
       <p className="rl-hint">Yalnız “{myTeam.worker.displayName}” komandasının aktiv üzvlərini əlavə edə bilərsiniz. Hər üzv iştirakını öz hesabından təsdiqləyəcək.</p>
@@ -165,10 +172,10 @@ function AddParticipantModal({ w, onClose, onChanged }: { w: WorkDetail; onClose
     </>}
     {owner && tab === 'registered' && (picked ? <div className="hp-picked"><WorkerLine w={picked} right={<button type="button" className="icon-button" aria-label="Dəyiş" onClick={() => setPicked(null)}><X size={15} /></button>} />
       <button type="button" className="button button-primary full-button" disabled={add.isPending} data-testid="button-invite-worker" onClick={() => add.mutate({ workId: w.id, data: { workerId: picked.id, role } }, { onSuccess: done })}>{add.isPending && <LoaderCircle className="spin" size={15} />}Dəvət göndər</button>
-      <small className="rl-hint">Usta dəvəti “Dəvətlər” bölməsində görəcək və iştirakını təsdiqləyəndən sonra “İştirakı təsdiqləyib” kimi göstəriləcək.</small></div>
+      <small className="rl-hint">Usta dəvəti “Mənə göndərilən dəvətlər” bölməsində görəcək. Təsdiqləyəndən sonra yanında “İşdə iştirakını təsdiqləyib” yazılacaq.</small></div>
       : <WorkerSearch onPick={setPicked} exclude={existing} />)}
     {owner && tab === 'placeholder' && <form className="rl-form" onSubmit={(e: FormEvent) => { e.preventDefault(); add.mutate({ workId: w.id, data: { placeholder: { name: ph.name.trim(), phone: ph.phone.trim(), specialty: ph.specialty.trim() }, role } }, { onSuccess: done }); }}>
-      <p className="rl-hint">Usta Təhvil-də qeydiyyatdan keçməyibsə, onu öz qeydiniz kimi əlavə edin. Profil “Qeydiyyatsız” göstəriləcək; telefonu yalnız siz görəcəksiniz. Sonra ona link göndərib qeydi onun hesabına bağlaya bilərsiniz.</p>
+      <p className="rl-hint">Ustanın Təhvil-də hesabı yoxdursa, adını və telefonunu yazın. Yanında “Hesabı yoxdur” görünəcək, telefonu yalnız siz görəcəksiniz. Sonra ona link göndərib bu qeydi onun hesabına bağlaya bilərsiniz.</p>
       <div className="field-grid three">
         <Field label="Ad, soyad" name="ph-name" required value={ph.name} onChange={v => setPh({ ...ph, name: v })} />
         <Field label="Telefon (məxfi)" name="ph-phone" type="tel" value={ph.phone} onChange={v => setPh({ ...ph, phone: v })} />
@@ -194,7 +201,7 @@ function NotesSection({ w, onChanged }: { w: WorkDetail; onChanged: () => void }
   const kinds: [WorkNoteInputKind, string][] = [['note', NOTE_KIND.note], ['defect', NOTE_KIND.defect], ['fix', NOTE_KIND.fix], ...(p.inspect ? [['inspection', NOTE_KIND.inspection] as [WorkNoteInputKind, string]] : [])];
   const icon = (k: string) => k === 'defect' ? <AlertTriangle size={14} /> : k === 'fix' ? <Wrench size={14} /> : k === 'inspection' ? <ShieldCheck size={14} /> : <MessageSquareText size={14} />;
   return <section className="surface hp-section">
-    <div className="section-head"><h2>Qeydlər, nasazlıqlar və yoxlamalar</h2><span className="count-chip">{w.notes.length}</span></div>
+    <div className="section-head"><h2>Qeydlər və problemlər</h2><span className="count-chip">{w.notes.length}</span></div>
     <ol className="hp-notes">{w.notes.map(n => <li key={n.id} className={`nk-${n.kind} ${n.result ?? ''}`}><span className="hp-note-icon">{icon(n.kind)}</span><div><b>{NOTE_KIND[n.kind]}{n.result ? (n.result === 'passed' ? ' — qüsur yoxdur' : ' — iradlar var') : ''}</b><small>{ROLE_OF[n.authorRole] ?? n.authorRole}{n.authorIsMe ? ' (siz)' : ''} · {dayTime(n.createdAt)}</small><p>{n.body}</p></div></li>)}</ol>
     {p.addNote && <form className="rl-form hp-note-form" onSubmit={(e: FormEvent) => { e.preventDefault(); add.mutate({ workId: w.id, data: { kind, body: body.trim(), ...(kind === 'inspection' ? { result } : {}) } }, { onSuccess: () => { setBody(''); onChanged(); toast('Qeyd əlavə olundu'); } }); }}>
       <Seg label="Növ" value={kind} options={kinds} onChange={setKind} />
@@ -228,7 +235,7 @@ function ReviewsSection({ w, onChanged }: { w: WorkDetail; onChanged: () => void
       <div className="field"><span>Qiymət</span><span className="hp-stars big">{[1, 2, 3, 4, 5].map(i => <button key={i} type="button" aria-label={`${i} ulduz`} onClick={() => setRating(i)}><Star size={20} className={i <= rating ? 'on' : ''} /></button>)}</span></div>
       <Field label="Rəy" name="review-body"><textarea rows={3} maxLength={2000} value={body} onChange={e => setBody(e.target.value)} /></Field>
       <button type="submit" className="button button-secondary" disabled={create.isPending} data-testid="button-add-review"><ThumbsUp size={14} />Rəy yaz</button>
-      <small className="rl-hint">Rəy yalnız bu evin üzvü tərəfindən, qəbul edilmiş işə və hər ustaya bir dəfə yazıla bilər.</small>
+      <small className="rl-hint">Rəyi ev sahibi təsdiqlənmiş işə, hər ustaya bir dəfə yaza bilər.</small>
     </form>}
   </section>;
 }
@@ -256,11 +263,11 @@ export function WorkFormModal({ homeId, work, onClose, onSaved, roomId, kind }: 
       description: form.description, materials: form.materials, location: form.location, startDate: form.startDate || null, endDate: form.endDate || null, visibility: form.visibility as WorkInput['visibility'],
       ...(work ? {} : { status: form.status as WorkInput['status'] }), ...(owner ? { smetaProjectId: form.smetaProjectId || null } : {}),
     };
-    const done = { onSuccess: (w: WorkDetail) => { toast(work ? 'İş qeydi yeniləndi' : 'İş qeydi yaradıldı'); onSaved(w.id); } };
+    const done = { onSuccess: (w: WorkDetail) => { toast(work ? 'Məlumat yeniləndi' : 'Görülən iş əlavə olundu'); onSaved(w.id); } };
     if (work) update.mutate({ workId: work.id, data }, done); else create.mutate({ homeId, data }, done);
   };
   const busy = create.isPending || update.isPending;
-  return <Modal open onClose={onClose} eyebrow={home.data?.home.name ?? 'İş qeydi'} title={work ? 'İş qeydini redaktə et' : 'Yeni iş qeydi'} wide
+  return <Modal open onClose={onClose} eyebrow={home.data?.home.name ?? 'Görülən iş'} title={work ? 'İşin məlumatını dəyiş' : 'Yeni iş qeydi'} wide
     footer={<button type="submit" form="work-form" className="button button-primary" disabled={busy || form.title.trim().length < 2} data-testid="button-save-work">{busy && <LoaderCircle className="spin" size={15} />}Yadda saxla</button>}>
     <form id="work-form" className="rl-form" onSubmit={submit}>
       {work?.status === 'confirmed' && <p className="rl-warn"><AlertTriangle size={15} />Bu iş artıq qəbul edilib. Dəyişikliklər audit jurnalında “təsdiqdən sonra dəyişiklik” kimi qeyd olunacaq.</p>}

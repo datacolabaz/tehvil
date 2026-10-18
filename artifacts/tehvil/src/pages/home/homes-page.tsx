@@ -1,52 +1,108 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowUpRight, BellRing, Calculator, ClipboardCheck, HardHat, Home, House, LoaderCircle, MapPin, Plus, QrCode, ShieldCheck } from 'lucide-react';
-import { useCreateHome, useGetMyInbox, useListHomes, useUpdateHome, type Home as HomeT, type HomeInput } from '@workspace/api-client-react';
+import { ArrowRight, ArrowUpRight, BellRing, ClipboardCheck, HardHat, Home, House, ImagePlus, LoaderCircle, MapPin, Plus } from 'lucide-react';
+import { useCreateHome, useGetMyInbox, useGetMyRoles, useListHomes, useUpdateHome, type Home as HomeT, type HomeInput } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
-import { Empty, HomeToaster, Modal, Pill, Seg, Select, Skeleton, opts, toast } from '@/components/home/ui';
-import { HOME_ROLE, PROPERTY, STAGE, day, refreshHomeData } from '@/lib/home/labels';
+import { HomeToaster, Modal, Pill, Seg, Select, Skeleton, opts, toast } from '@/components/home/ui';
+import { HOME_ROLE, PROPERTY, PROPERTY_SIMPLE, STAGE, clearDraft, day, loadDraft, refreshHomeData, saveDraft } from '@/lib/home/labels';
+import { uploadHomeMedia } from '@/lib/home/upload';
 
 export function HomesPage() {
   const homes = useListHomes();
   const inbox = useGetMyInbox();
-  const [creating, setCreating] = useState(false);
+  const roles = useGetMyRoles({ query: { queryKey: ['/api/me/roles'] } });
+  const [creating, setCreating] = useState(() => new URLSearchParams(window.location.search).get('new') === '1');
   const [, setLocation] = useLocation();
+  useEffect(() => {
+    // The sidebar button opens the form even when we are already on this page.
+    const open = () => { if (new URLSearchParams(window.location.search).get('new') === '1') setCreating(true); };
+    window.addEventListener('popstate', open); open();
+    return () => window.removeEventListener('popstate', open);
+  });
+  const close = () => { setCreating(false); if (window.location.search.includes('new=1')) setLocation('/homes', { replace: true }); };
   const list = homes.data ?? [];
   const pendingInvites = (inbox.data?.participations.length ?? 0) + (inbox.data?.memberships.length ?? 0);
   const approvals = inbox.data?.approvals.length ?? 0;
+  const firstVisit = !homes.isLoading && !list.length;
   return <>
-    <PageHeading eyebrow="Evin rəqəmsal pasportu" title="Mənim evlərim" description="Hər evin tikinti və təmir tarixçəsi, gizli kommunikasiyaları, avadanlıqları və orada işləmiş ustalar — bir yerdə, sübutlarla."
-      action={<button type="button" className="button button-primary" onClick={() => setCreating(true)} data-testid="button-create-home"><Plus size={16} />Ev əlavə et</button>} />
+    {!firstVisit && <PageHeading eyebrow="Evlərim" title="Evlərim" description="Hər evin təmir tarixçəsi, evdəki sistemlər, avadanlıqlar və orada işləmiş ustalar."
+      action={<button type="button" className="button button-primary" onClick={() => setCreating(true)} data-testid="button-create-home"><Plus size={16} />Evimi əlavə et</button>} />}
     {(pendingInvites > 0 || approvals > 0) && <div className="hp-alerts">
       {approvals > 0 && <Link href="/approvals" className="hp-alert warn" data-testid="link-approvals"><ClipboardCheck size={17} /><span><b>{approvals} iş</b> sizin təsdiqinizi gözləyir</span><ArrowUpRight size={15} /></Link>}
-      {pendingInvites > 0 && <Link href="/invitations" className="hp-alert" data-testid="link-invitations"><BellRing size={17} /><span><b>{pendingInvites} dəvət</b> cavab gözləyir</span><ArrowUpRight size={15} /></Link>}
+      {pendingInvites > 0 && <Link href="/invitations" className="hp-alert" data-testid="link-invitations"><BellRing size={17} /><span>Sizə <b>{pendingInvites} dəvət</b> göndərilib</span><ArrowUpRight size={15} /></Link>}
     </div>}
-    {homes.isLoading ? <Skeleton rows={3} /> : !list.length ? <div className="hp-intro surface">
-      <div>
-        <div className="eyebrow"><ShieldCheck size={13} className="sm-ii" /> Ev üçün tibbi kart kimi</div>
-        <h2 className="font-display">Evinizin rəqəmsal pasportunu yaradın</h2>
-        <p>Kim, nə vaxt, harada, hansı işi görüb; divarın içində hansı xətlər keçir; kombi nə vaxt quraşdırılıb və zəmanəti nə vaxt bitir — hamısı foto sübutla qeyd olunur. Ustalar öz hesablarından iştiraklarını təsdiqləyir, siz isə işi qəbul edirsiniz.</p>
-        <button type="button" className="button button-primary" onClick={() => setCreating(true)}><Plus size={16} />İlk evi əlavə et</button>
+    {homes.isLoading ? <Skeleton rows={3} /> : firstVisit ? <section className="hp-welcome">
+      <h1 className="font-display">Xoş gəlmisiniz!</h1>
+      <p>Təhvil-də evinizdə görülən bütün işlər — kim, nə vaxt, harada — fotolarla bir yerdə saxlanılır. Başlamaq üçün seçin:</p>
+      <div className="hp-choice">
+        <button type="button" className="hp-choice-card" onClick={() => setCreating(true)} data-testid="button-create-home">
+          <House size={28} /><b>Ev sahibiyəm</b><span>Evimi əlavə edim və görülən işləri qeyd edim.</span><em>Evimi əlavə et <ArrowRight size={14} /></em>
+        </button>
+        <Link href="/workers?create=individual" className="hp-choice-card" data-testid="link-start-master">
+          <HardHat size={28} /><b>Ustayam, briqadirəm və ya şirkətəm</b><span>Gördüyüm işləri, fotoları və materialları qeyd edim.</span><em>Usta profili yarat <ArrowRight size={14} /></em>
+        </Link>
       </div>
-      <ul className="hp-intro-list">
-        <li><House size={18} /><span><b>Ev profili və otaqlar</b>Ünvan, sahə, tikinti ili, otaqlar.</span></li>
-        <li><HardHat size={18} /><span><b>Ustalar və briqadalar</b>Hər işdə kimin hansı rolda iştirak etdiyi.</span></li>
-        <li><QrCode size={18} /><span><b>QR və paylaşım</b>Alıcıya və ya ustaya yalnız seçdiyinizi göstərin.</span></li>
-        <li><Calculator size={18} /><span><b>AI Smeta ilə əlaqə</b>İş qeydini smeta layihəsinə bağlayın.</span></li>
-      </ul>
-    </div> : <div className="hp-home-grid">{list.map(h => <Link key={h.id} href={`/homes/${h.id}`} className="hp-home-card" data-testid={`card-home-${h.id}`}>
+      {roles.data?.isPerformer && <p className="rl-hint"><HardHat size={13} className="sm-ii" /> Sizin usta hesabınız var — işləriniz <Link href="/my-works">İşlərim</Link> bölməsindədir.</p>}
+      <p className="rl-hint">Sizi kimsə evinə və ya işə dəvət edibsə, dəvət <Link href="/invitations">Mənə göndərilən dəvətlər</Link> bölməsində görünür.</p>
+    </section> : <div className="hp-home-grid">{list.map(h => <Link key={h.id} href={`/homes/${h.id}`} className="hp-home-card" data-testid={`card-home-${h.id}`}>
       <div className="hp-home-cover">{h.coverUrl ? <img src={h.coverUrl} alt="" loading="lazy" /> : <Home size={30} />}<Pill small tone={h.myRole === 'owner' ? 'ok' : 'info'}>{HOME_ROLE[h.myRole] ?? h.myRole}</Pill></div>
       <div className="hp-home-body">
         <h3>{h.name}</h3>
         <small><MapPin size={12} className="sm-ii" /> {[PROPERTY[h.propertyType], h.district, h.city].filter(Boolean).join(' · ')}</small>
-        <div className="hp-home-meta"><span><b>{h.works}</b> iş</span><span><b>{h.performers}</b> icraçı</span><span>{STAGE[h.stage]}</span>{h.lastWorkAt && <span>son iş: {day(h.lastWorkAt)}</span>}</div>
-        {h.pendingApproval > 0 && <span className="hp-pending"><ClipboardCheck size={13} />{h.pendingApproval} iş təsdiq gözləyir</span>}
+        <div className="hp-home-meta"><span><b>{h.works}</b> görülən iş</span><span><b>{h.performers}</b> usta</span>{h.lastWorkAt && <span>son iş: {day(h.lastWorkAt)}</span>}</div>
+        {h.pendingApproval > 0 && <span className="hp-pending"><ClipboardCheck size={13} />{h.pendingApproval} iş təsdiqinizi gözləyir</span>}
       </div>
     </Link>)}</div>}
-    <HomeFormModal open={creating} onClose={() => setCreating(false)} onSaved={id => { setCreating(false); setLocation(`/homes/${id}`); }} />
+    {creating && <AddHomeModal onClose={close} onSaved={id => { setCreating(false); setLocation(`/homes/${id}?welcome=1`); }} />}
     <HomeToaster />
   </>;
+}
+
+const DRAFT = 'new-home';
+/** Step 1: only what is needed to start. Everything else is filled in later from the home page. */
+export function AddHomeModal({ onClose, onSaved }: { onClose: () => void; onSaved: (id: string) => void }) {
+  const create = useCreateHome();
+  const update = useUpdateHome();
+  const qc = useQueryClient();
+  const [form, setForm] = useState(() => loadDraft<{ name: string; propertyType: string; address: string }>(DRAFT) ?? { name: '', propertyType: 'apartment', address: '' });
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => { saveDraft(DRAFT, form); }, [form]);
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (form.name.trim().length < 2) { setError('Evə ad verin, məsələn “Bakıdakı evim”.'); return; }
+    setBusy(true); setError('');
+    try {
+      const data: HomeInput = { name: form.name.trim(), propertyType: form.propertyType as HomeInput['propertyType'], address: form.address.trim(), city: 'Bakı' };
+      const o = await create.mutateAsync({ data });
+      if (photo) {
+        try {
+          const [m] = await uploadHomeMedia([photo], { homeId: o.home.id }, { videos: false });
+          if (m) await update.mutateAsync({ homeId: o.home.id, data: { ...data, coverMediaId: m.id } });
+        } catch { toast('Ev əlavə olundu, amma şəkil yüklənmədi. Şəkli sonra əlavə edə bilərsiniz.'); }
+      }
+      clearDraft(DRAFT);
+      void refreshHomeData(qc);
+      onSaved(o.home.id);
+    } catch { setError('Ev əlavə olunmadı. İnternet bağlantısını yoxlayıb yenidən cəhd edin.'); }
+    finally { setBusy(false); }
+  };
+  return <Modal open onClose={onClose} eyebrow="1-ci addım" title="Evimi əlavə et"
+    footer={<button type="submit" form="add-home" className="button button-primary hp-big" disabled={busy} data-testid="button-save-home">{busy && <LoaderCircle className="spin" size={15} />}Evi əlavə et</button>}>
+    <form id="add-home" className="rl-form" onSubmit={e => { void submit(e); }}>
+      <Field label="Evin adı" name="home-name" required value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="məs. Bakıdakı evim" />
+      <Seg label="Ev növü" value={form.propertyType} options={PROPERTY_SIMPLE} onChange={v => setForm({ ...form, propertyType: v })} />
+      <Field label="Ünvan (istəyə bağlı)" name="home-address" value={form.address} onChange={v => setForm({ ...form, address: v })} placeholder="məs. Yasamal, Şərifzadə küç." />
+      <small className="rl-hint">Ünvanı yalnız siz görürsünüz. Başqasına göstərmək sizin seçiminizdir.</small>
+      <label className="field"><span>Şəkil (istəyə bağlı)</span>
+        <span className="hp-file"><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => setPhoto(e.target.files?.[0] ?? null)} data-testid="input-home-photo" /><ImagePlus size={16} />{photo ? photo.name : 'Şəkil seç'}</span>
+      </label>
+      <p className="rl-hint">Qalan məlumatları — otaqları, elektrik, su və istilik sistemlərini, avadanlıqları — sonra, istədiyiniz vaxt əlavə edə bilərsiniz.</p>
+      {error && <p className="sm-field-error" role="alert">{error}</p>}
+    </form>
+  </Modal>;
 }
 
 const blank = { name: '', propertyType: 'apartment', city: 'Bakı', district: '', address: '', areaM2: '', roomCount: '', floor: '', builtYear: '', stage: 'living', notes: '' };
@@ -66,7 +122,7 @@ export function HomeFormModal({ open, onClose, onSaved, home }: { open: boolean;
     if (home) update.mutate({ homeId: home.id, data }, done); else create.mutate({ data }, done);
   };
   const busy = create.isPending || update.isPending;
-  return <Modal open={open} onClose={onClose} eyebrow="Ev profili" title={home ? 'Ev məlumatlarını dəyiş' : 'Yeni ev'} wide
+  return <Modal open={open} onClose={onClose} eyebrow="Evin məlumatları" title={home ? 'Evin məlumatlarını dəyiş' : 'Yeni ev'} wide
     footer={<button type="submit" form="home-form" className="button button-primary" disabled={busy || form.name.trim().length < 2} data-testid="button-save-home">{busy && <LoaderCircle className="spin" size={15} />}Yadda saxla</button>}>
     <form id="home-form" className="rl-form" onSubmit={submit}>
       <Field label="Evin adı" name="home-name" required value={form.name} onChange={set('name')} placeholder="məs. Yasamaldakı mənzil" />
@@ -74,9 +130,9 @@ export function HomeFormModal({ open, onClose, onSaved, home }: { open: boolean;
       <div className="field-grid three">
         <Field label="Şəhər" name="home-city" value={form.city} onChange={set('city')} />
         <Field label="Rayon" name="home-district" value={form.district} onChange={set('district')} placeholder="məs. Yasamal" />
-        <Select label="Mərhələ" name="home-stage" value={form.stage} onChange={set('stage')} options={opts(STAGE)} />
+        <Select label="Hazırda" name="home-stage" value={form.stage} onChange={set('stage')} options={opts(STAGE)} />
       </div>
-      <Field label="Ünvan (yalnız siz görürsünüz, QR-da göstərmək sizin seçiminizdir)" name="home-address" value={form.address} onChange={set('address')} />
+      <Field label="Ünvan (yalnız siz görürsünüz)" name="home-address" value={form.address} onChange={set('address')} />
       <div className="field-grid four">
         <Field label="Sahə, m²" name="home-area" type="number" min="1" value={form.areaM2} onChange={set('areaM2')} />
         <Field label="Otaq sayı" name="home-rooms" type="number" min="0" value={form.roomCount} onChange={set('roomCount')} />

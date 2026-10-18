@@ -20,7 +20,7 @@ import {
   useGetRenovationPassport, getListProjectsQueryKey, getGetProjectDashboardQueryKey,
   getListRoomsQueryKey, getListScopeItemsQueryKey, getListChangeOrdersQueryKey,
   getListMilestonesQueryKey, getListPaymentsQueryKey,
-  getListTimelineQueryKey, getGetRenovationPassportQueryKey, useGetHomeOverview, useGetWork,
+  getListTimelineQueryKey, getGetRenovationPassportQueryKey, useGetHomeOverview, useGetWork, useGetMyRoles, useGetMyInbox,
 } from '@workspace/api-client-react';
 import type { Project, ProjectInput, Room, ScopeItem } from '@workspace/api-client-react';
 import { copy, type Lang, type TKey } from '@/lib/i18n';
@@ -77,6 +77,7 @@ const WorkPage = lazy(() => import('@/pages/home/work-page').then(m => ({ defaul
 const WorkersPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.WorkersPage })));
 const WorkerProfilePage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.WorkerProfilePage })));
 const PublicWorkerPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.PublicWorkerPage })));
+const AllHistoryPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.AllHistoryPage })));
 const MyWorksPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.MyWorksPage })));
 const InboxPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.InboxPage })));
 const InviteAcceptPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.InviteAcceptPage })));
@@ -85,14 +86,14 @@ const SharedHomePage = lazy(() => import('@/pages/home/public-home-page').then(m
 
 /** Sections of one home in the digital home passport (Azerbaijani, like the brief). */
 const HOME_NAV = [
-  { path: '', key: 'profile', label: 'Ev profili', icon: House },
-  { path: '/history', key: 'history', label: 'Tikinti və təmir tarixçəsi', icon: History },
+  { path: '', key: 'profile', label: 'Evin məlumatları', icon: House },
+  { path: '/history', key: 'history', label: 'Təmir tarixçəsi', icon: History },
   { path: '/rooms', key: 'rooms', label: 'Otaqlar', icon: DoorOpen },
-  { path: '/map', key: 'map', label: 'Kommunikasiya xəritəsi', icon: Cable },
+  { path: '/map', key: 'map', label: 'Evdəki sistemlər', icon: Cable },
   { path: '/equipment', key: 'equipment', label: 'Avadanlıqlar', icon: Boxes },
-  { path: '/performers', key: 'performers', label: 'Ustalar və briqadalar', icon: HardHat },
-  { path: '/sharing', key: 'sharing', label: 'QR və paylaşım', icon: QrCode },
-  { path: '/audit', key: 'audit', label: 'Audit jurnalı', icon: ClipboardList },
+  { path: '/performers', key: 'performers', label: 'Usta və şirkətlər', icon: HardHat },
+  { path: '/sharing', key: 'sharing', label: 'Məlumatları paylaş', icon: QrCode },
+  { path: '/audit', key: 'audit', label: 'Dəyişikliklər tarixçəsi', icon: ClipboardList },
 ] as const;
 
 /** Realtor panel sections (the brief's sidebar). Labels are Azerbaijani, like the AI Smeta module. */
@@ -133,15 +134,29 @@ type Crumb = { label: string; href?: string };
 function AppShell({ children, project, projectId, active, crumbs, lang, change, t, realtorSection, home }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string; realtorSection?: string; home?: { id: string; name: string; section: string; owner: boolean; audit: boolean } }) {
   const [open, setOpen] = useState(false);
   const { signOut } = useClerk(); const { user } = useUser();
-  const nav: { href: string; icon: typeof Home; key: TKey; badge?: boolean }[] = [
-    { href: '/homes', icon: House, key: 'myHomes' as const },
-    { href: '/my-works', icon: HardHat, key: 'myWorks' as const },
-    { href: '/workers', icon: UsersRound, key: 'workersNav' as const },
-    { href: '/invitations', icon: BellRing, key: 'inboxNav' as const },
-    { href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' as const },
-    { href: '/smeta', icon: Calculator, key: 'smeta' as const, badge: true },
-    { href: '/realtor', icon: Building2, key: 'realtor' as const, badge: true },
-    ...(projectId ? [
+  // Menu by what the account really uses: home owners see the five main actions, masters also see their jobs,
+  // extra services sit at the bottom and the older project workspace appears only for people who have projects.
+  const roles = useGetMyRoles({ query: { staleTime: 60_000, queryKey: ['/api/me/roles'] } });
+  const inbox = useGetMyInbox({ query: { staleTime: 30_000, queryKey: ['/api/me/inbox'] } });
+  const pending = (inbox.data?.participations.length ?? 0) + (inbox.data?.memberships.length ?? 0) + (inbox.data?.approvals.length ?? 0);
+  const r = roles.data;
+  type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number };
+  const mainNav: NavItem[] = [
+    { href: '/homes', icon: House, key: 'myHomes' },
+    { href: '/history', icon: History, key: 'repairHistory' },
+    { href: '/workers', icon: UsersRound, key: 'workersNav' },
+    { href: '/invitations', icon: BellRing, key: 'inboxNav', count: pending },
+  ];
+  const workerNav: NavItem[] = r?.isPerformer ? [
+    { href: '/my-works', icon: HardHat, key: 'myWorks' },
+    { href: '/my-works?tab=done', icon: CheckCircle2, key: 'doneWorks' },
+  ] : [];
+  const extraNav: NavItem[] = [
+    { href: '/smeta', icon: Calculator, key: 'smeta' },
+    { href: '/realtor', icon: Building2, key: 'realtor' },
+    ...(r?.hasProjects || projectId ? [{ href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' as TKey }] : []),
+  ];
+  const projectNav: NavItem[] = projectId ? [
       { href: `/projects/${projectId}`, icon: Home, key: 'projects' as const },
       { href: `/projects/${projectId}/scope`, icon: ListChecks, key: 'scope' as const },
       { href: `/projects/${projectId}/changes`, icon: FilePlus2, key: 'changes' as const },
@@ -149,18 +164,23 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
       { href: `/projects/${projectId}/payments`, icon: WalletCards, key: 'payments' as const },
       { href: `/projects/${projectId}/timeline`, icon: Clock3, key: 'timeline' as const },
       { href: `/projects/${projectId}/passport`, icon: FileText, key: 'passport' as const },
-    ] : []),
-  ];
+    ] : [];
+  const isActive = (key: TKey, href: string) => active === key || (!active && href === '/dashboard' && !!projectId);
+  const navList = (items: NavItem[]) => <nav className="side-nav">{items.map(({ href, icon: Icon, key, badge, count }) => <Link key={href} href={href} onClick={() => setOpen(false)} className={`side-link ${isActive(key, href) ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{t(key)}</span>{badge && <span className="nav-badge">{t('newBadge')}</span>}{!!count && <span className="nav-count">{count}</span>}{isActive(key, href) && <span className="nav-active-dot"/>}</Link>)}</nav>;
   return <div className="workspace">
     <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}><div className="sidebar-head"><Brand inverse/><button className="mobile-close" onClick={() => setOpen(false)} aria-label={t('close')}><X size={18}/></button></div>
       {project && <div className="project-switcher"><span className="project-symbol">⌂</span><div><small>{t('projects')}</small><strong>{project.name}</strong></div><ChevronDown size={14}/></div>}
-      <div className="sidebar-label">{projectId ? project?.name || t('projects') : t('dashboard')}</div>
-      <nav className="side-nav">{nav.map(({ href, icon: Icon, key, badge }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${active === key || (!active && key === 'dashboard') ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{t(key)}</span>{badge && <span className="nav-badge">{t('newBadge')}</span>}{active === key && <span className="nav-active-dot"/>}</Link>)}</nav>
+      {projectId ? <><div className="sidebar-label">{project?.name || t('projects')}</div>{navList(projectNav)}</> : <>
+        <Link href="/homes?new=1" onClick={() => setOpen(false)} className="button button-primary hp-side-add" data-testid="nav-add-home"><Plus size={16}/>{t('addHome')}</Link>
+        {navList(mainNav)}
+      </>}
       {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => (n.key !== 'sharing' || home.owner) && (n.key !== 'audit' || home.audit)).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${home.section === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{home.section === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       {realtorSection && <><div className="sidebar-label">{t('realtor')}</div><nav className="side-nav rl-side-nav">{REALTOR_NAV.map(({ href, key, label, icon: Icon }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${realtorSection === key ? 'selected' : ''}`} data-testid={`nav-realtor-${key}`}><Icon size={17}/><span>{label}</span>{realtorSection === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
+      {!projectId && workerNav.length > 0 && <><div className="sidebar-label">{t('masterSection')}</div>{navList(workerNav)}</>}
+      <div className="sidebar-label">{t('extraServices')}</div>{navList(extraNav)}
       <div className="sidebar-bottom"><div className="privacy-note"><ShieldCheck size={17}/><p>{t('disclaimer')}</p></div><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
     </aside>
-    <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs"><Link href="/dashboard">{t('dashboard')}</Link>{project && <><ChevronRight size={13}/><span>{project.name}</span></>}{crumbs?.map((c, i) => <Fragment key={i}><ChevronRight size={13}/>{c.href ? <Link href={c.href}>{c.label}</Link> : <span>{c.label}</span>}</Fragment>)}</div><div className="topbar-tools"><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
+    <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs">{project && <Link href="/dashboard">{t('dashboard')}</Link>}{project && <><ChevronRight size={13}/><span>{project.name}</span></>}{crumbs?.map((c, i) => <Fragment key={i}>{(project || i > 0) && <ChevronRight size={13}/>}{c.href ? <Link href={c.href}>{c.label}</Link> : <span>{c.label}</span>}</Fragment>)}</div><div className="topbar-tools"><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
       <main className="page-content">{children}</main>
     </div>{open && <button className="scrim" aria-label={t('close')} onClick={() => setOpen(false)}/>}
   </div>;
@@ -340,16 +360,16 @@ function InvitationPage({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TK
 }
 const clerkCopy: Record<Lang, Record<string, unknown>> = {
   az: { formFieldLabel__emailAddress:'E-poçt ünvanı', formFieldLabel__password:'Şifrə', formFieldInputPlaceholder__emailAddress:'E-poçt ünvanınızı yazın', formFieldInputPlaceholder__password:'Şifrənizi yazın', formFieldInputPlaceholder__signUpPassword:'Şifrə yaradın', formButtonPrimary:'Davam et', dividerText:'və ya', socialButtonsBlockButton:'{{provider|titleize}} ilə davam et',
-    signIn:{start:{title:'Layihənizə qayıdın',subtitle:'Daxil olun və işin gedişini izləyin',actionText:'Hesabınız yoxdur?',actionLink:'Qeydiyyatdan keçin'}},
-    signUp:{start:{title:'Təhvil hesabı yaradın',subtitle:'Layihəniz üçün ortaq, aydın qeyd sahəsi',actionText:'Artıq hesabınız var?',actionLink:'Daxil olun'}} },
+    signIn:{start:{title:'Təhvil-ə daxil olun',subtitle:'Evinizin məlumatları və təmir tarixçəsi sizi gözləyir',actionText:'Hesabınız yoxdur?',actionLink:'Qeydiyyatdan keçin'}},
+    signUp:{start:{title:'Təhvil hesabı yaradın',subtitle:'Evinizin təmir tarixçəsini bir yerdə saxlayın — pulsuzdur',actionText:'Artıq hesabınız var?',actionLink:'Daxil olun'}} },
   ru: { formFieldLabel__emailAddress:'Эл. почта', formFieldLabel__password:'Пароль', formFieldInputPlaceholder__emailAddress:'Введите адрес эл. почты', formFieldInputPlaceholder__password:'Введите пароль', formFieldInputPlaceholder__signUpPassword:'Придумайте пароль', formButtonPrimary:'Продолжить', dividerText:'или', socialButtonsBlockButton:'Продолжить через {{provider|titleize}}',
-    signIn:{start:{title:'Вернитесь к проекту',subtitle:'Войдите и следите за ходом работ',actionText:'Нет аккаунта?',actionLink:'Зарегистрироваться'}},
+    signIn:{start:{title:'Войдите в Təhvil',subtitle:'История вашего дома ждёт вас',actionText:'Нет аккаунта?',actionLink:'Зарегистрироваться'}},
     signUp:{start:{title:'Создайте аккаунт Təhvil',subtitle:'Общее и понятное пространство для вашего проекта',actionText:'Уже есть аккаунт?',actionLink:'Войти'}} },
-  en: { signIn:{start:{title:'Return to your project',subtitle:'Sign in and follow the progress'}}, signUp:{start:{title:'Create your Təhvil account',subtitle:'A shared, clear record for your project'}} },
+  en: { signIn:{start:{title:'Sign in to Təhvil',subtitle:'Your home\'s records are waiting'}}, signUp:{start:{title:'Create your Təhvil account',subtitle:'A shared, clear record for your project'}} },
 };
-function authTag() { const l=(localStorage.getItem('tehvil-language') as Lang)||'az'; return l==='ru'?'БАКУ · ПРОСТРАНСТВО ПРОЕКТА':l==='en'?'BAKU · PROJECT SPACE':'BAKI · LAYİHƏ MƏKANI'; }
+function authTag() { const l=(localStorage.getItem('tehvil-language') as Lang)||'az'; return l==='ru'?'БАКУ · ИСТОРИЯ ВАШЕГО ДОМА':l==='en'?'BAKU · YOUR HOME RECORD':'BAKI · EVİNİZİN TARİXÇƏSİ'; }
 function authCopy() { return copy[((localStorage.getItem('tehvil-language') as Lang) || 'az')]; }
-function SignInPage() { const c=authCopy(); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} {...realtorRedirect()}/></div></div>; }
+function SignInPage() { const c=authCopy(); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{c.artTop}</div><h1 className="font-display">{c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up${window.location.search}`} {...realtorRedirect()}/></div></div>; }
 function realtorRedirect() {
   const qs = new URLSearchParams(window.location.search);
   // Only same-site paths (e.g. an invitation link) are accepted as a redirect target.
@@ -357,7 +377,7 @@ function realtorRedirect() {
   if (next && /^\/(invite|works|homes|workers)\/[A-Za-z0-9_/-]{1,80}$/.test(next)) return { forceRedirectUrl: `${basePath}${next}` };
   return qs.get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {};
 }
-function SignUpPage() { const c=authCopy(); const realtor=!!realtorRedirect().forceRedirectUrl; return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${realtor?'?realtor=1':''}`} {...realtorRedirect()}/></div></div>; }
+function SignUpPage() { const c=authCopy(); const realtor=!!new URLSearchParams(window.location.search).get('realtor'); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${window.location.search}`} {...realtorRedirect()}/></div></div>; }
 function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/homes"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
 function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   const [msg, setMsg] = useState<FeedbackMsg | null>(null);
@@ -376,7 +396,7 @@ function ClerkRoutes() {
   const [,setLocation]=useLocation();
   const {lang,change:changeLang}=useLanguage();
   const t=(key:TKey):any=>copy[lang][key];
-  return <ClerkProvider publishableKey={clerkPubKey} proxyUrl={clerkProxyUrl} signInUrl={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`}
+  return <ClerkProvider publishableKey={clerkPubKey} proxyUrl={clerkProxyUrl} signInUrl={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up${window.location.search}`}
     appearance={{theme:shadcn,cssLayerName:'clerk',options:{logoPlacement:'inside',logoLinkUrl:basePath||'/',logoImageUrl:`${window.location.origin}${basePath}/logo.svg`},variables:{colorPrimary:'#24483f',colorPrimaryForeground:'#f8f6f1',colorForeground:'#213a34',colorMutedForeground:'#6b7b73',colorDanger:'#a9433d',colorBackground:'#fbf9f4',colorInput:'#fffdf9',colorInputForeground:'#213a34',colorNeutral:'#d8d5ca',fontFamily:'DM Sans, sans-serif',borderRadius:'1rem'},elements:{rootBox:'w-full flex justify-center',cardBox:'bg-[#fbf9f4] rounded-2xl w-[440px] max-w-full overflow-hidden border border-[#e5e0d5]',card:'!shadow-none !border-0 !bg-transparent !rounded-none',footer:'!shadow-none !border-0 !bg-transparent !rounded-none',headerTitle:'text-[#213a34] font-semibold',headerSubtitle:'text-[#66766f]',socialButtonsBlockButtonText:'text-[#213a34]',formFieldLabel:'text-[#344b43]',footerActionLink:'text-[#24483f] font-semibold',footerActionText:'text-[#66766f]',dividerText:'text-[#758078]',identityPreviewEditButton:'text-[#24483f]',formFieldSuccessText:'text-[#24483f]',alertText:'text-[#a9433d]',logoBox:'mb-3',logoImage:'max-h-10',socialButtonsBlockButton:'border border-[#d8d5ca] bg-[#fffdf9] rounded-xl',formButtonPrimary:'bg-[#24483f] hover:bg-[#1b3932] text-[#f8f6f1] rounded-xl',formFieldInput:'bg-[#fffdf9] border border-[#d8d5ca] rounded-xl text-[#213a34]',footerAction:'border-0',dividerLine:'bg-[#e5e0d5]',alert:'bg-[#f6e8e4] border-[#ecd1cb]',otpCodeFieldInput:'border border-[#d8d5ca] rounded-lg',formFieldRow:'mb-4',main:'gap-4'}}}
     localization={clerkCopy[lang]}
     routerPush={to=>setLocation(stripBase(to))} routerReplace={to=>setLocation(stripBase(to),{replace:true})}>
@@ -401,11 +421,12 @@ function ClerkRoutes() {
       <Route path="/homes/:homeId/audit">{params => <HomeShell homeId={params.homeId} section="audit" lang={lang} change={changeLang} t={t}><HomeAuditPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId">{params => <HomeShell homeId={params.homeId} section="profile" lang={lang} change={changeLang} t={t}><HomeProfilePage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/works/:workId">{params => <WorkShell workId={params.workId} lang={lang} change={changeLang} t={t}/>}</Route>
-      <Route path="/my-works">{() => <PlainShell active="myWorks" crumbs={[{ label: t('myWorks') }]} lang={lang} change={changeLang} t={t}><MyWorksPage/></PlainShell>}</Route>
+      <Route path="/my-works">{() => <PlainShell active={new URLSearchParams(window.location.search).get('tab') === 'done' ? 'doneWorks' : 'myWorks'} crumbs={[{ label: t('myWorks') }]} lang={lang} change={changeLang} t={t}><MyWorksPage/></PlainShell>}</Route>
       <Route path="/workers/:workerId">{params => <PlainShell active="workersNav" crumbs={[{ label: t('workersNav'), href: '/workers' }, { label: 'Profil' }]} lang={lang} change={changeLang} t={t}><WorkerProfilePage workerId={params.workerId}/></PlainShell>}</Route>
       <Route path="/workers">{() => <PlainShell active="workersNav" crumbs={[{ label: t('workersNav') }]} lang={lang} change={changeLang} t={t}><WorkersPage/></PlainShell>}</Route>
-      <Route path="/invitations">{() => <PlainShell active="inboxNav" crumbs={[{ label: 'Dəvətlər' }]} lang={lang} change={changeLang} t={t}><InboxPage tab="invitations"/></PlainShell>}</Route>
-      <Route path="/approvals">{() => <PlainShell active="inboxNav" crumbs={[{ label: 'Təsdiq gözləyən qeydlər' }]} lang={lang} change={changeLang} t={t}><InboxPage tab="approvals"/></PlainShell>}</Route>
+      <Route path="/history">{() => <PlainShell active="repairHistory" crumbs={[{ label: t('repairHistory') }]} lang={lang} change={changeLang} t={t}><AllHistoryPage/></PlainShell>}</Route>
+      <Route path="/invitations">{() => <PlainShell active="inboxNav" crumbs={[{ label: t('inboxNav') }]} lang={lang} change={changeLang} t={t}><InboxPage tab="invitations"/></PlainShell>}</Route>
+      <Route path="/approvals">{() => <PlainShell active="inboxNav" crumbs={[{ label: 'Təsdiqinizi gözləyən işlər' }]} lang={lang} change={changeLang} t={t}><InboxPage tab="approvals"/></PlainShell>}</Route>
       <Route path="/" component={()=> <HomeRedirect lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/sign-in/*?" component={SignInPage}/><Route path="/sign-up/*?" component={SignUpPage}/>
       <Route path="/dashboard" component={()=> <DashboardPage lang={lang} change={changeLang} t={t}/>}/>

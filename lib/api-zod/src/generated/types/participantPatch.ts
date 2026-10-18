@@ -16,4 +16,7 @@ export interface ParticipantPatch {
      * @maxLength 300
      */
   note?: string;
+  canAddMedia?: boolean;
+  canAddNotes?: boolean;
+  canEdit?: boolean;
 }

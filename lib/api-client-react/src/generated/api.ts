@@ -35,6 +35,7 @@ import type {
   GetSharedPassport200,
   HandoverInput,
   HealthStatus,
+  HideInput,
   HomeInput,
   HomeInvitationAcceptInput,
   HomeInvitationInput,
@@ -51,6 +52,7 @@ import type {
   HomeSharing,
   HomeSharingInput,
   HomeSummary,
+  HomeWorkItem,
   IdentityInput,
   Inbox,
   InfrastructureInput,
@@ -63,6 +65,7 @@ import type {
   InvitationPreview,
   ListingImport,
   ListingImportInput,
+  MeRoles,
   MembershipInput,
   MembershipPatch,
   Milestone,
@@ -11345,6 +11348,160 @@ export function useGetMyInbox<TData = Awaited<ReturnType<typeof getMyInbox>>, TE
 
 
 
+export const getListMyHomeWorksUrl = () => {
+
+
+
+
+  return `/api/me/home-works`
+}
+
+/**
+ * @summary Repair history across all homes I own or manage
+ */
+export const listMyHomeWorks = async ( options?: Parameters<typeof customFetch>[1]): Promise<HomeWorkItem[]> => {
+
+  return customFetch<HomeWorkItem[]>(getListMyHomeWorksUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMyHomeWorksQueryKey = () => {
+    return [
+    `/api/me/home-works`
+    ] as const;
+    }
+
+
+export const getListMyHomeWorksQueryOptions = <TData = Awaited<ReturnType<typeof listMyHomeWorks>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMyHomeWorks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMyHomeWorksQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMyHomeWorks>>> = ({ signal }) => listMyHomeWorks({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMyHomeWorks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListMyHomeWorksQueryResult = NonNullable<Awaited<ReturnType<typeof listMyHomeWorks>>>
+export type ListMyHomeWorksQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Repair history across all homes I own or manage
+ */
+
+export function useListMyHomeWorks<TData = Awaited<ReturnType<typeof listMyHomeWorks>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMyHomeWorks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListMyHomeWorksQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetMyRolesUrl = () => {
+
+
+
+
+  return `/api/me/roles`
+}
+
+/**
+ * @summary What the signed-in account is (for a menu that shows only relevant sections)
+ */
+export const getMyRoles = async ( options?: Parameters<typeof customFetch>[1]): Promise<MeRoles> => {
+
+  return customFetch<MeRoles>(getGetMyRolesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyRolesQueryKey = () => {
+    return [
+    `/api/me/roles`
+    ] as const;
+    }
+
+
+export const getGetMyRolesQueryOptions = <TData = Awaited<ReturnType<typeof getMyRoles>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyRoles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyRolesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyRoles>>> = ({ signal }) => getMyRoles({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyRoles>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyRolesQueryResult = NonNullable<Awaited<ReturnType<typeof getMyRoles>>>
+export type GetMyRolesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary What the signed-in account is (for a menu that shows only relevant sections)
+ */
+
+export function useGetMyRoles<TData = Awaited<ReturnType<typeof getMyRoles>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyRoles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyRolesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getListMyWorksUrl = () => {
 
 
@@ -12664,6 +12821,95 @@ export function useGetSharedHome<TData = Awaited<ReturnType<typeof getSharedHome
 
 
 
+
+export const getHideReviewUrl = (reviewId: string,) => {
+
+
+
+
+  return `/api/staff/reviews/${reviewId}/hide`
+}
+
+/**
+ * @summary Tehvil.az staff hides or restores a reported review
+ */
+export const hideReview = async (reviewId: string,
+    hideInput: HideInput, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ActionResult>(getHideReviewUrl(reviewId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(hideInput)
+  }
+);}
+
+
+
+
+
+export const getHideReviewMutationKey = () => ['hideReview'] as const;
+
+export const getHideReviewMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hideReview>>, TError,HideReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof hideReview>>, TError,HideReviewMutationVariables, TContext> => {
+
+const mutationKey = getHideReviewMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof hideReview>>, HideReviewMutationVariables> = (props) => {
+          const {reviewId,data} = props ?? {};
+
+          return  hideReview(reviewId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type HideReviewMutationResult = NonNullable<Awaited<ReturnType<typeof hideReview>>>
+    export type HideReviewMutationBody = BodyType<HideInput>
+    export type HideReviewMutationError = ErrorType<unknown>
+    export type HideReviewMutationVariables = {reviewId: string;data: BodyType<HideInput>}
+
+    /**
+ * @summary Tehvil.az staff hides or restores a reported review
+ */
+export const useHideReview = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hideReview>>, TError,HideReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof hideReview>>,
+        TError,
+        HideReviewMutationVariables,
+        TContext
+      > => {
+      return useMutation(getHideReviewMutationOptions(options));
+    }
 
 export const getSetWorkerIdentityUrl = (workerId: string,) => {
 

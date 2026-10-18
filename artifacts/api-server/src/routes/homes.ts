@@ -65,6 +65,7 @@ import {
   diff,
   getHomeAccess,
   homePermissions,
+  manages,
   homesOfUser,
   loadActor,
   visibleWorks,
@@ -93,6 +94,7 @@ export const notFound = (res: Response, error = "Tapılmadı") => { res.status(4
 export const forbidden = (res: Response, error = "Bu əməliyyat üçün icazəniz yoxdur") => { res.status(403).json({ error }); };
 export const noStore = (res: Response) => res.setHeader("Cache-Control", "private, no-store");
 const INVITE_DAYS = 14;
+const HOME_ROLES: string[] = ["member", "contributor", "viewer"];
 
 const intIn = (v: number | null | undefined, lo: number, hi: number) => v == null ? null : Math.min(hi, Math.max(lo, Math.round(v)));
 
@@ -141,7 +143,7 @@ export async function homeOverview(a: HomeAccess, userId: string) {
   const mine = (row: { workId?: string | null; installWorkId?: string | null; createdByUserId?: string }) =>
     member || (row.workId && workIds.has(row.workId)) || (row.installWorkId && workIds.has(row.installWorkId)) || row.createdByUserId === userId;
   const summaries = await workSummaries(works);
-  const performers = await homePerformers(a.home.id, userId, member ? undefined : workIds, a.memberRole === "owner" || a.memberRole === "technician");
+  const performers = await homePerformers(a.home.id, userId, member ? undefined : workIds, !!a.memberRole && a.memberRole !== "viewer");
   return {
     home: member ? homeDto(a.home, a, perms) : performerHomeDto(a.home, perms),
     rooms: await roomDtos(a.home.id, rooms, workIds),
@@ -177,7 +179,7 @@ router.get("/homes", async (req, res): Promise<void> => {
   const list = [...memberHomes.map((h) => ({ home: h.home, role: h.role })),
     ...performerRows.filter((p) => !memberHomes.some((m) => m.home.id === p.home.id)).map((p) => ({ home: p.home, role: "performer" }))];
   const out = [];
-  for (const { home, role } of list) {
+  for (const { home } of list) {
     const a = await getHomeAccess(userId, home.id, actor);
     if (!a) continue;
     const works = await visibleWorks(a);
@@ -186,8 +188,8 @@ router.get("/homes", async (req, res): Promise<void> => {
     const last = works.map((w) => w.endDate ?? w.startDate).filter(Boolean).sort().pop() ?? null;
     out.push({
       id: home.id, publicId: home.publicId, name: home.name, propertyType: home.propertyType, city: home.city, district: home.district, stage: home.stage,
-      coverUrl: home.coverMediaId ? homeMediaUrl(home.coverMediaId) : null, myRole: role, areaM2: home.areaM2, roomCount: home.roomCount,
-      works: works.length, pendingApproval: role === "owner" ? works.filter((w) => w.status === "completed").length : 0,
+      coverUrl: home.coverMediaId ? homeMediaUrl(home.coverMediaId) : null, myRole: a.role, areaM2: home.areaM2, roomCount: home.roomCount,
+      works: works.length, pendingApproval: manages(a.memberRole) ? works.filter((w) => w.status === "completed").length : 0,
       performers: performerCount[0]?.n ?? 0, lastWorkAt: last, updatedAt: home.updatedAt.toISOString(),
     });
   }
@@ -247,7 +249,7 @@ router.patch("/homes/:homeId", async (req, res): Promise<void> => {
   }
   const changes = diff(a.home as unknown as Record<string, unknown>, values, Object.keys(values));
   await db.update(homesTable).set({ ...values, updatedAt: new Date() }).where(eq(homesTable.id, a.home.id));
-  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "home.updated", entityType: "home", entityId: a.home.id, summary: "Ev profili yeniləndi", changes });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "home.updated", entityType: "home", entityId: a.home.id, summary: "Ev profili yeniləndi", changes });
   res.json(await homeOverview((await getHomeAccess(uid(req), a.home.id))!, uid(req)));
 });
 
@@ -258,7 +260,7 @@ router.delete("/homes/:homeId", async (req, res): Promise<void> => {
   if (!a) return;
   if (a.memberRole !== "owner") return forbidden(res);
   await db.update(homesTable).set({ archivedAt: new Date(), updatedAt: new Date() }).where(eq(homesTable.id, a.home.id));
-  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "home.archived", entityType: "home", entityId: a.home.id, summary: a.home.name });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "home.archived", entityType: "home", entityId: a.home.id, summary: a.home.name });
   res.json({ success: true });
 });
 
@@ -281,7 +283,7 @@ router.post("/homes/:homeId/rooms", async (req, res): Promise<void> => {
   if (!homePermissions(a).edit) return forbidden(res);
   const [{ n }] = await db.select({ n: sql<number>`coalesce(max(${homeRoomsTable.position}), -1)::int + 1` }).from(homeRoomsTable).where(eq(homeRoomsTable.homeId, a.home.id));
   const [room] = await db.insert(homeRoomsTable).values({ position: n, ...roomValues(body.data), homeId: a.home.id }).returning();
-  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "room.created", entityType: "room", entityId: room.id, summary: room.name });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "room.created", entityType: "room", entityId: room.id, summary: room.name });
   res.status(201).json((await roomDtos(a.home.id, [room]))[0]);
 });
 
@@ -326,7 +328,7 @@ router.patch("/homes/:homeId/rooms/:roomId", async (req, res): Promise<void> => 
   const values = roomValues(body.data);
   const changes = diff(room as unknown as Record<string, unknown>, values, Object.keys(values));
   const [saved] = await db.update(homeRoomsTable).set(values).where(eq(homeRoomsTable.id, room.id)).returning();
-  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "room.updated", entityType: "room", entityId: room.id, summary: saved.name, changes });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "room.updated", entityType: "room", entityId: room.id, summary: saved.name, changes });
   res.json((await roomDtos(a.home.id, [saved]))[0]);
 });
 
@@ -342,7 +344,7 @@ router.delete("/homes/:homeId/rooms/:roomId", async (req, res): Promise<void> =>
     // Works, equipment and utility lines keep existing without a room (FK set null); media is unlinked explicitly.
     await tx.update(homeMediaTable).set({ roomId: null }).where(eq(homeMediaTable.roomId, room.id));
     await tx.delete(homeRoomsTable).where(eq(homeRoomsTable.id, room.id));
-    await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "room.deleted", entityType: "room", entityId: room.id, summary: room.name }, tx);
+    await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "room.deleted", entityType: "room", entityId: room.id, summary: room.name }, tx);
   });
   res.json({ success: true });
 });
@@ -369,7 +371,7 @@ router.delete("/homes/:homeId/members/:memberId", async (req, res): Promise<void
   const userId = uid(req);
   const [m] = await db.select().from(homeMembersTable).where(and(eq(homeMembersTable.id, p.data.memberId), eq(homeMembersTable.homeId, a.home.id)));
   if (!m) return notFound(res, "Üzv tapılmadı");
-  // The owner removes technicians / viewers; a technician or viewer may leave on their own.
+  // The owner removes members, contributors and viewers; any of them may leave on their own.
   const self = m.userId === userId;
   if (m.role === "owner") return bad(res, "Ev sahibi silinə bilməz");
   if (a.memberRole !== "owner" && !self) return forbidden(res);
@@ -385,7 +387,7 @@ router.get("/homes/:homeId/performers", async (req, res): Promise<void> => {
   const a = await access(req, res, p.data.homeId);
   if (!a) return;
   const works = await visibleWorks(a);
-  res.json(await homePerformers(a.home.id, uid(req), a.memberRole ? undefined : new Set(works.map((w) => w.id)), a.memberRole === "owner" || a.memberRole === "technician"));
+  res.json(await homePerformers(a.home.id, uid(req), a.memberRole ? undefined : new Set(works.map((w) => w.id)), !!a.memberRole && a.memberRole !== "viewer"));
 });
 
 /* ---------------------------------------------------------------------- works */
@@ -430,7 +432,7 @@ router.post("/homes/:homeId/works", async (req, res): Promise<void> => {
   const a = await access(req, res, p.data.homeId);
   if (!a) return;
   if (!homePermissions(a).addWorks) return forbidden(res);
-  const owner = a.memberRole === "owner";
+  const owner = manages(a.memberRole);
   const v = await workValues(a.home.id, userId, owner, body.data);
   if ("error" in v) return bad(res, v.error);
   // A performer records a work through the profile they already work in this home with (individual first).
@@ -444,7 +446,7 @@ router.post("/homes/:homeId/works", async (req, res): Promise<void> => {
   }
   const status = body.data.status ?? "planned";
   const work = await db.transaction(async (tx) => {
-    const [w] = await tx.insert(workRecordsTable).values({ ...v.values, title: v.values.title!, homeId: a.home.id, status, createdByUserId: userId }).returning();
+    const [w] = await tx.insert(workRecordsTable).values({ ...v.values, title: v.values.title!, homeId: a.home.id, status, createdByUserId: userId, ...(status === "completed" ? { completedAt: new Date() } : {}) }).returning();
     await tx.insert(workApprovalsTable).values({ workId: w.id, action: "created", fromStatus: "", toStatus: status, actorUserId: userId, actorRole: a.role });
     if (performerWorkerId) {
       await tx.insert(workParticipantsTable).values({ workId: w.id, workerId: performerWorkerId, role: "lead", status: "accepted", addedByUserId: userId, respondedAt: new Date() });
@@ -498,7 +500,7 @@ async function infraValues(a: HomeAccess, d: ReturnType<typeof CreateInfrastruct
   const mediaId = await homeMediaIn(a.home.id, d.mediaId);
   if (mediaId === undefined) return { error: "Şəkil bu evə aid deyil" };
   // The source is decided by who records it, not by what the client claims.
-  const source = a.memberRole === "technician" ? "specialist" : a.memberRole === "owner" ? (d.source === "plan" ? "plan" : "owner") : "worker";
+  const source = a.memberRole === "contributor" ? "specialist" : manages(a.memberRole) ? (d.source === "plan" ? "plan" : "owner") : "worker";
   return { values: { roomId, workId, mediaId, type: d.type, label: (d.label ?? "").trim(), notes: (d.notes ?? "").trim(), points: clampPoints(d.points), source } };
 }
 
@@ -535,7 +537,7 @@ router.patch("/infrastructure/:itemId", async (req, res): Promise<void> => {
   if (!found) return;
   const { row, a } = found;
   const userId = uid(req);
-  if (row.createdByUserId !== userId && a.memberRole !== "owner") return forbidden(res);
+  if (row.createdByUserId !== userId && !manages(a.memberRole)) return forbidden(res);
   const v = await infraValues(a, body.data);
   if ("error" in v) return bad(res, v.error);
   const values = { ...v.values!, source: row.source };
@@ -555,7 +557,7 @@ router.delete("/infrastructure/:itemId", async (req, res): Promise<void> => {
   if (!found) return;
   const { row, a } = found;
   const userId = uid(req);
-  if (row.createdByUserId !== userId && a.memberRole !== "owner") return forbidden(res);
+  if (row.createdByUserId !== userId && !manages(a.memberRole)) return forbidden(res);
   await db.delete(infrastructureItemsTable).where(eq(infrastructureItemsTable.id, row.id));
   await audit({ homeId: a.home.id, actorUserId: userId, actorRole: a.role, action: "infrastructure.deleted", entityType: "infrastructure", entityId: row.id, summary: `${row.type}: ${row.label}` });
   res.json({ success: true });
@@ -567,10 +569,10 @@ router.post("/infrastructure/:itemId/verify", async (req, res): Promise<void> =>
   const found = await loadInfra(req, res, p.data.itemId);
   if (!found) return;
   const { row, a } = found;
-  if (a.memberRole !== "technician") return forbidden(res, "Yalnız evə əlavə olunmuş texniki mütəxəssis təsdiqləyə bilər");
+  if (a.memberRole !== "contributor") return forbidden(res, "Xətti yalnız ev sahibinin əlavə etdiyi mütəxəssis (məlumat əlavə edə bilən şəxs) təsdiqləyə bilər");
   const userId = uid(req);
   const [saved] = await db.update(infrastructureItemsTable).set({ verifiedAt: new Date(), verifiedByUserId: userId }).where(eq(infrastructureItemsTable.id, row.id)).returning();
-  await audit({ homeId: a.home.id, actorUserId: userId, actorRole: "technician", action: "infrastructure.verified", entityType: "infrastructure", entityId: row.id, summary: `${row.type}: ${row.label}` });
+  await audit({ homeId: a.home.id, actorUserId: userId, actorRole: "contributor", action: "infrastructure.verified", entityType: "infrastructure", entityId: row.id, summary: `${row.type}: ${row.label}` });
   res.json((await infraDtos([saved], userId))[0]);
 });
 
@@ -638,7 +640,7 @@ router.patch("/equipment/:equipmentId", async (req, res): Promise<void> => {
   if (!found) return;
   const { row, a } = found;
   const userId = uid(req);
-  if (!(a.memberRole === "owner" || a.memberRole === "technician" || row.createdByUserId === userId)) return forbidden(res);
+  if (!(manages(a.memberRole) || a.memberRole === "contributor" || row.createdByUserId === userId)) return forbidden(res);
   const v = await equipmentValues(a, body.data);
   if ("error" in v) return bad(res, v.error);
   const changes = diff(row as unknown as Record<string, unknown>, v.values!, Object.keys(v.values!) as never[]);
@@ -653,11 +655,11 @@ router.delete("/equipment/:equipmentId", async (req, res): Promise<void> => {
   const found = await loadEquipment(req, res, p.data.equipmentId);
   if (!found) return;
   const { row, a } = found;
-  if (a.memberRole !== "owner") return forbidden(res);
+  if (!manages(a.memberRole)) return forbidden(res);
   await db.transaction(async (tx) => {
     await tx.update(workRecordsTable).set({ equipmentId: null }).where(eq(workRecordsTable.equipmentId, row.id));
     await tx.delete(equipmentTable).where(eq(equipmentTable.id, row.id));
-    await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "equipment.deleted", entityType: "equipment", entityId: row.id, summary: row.name }, tx);
+    await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "equipment.deleted", entityType: "equipment", entityId: row.id, summary: row.name }, tx);
   });
   res.json({ success: true });
 });
@@ -671,12 +673,13 @@ router.post("/homes/:homeId/invitations", async (req, res): Promise<void> => {
   if (!body.success) return bad(res, "Dəvət məlumatlarını yoxlayın");
   const a = await access(req, res, p.data.homeId);
   if (!a) return;
-  if (a.memberRole !== "owner") return forbidden(res);
   const d = body.data;
+  // Performers can be invited by the owner or a home member; access to the home itself only by the owner.
+  if (d.kind === "member" ? a.memberRole !== "owner" : !manages(a.memberRole)) return forbidden(res);
   let workId: string | null = null;
   let placeholderWorkerId: string | null = null;
   if (d.kind === "work") {
-    if (["technician", "viewer"].includes(d.role)) return bad(res, "İcraçı üçün iş rolunu seçin");
+    if (HOME_ROLES.includes(d.role)) return bad(res, "Usta üçün işdəki rolunu seçin");
     workId = (await workIn(a.home.id, d.workId)) ?? null;
     if (!workId) return bad(res, "Dəvət üçün işi seçin");
     if (d.placeholderWorkerId) {
@@ -684,8 +687,8 @@ router.post("/homes/:homeId/invitations", async (req, res): Promise<void> => {
       if (!pp) return bad(res, "Qeydiyyatsız icraçı bu işdə tapılmadı");
       placeholderWorkerId = d.placeholderWorkerId;
     }
-  } else if (!["technician", "viewer"].includes(d.role)) {
-    return bad(res, "Ev üzvü üçün rol: texniki mütəxəssis və ya ailə üzvü");
+  } else if (!HOME_ROLES.includes(d.role)) {
+    return bad(res, "Evə dəvət üçün icazəni seçin: ev üzvü, məlumat əlavə edə bilər və ya yalnız baxa bilər");
   }
   const token = newToken();
   const expiresAt = new Date(Date.now() + INVITE_DAYS * 86_400_000);
@@ -693,7 +696,7 @@ router.post("/homes/:homeId/invitations", async (req, res): Promise<void> => {
     kind: d.kind, tokenHash: hashToken(token), homeId: a.home.id, workId, placeholderWorkerId, role: d.role,
     name: (d.name ?? "").trim(), contact: (d.contact ?? "").trim(), createdByUserId: uid(req), expiresAt,
   }).returning();
-  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "invitation.created", entityType: "invitation", entityId: inv.id, summary: `${d.kind}/${d.role}${inv.name ? `: ${inv.name}` : ""}` });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "invitation.created", entityType: "invitation", entityId: inv.id, summary: `${d.kind}/${d.role}${inv.name ? `: ${inv.name}` : ""}` });
   res.json({ url: `${publicOrigin(req)}/invite/${token}`, expiresAt: expiresAt.toISOString() });
 });
 
@@ -737,7 +740,7 @@ router.put("/homes/:homeId/sharing", async (req, res): Promise<void> => {
   if (!homePermissions(a).manageSharing) return forbidden(res);
   const changes = diff(a.home as unknown as Record<string, unknown>, body.data, Object.keys(body.data) as never[]);
   await db.update(homesTable).set({ ...body.data, updatedAt: new Date() }).where(eq(homesTable.id, a.home.id));
-  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "sharing.updated", entityType: "home", entityId: a.home.id, summary: `QR səviyyəsi: ${body.data.publicLevel}`, changes });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "sharing.updated", entityType: "home", entityId: a.home.id, summary: `QR səviyyəsi: ${body.data.publicLevel}`, changes });
   res.json(await sharingDto(req, a.home.id));
 });
 
@@ -760,14 +763,13 @@ router.post("/homes/:homeId/shares", async (req, res): Promise<void> => {
     roomIds: keep(d.scope.roomIds, rooms), workIds: keep(d.scope.workIds, works), equipmentIds: keep(d.scope.equipmentIds, equipment),
     includePhotos: d.scope.includePhotos, includeInfrastructure: d.level === "technical" ? true : d.scope.includeInfrastructure,
   };
-  if (d.level === "selected" && !scope.roomIds.length && !scope.workIds.length && !scope.equipmentIds.length) return bad(res, "Paylaşmaq üçün ən azı bir otaq, iş və ya avadanlıq seçin");
   const days = d.expiresInDays == null ? null : Math.min(365, Math.max(1, Math.round(d.expiresInDays)));
   const token = newToken();
   const [share] = await db.insert(homeSharesTable).values({
     homeId: a.home.id, tokenHash: hashToken(token), label: (d.label ?? "").trim(), level: d.level, scope, createdByUserId: uid(req),
     expiresAt: days ? new Date(Date.now() + days * 86_400_000) : null,
   }).returning();
-  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "share.created", entityType: "share", entityId: share.id, summary: `${share.level}${share.label ? `: ${share.label}` : ""}` });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "share.created", entityType: "share", entityId: share.id, summary: `${share.level}${share.label ? `: ${share.label}` : ""}` });
   res.json({ share: shareDto(share), url: `${publicOrigin(req)}/h/s/${token}` });
 });
 
@@ -780,7 +782,7 @@ router.delete("/homes/:homeId/shares/:shareId", async (req, res): Promise<void> 
   const [share] = await db.update(homeSharesTable).set({ revokedAt: new Date() })
     .where(and(eq(homeSharesTable.id, p.data.shareId), eq(homeSharesTable.homeId, a.home.id), isNull(homeSharesTable.revokedAt))).returning();
   if (!share) return notFound(res, "Link tapılmadı");
-  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: "owner", action: "share.revoked", entityType: "share", entityId: share.id, summary: share.label });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "share.revoked", entityType: "share", entityId: share.id, summary: share.label });
   res.json({ success: true });
 });
 

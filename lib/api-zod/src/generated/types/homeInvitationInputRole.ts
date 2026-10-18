@@ -16,6 +16,7 @@ export const HomeInvitationInputRole = {
   assistant: 'assistant',
   supervisor: 'supervisor',
   inspector: 'inspector',
-  technician: 'technician',
+  member: 'member',
+  contributor: 'contributor',
   viewer: 'viewer',
 } as const;

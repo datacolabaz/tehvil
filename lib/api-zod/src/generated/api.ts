@@ -9281,7 +9281,7 @@ export const createWorkBodyLocationMax = 2000;
 
 export const CreateWorkBody = zod.object({
   "title": zod.string().min(createWorkBodyTitleMin).max(createWorkBodyTitleMax),
-  "category": zod.enum(['electrical', 'plumbing', 'sewer', 'heating', 'tiling', 'plaster', 'painting', 'flooring', 'drywall', 'welding', 'carpentry', 'roofing', 'hvac', 'insulation', 'general', 'other']).optional(),
+  "category": zod.enum(['electrical', 'plumbing', 'waterproofing', 'plaster', 'painting', 'flooring', 'doors_windows', 'heating', 'hvac', 'sewer', 'tiling', 'drywall', 'welding', 'carpentry', 'roofing', 'insulation', 'general', 'other']).optional(),
   "kind": zod.enum(['construction', 'renovation', 'installation', 'maintenance', 'repair', 'inspection']).optional(),
   "roomId": zod.string().uuid().nullish(),
   "equipmentId": zod.string().uuid().nullish(),
@@ -9291,7 +9291,7 @@ export const CreateWorkBody = zod.object({
   "startDate": zod.string().date().nullish(),
   "endDate": zod.string().date().nullish(),
   "visibility": zod.enum(['public', 'private']).optional(),
-  "status": zod.enum(['planned', 'in_progress']).optional(),
+  "status": zod.enum(['planned', 'in_progress', 'completed']).optional(),
   "smetaProjectId": zod.string().uuid().nullish()
 })
 
@@ -9338,7 +9338,10 @@ export const CreateWorkResponse = zod.object({
   "invitedAt": zod.string().datetime({"offset":true}),
   "respondedAt": zod.string().datetime({"offset":true}).nullable(),
   "isMe": zod.boolean(),
-  "phone": zod.string().nullable()
+  "phone": zod.string().nullable(),
+  "canAddMedia": zod.boolean(),
+  "canAddNotes": zod.boolean(),
+  "canEdit": zod.boolean()
 })),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -9822,7 +9825,7 @@ export const createHomeInvitationBodyContactMax = 254;
 export const CreateHomeInvitationBody = zod.object({
   "kind": zod.enum(['work', 'member']),
   "workId": zod.string().uuid().nullish(),
-  "role": zod.enum(['lead', 'team_lead', 'team_member', 'assistant', 'supervisor', 'inspector', 'technician', 'viewer']),
+  "role": zod.enum(['lead', 'team_lead', 'team_member', 'assistant', 'supervisor', 'inspector', 'member', 'contributor', 'viewer']),
   "name": zod.string().min(createHomeInvitationBodyNameMin).max(createHomeInvitationBodyNameMax).optional(),
   "contact": zod.string().min(createHomeInvitationBodyContactMin).max(createHomeInvitationBodyContactMax).optional(),
   "placeholderWorkerId": zod.string().uuid().nullish()
@@ -10045,7 +10048,10 @@ export const GetWorkResponse = zod.object({
   "invitedAt": zod.string().datetime({"offset":true}),
   "respondedAt": zod.string().datetime({"offset":true}).nullable(),
   "isMe": zod.boolean(),
-  "phone": zod.string().nullable()
+  "phone": zod.string().nullable(),
+  "canAddMedia": zod.boolean(),
+  "canAddNotes": zod.boolean(),
+  "canEdit": zod.boolean()
 })),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -10130,7 +10136,7 @@ export const updateWorkBodyLocationMax = 2000;
 
 export const UpdateWorkBody = zod.object({
   "title": zod.string().min(updateWorkBodyTitleMin).max(updateWorkBodyTitleMax),
-  "category": zod.enum(['electrical', 'plumbing', 'sewer', 'heating', 'tiling', 'plaster', 'painting', 'flooring', 'drywall', 'welding', 'carpentry', 'roofing', 'hvac', 'insulation', 'general', 'other']).optional(),
+  "category": zod.enum(['electrical', 'plumbing', 'waterproofing', 'plaster', 'painting', 'flooring', 'doors_windows', 'heating', 'hvac', 'sewer', 'tiling', 'drywall', 'welding', 'carpentry', 'roofing', 'insulation', 'general', 'other']).optional(),
   "kind": zod.enum(['construction', 'renovation', 'installation', 'maintenance', 'repair', 'inspection']).optional(),
   "roomId": zod.string().uuid().nullish(),
   "equipmentId": zod.string().uuid().nullish(),
@@ -10140,7 +10146,7 @@ export const UpdateWorkBody = zod.object({
   "startDate": zod.string().date().nullish(),
   "endDate": zod.string().date().nullish(),
   "visibility": zod.enum(['public', 'private']).optional(),
-  "status": zod.enum(['planned', 'in_progress']).optional(),
+  "status": zod.enum(['planned', 'in_progress', 'completed']).optional(),
   "smetaProjectId": zod.string().uuid().nullish()
 })
 
@@ -10187,7 +10193,10 @@ export const UpdateWorkResponse = zod.object({
   "invitedAt": zod.string().datetime({"offset":true}),
   "respondedAt": zod.string().datetime({"offset":true}).nullable(),
   "isMe": zod.boolean(),
-  "phone": zod.string().nullable()
+  "phone": zod.string().nullable(),
+  "canAddMedia": zod.boolean(),
+  "canAddNotes": zod.boolean(),
+  "canEdit": zod.boolean()
 })),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -10309,7 +10318,10 @@ export const ChangeWorkStatusResponse = zod.object({
   "invitedAt": zod.string().datetime({"offset":true}),
   "respondedAt": zod.string().datetime({"offset":true}).nullable(),
   "isMe": zod.boolean(),
-  "phone": zod.string().nullable()
+  "phone": zod.string().nullable(),
+  "canAddMedia": zod.boolean(),
+  "canAddNotes": zod.boolean(),
+  "canEdit": zod.boolean()
 })),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -10431,7 +10443,10 @@ export const AddWorkNoteResponse = zod.object({
   "invitedAt": zod.string().datetime({"offset":true}),
   "respondedAt": zod.string().datetime({"offset":true}).nullable(),
   "isMe": zod.boolean(),
-  "phone": zod.string().nullable()
+  "phone": zod.string().nullable(),
+  "canAddMedia": zod.boolean(),
+  "canAddNotes": zod.boolean(),
+  "canEdit": zod.boolean()
 })),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -10569,7 +10584,10 @@ export const AddWorkParticipantResponse = zod.object({
   "invitedAt": zod.string().datetime({"offset":true}),
   "respondedAt": zod.string().datetime({"offset":true}).nullable(),
   "isMe": zod.boolean(),
-  "phone": zod.string().nullable()
+  "phone": zod.string().nullable(),
+  "canAddMedia": zod.boolean(),
+  "canAddNotes": zod.boolean(),
+  "canEdit": zod.boolean()
 })),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -10647,7 +10665,10 @@ export const updateWorkParticipantBodyNoteMax = 300;
 export const UpdateWorkParticipantBody = zod.object({
   "role": zod.enum(['lead', 'team_lead', 'team_member', 'assistant', 'supervisor', 'inspector']).optional(),
   "status": zod.enum(['removed']).optional(),
-  "note": zod.string().min(updateWorkParticipantBodyNoteMin).max(updateWorkParticipantBodyNoteMax).optional()
+  "note": zod.string().min(updateWorkParticipantBodyNoteMin).max(updateWorkParticipantBodyNoteMax).optional(),
+  "canAddMedia": zod.boolean().optional(),
+  "canAddNotes": zod.boolean().optional(),
+  "canEdit": zod.boolean().optional()
 })
 
 export const UpdateWorkParticipantResponse = zod.object({
@@ -10693,7 +10714,10 @@ export const UpdateWorkParticipantResponse = zod.object({
   "invitedAt": zod.string().datetime({"offset":true}),
   "respondedAt": zod.string().datetime({"offset":true}).nullable(),
   "isMe": zod.boolean(),
-  "phone": zod.string().nullable()
+  "phone": zod.string().nullable(),
+  "canAddMedia": zod.boolean(),
+  "canAddNotes": zod.boolean(),
+  "canEdit": zod.boolean()
 })),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -10818,7 +10842,10 @@ export const CreateReviewResponse = zod.object({
   "invitedAt": zod.string().datetime({"offset":true}),
   "respondedAt": zod.string().datetime({"offset":true}).nullable(),
   "isMe": zod.boolean(),
-  "phone": zod.string().nullable()
+  "phone": zod.string().nullable(),
+  "canAddMedia": zod.boolean(),
+  "canAddNotes": zod.boolean(),
+  "canEdit": zod.boolean()
 })),
   "media": zod.array(zod.object({
   "id": zod.string(),
@@ -11011,6 +11038,52 @@ export const GetMyInboxResponse = zod.object({
 }),
   "homeName": zod.string()
 }))
+})
+
+
+/**
+ * @summary Repair history across all homes I own or manage
+ */
+export const ListMyHomeWorksResponseItem = zod.object({
+  "work": zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true})
+}),
+  "homeName": zod.string(),
+  "myRole": zod.string()
+})
+export const ListMyHomeWorksResponse = zod.array(ListMyHomeWorksResponseItem)
+
+
+/**
+ * @summary What the signed-in account is (for a menu that shows only relevant sections)
+ */
+export const GetMyRolesResponse = zod.object({
+  "staff": zod.boolean(),
+  "hasHomes": zod.boolean(),
+  "managesHomes": zod.boolean(),
+  "isPerformer": zod.boolean(),
+  "hasProjects": zod.boolean()
 })
 
 
@@ -12285,6 +12358,23 @@ export const GetSharedHomeResponse = zod.object({
 })),
   "shareLabel": zod.string().nullable(),
   "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Tehvil.az staff hides or restores a reported review
+ */
+export const HideReviewParams = zod.object({
+  "reviewId": zod.coerce.string().uuid()
+})
+
+export const HideReviewBody = zod.object({
+  "hidden": zod.boolean()
+})
+
+export const HideReviewResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
 })
 
 

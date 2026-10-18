@@ -71,7 +71,7 @@ Leave `VITE_CLERK_PROXY_URL` unset for external Clerk. Do not copy Replit's mana
 | `WHATSAPP_APP_SECRET` | Optional. Meta app secret; webhook signatures are rejected without it |
 | `WHATSAPP_TOKEN_KEY` | Optional. Long random secret used to encrypt realtors' WhatsApp access tokens at rest. Rotating it invalidates saved tokens |
 | `WHATSAPP_GRAPH_VERSION` | Optional, defaults to `v21.0` |
-| `ADMIN_USER_IDS` | Optional. Comma-separated Clerk user ids allowed to mark a performer's identity as checked (home passport "Şəxsiyyət yoxlanılıb" badge). Leave empty to disable |
+| `STAFF_USER_IDS` | Optional. Comma-separated Clerk user ids of Tehvil.az staff (platform role `staff`): may mark a tradesperson's identity as checked and hide disputed reviews. `ADMIN_USER_IDS` is accepted as the older name. Leave empty to disable |
 | `REALTOR_SCHEDULER` | Set `off` on extra backend replicas if you want only one instance to run realtor reminders (duplicates are prevented either way) |
 
 Without the three `WHATSAPP_*` secrets the realtor panel works in one-tap mode (prepared messages opened via wa.me). The webhook URL to register in Meta is `https://<PUBLIC_APP_URL host>/api/whatsapp/webhook`.

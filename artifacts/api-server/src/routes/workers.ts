@@ -11,6 +11,8 @@ import {
   CreateTeamInvitationParams,
   CreateWorkerBody,
   DeleteHomeMediaParams,
+  HideReviewBody,
+  HideReviewParams,
   RespondMembershipBody,
   RespondMembershipParams,
   SearchWorkersQueryParams,
@@ -27,12 +29,15 @@ import {
   homeMediaTable,
   homeMembersTable,
   homesTable,
+  projectParticipantsTable,
+  renovationProjectsTable,
   workerMembershipsTable,
+  workerReviewsTable,
   workersTable,
   workParticipantsTable,
   workRecordsTable,
 } from "@workspace/db";
-import { adminUserIds, audit, canManageWorker, diff, getHomeAccess, getWorkAccess, loadActor, workPermissions, type Actor, type WorkerRow } from "../lib/homeAccess";
+import { audit, isStaff, manages, canManageWorker, diff, getHomeAccess, getWorkAccess, loadActor, workPermissions, type Actor, type WorkerRow } from "../lib/homeAccess";
 import { loadWorkers, mediaDto, workerRef, workSummaries } from "../lib/homeDtos";
 import { attachHomeMedia, HomeMediaError } from "../lib/homeMedia";
 import { hashToken, newToken, publicOrigin } from "../lib/realtorCore";
@@ -80,7 +85,7 @@ router.get("/me/inbox", async (req, res): Promise<void> => {
     ? await db.select().from(workerMembershipsTable).where(and(eq(workerMembershipsTable.memberId, actor.individual.id), eq(workerMembershipsTable.status, "invited")))
     : [];
   const ownedHomes = await db.select({ home: homesTable }).from(homeMembersTable).innerJoin(homesTable, eq(homesTable.id, homeMembersTable.homeId))
-    .where(and(eq(homeMembersTable.userId, userId), eq(homeMembersTable.role, "owner"), isNull(homesTable.archivedAt)));
+    .where(and(eq(homeMembersTable.userId, userId), inArray(homeMembersTable.role, ["owner", "member"]), isNull(homesTable.archivedAt)));
   const pending = ownedHomes.length
     ? await db.select().from(workRecordsTable).where(and(inArray(workRecordsTable.homeId, ownedHomes.map((h) => h.home.id)), eq(workRecordsTable.status, "completed")))
     : [];
@@ -92,6 +97,40 @@ router.get("/me/inbox", async (req, res): Promise<void> => {
     memberships: (await membershipDtos(memberships)).map((m) => ({ membershipId: m.id, group: m.group, role: m.role, member: m.member, createdAt: m.createdAt })),
     approvals: summaries.map((s) => ({ work: s, homeName: ownedHomes.find((h) => h.home.id === s.homeId)?.home.name ?? "" })),
   });
+});
+
+router.get("/me/roles", async (req, res): Promise<void> => {
+  noStore(res);
+  const userId = uid(req);
+  const actor = await loadActor(userId);
+  const memberships = await db.select({ role: homeMembersTable.role }).from(homeMembersTable)
+    .innerJoin(homesTable, eq(homesTable.id, homeMembersTable.homeId)).where(and(eq(homeMembersTable.userId, userId), isNull(homesTable.archivedAt)));
+  const [participation] = actor.actingIds.length
+    ? await db.select({ id: workParticipantsTable.id }).from(workParticipantsTable).where(and(inArray(workParticipantsTable.workerId, actor.actingIds), inArray(workParticipantsTable.status, ["accepted", "invited"]))).limit(1)
+    : [];
+  const [project] = await db.select({ id: renovationProjectsTable.id }).from(renovationProjectsTable).where(eq(renovationProjectsTable.ownerUserId, userId)).limit(1);
+  const [joined] = project ? [project] : await db.select({ id: projectParticipantsTable.id }).from(projectParticipantsTable).where(eq(projectParticipantsTable.userId, userId)).limit(1);
+  res.json({
+    staff: isStaff(userId),
+    hasHomes: memberships.length > 0,
+    managesHomes: memberships.some((m) => m.role === "owner" || m.role === "member"),
+    isPerformer: actor.actingIds.length > 0 || !!participation,
+    hasProjects: !!joined,
+  });
+});
+
+router.get("/me/home-works", async (req, res): Promise<void> => {
+  noStore(res);
+  const userId = uid(req);
+  const homes = await db.select({ home: homesTable, role: homeMembersTable.role }).from(homeMembersTable)
+    .innerJoin(homesTable, eq(homesTable.id, homeMembersTable.homeId)).where(and(eq(homeMembersTable.userId, userId), isNull(homesTable.archivedAt)));
+  if (!homes.length) { res.json([]); return; }
+  const works = await db.select().from(workRecordsTable).where(inArray(workRecordsTable.homeId, homes.map((h) => h.home.id)));
+  const summaries = await workSummaries(works);
+  res.json(summaries.map((w) => {
+    const h = homes.find((x) => x.home.id === w.homeId)!;
+    return { work: w, homeName: h.home.name, myRole: h.role === "technician" ? "contributor" : h.role };
+  }));
 });
 
 router.get("/me/works", async (req, res): Promise<void> => {
@@ -395,7 +434,7 @@ router.post("/home-media", async (req, res): Promise<void> => {
   } else if (d.homeId) {
     const a = await getHomeAccess(userId, d.homeId);
     if (!a) return notFound(res, "Ev tapılmadı");
-    if (a.memberRole !== "owner" && a.memberRole !== "technician" && !a.performerWorkIds.size) return forbidden(res);
+    if ((!a.memberRole || a.memberRole === "viewer") && !a.performerWorkIds.size) return forbidden(res);
     homeId = a.home.id;
     if (d.roomId) {
       const ok = await db.execute(sql`select 1 from home_rooms where id = ${d.roomId} and home_id = ${homeId}`);
@@ -420,7 +459,7 @@ router.delete("/home-media/:mediaId", async (req, res): Promise<void> => {
   const [m] = await db.select().from(homeMediaTable).where(and(eq(homeMediaTable.id, p.data.mediaId), isNull(homeMediaTable.deletedAt)));
   if (!m) return notFound(res, "Fayl tapılmadı");
   const a = m.homeId ? await getHomeAccess(userId, m.homeId) : null;
-  if (m.uploadedByUserId !== userId && a?.memberRole !== "owner") return forbidden(res);
+  if (m.uploadedByUserId !== userId && !manages(a?.memberRole ?? null)) return forbidden(res);
   // Soft delete: the file record stays for the audit trail.
   await db.update(homeMediaTable).set({ deletedAt: new Date() }).where(eq(homeMediaTable.id, m.id));
   if (m.homeId) {
@@ -432,18 +471,32 @@ router.delete("/home-media/:mediaId", async (req, res): Promise<void> => {
 
 /* ---------------------------------------------------------------------- admin */
 
+router.post("/staff/reviews/:reviewId/hide", async (req, res): Promise<void> => {
+  const p = HideReviewParams.safeParse(req.params);
+  const body = HideReviewBody.safeParse(req.body);
+  if (!p.success) return notFound(res, "Rəy tapılmadı");
+  if (!body.success) return bad(res);
+  const userId = uid(req);
+  if (!isStaff(userId)) return forbidden(res);
+  const [review] = await db.update(workerReviewsTable).set({ hiddenAt: body.data.hidden ? new Date() : null }).where(eq(workerReviewsTable.id, p.data.reviewId)).returning();
+  if (!review) return notFound(res, "Rəy tapılmadı");
+  const [w] = await db.select({ homeId: workRecordsTable.homeId }).from(workRecordsTable).where(eq(workRecordsTable.id, review.workId));
+  await audit({ homeId: w?.homeId ?? null, workerId: review.workerId, actorUserId: userId, actorRole: "staff", action: body.data.hidden ? "review.hidden" : "review.restored", entityType: "review", entityId: review.id, summary: review.reportReason ?? "" });
+  res.json({ success: true });
+});
+
 router.post("/admin/workers/:workerId/identity", async (req, res): Promise<void> => {
   const p = SetWorkerIdentityParams.safeParse(req.params);
   const body = SetWorkerIdentityBody.safeParse(req.body);
   if (!p.success) return notFound(res, "Profil tapılmadı");
   if (!body.success) return bad(res);
   const userId = uid(req);
-  if (!adminUserIds().has(userId)) return forbidden(res);
+  if (!isStaff(userId)) return forbidden(res);
   const worker = await loadWorker(p.data.workerId);
   if (!worker || worker.status !== "active") return notFound(res, "Profil tapılmadı");
   const [saved] = await db.update(workersTable).set({ identityVerifiedAt: body.data.verified ? new Date() : null, identityVerifiedBy: body.data.verified ? userId : null, updatedAt: new Date() })
     .where(eq(workersTable.id, worker.id)).returning();
-  await audit({ workerId: worker.id, actorUserId: userId, actorRole: "admin", action: body.data.verified ? "worker.identity_verified" : "worker.identity_revoked", entityType: "worker", entityId: worker.id, summary: worker.displayName });
+  await audit({ workerId: worker.id, actorUserId: userId, actorRole: "staff", action: body.data.verified ? "worker.identity_verified" : "worker.identity_revoked", entityType: "worker", entityId: worker.id, summary: worker.displayName });
   await profileOut(res, saved, userId);
 });
 

@@ -15,9 +15,15 @@ import {
  * caller may do; the frontend only mirrors the answer (permissions objects).
  *
  * Roles
- *   owner       home_members.role = owner      — full control of the home
- *   technician  home_members.role = technician — technical data, inspection notes, verifies utility lines
- *   viewer      home_members.role = viewer     — household member, read only
+ *   owner        home_members.role = owner       — "Ev sahibi": full control, the only one who manages access and sharing
+ *   member       home_members.role = member      — "Ev üzvü": manages the home's records (works, rooms, performers, approvals),
+ *                                                   but not access, sharing or archiving
+ *   contributor  home_members.role = contributor — "Məlumat əlavə edə bilər": adds photos, notes, inspections, utility lines,
+ *                                                   equipment; verifies utility lines (legacy value "technician")
+ *   viewer       home_members.role = viewer      — "Yalnız baxa bilər": read only
+ *
+ * Platform level (separate from homes): user (every account), staff (STAFF_USER_IDS), system (automatic jobs;
+ * never a login — audit rows written by jobs use SYSTEM_ACTOR).
  *   performer   accepted participant of at least one work in the home, acting through
  *               an individual profile, or a team / company the caller manages — sees
  *               only the home name and the works they take part in
@@ -27,7 +33,7 @@ export type HomeRow = typeof homesTable.$inferSelect;
 export type WorkerRow = typeof workersTable.$inferSelect;
 export type WorkRow = typeof workRecordsTable.$inferSelect;
 export type ParticipantRow = typeof workParticipantsTable.$inferSelect;
-export type MemberRole = "owner" | "technician" | "viewer";
+export type MemberRole = "owner" | "member" | "contributor" | "viewer";
 export type HomeRole = MemberRole | "performer";
 
 export const ACTIVE_PARTICIPATION = ["accepted", "recorded"] as const;
@@ -36,9 +42,22 @@ export const PERFORMER_ROLES_LEADING = ["lead", "team_lead"];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (v: unknown): v is string => typeof v === "string" && UUID.test(v);
 
-export function adminUserIds(): Set<string> {
-  return new Set((process.env.ADMIN_USER_IDS ?? "").split(",").map((s) => s.trim()).filter(Boolean));
+/** Tehvil.az staff accounts (platform role "staff"). ADMIN_USER_IDS is accepted as the older name. */
+export function staffUserIds(): Set<string> {
+  return new Set(`${process.env.STAFF_USER_IDS ?? ""},${process.env.ADMIN_USER_IDS ?? ""}`.split(",").map((s) => s.trim()).filter(Boolean));
 }
+export const adminUserIds = staffUserIds;
+export const isStaff = (userId: string | null | undefined) => !!userId && staffUserIds().has(userId);
+/** Actor id for audit rows written by automatic processes; it can never sign in. */
+export const SYSTEM_ACTOR = "system";
+
+export function normalizeMemberRole(role: string | null | undefined): MemberRole | null {
+  if (!role) return null;
+  if (role === "technician") return "contributor";
+  return (["owner", "member", "contributor", "viewer"] as const).includes(role as MemberRole) ? (role as MemberRole) : null;
+}
+/** Owner or member: may manage the home's records. */
+export const manages = (role: MemberRole | null) => role === "owner" || role === "member";
 
 /* ------------------------------------------------------------------ actor */
 
@@ -108,7 +127,7 @@ export async function getHomeAccess(userId: string, homeId: string, actor?: Acto
       .where(and(eq(workRecordsTable.homeId, homeId), inArray(workParticipantsTable.workerId, a.actingIds), inArray(workParticipantsTable.status, ["accepted", "invited"])));
     for (const r of rows) (r.status === "accepted" ? performerWorkIds : invitedWorkIds).add(r.workId);
   }
-  const memberRole = (member?.role as MemberRole | undefined) ?? null;
+  const memberRole = normalizeMemberRole(member?.role);
   if (!memberRole && !performerWorkIds.size && !invitedWorkIds.size) return null;
   if (home.archivedAt && memberRole !== "owner") return null;
   return { home, actor: a, role: memberRole ?? "performer", memberRole, performerWorkIds, invitedWorkIds };
@@ -116,15 +135,16 @@ export async function getHomeAccess(userId: string, homeId: string, actor?: Acto
 
 export function homePermissions(access: HomeAccess) {
   const owner = access.memberRole === "owner";
-  const tech = access.memberRole === "technician";
+  const manager = manages(access.memberRole);
+  const contributor = access.memberRole === "contributor";
   return {
-    edit: owner,
+    edit: manager,
     manageMembers: owner,
     manageSharing: owner,
-    addWorks: owner || access.performerWorkIds.size > 0,
-    confirmWorks: owner,
-    inspect: tech,
-    viewAudit: owner || tech,
+    addWorks: manager || access.performerWorkIds.size > 0,
+    confirmWorks: manager,
+    inspect: contributor,
+    viewAudit: manager || contributor,
   };
 }
 
@@ -153,26 +173,32 @@ export async function getWorkAccess(userId: string, workId: string, actor?: Acto
   return { work, homeAccess, mine, role: homeAccess.memberRole ?? "performer" };
 }
 
+export const participantCanEdit = (p: Pick<ParticipantRow, "canEdit" | "role">) => p.canEdit ?? PERFORMER_ROLES_LEADING.includes(p.role);
+
 export function workPermissions(access: WorkAccess) {
   const { work, homeAccess, mine } = access;
-  const owner = homeAccess.memberRole === "owner";
-  const tech = homeAccess.memberRole === "technician";
+  const owner = manages(homeAccess.memberRole);
+  const tech = homeAccess.memberRole === "contributor";
   const accepted = mine.filter((p) => p.status === "accepted");
   const leading = accepted.some((p) => PERFORMER_ROLES_LEADING.includes(p.role));
+  // Per-work permissions the owner can switch for each participant.
+  const canEditWork = accepted.some(participantCanEdit);
+  const canMedia = accepted.some((p) => p.canAddMedia);
+  const canNotes = accepted.some((p) => p.canAddNotes);
   const managesTeamHere = accepted.some((p) => homeAccess.actor.managed.some((m) => m.id === p.workerId));
   const open = work.status !== "confirmed";
   return {
-    edit: owner || (leading && open),
+    edit: owner || (canEditWork && open),
     manageParticipants: owner || (managesTeamHere && open),
-    addMedia: owner || tech || (accepted.length > 0 && open),
-    addNote: owner || tech || accepted.length > 0,
-    start: (owner || leading) && (work.status === "planned" || work.status === "revision"),
-    complete: (owner || leading) && ["planned", "in_progress", "revision"].includes(work.status),
+    addMedia: owner || tech || (canMedia && open),
+    addNote: owner || tech || canNotes,
+    start: (owner || leading || canEditWork) && (work.status === "planned" || work.status === "revision"),
+    complete: (owner || leading || canEditWork) && ["planned", "in_progress", "revision"].includes(work.status),
     confirm: owner && work.status === "completed",
     requestRevision: owner && work.status === "completed",
     reopen: owner && (work.status === "confirmed" || work.status === "completed" || work.status === "revision"),
     inspect: tech,
-    review: (owner || homeAccess.memberRole === "viewer") && work.status === "confirmed",
+    review: owner && work.status === "confirmed",
   };
 }
 
@@ -236,7 +262,7 @@ export async function ownerSeesContact(userId: string, workerId: string): Promis
     .where(and(
       eq(workParticipantsTable.workerId, workerId),
       inArray(workParticipantsTable.status, ["accepted", "recorded", "invited"]),
-      or(eq(homeMembersTable.role, "owner"), eq(homeMembersTable.role, "technician")),
+      inArray(homeMembersTable.role, ["owner", "member", "contributor", "technician"]),
     ))
     .limit(1);
   return rows.length > 0;
