@@ -26,6 +26,8 @@ tags:
     description: Private project evidence and document storage
   - name: smeta
     description: AI Smeta estimates, budget control and client approval
+  - name: home
+    description: Digital home passport — homes, rooms, work records, performers (individuals, teams, companies), utility map, equipment, QR sharing
   - name: realtor
     description: Realtor sales and trust platform — listings, leads, appointments, WhatsApp automation and Təhvil-certified apartment passports
 paths:
@@ -1563,6 +1565,918 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/OwnerConfirmView" }
+  # >>> HOME-PASSPORT paths
+  /homes:
+    get:
+      operationId: listHomes
+      tags: [home]
+      summary: Homes the signed-in user owns or is a member of
+      responses:
+        '200':
+          description: Homes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/HomeSummary'}
+    post:
+      operationId: createHome
+      tags: [home]
+      summary: Create a home; the creator becomes its owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeInput'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeOverview'}
+  /homes/{homeId}:
+    get:
+      operationId: getHomeOverview
+      tags: [home]
+      summary: Home profile with rooms, counters, recent works and performers
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Home
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeOverview'}
+    patch:
+      operationId: updateHome
+      tags: [home]
+      summary: Edit home profile (owner)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeOverview'}
+    delete:
+      operationId: archiveHome
+      tags: [home]
+      summary: Archive (never delete) a home (owner)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /homes/{homeId}/rooms:
+    post:
+      operationId: createHomeRoom
+      tags: [home]
+      summary: Add a room
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeRoomInput'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeRoom'}
+  /homes/{homeId}/rooms/{roomId}:
+    get:
+      operationId: getHomeRoom
+      tags: [home]
+      summary: Room with its works, equipment, utility lines and media
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      - {$ref: '#/components/parameters/RoomId'}
+      responses:
+        '200':
+          description: HomeRoom
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeRoomDetail'}
+    patch:
+      operationId: updateHomeRoom
+      tags: [home]
+      summary: Edit room
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      - {$ref: '#/components/parameters/RoomId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeRoomInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeRoom'}
+    delete:
+      operationId: deleteHomeRoom
+      tags: [home]
+      summary: Delete room; linked records keep existing without a room
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      - {$ref: '#/components/parameters/RoomId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /homes/{homeId}/members:
+    get:
+      operationId: listHomeMembers
+      tags: [home]
+      summary: Account members (owner, technician, viewer)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/HomeMember'}
+  /homes/{homeId}/members/{memberId}:
+    delete:
+      operationId: removeHomeMember
+      tags: [home]
+      summary: Remove a technician or viewer (owner)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      - {$ref: '#/components/parameters/MemberId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /homes/{homeId}/performers:
+    get:
+      operationId: listHomePerformers
+      tags: [home]
+      summary: Individuals, teams and companies that worked in this home
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Performers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/HomePerformer'}
+  /homes/{homeId}/works:
+    get:
+      operationId: listWorks
+      tags: [home]
+      summary: Construction and repair history, newest first
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Works
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/WorkSummary'}
+    post:
+      operationId: createWork
+      tags: [home]
+      summary: Create a work record
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WorkInput'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WorkDetail'}
+  /homes/{homeId}/media:
+    get:
+      operationId: listHomeMedia
+      tags: [home]
+      summary: Photos and videos of the home visible to the caller
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Media
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/HomeMedia'}
+  /homes/{homeId}/infrastructure:
+    get:
+      operationId: listInfrastructure
+      tags: [home]
+      summary: Hidden utility lines marked on photos
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/InfrastructureItem'}
+    post:
+      operationId: createInfrastructure
+      tags: [home]
+      summary: Mark a utility line
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/InfrastructureInput'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InfrastructureItem'}
+  /infrastructure/{itemId}:
+    patch:
+      operationId: updateInfrastructure
+      tags: [home]
+      summary: Edit a utility line (author or owner)
+      parameters:
+      - {$ref: '#/components/parameters/ItemId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/InfrastructureInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InfrastructureItem'}
+    delete:
+      operationId: deleteInfrastructure
+      tags: [home]
+      summary: Delete a utility line (author or owner)
+      parameters:
+      - {$ref: '#/components/parameters/ItemId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /infrastructure/{itemId}/verify:
+    post:
+      operationId: verifyInfrastructure
+      tags: [home]
+      summary: Technician confirms the marking
+      parameters:
+      - {$ref: '#/components/parameters/ItemId'}
+      responses:
+        '200':
+          description: Verified
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InfrastructureItem'}
+  /homes/{homeId}/equipment:
+    get:
+      operationId: listEquipment
+      tags: [home]
+      summary: Equipment register
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Equipment
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Equipment'}
+    post:
+      operationId: createEquipment
+      tags: [home]
+      summary: Add equipment
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EquipmentInput'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Equipment'}
+  /equipment/{equipmentId}:
+    patch:
+      operationId: updateEquipment
+      tags: [home]
+      summary: Edit equipment
+      parameters:
+      - {$ref: '#/components/parameters/EquipmentId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EquipmentInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Equipment'}
+    delete:
+      operationId: deleteEquipment
+      tags: [home]
+      summary: Delete equipment (owner)
+      parameters:
+      - {$ref: '#/components/parameters/EquipmentId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /homes/{homeId}/invitations:
+    post:
+      operationId: createHomeInvitation
+      tags: [home]
+      summary: Invitation link for a performer (to a work) or a technician / viewer (to the home)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeInvitationInput'}
+      responses:
+        '200':
+          description: Link
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InvitationLink'}
+  /homes/{homeId}/sharing:
+    get:
+      operationId: getHomeSharing
+      tags: [home]
+      summary: QR page settings and secret share links
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Sharing
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeSharing'}
+    put:
+      operationId: updateHomeSharing
+      tags: [home]
+      summary: Change what the QR page shows
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeSharingInput'}
+      responses:
+        '200':
+          description: Sharing
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeSharing'}
+  /homes/{homeId}/shares:
+    post:
+      operationId: createHomeShare
+      tags: [home]
+      summary: Create a revocable secret share link
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeShareInput'}
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeShareCreated'}
+  /homes/{homeId}/shares/{shareId}:
+    delete:
+      operationId: revokeHomeShare
+      tags: [home]
+      summary: Revoke a share link
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      - {$ref: '#/components/parameters/ShareId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /homes/{homeId}/audit:
+    get:
+      operationId: listHomeAudit
+      tags: [home]
+      summary: Audit trail (owner and technician)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/AuditEntry'}
+  /works/{workId}:
+    get:
+      operationId: getWork
+      tags: [home]
+      summary: Work with participants, media, notes, status history
+      parameters:
+      - {$ref: '#/components/parameters/WorkId'}
+      responses:
+        '200':
+          description: Work
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WorkDetail'}
+    patch:
+      operationId: updateWork
+      tags: [home]
+      summary: Edit a work; changes are audited
+      parameters:
+      - {$ref: '#/components/parameters/WorkId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WorkInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WorkDetail'}
+  /works/{workId}/status:
+    post:
+      operationId: changeWorkStatus
+      tags: [home]
+      summary: Start, complete, confirm, request revision or reopen
+      parameters:
+      - {$ref: '#/components/parameters/WorkId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WorkStatusInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WorkDetail'}
+  /works/{workId}/notes:
+    post:
+      operationId: addWorkNote
+      tags: [home]
+      summary: Add a note, defect, fix or inspection result
+      parameters:
+      - {$ref: '#/components/parameters/WorkId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WorkNoteInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WorkDetail'}
+  /works/{workId}/participants:
+    post:
+      operationId: addWorkParticipant
+      tags: [home]
+      summary: Invite a registered performer, record a non-registered one, or add a team member
+      parameters:
+      - {$ref: '#/components/parameters/WorkId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ParticipantInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WorkDetail'}
+  /works/{workId}/participants/{participantId}:
+    patch:
+      operationId: updateWorkParticipant
+      tags: [home]
+      summary: Change role or remove a participant
+      parameters:
+      - {$ref: '#/components/parameters/WorkId'}
+      - {$ref: '#/components/parameters/ParticipantId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ParticipantPatch'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WorkDetail'}
+  /works/{workId}/reviews:
+    post:
+      operationId: createReview
+      tags: [home]
+      summary: Review a performer of a confirmed work (home owner, once)
+      parameters:
+      - {$ref: '#/components/parameters/WorkId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReviewInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/WorkDetail'}
+  /reviews/{reviewId}/report:
+    post:
+      operationId: reportReview
+      tags: [home]
+      summary: Report a review as wrong or disputed
+      parameters:
+      - {$ref: '#/components/parameters/ReviewId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReportInput'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /participations/{participantId}/respond:
+    post:
+      operationId: respondParticipation
+      tags: [home]
+      summary: Accept or decline an invitation to a work
+      parameters:
+      - {$ref: '#/components/parameters/ParticipantId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RespondInput'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /memberships/{membershipId}/respond:
+    post:
+      operationId: respondMembership
+      tags: [home]
+      summary: Accept or decline a team / company invitation
+      parameters:
+      - {$ref: '#/components/parameters/MembershipId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RespondInput'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /me/inbox:
+    get:
+      operationId: getMyInbox
+      tags: [home]
+      summary: Pending invitations and works waiting for my confirmation
+      responses:
+        '200':
+          description: Inbox
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Inbox'}
+  /me/works:
+    get:
+      operationId: listMyWorks
+      tags: [home]
+      summary: Works I take part in through any of my profiles
+      responses:
+        '200':
+          description: Works
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/MyWork'}
+  /me/workers:
+    get:
+      operationId: getMyWorkers
+      tags: [home]
+      summary: My individual profile, teams/companies I manage and my memberships
+      responses:
+        '200':
+          description: Profiles
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/MyWorkers'}
+  /workers:
+    get:
+      operationId: searchWorkers
+      tags: [home]
+      summary: Find registered individuals, teams and companies
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/WorkerCard'}
+      parameters:
+      - name: q
+        in: query
+        required: false
+        schema: {type: string, maxLength: 80}
+      - name: specialty
+        in: query
+        required: false
+        schema: {type: string, maxLength: 30}
+      - name: city
+        in: query
+        required: false
+        schema: {type: string, maxLength: 60}
+    post:
+      operationId: createWorker
+      tags: [home]
+      summary: Create my individual profile, a team (I lead it) or a company (I represent it)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WorkerInput'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Worker'}
+  /workers/{workerId}:
+    get:
+      operationId: getWorker
+      tags: [home]
+      summary: Performer profile; contacts only where allowed. Works without sign-in.
+      parameters:
+      - {$ref: '#/components/parameters/WorkerId'}
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Worker'}
+    patch:
+      operationId: updateWorker
+      tags: [home]
+      summary: Edit a profile I own or manage
+      parameters:
+      - {$ref: '#/components/parameters/WorkerId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WorkerPatch'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Worker'}
+  /workers/{workerId}/members:
+    post:
+      operationId: addWorkerMember
+      tags: [home]
+      summary: Invite a registered performer to my team / company
+      parameters:
+      - {$ref: '#/components/parameters/WorkerId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MembershipInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Worker'}
+  /workers/{workerId}/members/{membershipId}:
+    patch:
+      operationId: updateWorkerMember
+      tags: [home]
+      summary: Remove a member, leave, or change role; past work stays
+      parameters:
+      - {$ref: '#/components/parameters/WorkerId'}
+      - {$ref: '#/components/parameters/MembershipId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/MembershipPatch'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Worker'}
+  /workers/{workerId}/invitations:
+    post:
+      operationId: createTeamInvitation
+      tags: [home]
+      summary: Invitation link to join my team / company
+      parameters:
+      - {$ref: '#/components/parameters/WorkerId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/TeamInvitationInput'}
+      responses:
+        '200':
+          description: Link
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InvitationLink'}
+  /invitations/{token}:
+    get:
+      operationId: getHomeInvitation
+      tags: [home]
+      summary: What an invitation link is for (no sign-in)
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      responses:
+        '200':
+          description: Invitation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InvitationPreview'}
+  /invitations/{token}/accept:
+    post:
+      operationId: acceptHomeInvitation
+      tags: [home]
+      summary: Accept with the signed-in account
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeInvitationAcceptInput'}
+      responses:
+        '200':
+          description: Accepted
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InvitationAcceptResult'}
+  /home-media:
+    post:
+      operationId: attachHomeMedia
+      tags: [home]
+      summary: Register uploaded photos/videos for a home, room, work or profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeMediaAttachInput'}
+      responses:
+        '200':
+          description: Media
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/HomeMedia'}
+  /home-media/{mediaId}:
+    get:
+      operationId: getHomeMedia
+      tags: [home]
+      summary: Media file, after access check (member, participant, public QR or share link)
+      parameters:
+      - {$ref: '#/components/parameters/MediaId'}
+      responses:
+        '200':
+          description: File
+          content:
+            '*/*':
+              schema: {type: string, format: binary}
+    delete:
+      operationId: deleteHomeMedia
+      tags: [home]
+      summary: Hide media (uploader or owner); the file record is kept for audit
+      parameters:
+      - {$ref: '#/components/parameters/MediaId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /public/homes/{publicId}:
+    get:
+      operationId: getPublicHome
+      tags: [home]
+      summary: 'QR page: only what the owner made public'
+      parameters:
+      - {$ref: '#/components/parameters/HomePublicId'}
+      responses:
+        '200':
+          description: Home
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PublicHome'}
+  /public/home-shares/{token}:
+    get:
+      operationId: getSharedHome
+      tags: [home]
+      summary: Secret share link view
+      parameters:
+      - {$ref: '#/components/parameters/ShareToken'}
+      responses:
+        '200':
+          description: Home
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PublicHome'}
+  /admin/workers/{workerId}/identity:
+    post:
+      operationId: setWorkerIdentity
+      tags: [home]
+      summary: Administrator records a separate identity/business check
+      parameters:
+      - {$ref: '#/components/parameters/WorkerId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/IdentityInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Worker'}
+  # <<< HOME-PASSPORT paths
 components:
   parameters:
     ProjectId:
@@ -1626,6 +2540,83 @@ components:
       in: path
       required: true
       schema: { type: string, minLength: 20, maxLength: 64, pattern: "^[A-Za-z0-9_-]+$" }
+  # >>> HOME-PASSPORT parameters
+    HomeId:
+      name: homeId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    RoomId:
+      name: roomId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    MemberId:
+      name: memberId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    ItemId:
+      name: itemId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    EquipmentId:
+      name: equipmentId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    ShareId:
+      name: shareId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    WorkId:
+      name: workId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    ParticipantId:
+      name: participantId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    ReviewId:
+      name: reviewId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    MembershipId:
+      name: membershipId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    WorkerId:
+      name: workerId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    MediaId:
+      name: mediaId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    HomePublicId:
+      name: publicId
+      in: path
+      required: true
+      schema: {type: string, minLength: 6, maxLength: 16, pattern: '^[a-z0-9]+$'}
+    ShareToken:
+      name: token
+      in: path
+      required: true
+      schema: {type: string, minLength: 20, maxLength: 64, pattern: '^[A-Za-z0-9_-]+$'}
+    InviteToken:
+      name: token
+      in: path
+      required: true
+      schema: {type: string, minLength: 20, maxLength: 64, pattern: '^[A-Za-z0-9_-]+$'}
+  # <<< HOME-PASSPORT parameters
   schemas:
     HealthStatus:
       type: object
@@ -3163,3 +4154,1166 @@ components:
         passportViews: { type: integer }
         firstName: { type: string }
       required: [profileComplete, listings, leads, passports, publishedPassports, appointments, whatsappConnected, whatsappMode, passportViews, firstName]
+  # >>> HOME-PASSPORT schemas
+    HomeMedia:
+      type: object
+      properties:
+        id: {type: string}
+        url: {type: string}
+        contentType: {type: string}
+        originalName: {type: string}
+        caption: {type: string}
+        phase: {type: string}
+        workId:
+          type: [string, 'null']
+        roomId:
+          type: [string, 'null']
+        uploadedByMe: {type: boolean}
+        createdAt: {type: string, format: date-time}
+      required: [id, url, contentType, originalName, caption, phase, workId, roomId, uploadedByMe, createdAt]
+    HomeMediaAttachInput:
+      type: object
+      properties:
+        files:
+          type: array
+          items: {$ref: '#/components/schemas/MediaInput'}
+          maxItems: 20
+        homeId:
+          type: [string, 'null']
+          format: uuid
+        workId:
+          type: [string, 'null']
+          format: uuid
+        roomId:
+          type: [string, 'null']
+          format: uuid
+        workerId:
+          type: [string, 'null']
+          format: uuid
+        caption: {type: string, minLength: 0, maxLength: 300}
+        phase:
+          type: string
+          enum: [before, during, after, hidden, other]
+      required: [files]
+    HomePermissions:
+      type: object
+      properties:
+        edit: {type: boolean}
+        manageMembers: {type: boolean}
+        manageSharing: {type: boolean}
+        addWorks: {type: boolean}
+        confirmWorks: {type: boolean}
+        inspect: {type: boolean}
+        viewAudit: {type: boolean}
+      required: [edit, manageMembers, manageSharing, addWorks, confirmWorks, inspect, viewAudit]
+    Home:
+      type: object
+      properties:
+        id: {type: string}
+        publicId: {type: string}
+        name: {type: string}
+        propertyType: {type: string}
+        city: {type: string}
+        district: {type: string}
+        address: {type: string}
+        areaM2:
+          type: [integer, 'null']
+        roomCount:
+          type: [integer, 'null']
+        floor: {type: string}
+        builtYear:
+          type: [integer, 'null']
+        stage: {type: string}
+        coverMediaId:
+          type: [string, 'null']
+        coverUrl:
+          type: [string, 'null']
+        notes: {type: string}
+        publicLevel: {type: string}
+        publicShowAddress: {type: boolean}
+        publicShowPhotos: {type: boolean}
+        publicShowEquipment: {type: boolean}
+        showOnWorkerProfiles: {type: boolean}
+        myRole: {type: string}
+        permissions: {$ref: '#/components/schemas/HomePermissions'}
+        archived: {type: boolean}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+      required: [id, publicId, name, propertyType, city, district, address, areaM2, roomCount, floor, builtYear, stage, coverMediaId, coverUrl, notes, publicLevel, publicShowAddress, publicShowPhotos, publicShowEquipment,
+        showOnWorkerProfiles, myRole, permissions, archived, createdAt, updatedAt]
+    HomeInput:
+      type: object
+      properties:
+        name: {type: string, minLength: 2, maxLength: 160}
+        propertyType:
+          type: string
+          enum: [apartment, house, villa, office, commercial, other]
+        city: {type: string, minLength: 0, maxLength: 100}
+        district: {type: string, minLength: 0, maxLength: 120}
+        address: {type: string, minLength: 0, maxLength: 240}
+        areaM2:
+          type: [integer, 'null']
+        roomCount:
+          type: [integer, 'null']
+        floor: {type: string, minLength: 0, maxLength: 20}
+        builtYear:
+          type: [integer, 'null']
+        stage:
+          type: string
+          enum: [construction, renovation, living]
+        coverMediaId:
+          type: [string, 'null']
+          format: uuid
+        notes: {type: string, minLength: 0, maxLength: 4000}
+      required: [name, propertyType]
+    HomeSummary:
+      type: object
+      properties:
+        id: {type: string}
+        publicId: {type: string}
+        name: {type: string}
+        propertyType: {type: string}
+        city: {type: string}
+        district: {type: string}
+        stage: {type: string}
+        coverUrl:
+          type: [string, 'null']
+        myRole: {type: string}
+        areaM2:
+          type: [integer, 'null']
+        roomCount:
+          type: [integer, 'null']
+        works: {type: integer}
+        pendingApproval: {type: integer}
+        performers: {type: integer}
+        lastWorkAt:
+          type: [string, 'null']
+        updatedAt: {type: string, format: date-time}
+      required: [id, publicId, name, propertyType, city, district, stage, coverUrl, myRole, areaM2, roomCount, works, pendingApproval, performers, lastWorkAt, updatedAt]
+    HomeRoom:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        kind: {type: string}
+        floor: {type: string}
+        areaM2:
+          type: [integer, 'null']
+        condition: {type: string}
+        notes: {type: string}
+        position: {type: integer}
+        works: {type: integer}
+        equipment: {type: integer}
+        infrastructure: {type: integer}
+        photoUrl:
+          type: [string, 'null']
+      required: [id, name, kind, floor, areaM2, condition, notes, position, works, equipment, infrastructure, photoUrl]
+    HomeRoomInput:
+      type: object
+      properties:
+        name: {type: string, minLength: 1, maxLength: 120}
+        kind:
+          type: string
+          enum: [living, bedroom, kitchen, bathroom, toilet, hall, balcony, utility, other]
+        floor: {type: string, minLength: 0, maxLength: 20}
+        areaM2:
+          type: [integer, 'null']
+        condition:
+          type: string
+          enum: [good, needs_repair, in_progress, unknown]
+        notes: {type: string, minLength: 0, maxLength: 2000}
+        position: {type: integer}
+      required: [name]
+    WorkerRef:
+      type: object
+      properties:
+        id: {type: string}
+        kind: {type: string}
+        displayName: {type: string}
+        status: {type: string}
+        photoUrl:
+          type: [string, 'null']
+        specialties:
+          type: array
+          items: {type: string}
+        registered: {type: boolean}
+        identityVerified: {type: boolean}
+      required: [id, kind, displayName, status, photoUrl, specialties, registered, identityVerified]
+    Participant:
+      type: object
+      properties:
+        id: {type: string}
+        worker: {$ref: '#/components/schemas/WorkerRef'}
+        role: {type: string}
+        status: {type: string}
+        viaTeamId:
+          type: [string, 'null']
+        viaTeamName:
+          type: [string, 'null']
+        note: {type: string}
+        invitedAt: {type: string, format: date-time}
+        respondedAt:
+          type: [string, 'null']
+          format: date-time
+        isMe: {type: boolean}
+        phone:
+          type: [string, 'null']
+      required: [id, worker, role, status, viaTeamId, viaTeamName, note, invitedAt, respondedAt, isMe, phone]
+    ParticipantBrief:
+      type: object
+      properties:
+        workerId: {type: string}
+        name: {type: string}
+        kind: {type: string}
+        role: {type: string}
+        status: {type: string}
+      required: [workerId, name, kind, role, status]
+    WorkSummary:
+      type: object
+      properties:
+        id: {type: string}
+        homeId: {type: string}
+        title: {type: string}
+        category: {type: string}
+        kind: {type: string}
+        status: {type: string}
+        startDate:
+          type: [string, 'null']
+        endDate:
+          type: [string, 'null']
+        roomId:
+          type: [string, 'null']
+        roomName:
+          type: [string, 'null']
+        participants:
+          type: array
+          items: {$ref: '#/components/schemas/ParticipantBrief'}
+        mediaCount: {type: integer}
+        openDefects: {type: integer}
+        inspected: {type: boolean}
+        visibility: {type: string}
+        updatedAt: {type: string, format: date-time}
+      required: [id, homeId, title, category, kind, status, startDate, endDate, roomId, roomName, participants, mediaCount, openDefects, inspected, visibility, updatedAt]
+    WorkNote:
+      type: object
+      properties:
+        id: {type: string}
+        kind: {type: string}
+        body: {type: string}
+        result:
+          type: [string, 'null']
+        authorRole: {type: string}
+        authorIsMe: {type: boolean}
+        createdAt: {type: string, format: date-time}
+      required: [id, kind, body, result, authorRole, authorIsMe, createdAt]
+    WorkNoteInput:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum: [note, defect, fix, inspection]
+        body: {type: string, minLength: 1, maxLength: 4000}
+        result:
+          type: [string, 'null']
+          enum: [passed, issues, null]
+      required: [kind, body]
+    WorkApproval:
+      type: object
+      properties:
+        id: {type: string}
+        action: {type: string}
+        fromStatus: {type: string}
+        toStatus: {type: string}
+        actorRole: {type: string}
+        note: {type: string}
+        createdAt: {type: string, format: date-time}
+      required: [id, action, fromStatus, toStatus, actorRole, note, createdAt]
+    Review:
+      type: object
+      properties:
+        id: {type: string}
+        workId: {type: string}
+        workTitle: {type: string}
+        workerId: {type: string}
+        rating: {type: integer}
+        body: {type: string}
+        createdAt: {type: string, format: date-time}
+        reported: {type: boolean}
+        mine: {type: boolean}
+      required: [id, workId, workTitle, workerId, rating, body, createdAt, reported, mine]
+    ReviewInput:
+      type: object
+      properties:
+        workerId: {type: string, format: uuid}
+        rating: {type: integer, minimum: 1, maximum: 5}
+        body: {type: string, minLength: 0, maxLength: 2000}
+      required: [workerId, rating]
+    ReportInput:
+      type: object
+      properties:
+        reason: {type: string, minLength: 3, maxLength: 300}
+      required: [reason]
+    WorkPermissions:
+      type: object
+      properties:
+        edit: {type: boolean}
+        manageParticipants: {type: boolean}
+        addMedia: {type: boolean}
+        addNote: {type: boolean}
+        start: {type: boolean}
+        complete: {type: boolean}
+        confirm: {type: boolean}
+        requestRevision: {type: boolean}
+        reopen: {type: boolean}
+        inspect: {type: boolean}
+        review: {type: boolean}
+      required: [edit, manageParticipants, addMedia, addNote, start, complete, confirm, requestRevision, reopen, inspect, review]
+    WorkDetail:
+      type: object
+      properties:
+        id: {type: string}
+        homeId: {type: string}
+        homeName: {type: string}
+        title: {type: string}
+        category: {type: string}
+        kind: {type: string}
+        status: {type: string}
+        description: {type: string}
+        materials: {type: string}
+        location: {type: string}
+        startDate:
+          type: [string, 'null']
+        endDate:
+          type: [string, 'null']
+        roomId:
+          type: [string, 'null']
+        roomName:
+          type: [string, 'null']
+        equipmentId:
+          type: [string, 'null']
+        equipmentName:
+          type: [string, 'null']
+        visibility: {type: string}
+        smetaProjectId:
+          type: [string, 'null']
+        smetaProjectName:
+          type: [string, 'null']
+        completedAt:
+          type: [string, 'null']
+          format: date-time
+        confirmedAt:
+          type: [string, 'null']
+          format: date-time
+        inspectedAt:
+          type: [string, 'null']
+          format: date-time
+        participants:
+          type: array
+          items: {$ref: '#/components/schemas/Participant'}
+        media:
+          type: array
+          items: {$ref: '#/components/schemas/HomeMedia'}
+        notes:
+          type: array
+          items: {$ref: '#/components/schemas/WorkNote'}
+        approvals:
+          type: array
+          items: {$ref: '#/components/schemas/WorkApproval'}
+        reviews:
+          type: array
+          items: {$ref: '#/components/schemas/Review'}
+        myRole: {type: string}
+        permissions: {$ref: '#/components/schemas/WorkPermissions'}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+      required: [id, homeId, homeName, title, category, kind, status, description, materials, location, startDate, endDate, roomId, roomName, equipmentId, equipmentName, visibility, smetaProjectId, smetaProjectName,
+        completedAt, confirmedAt, inspectedAt, participants, media, notes, approvals, reviews, myRole, permissions, createdAt, updatedAt]
+    WorkInput:
+      type: object
+      properties:
+        title: {type: string, minLength: 2, maxLength: 200}
+        category:
+          type: string
+          enum: [electrical, plumbing, sewer, heating, tiling, plaster, painting, flooring, drywall, welding, carpentry, roofing, hvac, insulation, general, other]
+        kind:
+          type: string
+          enum: [construction, renovation, installation, maintenance, repair, inspection]
+        roomId:
+          type: [string, 'null']
+          format: uuid
+        equipmentId:
+          type: [string, 'null']
+          format: uuid
+        description: {type: string, minLength: 0, maxLength: 6000}
+        materials: {type: string, minLength: 0, maxLength: 3000}
+        location: {type: string, minLength: 0, maxLength: 2000}
+        startDate:
+          type: [string, 'null']
+          format: date
+        endDate:
+          type: [string, 'null']
+          format: date
+        visibility:
+          type: string
+          enum: [public, private]
+        status:
+          type: string
+          enum: [planned, in_progress]
+        smetaProjectId:
+          type: [string, 'null']
+          format: uuid
+      required: [title]
+    WorkStatusInput:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [start, complete, confirm, request_revision, reopen]
+        note: {type: string, minLength: 0, maxLength: 2000}
+      required: [action]
+    PlaceholderInput:
+      type: object
+      properties:
+        name: {type: string, minLength: 2, maxLength: 120}
+        phone: {type: string, minLength: 0, maxLength: 32}
+        specialty: {type: string, minLength: 0, maxLength: 60}
+      required: [name]
+    ParticipantInput:
+      type: object
+      properties:
+        workerId:
+          type: [string, 'null']
+          format: uuid
+        placeholder: {$ref: '#/components/schemas/PlaceholderInput'}
+        role:
+          type: string
+          enum: [lead, team_lead, team_member, assistant, supervisor, inspector]
+        viaTeamId:
+          type: [string, 'null']
+          format: uuid
+        note: {type: string, minLength: 0, maxLength: 300}
+      required: [role]
+    ParticipantPatch:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [lead, team_lead, team_member, assistant, supervisor, inspector]
+        status:
+          type: string
+          enum: [removed]
+        note: {type: string, minLength: 0, maxLength: 300}
+    RespondInput:
+      type: object
+      properties:
+        accept: {type: boolean}
+      required: [accept]
+    HomePerformerWork:
+      type: object
+      properties:
+        id: {type: string}
+        title: {type: string}
+        status: {type: string}
+        startDate:
+          type: [string, 'null']
+        role: {type: string}
+      required: [id, title, status, startDate, role]
+    HomePerformer:
+      type: object
+      properties:
+        worker: {$ref: '#/components/schemas/WorkerRef'}
+        roles:
+          type: array
+          items: {type: string}
+        works:
+          type: array
+          items: {$ref: '#/components/schemas/HomePerformerWork'}
+        phone:
+          type: [string, 'null']
+      required: [worker, roles, works, phone]
+    HomeMember:
+      type: object
+      properties:
+        id: {type: string}
+        role: {type: string}
+        displayName: {type: string}
+        isMe: {type: boolean}
+        createdAt: {type: string, format: date-time}
+      required: [id, role, displayName, isMe, createdAt]
+    HomeOverviewStats:
+      type: object
+      properties:
+        works: {type: integer}
+        completed: {type: integer}
+        confirmed: {type: integer}
+        pendingApproval: {type: integer}
+        equipment: {type: integer}
+        infrastructure: {type: integer}
+        performers: {type: integer}
+        media: {type: integer}
+        openDefects: {type: integer}
+      required: [works, completed, confirmed, pendingApproval, equipment, infrastructure, performers, media, openDefects]
+    HomeOverview:
+      type: object
+      properties:
+        home: {$ref: '#/components/schemas/Home'}
+        rooms:
+          type: array
+          items: {$ref: '#/components/schemas/HomeRoom'}
+        stats: {$ref: '#/components/schemas/HomeOverviewStats'}
+        recentWorks:
+          type: array
+          items: {$ref: '#/components/schemas/WorkSummary'}
+        performers:
+          type: array
+          items: {$ref: '#/components/schemas/HomePerformer'}
+      required: [home, rooms, stats, recentWorks, performers]
+    HomeRoomDetail:
+      type: object
+      properties:
+        room: {$ref: '#/components/schemas/HomeRoom'}
+        works:
+          type: array
+          items: {$ref: '#/components/schemas/WorkSummary'}
+        equipment:
+          type: array
+          items: {$ref: '#/components/schemas/Equipment'}
+        infrastructure:
+          type: array
+          items: {$ref: '#/components/schemas/InfrastructureItem'}
+        media:
+          type: array
+          items: {$ref: '#/components/schemas/HomeMedia'}
+      required: [room, works, equipment, infrastructure, media]
+    MarkerPoint:
+      type: object
+      properties:
+        x: {type: number}
+        y: {type: number}
+      required: [x, y]
+    InfrastructureItem:
+      type: object
+      properties:
+        id: {type: string}
+        roomId:
+          type: [string, 'null']
+        roomName:
+          type: [string, 'null']
+        workId:
+          type: [string, 'null']
+        workTitle:
+          type: [string, 'null']
+        mediaId:
+          type: [string, 'null']
+        mediaUrl:
+          type: [string, 'null']
+        type: {type: string}
+        label: {type: string}
+        notes: {type: string}
+        points:
+          type: array
+          items: {$ref: '#/components/schemas/MarkerPoint'}
+        source: {type: string}
+        createdByMe: {type: boolean}
+        verified: {type: boolean}
+        verifiedAt:
+          type: [string, 'null']
+          format: date-time
+        createdAt: {type: string, format: date-time}
+      required: [id, roomId, roomName, workId, workTitle, mediaId, mediaUrl, type, label, notes, points, source, createdByMe, verified, verifiedAt, createdAt]
+    InfrastructureInput:
+      type: object
+      properties:
+        roomId:
+          type: [string, 'null']
+          format: uuid
+        workId:
+          type: [string, 'null']
+          format: uuid
+        mediaId:
+          type: [string, 'null']
+          format: uuid
+        type:
+          type: string
+          enum: [electric, water, sewer, heating, gas, ventilation, internet, other]
+        label: {type: string, minLength: 0, maxLength: 160}
+        notes: {type: string, minLength: 0, maxLength: 2000}
+        points:
+          type: array
+          items: {$ref: '#/components/schemas/MarkerPoint'}
+          maxItems: 200
+        source:
+          type: string
+          enum: [owner, worker, plan, specialist]
+      required: [type]
+    EquipmentService:
+      type: object
+      properties:
+        id: {type: string}
+        title: {type: string}
+        status: {type: string}
+        startDate:
+          type: [string, 'null']
+      required: [id, title, status, startDate]
+    Equipment:
+      type: object
+      properties:
+        id: {type: string}
+        roomId:
+          type: [string, 'null']
+        roomName:
+          type: [string, 'null']
+        installWorkId:
+          type: [string, 'null']
+        installWorkTitle:
+          type: [string, 'null']
+        installers:
+          type: array
+          items: {$ref: '#/components/schemas/WorkerRef'}
+        name: {type: string}
+        category: {type: string}
+        brand: {type: string}
+        model: {type: string}
+        serialNumber: {type: string}
+        installedAt:
+          type: [string, 'null']
+        warrantyUntil:
+          type: [string, 'null']
+        photoMediaId:
+          type: [string, 'null']
+        photoUrl:
+          type: [string, 'null']
+        notes: {type: string}
+        services:
+          type: array
+          items: {$ref: '#/components/schemas/EquipmentService'}
+      required: [id, roomId, roomName, installWorkId, installWorkTitle, installers, name, category, brand, model, serialNumber, installedAt, warrantyUntil, photoMediaId, photoUrl, notes, services]
+    EquipmentInput:
+      type: object
+      properties:
+        name: {type: string, minLength: 1, maxLength: 160}
+        category:
+          type: string
+          enum: [boiler, air_conditioner, water_filter, water_heater, electrical_panel, ventilation, appliance, other]
+        roomId:
+          type: [string, 'null']
+          format: uuid
+        installWorkId:
+          type: [string, 'null']
+          format: uuid
+        brand: {type: string, minLength: 0, maxLength: 80}
+        model: {type: string, minLength: 0, maxLength: 120}
+        serialNumber: {type: string, minLength: 0, maxLength: 120}
+        installedAt:
+          type: [string, 'null']
+          format: date
+        warrantyUntil:
+          type: [string, 'null']
+          format: date
+        photoMediaId:
+          type: [string, 'null']
+          format: uuid
+        notes: {type: string, minLength: 0, maxLength: 3000}
+      required: [name]
+    HomeInvitationInput:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum: [work, member]
+        workId:
+          type: [string, 'null']
+          format: uuid
+        role:
+          type: string
+          enum: [lead, team_lead, team_member, assistant, supervisor, inspector, technician, viewer]
+        name: {type: string, minLength: 0, maxLength: 120}
+        contact: {type: string, minLength: 0, maxLength: 254}
+        placeholderWorkerId:
+          type: [string, 'null']
+          format: uuid
+      required: [kind, role]
+    TeamInvitationInput:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [member, representative]
+        name: {type: string, minLength: 0, maxLength: 120}
+        contact: {type: string, minLength: 0, maxLength: 254}
+      required: [role]
+    InvitationLink:
+      type: object
+      properties:
+        url: {type: string}
+        expiresAt: {type: string, format: date-time}
+      required: [url, expiresAt]
+    InvitationPreview:
+      type: object
+      properties:
+        kind: {type: string}
+        role: {type: string}
+        status: {type: string}
+        expired: {type: boolean}
+        homeName:
+          type: [string, 'null']
+        workTitle:
+          type: [string, 'null']
+        groupName:
+          type: [string, 'null']
+        groupKind:
+          type: [string, 'null']
+        name: {type: string}
+        placeholderName:
+          type: [string, 'null']
+      required: [kind, role, status, expired, homeName, workTitle, groupName, groupKind, name, placeholderName]
+    WorkerProfileDraft:
+      type: object
+      properties:
+        displayName: {type: string, minLength: 2, maxLength: 160}
+        specialties:
+          type: array
+          items: {type: string}
+          maxItems: 20
+        city: {type: string, minLength: 0, maxLength: 100}
+        phone: {type: string, minLength: 0, maxLength: 32}
+      required: [displayName]
+    HomeInvitationAcceptInput:
+      type: object
+      properties:
+        workerId:
+          type: [string, 'null']
+          format: uuid
+        createProfile: {$ref: '#/components/schemas/WorkerProfileDraft'}
+    InvitationAcceptResult:
+      type: object
+      properties:
+        redirect: {type: string}
+      required: [redirect]
+    InboxParticipation:
+      type: object
+      properties:
+        participantId: {type: string}
+        workId: {type: string}
+        workTitle: {type: string}
+        homeId: {type: string}
+        homeName: {type: string}
+        role: {type: string}
+        worker: {$ref: '#/components/schemas/WorkerRef'}
+        invitedAt: {type: string, format: date-time}
+      required: [participantId, workId, workTitle, homeId, homeName, role, worker, invitedAt]
+    InboxMembership:
+      type: object
+      properties:
+        membershipId: {type: string}
+        group: {$ref: '#/components/schemas/WorkerRef'}
+        role: {type: string}
+        member: {$ref: '#/components/schemas/WorkerRef'}
+        createdAt: {type: string, format: date-time}
+      required: [membershipId, group, role, member, createdAt]
+    InboxApproval:
+      type: object
+      properties:
+        work: {$ref: '#/components/schemas/WorkSummary'}
+        homeName: {type: string}
+      required: [work, homeName]
+    Inbox:
+      type: object
+      properties:
+        participations:
+          type: array
+          items: {$ref: '#/components/schemas/InboxParticipation'}
+        memberships:
+          type: array
+          items: {$ref: '#/components/schemas/InboxMembership'}
+        approvals:
+          type: array
+          items: {$ref: '#/components/schemas/InboxApproval'}
+      required: [participations, memberships, approvals]
+    MyWork:
+      type: object
+      properties:
+        work: {$ref: '#/components/schemas/WorkSummary'}
+        homeName: {type: string}
+        role: {type: string}
+        participantStatus: {type: string}
+        worker: {$ref: '#/components/schemas/WorkerRef'}
+      required: [work, homeName, role, participantStatus, worker]
+    WorkerHistoryItem:
+      type: object
+      properties:
+        workId: {type: string}
+        title: {type: string}
+        category: {type: string}
+        kind: {type: string}
+        status: {type: string}
+        startDate:
+          type: [string, 'null']
+        endDate:
+          type: [string, 'null']
+        role: {type: string}
+        viaTeamName:
+          type: [string, 'null']
+        city: {type: string}
+        homeId:
+          type: [string, 'null']
+        homeName:
+          type: [string, 'null']
+        homePublicId:
+          type: [string, 'null']
+      required: [workId, title, category, kind, status, startDate, endDate, role, viaTeamName, city, homeId, homeName, homePublicId]
+    Membership:
+      type: object
+      properties:
+        id: {type: string}
+        group: {$ref: '#/components/schemas/WorkerRef'}
+        member: {$ref: '#/components/schemas/WorkerRef'}
+        role: {type: string}
+        status: {type: string}
+        joinedAt:
+          type: [string, 'null']
+          format: date-time
+        leftAt:
+          type: [string, 'null']
+          format: date-time
+        createdAt: {type: string, format: date-time}
+      required: [id, group, member, role, status, joinedAt, leftAt, createdAt]
+    WorkerStats:
+      type: object
+      properties:
+        works: {type: integer}
+        confirmedWorks: {type: integer}
+        homes: {type: integer}
+        reviews: {type: integer}
+        avgRating:
+          type: [number, 'null']
+      required: [works, confirmedWorks, homes, reviews, avgRating]
+    Worker:
+      type: object
+      properties:
+        id: {type: string}
+        kind: {type: string}
+        displayName: {type: string}
+        specialties:
+          type: array
+          items: {type: string}
+        city: {type: string}
+        serviceArea: {type: string}
+        about: {type: string}
+        experienceYears:
+          type: [integer, 'null']
+        photoMediaId:
+          type: [string, 'null']
+        photoUrl:
+          type: [string, 'null']
+        status: {type: string}
+        registered: {type: boolean}
+        identityVerified: {type: boolean}
+        phone:
+          type: [string, 'null']
+        email:
+          type: [string, 'null']
+        publicContact: {type: boolean}
+        legalName: {type: string}
+        taxId:
+          type: [string, 'null']
+        createdAt: {type: string, format: date-time}
+        canManage: {type: boolean}
+        isMine: {type: boolean}
+        members:
+          type: array
+          items: {$ref: '#/components/schemas/Membership'}
+        groups:
+          type: array
+          items: {$ref: '#/components/schemas/Membership'}
+        stats: {$ref: '#/components/schemas/WorkerStats'}
+        history:
+          type: array
+          items: {$ref: '#/components/schemas/WorkerHistoryItem'}
+        reviews:
+          type: array
+          items: {$ref: '#/components/schemas/Review'}
+      required: [id, kind, displayName, specialties, city, serviceArea, about, experienceYears, photoMediaId, photoUrl, status, registered, identityVerified, phone, email, publicContact, legalName, taxId, createdAt,
+        canManage, isMine, members, groups, stats, history, reviews]
+    WorkerCard:
+      type: object
+      properties:
+        worker: {$ref: '#/components/schemas/WorkerRef'}
+        city: {type: string}
+        stats: {$ref: '#/components/schemas/WorkerStats'}
+      required: [worker, city, stats]
+    WorkerInput:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum: [individual, team, company]
+        displayName: {type: string, minLength: 2, maxLength: 160}
+        specialties:
+          type: array
+          items: {type: string}
+          maxItems: 20
+        city: {type: string, minLength: 0, maxLength: 100}
+        serviceArea: {type: string, minLength: 0, maxLength: 200}
+        about: {type: string, minLength: 0, maxLength: 3000}
+        experienceYears:
+          type: [integer, 'null']
+        photoMediaId:
+          type: [string, 'null']
+          format: uuid
+        phone: {type: string, minLength: 0, maxLength: 32}
+        email: {type: string, minLength: 0, maxLength: 254}
+        publicContact: {type: boolean}
+        legalName: {type: string, minLength: 0, maxLength: 200}
+        taxId: {type: string, minLength: 0, maxLength: 20}
+      required: [kind, displayName]
+    WorkerPatch:
+      type: object
+      properties:
+        displayName: {type: string, minLength: 2, maxLength: 160}
+        specialties:
+          type: array
+          items: {type: string}
+          maxItems: 20
+        city: {type: string, minLength: 0, maxLength: 100}
+        serviceArea: {type: string, minLength: 0, maxLength: 200}
+        about: {type: string, minLength: 0, maxLength: 3000}
+        experienceYears:
+          type: [integer, 'null']
+        photoMediaId:
+          type: [string, 'null']
+          format: uuid
+        phone: {type: string, minLength: 0, maxLength: 32}
+        email: {type: string, minLength: 0, maxLength: 254}
+        publicContact: {type: boolean}
+        legalName: {type: string, minLength: 0, maxLength: 200}
+        taxId: {type: string, minLength: 0, maxLength: 20}
+    MyWorkers:
+      type: object
+      properties:
+        individual:
+          anyOf:
+          - {$ref: '#/components/schemas/Worker'}
+          - {type: 'null'}
+        managed:
+          type: array
+          items: {$ref: '#/components/schemas/WorkerCard'}
+        memberships:
+          type: array
+          items: {$ref: '#/components/schemas/Membership'}
+      required: [individual, managed, memberships]
+    MembershipInput:
+      type: object
+      properties:
+        memberWorkerId: {type: string, format: uuid}
+        role:
+          type: string
+          enum: [member, representative]
+      required: [memberWorkerId]
+    MembershipPatch:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [left, removed]
+        role:
+          type: string
+          enum: [leader, member, representative]
+    ShareScope:
+      type: object
+      properties:
+        roomIds:
+          type: array
+          items: {type: string}
+        workIds:
+          type: array
+          items: {type: string}
+        equipmentIds:
+          type: array
+          items: {type: string}
+        includePhotos: {type: boolean}
+        includeInfrastructure: {type: boolean}
+      required: [roomIds, workIds, equipmentIds, includePhotos, includeInfrastructure]
+    HomeShare:
+      type: object
+      properties:
+        id: {type: string}
+        label: {type: string}
+        level: {type: string}
+        scope: {$ref: '#/components/schemas/ShareScope'}
+        expiresAt:
+          type: [string, 'null']
+          format: date-time
+        revokedAt:
+          type: [string, 'null']
+          format: date-time
+        active: {type: boolean}
+        openCount: {type: integer}
+        lastOpenedAt:
+          type: [string, 'null']
+          format: date-time
+        createdAt: {type: string, format: date-time}
+      required: [id, label, level, scope, expiresAt, revokedAt, active, openCount, lastOpenedAt, createdAt]
+    HomeShareInput:
+      type: object
+      properties:
+        label: {type: string, minLength: 0, maxLength: 120}
+        level:
+          type: string
+          enum: [selected, technical]
+        scope: {$ref: '#/components/schemas/ShareScope'}
+        expiresInDays:
+          type: [integer, 'null']
+      required: [level, scope]
+    HomeShareCreated:
+      type: object
+      properties:
+        share: {$ref: '#/components/schemas/HomeShare'}
+        url: {type: string}
+      required: [share, url]
+    HomeSharing:
+      type: object
+      properties:
+        publicLevel: {type: string}
+        publicShowAddress: {type: boolean}
+        publicShowPhotos: {type: boolean}
+        publicShowEquipment: {type: boolean}
+        showOnWorkerProfiles: {type: boolean}
+        publicUrl: {type: string}
+        shares:
+          type: array
+          items: {$ref: '#/components/schemas/HomeShare'}
+      required: [publicLevel, publicShowAddress, publicShowPhotos, publicShowEquipment, showOnWorkerProfiles, publicUrl, shares]
+    HomeSharingInput:
+      type: object
+      properties:
+        publicLevel:
+          type: string
+          enum: ['off', basic, history]
+        publicShowAddress: {type: boolean}
+        publicShowPhotos: {type: boolean}
+        publicShowEquipment: {type: boolean}
+        showOnWorkerProfiles: {type: boolean}
+      required: [publicLevel, publicShowAddress, publicShowPhotos, publicShowEquipment, showOnWorkerProfiles]
+    AuditEntry:
+      type: object
+      properties:
+        id: {type: string}
+        action: {type: string}
+        entityType: {type: string}
+        entityId:
+          type: [string, 'null']
+        summary: {type: string}
+        actorRole: {type: string}
+        actorIsMe: {type: boolean}
+        changes: {}
+        createdAt: {type: string, format: date-time}
+      required: [id, action, entityType, entityId, summary, actorRole, actorIsMe, changes, createdAt]
+    PublicPerformer:
+      type: object
+      properties:
+        id: {type: string}
+        displayName: {type: string}
+        kind: {type: string}
+        role: {type: string}
+        profilePublic: {type: boolean}
+      required: [id, displayName, kind, role, profilePublic]
+    PublicWork:
+      type: object
+      properties:
+        id: {type: string}
+        title: {type: string}
+        category: {type: string}
+        kind: {type: string}
+        status: {type: string}
+        startDate:
+          type: [string, 'null']
+        endDate:
+          type: [string, 'null']
+        roomName:
+          type: [string, 'null']
+        performers:
+          type: array
+          items: {$ref: '#/components/schemas/PublicPerformer'}
+        photos:
+          type: array
+          items: {type: string}
+        confirmed: {type: boolean}
+        inspected: {type: boolean}
+        description: {type: string}
+        materials: {type: string}
+      required: [id, title, category, kind, status, startDate, endDate, roomName, performers, photos, confirmed, inspected, description, materials]
+    PublicEquipment:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        category: {type: string}
+        brand: {type: string}
+        model: {type: string}
+        installedAt:
+          type: [string, 'null']
+        warrantyUntil:
+          type: [string, 'null']
+        roomName:
+          type: [string, 'null']
+      required: [id, name, category, brand, model, installedAt, warrantyUntil, roomName]
+    PublicInfrastructure:
+      type: object
+      properties:
+        id: {type: string}
+        type: {type: string}
+        label: {type: string}
+        notes: {type: string}
+        roomName:
+          type: [string, 'null']
+        mediaUrl:
+          type: [string, 'null']
+        points:
+          type: array
+          items: {$ref: '#/components/schemas/MarkerPoint'}
+        source: {type: string}
+        verified: {type: boolean}
+      required: [id, type, label, notes, roomName, mediaUrl, points, source, verified]
+    PublicHome:
+      type: object
+      properties:
+        publicId: {type: string}
+        name: {type: string}
+        propertyType: {type: string}
+        city: {type: string}
+        district: {type: string}
+        address:
+          type: [string, 'null']
+        areaM2:
+          type: [integer, 'null']
+        roomCount:
+          type: [integer, 'null']
+        builtYear:
+          type: [integer, 'null']
+        stage: {type: string}
+        coverUrl:
+          type: [string, 'null']
+        level: {type: string}
+        rooms:
+          type: array
+          items: {type: string}
+        works:
+          type: array
+          items: {$ref: '#/components/schemas/PublicWork'}
+        equipment:
+          type: array
+          items: {$ref: '#/components/schemas/PublicEquipment'}
+        infrastructure:
+          type: array
+          items: {$ref: '#/components/schemas/PublicInfrastructure'}
+        shareLabel:
+          type: [string, 'null']
+        updatedAt: {type: string, format: date-time}
+      required: [publicId, name, propertyType, city, district, address, areaM2, roomCount, builtYear, stage, coverUrl, level, rooms, works, equipment, infrastructure, shareLabel, updatedAt]
+    IdentityInput:
+      type: object
+      properties:
+        verified: {type: boolean}
+      required: [verified]
+  # <<< HOME-PASSPORT schemas

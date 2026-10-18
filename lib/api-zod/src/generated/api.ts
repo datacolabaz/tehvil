@@ -8494,3 +8494,3922 @@ export const DecideOwnerWorkResponse = zod.object({
 })
 
 
+/**
+ * @summary Homes the signed-in user owns or is a member of
+ */
+export const ListHomesResponseItem = zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "name": zod.string(),
+  "propertyType": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "stage": zod.string(),
+  "coverUrl": zod.string().nullable(),
+  "myRole": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "roomCount": zod.number().int().nullable(),
+  "works": zod.number().int(),
+  "pendingApproval": zod.number().int(),
+  "performers": zod.number().int(),
+  "lastWorkAt": zod.string().nullable(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListHomesResponse = zod.array(ListHomesResponseItem)
+
+
+/**
+ * @summary Create a home; the creator becomes its owner
+ */
+export const createHomeBodyNameMin = 2;
+export const createHomeBodyNameMax = 160;
+
+export const createHomeBodyCityMin = 0;
+export const createHomeBodyCityMax = 100;
+
+export const createHomeBodyDistrictMin = 0;
+export const createHomeBodyDistrictMax = 120;
+
+export const createHomeBodyAddressMin = 0;
+export const createHomeBodyAddressMax = 240;
+
+export const createHomeBodyFloorMin = 0;
+export const createHomeBodyFloorMax = 20;
+
+export const createHomeBodyNotesMin = 0;
+export const createHomeBodyNotesMax = 4000;
+
+
+
+export const CreateHomeBody = zod.object({
+  "name": zod.string().min(createHomeBodyNameMin).max(createHomeBodyNameMax),
+  "propertyType": zod.enum(['apartment', 'house', 'villa', 'office', 'commercial', 'other']),
+  "city": zod.string().min(createHomeBodyCityMin).max(createHomeBodyCityMax).optional(),
+  "district": zod.string().min(createHomeBodyDistrictMin).max(createHomeBodyDistrictMax).optional(),
+  "address": zod.string().min(createHomeBodyAddressMin).max(createHomeBodyAddressMax).optional(),
+  "areaM2": zod.number().int().nullish(),
+  "roomCount": zod.number().int().nullish(),
+  "floor": zod.string().min(createHomeBodyFloorMin).max(createHomeBodyFloorMax).optional(),
+  "builtYear": zod.number().int().nullish(),
+  "stage": zod.enum(['construction', 'renovation', 'living']).optional(),
+  "coverMediaId": zod.string().uuid().nullish(),
+  "notes": zod.string().min(createHomeBodyNotesMin).max(createHomeBodyNotesMax).optional()
+})
+
+export const CreateHomeResponse = zod.object({
+  "home": zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "name": zod.string(),
+  "propertyType": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "roomCount": zod.number().int().nullable(),
+  "floor": zod.string(),
+  "builtYear": zod.number().int().nullable(),
+  "stage": zod.string(),
+  "coverMediaId": zod.string().nullable(),
+  "coverUrl": zod.string().nullable(),
+  "notes": zod.string(),
+  "publicLevel": zod.string(),
+  "publicShowAddress": zod.boolean(),
+  "publicShowPhotos": zod.boolean(),
+  "publicShowEquipment": zod.boolean(),
+  "showOnWorkerProfiles": zod.boolean(),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageMembers": zod.boolean(),
+  "manageSharing": zod.boolean(),
+  "addWorks": zod.boolean(),
+  "confirmWorks": zod.boolean(),
+  "inspect": zod.boolean(),
+  "viewAudit": zod.boolean()
+}),
+  "archived": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}),
+  "rooms": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "floor": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "condition": zod.string(),
+  "notes": zod.string(),
+  "position": zod.number().int(),
+  "works": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "photoUrl": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "completed": zod.number().int(),
+  "confirmed": zod.number().int(),
+  "pendingApproval": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "performers": zod.number().int(),
+  "media": zod.number().int(),
+  "openDefects": zod.number().int()
+}),
+  "recentWorks": zod.array(zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})),
+  "performers": zod.array(zod.object({
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "roles": zod.array(zod.string()),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "role": zod.string()
+})),
+  "phone": zod.string().nullable()
+}))
+})
+
+
+/**
+ * @summary Home profile with rooms, counters, recent works and performers
+ */
+export const GetHomeOverviewParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const GetHomeOverviewResponse = zod.object({
+  "home": zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "name": zod.string(),
+  "propertyType": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "roomCount": zod.number().int().nullable(),
+  "floor": zod.string(),
+  "builtYear": zod.number().int().nullable(),
+  "stage": zod.string(),
+  "coverMediaId": zod.string().nullable(),
+  "coverUrl": zod.string().nullable(),
+  "notes": zod.string(),
+  "publicLevel": zod.string(),
+  "publicShowAddress": zod.boolean(),
+  "publicShowPhotos": zod.boolean(),
+  "publicShowEquipment": zod.boolean(),
+  "showOnWorkerProfiles": zod.boolean(),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageMembers": zod.boolean(),
+  "manageSharing": zod.boolean(),
+  "addWorks": zod.boolean(),
+  "confirmWorks": zod.boolean(),
+  "inspect": zod.boolean(),
+  "viewAudit": zod.boolean()
+}),
+  "archived": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}),
+  "rooms": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "floor": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "condition": zod.string(),
+  "notes": zod.string(),
+  "position": zod.number().int(),
+  "works": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "photoUrl": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "completed": zod.number().int(),
+  "confirmed": zod.number().int(),
+  "pendingApproval": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "performers": zod.number().int(),
+  "media": zod.number().int(),
+  "openDefects": zod.number().int()
+}),
+  "recentWorks": zod.array(zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})),
+  "performers": zod.array(zod.object({
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "roles": zod.array(zod.string()),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "role": zod.string()
+})),
+  "phone": zod.string().nullable()
+}))
+})
+
+
+/**
+ * @summary Edit home profile (owner)
+ */
+export const UpdateHomeParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const updateHomeBodyNameMin = 2;
+export const updateHomeBodyNameMax = 160;
+
+export const updateHomeBodyCityMin = 0;
+export const updateHomeBodyCityMax = 100;
+
+export const updateHomeBodyDistrictMin = 0;
+export const updateHomeBodyDistrictMax = 120;
+
+export const updateHomeBodyAddressMin = 0;
+export const updateHomeBodyAddressMax = 240;
+
+export const updateHomeBodyFloorMin = 0;
+export const updateHomeBodyFloorMax = 20;
+
+export const updateHomeBodyNotesMin = 0;
+export const updateHomeBodyNotesMax = 4000;
+
+
+
+export const UpdateHomeBody = zod.object({
+  "name": zod.string().min(updateHomeBodyNameMin).max(updateHomeBodyNameMax),
+  "propertyType": zod.enum(['apartment', 'house', 'villa', 'office', 'commercial', 'other']),
+  "city": zod.string().min(updateHomeBodyCityMin).max(updateHomeBodyCityMax).optional(),
+  "district": zod.string().min(updateHomeBodyDistrictMin).max(updateHomeBodyDistrictMax).optional(),
+  "address": zod.string().min(updateHomeBodyAddressMin).max(updateHomeBodyAddressMax).optional(),
+  "areaM2": zod.number().int().nullish(),
+  "roomCount": zod.number().int().nullish(),
+  "floor": zod.string().min(updateHomeBodyFloorMin).max(updateHomeBodyFloorMax).optional(),
+  "builtYear": zod.number().int().nullish(),
+  "stage": zod.enum(['construction', 'renovation', 'living']).optional(),
+  "coverMediaId": zod.string().uuid().nullish(),
+  "notes": zod.string().min(updateHomeBodyNotesMin).max(updateHomeBodyNotesMax).optional()
+})
+
+export const UpdateHomeResponse = zod.object({
+  "home": zod.object({
+  "id": zod.string(),
+  "publicId": zod.string(),
+  "name": zod.string(),
+  "propertyType": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "address": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "roomCount": zod.number().int().nullable(),
+  "floor": zod.string(),
+  "builtYear": zod.number().int().nullable(),
+  "stage": zod.string(),
+  "coverMediaId": zod.string().nullable(),
+  "coverUrl": zod.string().nullable(),
+  "notes": zod.string(),
+  "publicLevel": zod.string(),
+  "publicShowAddress": zod.boolean(),
+  "publicShowPhotos": zod.boolean(),
+  "publicShowEquipment": zod.boolean(),
+  "showOnWorkerProfiles": zod.boolean(),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageMembers": zod.boolean(),
+  "manageSharing": zod.boolean(),
+  "addWorks": zod.boolean(),
+  "confirmWorks": zod.boolean(),
+  "inspect": zod.boolean(),
+  "viewAudit": zod.boolean()
+}),
+  "archived": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}),
+  "rooms": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "floor": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "condition": zod.string(),
+  "notes": zod.string(),
+  "position": zod.number().int(),
+  "works": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "photoUrl": zod.string().nullable()
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "completed": zod.number().int(),
+  "confirmed": zod.number().int(),
+  "pendingApproval": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "performers": zod.number().int(),
+  "media": zod.number().int(),
+  "openDefects": zod.number().int()
+}),
+  "recentWorks": zod.array(zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})),
+  "performers": zod.array(zod.object({
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "roles": zod.array(zod.string()),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "role": zod.string()
+})),
+  "phone": zod.string().nullable()
+}))
+})
+
+
+/**
+ * @summary Archive (never delete) a home (owner)
+ */
+export const ArchiveHomeParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ArchiveHomeResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Add a room
+ */
+export const CreateHomeRoomParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const createHomeRoomBodyNameMax = 120;
+
+export const createHomeRoomBodyFloorMin = 0;
+export const createHomeRoomBodyFloorMax = 20;
+
+export const createHomeRoomBodyNotesMin = 0;
+export const createHomeRoomBodyNotesMax = 2000;
+
+
+
+export const CreateHomeRoomBody = zod.object({
+  "name": zod.string().min(1).max(createHomeRoomBodyNameMax),
+  "kind": zod.enum(['living', 'bedroom', 'kitchen', 'bathroom', 'toilet', 'hall', 'balcony', 'utility', 'other']).optional(),
+  "floor": zod.string().min(createHomeRoomBodyFloorMin).max(createHomeRoomBodyFloorMax).optional(),
+  "areaM2": zod.number().int().nullish(),
+  "condition": zod.enum(['good', 'needs_repair', 'in_progress', 'unknown']).optional(),
+  "notes": zod.string().min(createHomeRoomBodyNotesMin).max(createHomeRoomBodyNotesMax).optional(),
+  "position": zod.number().int().optional()
+})
+
+export const CreateHomeRoomResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "floor": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "condition": zod.string(),
+  "notes": zod.string(),
+  "position": zod.number().int(),
+  "works": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "photoUrl": zod.string().nullable()
+})
+
+
+/**
+ * @summary Room with its works, equipment, utility lines and media
+ */
+export const GetHomeRoomParams = zod.object({
+  "homeId": zod.coerce.string().uuid(),
+  "roomId": zod.coerce.string().uuid()
+})
+
+export const GetHomeRoomResponse = zod.object({
+  "room": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "floor": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "condition": zod.string(),
+  "notes": zod.string(),
+  "position": zod.number().int(),
+  "works": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "photoUrl": zod.string().nullable()
+}),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})),
+  "equipment": zod.array(zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "installWorkId": zod.string().nullable(),
+  "installWorkTitle": zod.string().nullable(),
+  "installers": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+})),
+  "name": zod.string(),
+  "category": zod.string(),
+  "brand": zod.string(),
+  "model": zod.string(),
+  "serialNumber": zod.string(),
+  "installedAt": zod.string().nullable(),
+  "warrantyUntil": zod.string().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "notes": zod.string(),
+  "services": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable()
+}))
+})),
+  "infrastructure": zod.array(zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "workId": zod.string().nullable(),
+  "workTitle": zod.string().nullable(),
+  "mediaId": zod.string().nullable(),
+  "mediaUrl": zod.string().nullable(),
+  "type": zod.string(),
+  "label": zod.string(),
+  "notes": zod.string(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})),
+  "source": zod.string(),
+  "createdByMe": zod.boolean(),
+  "verified": zod.boolean(),
+  "verifiedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))
+})
+
+
+/**
+ * @summary Edit room
+ */
+export const UpdateHomeRoomParams = zod.object({
+  "homeId": zod.coerce.string().uuid(),
+  "roomId": zod.coerce.string().uuid()
+})
+
+export const updateHomeRoomBodyNameMax = 120;
+
+export const updateHomeRoomBodyFloorMin = 0;
+export const updateHomeRoomBodyFloorMax = 20;
+
+export const updateHomeRoomBodyNotesMin = 0;
+export const updateHomeRoomBodyNotesMax = 2000;
+
+
+
+export const UpdateHomeRoomBody = zod.object({
+  "name": zod.string().min(1).max(updateHomeRoomBodyNameMax),
+  "kind": zod.enum(['living', 'bedroom', 'kitchen', 'bathroom', 'toilet', 'hall', 'balcony', 'utility', 'other']).optional(),
+  "floor": zod.string().min(updateHomeRoomBodyFloorMin).max(updateHomeRoomBodyFloorMax).optional(),
+  "areaM2": zod.number().int().nullish(),
+  "condition": zod.enum(['good', 'needs_repair', 'in_progress', 'unknown']).optional(),
+  "notes": zod.string().min(updateHomeRoomBodyNotesMin).max(updateHomeRoomBodyNotesMax).optional(),
+  "position": zod.number().int().optional()
+})
+
+export const UpdateHomeRoomResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "floor": zod.string(),
+  "areaM2": zod.number().int().nullable(),
+  "condition": zod.string(),
+  "notes": zod.string(),
+  "position": zod.number().int(),
+  "works": zod.number().int(),
+  "equipment": zod.number().int(),
+  "infrastructure": zod.number().int(),
+  "photoUrl": zod.string().nullable()
+})
+
+
+/**
+ * @summary Delete room; linked records keep existing without a room
+ */
+export const DeleteHomeRoomParams = zod.object({
+  "homeId": zod.coerce.string().uuid(),
+  "roomId": zod.coerce.string().uuid()
+})
+
+export const DeleteHomeRoomResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Account members (owner, technician, viewer)
+ */
+export const ListHomeMembersParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListHomeMembersResponseItem = zod.object({
+  "id": zod.string(),
+  "role": zod.string(),
+  "displayName": zod.string(),
+  "isMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListHomeMembersResponse = zod.array(ListHomeMembersResponseItem)
+
+
+/**
+ * @summary Remove a technician or viewer (owner)
+ */
+export const RemoveHomeMemberParams = zod.object({
+  "homeId": zod.coerce.string().uuid(),
+  "memberId": zod.coerce.string().uuid()
+})
+
+export const RemoveHomeMemberResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Individuals, teams and companies that worked in this home
+ */
+export const ListHomePerformersParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListHomePerformersResponseItem = zod.object({
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "roles": zod.array(zod.string()),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "role": zod.string()
+})),
+  "phone": zod.string().nullable()
+})
+export const ListHomePerformersResponse = zod.array(ListHomePerformersResponseItem)
+
+
+/**
+ * @summary Construction and repair history, newest first
+ */
+export const ListWorksParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListWorksResponseItem = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListWorksResponse = zod.array(ListWorksResponseItem)
+
+
+/**
+ * @summary Create a work record
+ */
+export const CreateWorkParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const createWorkBodyTitleMin = 2;
+export const createWorkBodyTitleMax = 200;
+
+export const createWorkBodyDescriptionMin = 0;
+export const createWorkBodyDescriptionMax = 6000;
+
+export const createWorkBodyMaterialsMin = 0;
+export const createWorkBodyMaterialsMax = 3000;
+
+export const createWorkBodyLocationMin = 0;
+export const createWorkBodyLocationMax = 2000;
+
+
+
+export const CreateWorkBody = zod.object({
+  "title": zod.string().min(createWorkBodyTitleMin).max(createWorkBodyTitleMax),
+  "category": zod.enum(['electrical', 'plumbing', 'sewer', 'heating', 'tiling', 'plaster', 'painting', 'flooring', 'drywall', 'welding', 'carpentry', 'roofing', 'hvac', 'insulation', 'general', 'other']).optional(),
+  "kind": zod.enum(['construction', 'renovation', 'installation', 'maintenance', 'repair', 'inspection']).optional(),
+  "roomId": zod.string().uuid().nullish(),
+  "equipmentId": zod.string().uuid().nullish(),
+  "description": zod.string().min(createWorkBodyDescriptionMin).max(createWorkBodyDescriptionMax).optional(),
+  "materials": zod.string().min(createWorkBodyMaterialsMin).max(createWorkBodyMaterialsMax).optional(),
+  "location": zod.string().min(createWorkBodyLocationMin).max(createWorkBodyLocationMax).optional(),
+  "startDate": zod.string().date().nullish(),
+  "endDate": zod.string().date().nullish(),
+  "visibility": zod.enum(['public', 'private']).optional(),
+  "status": zod.enum(['planned', 'in_progress']).optional(),
+  "smetaProjectId": zod.string().uuid().nullish()
+})
+
+export const CreateWorkResponse = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "location": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "equipmentId": zod.string().nullable(),
+  "equipmentName": zod.string().nullable(),
+  "visibility": zod.string(),
+  "smetaProjectId": zod.string().nullable(),
+  "smetaProjectName": zod.string().nullable(),
+  "completedAt": zod.string().datetime({"offset":true}).nullable(),
+  "confirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "inspectedAt": zod.string().datetime({"offset":true}).nullable(),
+  "participants": zod.array(zod.object({
+  "id": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "viaTeamId": zod.string().nullable(),
+  "viaTeamName": zod.string().nullable(),
+  "note": zod.string(),
+  "invitedAt": zod.string().datetime({"offset":true}),
+  "respondedAt": zod.string().datetime({"offset":true}).nullable(),
+  "isMe": zod.boolean(),
+  "phone": zod.string().nullable()
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "authorIsMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "fromStatus": zod.string(),
+  "toStatus": zod.string(),
+  "actorRole": zod.string(),
+  "note": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+})),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageParticipants": zod.boolean(),
+  "addMedia": zod.boolean(),
+  "addNote": zod.boolean(),
+  "start": zod.boolean(),
+  "complete": zod.boolean(),
+  "confirm": zod.boolean(),
+  "requestRevision": zod.boolean(),
+  "reopen": zod.boolean(),
+  "inspect": zod.boolean(),
+  "review": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Photos and videos of the home visible to the caller
+ */
+export const ListHomeMediaParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListHomeMediaResponseItem = zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListHomeMediaResponse = zod.array(ListHomeMediaResponseItem)
+
+
+/**
+ * @summary Hidden utility lines marked on photos
+ */
+export const ListInfrastructureParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListInfrastructureResponseItem = zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "workId": zod.string().nullable(),
+  "workTitle": zod.string().nullable(),
+  "mediaId": zod.string().nullable(),
+  "mediaUrl": zod.string().nullable(),
+  "type": zod.string(),
+  "label": zod.string(),
+  "notes": zod.string(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})),
+  "source": zod.string(),
+  "createdByMe": zod.boolean(),
+  "verified": zod.boolean(),
+  "verifiedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListInfrastructureResponse = zod.array(ListInfrastructureResponseItem)
+
+
+/**
+ * @summary Mark a utility line
+ */
+export const CreateInfrastructureParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const createInfrastructureBodyLabelMin = 0;
+export const createInfrastructureBodyLabelMax = 160;
+
+export const createInfrastructureBodyNotesMin = 0;
+export const createInfrastructureBodyNotesMax = 2000;
+
+export const createInfrastructureBodyPointsMax = 200;
+
+
+
+export const CreateInfrastructureBody = zod.object({
+  "roomId": zod.string().uuid().nullish(),
+  "workId": zod.string().uuid().nullish(),
+  "mediaId": zod.string().uuid().nullish(),
+  "type": zod.enum(['electric', 'water', 'sewer', 'heating', 'gas', 'ventilation', 'internet', 'other']),
+  "label": zod.string().min(createInfrastructureBodyLabelMin).max(createInfrastructureBodyLabelMax).optional(),
+  "notes": zod.string().min(createInfrastructureBodyNotesMin).max(createInfrastructureBodyNotesMax).optional(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})).max(createInfrastructureBodyPointsMax).optional(),
+  "source": zod.enum(['owner', 'worker', 'plan', 'specialist']).optional()
+})
+
+export const CreateInfrastructureResponse = zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "workId": zod.string().nullable(),
+  "workTitle": zod.string().nullable(),
+  "mediaId": zod.string().nullable(),
+  "mediaUrl": zod.string().nullable(),
+  "type": zod.string(),
+  "label": zod.string(),
+  "notes": zod.string(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})),
+  "source": zod.string(),
+  "createdByMe": zod.boolean(),
+  "verified": zod.boolean(),
+  "verifiedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Edit a utility line (author or owner)
+ */
+export const UpdateInfrastructureParams = zod.object({
+  "itemId": zod.coerce.string().uuid()
+})
+
+export const updateInfrastructureBodyLabelMin = 0;
+export const updateInfrastructureBodyLabelMax = 160;
+
+export const updateInfrastructureBodyNotesMin = 0;
+export const updateInfrastructureBodyNotesMax = 2000;
+
+export const updateInfrastructureBodyPointsMax = 200;
+
+
+
+export const UpdateInfrastructureBody = zod.object({
+  "roomId": zod.string().uuid().nullish(),
+  "workId": zod.string().uuid().nullish(),
+  "mediaId": zod.string().uuid().nullish(),
+  "type": zod.enum(['electric', 'water', 'sewer', 'heating', 'gas', 'ventilation', 'internet', 'other']),
+  "label": zod.string().min(updateInfrastructureBodyLabelMin).max(updateInfrastructureBodyLabelMax).optional(),
+  "notes": zod.string().min(updateInfrastructureBodyNotesMin).max(updateInfrastructureBodyNotesMax).optional(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})).max(updateInfrastructureBodyPointsMax).optional(),
+  "source": zod.enum(['owner', 'worker', 'plan', 'specialist']).optional()
+})
+
+export const UpdateInfrastructureResponse = zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "workId": zod.string().nullable(),
+  "workTitle": zod.string().nullable(),
+  "mediaId": zod.string().nullable(),
+  "mediaUrl": zod.string().nullable(),
+  "type": zod.string(),
+  "label": zod.string(),
+  "notes": zod.string(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})),
+  "source": zod.string(),
+  "createdByMe": zod.boolean(),
+  "verified": zod.boolean(),
+  "verifiedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Delete a utility line (author or owner)
+ */
+export const DeleteInfrastructureParams = zod.object({
+  "itemId": zod.coerce.string().uuid()
+})
+
+export const DeleteInfrastructureResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Technician confirms the marking
+ */
+export const VerifyInfrastructureParams = zod.object({
+  "itemId": zod.coerce.string().uuid()
+})
+
+export const VerifyInfrastructureResponse = zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "workId": zod.string().nullable(),
+  "workTitle": zod.string().nullable(),
+  "mediaId": zod.string().nullable(),
+  "mediaUrl": zod.string().nullable(),
+  "type": zod.string(),
+  "label": zod.string(),
+  "notes": zod.string(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})),
+  "source": zod.string(),
+  "createdByMe": zod.boolean(),
+  "verified": zod.boolean(),
+  "verifiedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Equipment register
+ */
+export const ListEquipmentParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListEquipmentResponseItem = zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "installWorkId": zod.string().nullable(),
+  "installWorkTitle": zod.string().nullable(),
+  "installers": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+})),
+  "name": zod.string(),
+  "category": zod.string(),
+  "brand": zod.string(),
+  "model": zod.string(),
+  "serialNumber": zod.string(),
+  "installedAt": zod.string().nullable(),
+  "warrantyUntil": zod.string().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "notes": zod.string(),
+  "services": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable()
+}))
+})
+export const ListEquipmentResponse = zod.array(ListEquipmentResponseItem)
+
+
+/**
+ * @summary Add equipment
+ */
+export const CreateEquipmentParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const createEquipmentBodyNameMax = 160;
+
+export const createEquipmentBodyBrandMin = 0;
+export const createEquipmentBodyBrandMax = 80;
+
+export const createEquipmentBodyModelMin = 0;
+export const createEquipmentBodyModelMax = 120;
+
+export const createEquipmentBodySerialNumberMin = 0;
+export const createEquipmentBodySerialNumberMax = 120;
+
+export const createEquipmentBodyNotesMin = 0;
+export const createEquipmentBodyNotesMax = 3000;
+
+
+
+export const CreateEquipmentBody = zod.object({
+  "name": zod.string().min(1).max(createEquipmentBodyNameMax),
+  "category": zod.enum(['boiler', 'air_conditioner', 'water_filter', 'water_heater', 'electrical_panel', 'ventilation', 'appliance', 'other']).optional(),
+  "roomId": zod.string().uuid().nullish(),
+  "installWorkId": zod.string().uuid().nullish(),
+  "brand": zod.string().min(createEquipmentBodyBrandMin).max(createEquipmentBodyBrandMax).optional(),
+  "model": zod.string().min(createEquipmentBodyModelMin).max(createEquipmentBodyModelMax).optional(),
+  "serialNumber": zod.string().min(createEquipmentBodySerialNumberMin).max(createEquipmentBodySerialNumberMax).optional(),
+  "installedAt": zod.string().date().nullish(),
+  "warrantyUntil": zod.string().date().nullish(),
+  "photoMediaId": zod.string().uuid().nullish(),
+  "notes": zod.string().min(createEquipmentBodyNotesMin).max(createEquipmentBodyNotesMax).optional()
+})
+
+export const CreateEquipmentResponse = zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "installWorkId": zod.string().nullable(),
+  "installWorkTitle": zod.string().nullable(),
+  "installers": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+})),
+  "name": zod.string(),
+  "category": zod.string(),
+  "brand": zod.string(),
+  "model": zod.string(),
+  "serialNumber": zod.string(),
+  "installedAt": zod.string().nullable(),
+  "warrantyUntil": zod.string().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "notes": zod.string(),
+  "services": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable()
+}))
+})
+
+
+/**
+ * @summary Edit equipment
+ */
+export const UpdateEquipmentParams = zod.object({
+  "equipmentId": zod.coerce.string().uuid()
+})
+
+export const updateEquipmentBodyNameMax = 160;
+
+export const updateEquipmentBodyBrandMin = 0;
+export const updateEquipmentBodyBrandMax = 80;
+
+export const updateEquipmentBodyModelMin = 0;
+export const updateEquipmentBodyModelMax = 120;
+
+export const updateEquipmentBodySerialNumberMin = 0;
+export const updateEquipmentBodySerialNumberMax = 120;
+
+export const updateEquipmentBodyNotesMin = 0;
+export const updateEquipmentBodyNotesMax = 3000;
+
+
+
+export const UpdateEquipmentBody = zod.object({
+  "name": zod.string().min(1).max(updateEquipmentBodyNameMax),
+  "category": zod.enum(['boiler', 'air_conditioner', 'water_filter', 'water_heater', 'electrical_panel', 'ventilation', 'appliance', 'other']).optional(),
+  "roomId": zod.string().uuid().nullish(),
+  "installWorkId": zod.string().uuid().nullish(),
+  "brand": zod.string().min(updateEquipmentBodyBrandMin).max(updateEquipmentBodyBrandMax).optional(),
+  "model": zod.string().min(updateEquipmentBodyModelMin).max(updateEquipmentBodyModelMax).optional(),
+  "serialNumber": zod.string().min(updateEquipmentBodySerialNumberMin).max(updateEquipmentBodySerialNumberMax).optional(),
+  "installedAt": zod.string().date().nullish(),
+  "warrantyUntil": zod.string().date().nullish(),
+  "photoMediaId": zod.string().uuid().nullish(),
+  "notes": zod.string().min(updateEquipmentBodyNotesMin).max(updateEquipmentBodyNotesMax).optional()
+})
+
+export const UpdateEquipmentResponse = zod.object({
+  "id": zod.string(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "installWorkId": zod.string().nullable(),
+  "installWorkTitle": zod.string().nullable(),
+  "installers": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+})),
+  "name": zod.string(),
+  "category": zod.string(),
+  "brand": zod.string(),
+  "model": zod.string(),
+  "serialNumber": zod.string(),
+  "installedAt": zod.string().nullable(),
+  "warrantyUntil": zod.string().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "notes": zod.string(),
+  "services": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable()
+}))
+})
+
+
+/**
+ * @summary Delete equipment (owner)
+ */
+export const DeleteEquipmentParams = zod.object({
+  "equipmentId": zod.coerce.string().uuid()
+})
+
+export const DeleteEquipmentResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Invitation link for a performer (to a work) or a technician / viewer (to the home)
+ */
+export const CreateHomeInvitationParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const createHomeInvitationBodyNameMin = 0;
+export const createHomeInvitationBodyNameMax = 120;
+
+export const createHomeInvitationBodyContactMin = 0;
+export const createHomeInvitationBodyContactMax = 254;
+
+
+
+export const CreateHomeInvitationBody = zod.object({
+  "kind": zod.enum(['work', 'member']),
+  "workId": zod.string().uuid().nullish(),
+  "role": zod.enum(['lead', 'team_lead', 'team_member', 'assistant', 'supervisor', 'inspector', 'technician', 'viewer']),
+  "name": zod.string().min(createHomeInvitationBodyNameMin).max(createHomeInvitationBodyNameMax).optional(),
+  "contact": zod.string().min(createHomeInvitationBodyContactMin).max(createHomeInvitationBodyContactMax).optional(),
+  "placeholderWorkerId": zod.string().uuid().nullish()
+})
+
+export const CreateHomeInvitationResponse = zod.object({
+  "url": zod.string(),
+  "expiresAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary QR page settings and secret share links
+ */
+export const GetHomeSharingParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const GetHomeSharingResponse = zod.object({
+  "publicLevel": zod.string(),
+  "publicShowAddress": zod.boolean(),
+  "publicShowPhotos": zod.boolean(),
+  "publicShowEquipment": zod.boolean(),
+  "showOnWorkerProfiles": zod.boolean(),
+  "publicUrl": zod.string(),
+  "shares": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "level": zod.string(),
+  "scope": zod.object({
+  "roomIds": zod.array(zod.string()),
+  "workIds": zod.array(zod.string()),
+  "equipmentIds": zod.array(zod.string()),
+  "includePhotos": zod.boolean(),
+  "includeInfrastructure": zod.boolean()
+}),
+  "expiresAt": zod.string().datetime({"offset":true}).nullable(),
+  "revokedAt": zod.string().datetime({"offset":true}).nullable(),
+  "active": zod.boolean(),
+  "openCount": zod.number().int(),
+  "lastOpenedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))
+})
+
+
+/**
+ * @summary Change what the QR page shows
+ */
+export const UpdateHomeSharingParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const UpdateHomeSharingBody = zod.object({
+  "publicLevel": zod.enum(['off', 'basic', 'history']),
+  "publicShowAddress": zod.boolean(),
+  "publicShowPhotos": zod.boolean(),
+  "publicShowEquipment": zod.boolean(),
+  "showOnWorkerProfiles": zod.boolean()
+})
+
+export const UpdateHomeSharingResponse = zod.object({
+  "publicLevel": zod.string(),
+  "publicShowAddress": zod.boolean(),
+  "publicShowPhotos": zod.boolean(),
+  "publicShowEquipment": zod.boolean(),
+  "showOnWorkerProfiles": zod.boolean(),
+  "publicUrl": zod.string(),
+  "shares": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "level": zod.string(),
+  "scope": zod.object({
+  "roomIds": zod.array(zod.string()),
+  "workIds": zod.array(zod.string()),
+  "equipmentIds": zod.array(zod.string()),
+  "includePhotos": zod.boolean(),
+  "includeInfrastructure": zod.boolean()
+}),
+  "expiresAt": zod.string().datetime({"offset":true}).nullable(),
+  "revokedAt": zod.string().datetime({"offset":true}).nullable(),
+  "active": zod.boolean(),
+  "openCount": zod.number().int(),
+  "lastOpenedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))
+})
+
+
+/**
+ * @summary Create a revocable secret share link
+ */
+export const CreateHomeShareParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const createHomeShareBodyLabelMin = 0;
+export const createHomeShareBodyLabelMax = 120;
+
+
+
+export const CreateHomeShareBody = zod.object({
+  "label": zod.string().min(createHomeShareBodyLabelMin).max(createHomeShareBodyLabelMax).optional(),
+  "level": zod.enum(['selected', 'technical']),
+  "scope": zod.object({
+  "roomIds": zod.array(zod.string()),
+  "workIds": zod.array(zod.string()),
+  "equipmentIds": zod.array(zod.string()),
+  "includePhotos": zod.boolean(),
+  "includeInfrastructure": zod.boolean()
+}),
+  "expiresInDays": zod.number().int().nullish()
+})
+
+export const CreateHomeShareResponse = zod.object({
+  "share": zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "level": zod.string(),
+  "scope": zod.object({
+  "roomIds": zod.array(zod.string()),
+  "workIds": zod.array(zod.string()),
+  "equipmentIds": zod.array(zod.string()),
+  "includePhotos": zod.boolean(),
+  "includeInfrastructure": zod.boolean()
+}),
+  "expiresAt": zod.string().datetime({"offset":true}).nullable(),
+  "revokedAt": zod.string().datetime({"offset":true}).nullable(),
+  "active": zod.boolean(),
+  "openCount": zod.number().int(),
+  "lastOpenedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+}),
+  "url": zod.string()
+})
+
+
+/**
+ * @summary Revoke a share link
+ */
+export const RevokeHomeShareParams = zod.object({
+  "homeId": zod.coerce.string().uuid(),
+  "shareId": zod.coerce.string().uuid()
+})
+
+export const RevokeHomeShareResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Audit trail (owner and technician)
+ */
+export const ListHomeAuditParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListHomeAuditResponseItem = zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "entityType": zod.string(),
+  "entityId": zod.string().nullable(),
+  "summary": zod.string(),
+  "actorRole": zod.string(),
+  "actorIsMe": zod.boolean(),
+  "changes": zod.unknown(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListHomeAuditResponse = zod.array(ListHomeAuditResponseItem)
+
+
+/**
+ * @summary Work with participants, media, notes, status history
+ */
+export const GetWorkParams = zod.object({
+  "workId": zod.coerce.string().uuid()
+})
+
+export const GetWorkResponse = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "location": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "equipmentId": zod.string().nullable(),
+  "equipmentName": zod.string().nullable(),
+  "visibility": zod.string(),
+  "smetaProjectId": zod.string().nullable(),
+  "smetaProjectName": zod.string().nullable(),
+  "completedAt": zod.string().datetime({"offset":true}).nullable(),
+  "confirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "inspectedAt": zod.string().datetime({"offset":true}).nullable(),
+  "participants": zod.array(zod.object({
+  "id": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "viaTeamId": zod.string().nullable(),
+  "viaTeamName": zod.string().nullable(),
+  "note": zod.string(),
+  "invitedAt": zod.string().datetime({"offset":true}),
+  "respondedAt": zod.string().datetime({"offset":true}).nullable(),
+  "isMe": zod.boolean(),
+  "phone": zod.string().nullable()
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "authorIsMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "fromStatus": zod.string(),
+  "toStatus": zod.string(),
+  "actorRole": zod.string(),
+  "note": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+})),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageParticipants": zod.boolean(),
+  "addMedia": zod.boolean(),
+  "addNote": zod.boolean(),
+  "start": zod.boolean(),
+  "complete": zod.boolean(),
+  "confirm": zod.boolean(),
+  "requestRevision": zod.boolean(),
+  "reopen": zod.boolean(),
+  "inspect": zod.boolean(),
+  "review": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Edit a work; changes are audited
+ */
+export const UpdateWorkParams = zod.object({
+  "workId": zod.coerce.string().uuid()
+})
+
+export const updateWorkBodyTitleMin = 2;
+export const updateWorkBodyTitleMax = 200;
+
+export const updateWorkBodyDescriptionMin = 0;
+export const updateWorkBodyDescriptionMax = 6000;
+
+export const updateWorkBodyMaterialsMin = 0;
+export const updateWorkBodyMaterialsMax = 3000;
+
+export const updateWorkBodyLocationMin = 0;
+export const updateWorkBodyLocationMax = 2000;
+
+
+
+export const UpdateWorkBody = zod.object({
+  "title": zod.string().min(updateWorkBodyTitleMin).max(updateWorkBodyTitleMax),
+  "category": zod.enum(['electrical', 'plumbing', 'sewer', 'heating', 'tiling', 'plaster', 'painting', 'flooring', 'drywall', 'welding', 'carpentry', 'roofing', 'hvac', 'insulation', 'general', 'other']).optional(),
+  "kind": zod.enum(['construction', 'renovation', 'installation', 'maintenance', 'repair', 'inspection']).optional(),
+  "roomId": zod.string().uuid().nullish(),
+  "equipmentId": zod.string().uuid().nullish(),
+  "description": zod.string().min(updateWorkBodyDescriptionMin).max(updateWorkBodyDescriptionMax).optional(),
+  "materials": zod.string().min(updateWorkBodyMaterialsMin).max(updateWorkBodyMaterialsMax).optional(),
+  "location": zod.string().min(updateWorkBodyLocationMin).max(updateWorkBodyLocationMax).optional(),
+  "startDate": zod.string().date().nullish(),
+  "endDate": zod.string().date().nullish(),
+  "visibility": zod.enum(['public', 'private']).optional(),
+  "status": zod.enum(['planned', 'in_progress']).optional(),
+  "smetaProjectId": zod.string().uuid().nullish()
+})
+
+export const UpdateWorkResponse = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "location": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "equipmentId": zod.string().nullable(),
+  "equipmentName": zod.string().nullable(),
+  "visibility": zod.string(),
+  "smetaProjectId": zod.string().nullable(),
+  "smetaProjectName": zod.string().nullable(),
+  "completedAt": zod.string().datetime({"offset":true}).nullable(),
+  "confirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "inspectedAt": zod.string().datetime({"offset":true}).nullable(),
+  "participants": zod.array(zod.object({
+  "id": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "viaTeamId": zod.string().nullable(),
+  "viaTeamName": zod.string().nullable(),
+  "note": zod.string(),
+  "invitedAt": zod.string().datetime({"offset":true}),
+  "respondedAt": zod.string().datetime({"offset":true}).nullable(),
+  "isMe": zod.boolean(),
+  "phone": zod.string().nullable()
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "authorIsMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "fromStatus": zod.string(),
+  "toStatus": zod.string(),
+  "actorRole": zod.string(),
+  "note": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+})),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageParticipants": zod.boolean(),
+  "addMedia": zod.boolean(),
+  "addNote": zod.boolean(),
+  "start": zod.boolean(),
+  "complete": zod.boolean(),
+  "confirm": zod.boolean(),
+  "requestRevision": zod.boolean(),
+  "reopen": zod.boolean(),
+  "inspect": zod.boolean(),
+  "review": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Start, complete, confirm, request revision or reopen
+ */
+export const ChangeWorkStatusParams = zod.object({
+  "workId": zod.coerce.string().uuid()
+})
+
+export const changeWorkStatusBodyNoteMin = 0;
+export const changeWorkStatusBodyNoteMax = 2000;
+
+
+
+export const ChangeWorkStatusBody = zod.object({
+  "action": zod.enum(['start', 'complete', 'confirm', 'request_revision', 'reopen']),
+  "note": zod.string().min(changeWorkStatusBodyNoteMin).max(changeWorkStatusBodyNoteMax).optional()
+})
+
+export const ChangeWorkStatusResponse = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "location": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "equipmentId": zod.string().nullable(),
+  "equipmentName": zod.string().nullable(),
+  "visibility": zod.string(),
+  "smetaProjectId": zod.string().nullable(),
+  "smetaProjectName": zod.string().nullable(),
+  "completedAt": zod.string().datetime({"offset":true}).nullable(),
+  "confirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "inspectedAt": zod.string().datetime({"offset":true}).nullable(),
+  "participants": zod.array(zod.object({
+  "id": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "viaTeamId": zod.string().nullable(),
+  "viaTeamName": zod.string().nullable(),
+  "note": zod.string(),
+  "invitedAt": zod.string().datetime({"offset":true}),
+  "respondedAt": zod.string().datetime({"offset":true}).nullable(),
+  "isMe": zod.boolean(),
+  "phone": zod.string().nullable()
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "authorIsMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "fromStatus": zod.string(),
+  "toStatus": zod.string(),
+  "actorRole": zod.string(),
+  "note": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+})),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageParticipants": zod.boolean(),
+  "addMedia": zod.boolean(),
+  "addNote": zod.boolean(),
+  "start": zod.boolean(),
+  "complete": zod.boolean(),
+  "confirm": zod.boolean(),
+  "requestRevision": zod.boolean(),
+  "reopen": zod.boolean(),
+  "inspect": zod.boolean(),
+  "review": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Add a note, defect, fix or inspection result
+ */
+export const AddWorkNoteParams = zod.object({
+  "workId": zod.coerce.string().uuid()
+})
+
+export const addWorkNoteBodyBodyMax = 4000;
+
+
+
+export const AddWorkNoteBody = zod.object({
+  "kind": zod.enum(['note', 'defect', 'fix', 'inspection']),
+  "body": zod.string().min(1).max(addWorkNoteBodyBodyMax),
+  "result": zod.union([zod.literal('passed'),zod.literal('issues'),zod.literal(null)]).nullish()
+})
+
+export const AddWorkNoteResponse = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "location": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "equipmentId": zod.string().nullable(),
+  "equipmentName": zod.string().nullable(),
+  "visibility": zod.string(),
+  "smetaProjectId": zod.string().nullable(),
+  "smetaProjectName": zod.string().nullable(),
+  "completedAt": zod.string().datetime({"offset":true}).nullable(),
+  "confirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "inspectedAt": zod.string().datetime({"offset":true}).nullable(),
+  "participants": zod.array(zod.object({
+  "id": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "viaTeamId": zod.string().nullable(),
+  "viaTeamName": zod.string().nullable(),
+  "note": zod.string(),
+  "invitedAt": zod.string().datetime({"offset":true}),
+  "respondedAt": zod.string().datetime({"offset":true}).nullable(),
+  "isMe": zod.boolean(),
+  "phone": zod.string().nullable()
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "authorIsMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "fromStatus": zod.string(),
+  "toStatus": zod.string(),
+  "actorRole": zod.string(),
+  "note": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+})),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageParticipants": zod.boolean(),
+  "addMedia": zod.boolean(),
+  "addNote": zod.boolean(),
+  "start": zod.boolean(),
+  "complete": zod.boolean(),
+  "confirm": zod.boolean(),
+  "requestRevision": zod.boolean(),
+  "reopen": zod.boolean(),
+  "inspect": zod.boolean(),
+  "review": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Invite a registered performer, record a non-registered one, or add a team member
+ */
+export const AddWorkParticipantParams = zod.object({
+  "workId": zod.coerce.string().uuid()
+})
+
+export const addWorkParticipantBodyPlaceholderNameMin = 2;
+export const addWorkParticipantBodyPlaceholderNameMax = 120;
+
+export const addWorkParticipantBodyPlaceholderPhoneMin = 0;
+export const addWorkParticipantBodyPlaceholderPhoneMax = 32;
+
+export const addWorkParticipantBodyPlaceholderSpecialtyMin = 0;
+export const addWorkParticipantBodyPlaceholderSpecialtyMax = 60;
+
+export const addWorkParticipantBodyNoteMin = 0;
+export const addWorkParticipantBodyNoteMax = 300;
+
+
+
+export const AddWorkParticipantBody = zod.object({
+  "workerId": zod.string().uuid().nullish(),
+  "placeholder": zod.object({
+  "name": zod.string().min(addWorkParticipantBodyPlaceholderNameMin).max(addWorkParticipantBodyPlaceholderNameMax),
+  "phone": zod.string().min(addWorkParticipantBodyPlaceholderPhoneMin).max(addWorkParticipantBodyPlaceholderPhoneMax).optional(),
+  "specialty": zod.string().min(addWorkParticipantBodyPlaceholderSpecialtyMin).max(addWorkParticipantBodyPlaceholderSpecialtyMax).optional()
+}).optional(),
+  "role": zod.enum(['lead', 'team_lead', 'team_member', 'assistant', 'supervisor', 'inspector']),
+  "viaTeamId": zod.string().uuid().nullish(),
+  "note": zod.string().min(addWorkParticipantBodyNoteMin).max(addWorkParticipantBodyNoteMax).optional()
+})
+
+export const AddWorkParticipantResponse = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "location": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "equipmentId": zod.string().nullable(),
+  "equipmentName": zod.string().nullable(),
+  "visibility": zod.string(),
+  "smetaProjectId": zod.string().nullable(),
+  "smetaProjectName": zod.string().nullable(),
+  "completedAt": zod.string().datetime({"offset":true}).nullable(),
+  "confirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "inspectedAt": zod.string().datetime({"offset":true}).nullable(),
+  "participants": zod.array(zod.object({
+  "id": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "viaTeamId": zod.string().nullable(),
+  "viaTeamName": zod.string().nullable(),
+  "note": zod.string(),
+  "invitedAt": zod.string().datetime({"offset":true}),
+  "respondedAt": zod.string().datetime({"offset":true}).nullable(),
+  "isMe": zod.boolean(),
+  "phone": zod.string().nullable()
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "authorIsMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "fromStatus": zod.string(),
+  "toStatus": zod.string(),
+  "actorRole": zod.string(),
+  "note": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+})),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageParticipants": zod.boolean(),
+  "addMedia": zod.boolean(),
+  "addNote": zod.boolean(),
+  "start": zod.boolean(),
+  "complete": zod.boolean(),
+  "confirm": zod.boolean(),
+  "requestRevision": zod.boolean(),
+  "reopen": zod.boolean(),
+  "inspect": zod.boolean(),
+  "review": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Change role or remove a participant
+ */
+export const UpdateWorkParticipantParams = zod.object({
+  "workId": zod.coerce.string().uuid(),
+  "participantId": zod.coerce.string().uuid()
+})
+
+export const updateWorkParticipantBodyNoteMin = 0;
+export const updateWorkParticipantBodyNoteMax = 300;
+
+
+
+export const UpdateWorkParticipantBody = zod.object({
+  "role": zod.enum(['lead', 'team_lead', 'team_member', 'assistant', 'supervisor', 'inspector']).optional(),
+  "status": zod.enum(['removed']).optional(),
+  "note": zod.string().min(updateWorkParticipantBodyNoteMin).max(updateWorkParticipantBodyNoteMax).optional()
+})
+
+export const UpdateWorkParticipantResponse = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "location": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "equipmentId": zod.string().nullable(),
+  "equipmentName": zod.string().nullable(),
+  "visibility": zod.string(),
+  "smetaProjectId": zod.string().nullable(),
+  "smetaProjectName": zod.string().nullable(),
+  "completedAt": zod.string().datetime({"offset":true}).nullable(),
+  "confirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "inspectedAt": zod.string().datetime({"offset":true}).nullable(),
+  "participants": zod.array(zod.object({
+  "id": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "viaTeamId": zod.string().nullable(),
+  "viaTeamName": zod.string().nullable(),
+  "note": zod.string(),
+  "invitedAt": zod.string().datetime({"offset":true}),
+  "respondedAt": zod.string().datetime({"offset":true}).nullable(),
+  "isMe": zod.boolean(),
+  "phone": zod.string().nullable()
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "authorIsMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "fromStatus": zod.string(),
+  "toStatus": zod.string(),
+  "actorRole": zod.string(),
+  "note": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+})),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageParticipants": zod.boolean(),
+  "addMedia": zod.boolean(),
+  "addNote": zod.boolean(),
+  "start": zod.boolean(),
+  "complete": zod.boolean(),
+  "confirm": zod.boolean(),
+  "requestRevision": zod.boolean(),
+  "reopen": zod.boolean(),
+  "inspect": zod.boolean(),
+  "review": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Review a performer of a confirmed work (home owner, once)
+ */
+export const CreateReviewParams = zod.object({
+  "workId": zod.coerce.string().uuid()
+})
+
+export const createReviewBodyRatingMax = 5;
+
+export const createReviewBodyBodyMin = 0;
+export const createReviewBodyBodyMax = 2000;
+
+
+
+export const CreateReviewBody = zod.object({
+  "workerId": zod.string().uuid(),
+  "rating": zod.number().int().min(1).max(createReviewBodyRatingMax),
+  "body": zod.string().min(createReviewBodyBodyMin).max(createReviewBodyBodyMax).optional()
+})
+
+export const CreateReviewResponse = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "description": zod.string(),
+  "materials": zod.string(),
+  "location": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "equipmentId": zod.string().nullable(),
+  "equipmentName": zod.string().nullable(),
+  "visibility": zod.string(),
+  "smetaProjectId": zod.string().nullable(),
+  "smetaProjectName": zod.string().nullable(),
+  "completedAt": zod.string().datetime({"offset":true}).nullable(),
+  "confirmedAt": zod.string().datetime({"offset":true}).nullable(),
+  "inspectedAt": zod.string().datetime({"offset":true}).nullable(),
+  "participants": zod.array(zod.object({
+  "id": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "viaTeamId": zod.string().nullable(),
+  "viaTeamName": zod.string().nullable(),
+  "note": zod.string(),
+  "invitedAt": zod.string().datetime({"offset":true}),
+  "respondedAt": zod.string().datetime({"offset":true}).nullable(),
+  "isMe": zod.boolean(),
+  "phone": zod.string().nullable()
+})),
+  "media": zod.array(zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "authorIsMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "id": zod.string(),
+  "action": zod.string(),
+  "fromStatus": zod.string(),
+  "toStatus": zod.string(),
+  "actorRole": zod.string(),
+  "note": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+})),
+  "myRole": zod.string(),
+  "permissions": zod.object({
+  "edit": zod.boolean(),
+  "manageParticipants": zod.boolean(),
+  "addMedia": zod.boolean(),
+  "addNote": zod.boolean(),
+  "start": zod.boolean(),
+  "complete": zod.boolean(),
+  "confirm": zod.boolean(),
+  "requestRevision": zod.boolean(),
+  "reopen": zod.boolean(),
+  "inspect": zod.boolean(),
+  "review": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Report a review as wrong or disputed
+ */
+export const ReportReviewParams = zod.object({
+  "reviewId": zod.coerce.string().uuid()
+})
+
+export const reportReviewBodyReasonMin = 3;
+export const reportReviewBodyReasonMax = 300;
+
+
+
+export const ReportReviewBody = zod.object({
+  "reason": zod.string().min(reportReviewBodyReasonMin).max(reportReviewBodyReasonMax)
+})
+
+export const ReportReviewResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Accept or decline an invitation to a work
+ */
+export const RespondParticipationParams = zod.object({
+  "participantId": zod.coerce.string().uuid()
+})
+
+export const RespondParticipationBody = zod.object({
+  "accept": zod.boolean()
+})
+
+export const RespondParticipationResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Accept or decline a team / company invitation
+ */
+export const RespondMembershipParams = zod.object({
+  "membershipId": zod.coerce.string().uuid()
+})
+
+export const RespondMembershipBody = zod.object({
+  "accept": zod.boolean()
+})
+
+export const RespondMembershipResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Pending invitations and works waiting for my confirmation
+ */
+export const GetMyInboxResponse = zod.object({
+  "participations": zod.array(zod.object({
+  "participantId": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "role": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "invitedAt": zod.string().datetime({"offset":true})
+})),
+  "memberships": zod.array(zod.object({
+  "membershipId": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "approvals": zod.array(zod.object({
+  "work": zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true})
+}),
+  "homeName": zod.string()
+}))
+})
+
+
+/**
+ * @summary Works I take part in through any of my profiles
+ */
+export const ListMyWorksResponseItem = zod.object({
+  "work": zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true})
+}),
+  "homeName": zod.string(),
+  "role": zod.string(),
+  "participantStatus": zod.string(),
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+})
+})
+export const ListMyWorksResponse = zod.array(ListMyWorksResponseItem)
+
+
+/**
+ * @summary My individual profile, teams/companies I manage and my memberships
+ */
+export const GetMyWorkersResponse = zod.object({
+  "individual": zod.union([zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "specialties": zod.array(zod.string()),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "about": zod.string(),
+  "experienceYears": zod.number().int().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "status": zod.string(),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean(),
+  "phone": zod.string().nullable(),
+  "email": zod.string().nullable(),
+  "publicContact": zod.boolean(),
+  "legalName": zod.string(),
+  "taxId": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "canManage": zod.boolean(),
+  "isMine": zod.boolean(),
+  "members": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "groups": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+}),
+  "history": zod.array(zod.object({
+  "workId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "role": zod.string(),
+  "viaTeamName": zod.string().nullable(),
+  "city": zod.string(),
+  "homeId": zod.string().nullable(),
+  "homeName": zod.string().nullable(),
+  "homePublicId": zod.string().nullable()
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+}))
+}),zod.null()]),
+  "managed": zod.array(zod.object({
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "city": zod.string(),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+})
+})),
+  "memberships": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))
+})
+
+
+/**
+ * @summary Find registered individuals, teams and companies
+ */
+export const searchWorkersQueryQMax = 80;
+
+export const searchWorkersQuerySpecialtyMax = 30;
+
+export const searchWorkersQueryCityMax = 60;
+
+
+
+export const SearchWorkersQueryParams = zod.object({
+  "q": zod.coerce.string().max(searchWorkersQueryQMax).optional(),
+  "specialty": zod.coerce.string().max(searchWorkersQuerySpecialtyMax).optional(),
+  "city": zod.coerce.string().max(searchWorkersQueryCityMax).optional()
+})
+
+export const SearchWorkersResponseItem = zod.object({
+  "worker": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "city": zod.string(),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+})
+})
+export const SearchWorkersResponse = zod.array(SearchWorkersResponseItem)
+
+
+/**
+ * @summary Create my individual profile, a team (I lead it) or a company (I represent it)
+ */
+export const createWorkerBodyDisplayNameMin = 2;
+export const createWorkerBodyDisplayNameMax = 160;
+
+export const createWorkerBodySpecialtiesMax = 20;
+
+export const createWorkerBodyCityMin = 0;
+export const createWorkerBodyCityMax = 100;
+
+export const createWorkerBodyServiceAreaMin = 0;
+export const createWorkerBodyServiceAreaMax = 200;
+
+export const createWorkerBodyAboutMin = 0;
+export const createWorkerBodyAboutMax = 3000;
+
+export const createWorkerBodyPhoneMin = 0;
+export const createWorkerBodyPhoneMax = 32;
+
+export const createWorkerBodyEmailMin = 0;
+export const createWorkerBodyEmailMax = 254;
+
+export const createWorkerBodyLegalNameMin = 0;
+export const createWorkerBodyLegalNameMax = 200;
+
+export const createWorkerBodyTaxIdMin = 0;
+export const createWorkerBodyTaxIdMax = 20;
+
+
+
+export const CreateWorkerBody = zod.object({
+  "kind": zod.enum(['individual', 'team', 'company']),
+  "displayName": zod.string().min(createWorkerBodyDisplayNameMin).max(createWorkerBodyDisplayNameMax),
+  "specialties": zod.array(zod.string()).max(createWorkerBodySpecialtiesMax).optional(),
+  "city": zod.string().min(createWorkerBodyCityMin).max(createWorkerBodyCityMax).optional(),
+  "serviceArea": zod.string().min(createWorkerBodyServiceAreaMin).max(createWorkerBodyServiceAreaMax).optional(),
+  "about": zod.string().min(createWorkerBodyAboutMin).max(createWorkerBodyAboutMax).optional(),
+  "experienceYears": zod.number().int().nullish(),
+  "photoMediaId": zod.string().uuid().nullish(),
+  "phone": zod.string().min(createWorkerBodyPhoneMin).max(createWorkerBodyPhoneMax).optional(),
+  "email": zod.string().min(createWorkerBodyEmailMin).max(createWorkerBodyEmailMax).optional(),
+  "publicContact": zod.boolean().optional(),
+  "legalName": zod.string().min(createWorkerBodyLegalNameMin).max(createWorkerBodyLegalNameMax).optional(),
+  "taxId": zod.string().min(createWorkerBodyTaxIdMin).max(createWorkerBodyTaxIdMax).optional()
+})
+
+export const CreateWorkerResponse = zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "specialties": zod.array(zod.string()),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "about": zod.string(),
+  "experienceYears": zod.number().int().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "status": zod.string(),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean(),
+  "phone": zod.string().nullable(),
+  "email": zod.string().nullable(),
+  "publicContact": zod.boolean(),
+  "legalName": zod.string(),
+  "taxId": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "canManage": zod.boolean(),
+  "isMine": zod.boolean(),
+  "members": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "groups": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+}),
+  "history": zod.array(zod.object({
+  "workId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "role": zod.string(),
+  "viaTeamName": zod.string().nullable(),
+  "city": zod.string(),
+  "homeId": zod.string().nullable(),
+  "homeName": zod.string().nullable(),
+  "homePublicId": zod.string().nullable()
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Performer profile; contacts only where allowed. Works without sign-in.
+ */
+export const GetWorkerParams = zod.object({
+  "workerId": zod.coerce.string().uuid()
+})
+
+export const GetWorkerResponse = zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "specialties": zod.array(zod.string()),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "about": zod.string(),
+  "experienceYears": zod.number().int().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "status": zod.string(),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean(),
+  "phone": zod.string().nullable(),
+  "email": zod.string().nullable(),
+  "publicContact": zod.boolean(),
+  "legalName": zod.string(),
+  "taxId": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "canManage": zod.boolean(),
+  "isMine": zod.boolean(),
+  "members": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "groups": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+}),
+  "history": zod.array(zod.object({
+  "workId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "role": zod.string(),
+  "viaTeamName": zod.string().nullable(),
+  "city": zod.string(),
+  "homeId": zod.string().nullable(),
+  "homeName": zod.string().nullable(),
+  "homePublicId": zod.string().nullable()
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Edit a profile I own or manage
+ */
+export const UpdateWorkerParams = zod.object({
+  "workerId": zod.coerce.string().uuid()
+})
+
+export const updateWorkerBodyDisplayNameMin = 2;
+export const updateWorkerBodyDisplayNameMax = 160;
+
+export const updateWorkerBodySpecialtiesMax = 20;
+
+export const updateWorkerBodyCityMin = 0;
+export const updateWorkerBodyCityMax = 100;
+
+export const updateWorkerBodyServiceAreaMin = 0;
+export const updateWorkerBodyServiceAreaMax = 200;
+
+export const updateWorkerBodyAboutMin = 0;
+export const updateWorkerBodyAboutMax = 3000;
+
+export const updateWorkerBodyPhoneMin = 0;
+export const updateWorkerBodyPhoneMax = 32;
+
+export const updateWorkerBodyEmailMin = 0;
+export const updateWorkerBodyEmailMax = 254;
+
+export const updateWorkerBodyLegalNameMin = 0;
+export const updateWorkerBodyLegalNameMax = 200;
+
+export const updateWorkerBodyTaxIdMin = 0;
+export const updateWorkerBodyTaxIdMax = 20;
+
+
+
+export const UpdateWorkerBody = zod.object({
+  "displayName": zod.string().min(updateWorkerBodyDisplayNameMin).max(updateWorkerBodyDisplayNameMax).optional(),
+  "specialties": zod.array(zod.string()).max(updateWorkerBodySpecialtiesMax).optional(),
+  "city": zod.string().min(updateWorkerBodyCityMin).max(updateWorkerBodyCityMax).optional(),
+  "serviceArea": zod.string().min(updateWorkerBodyServiceAreaMin).max(updateWorkerBodyServiceAreaMax).optional(),
+  "about": zod.string().min(updateWorkerBodyAboutMin).max(updateWorkerBodyAboutMax).optional(),
+  "experienceYears": zod.number().int().nullish(),
+  "photoMediaId": zod.string().uuid().nullish(),
+  "phone": zod.string().min(updateWorkerBodyPhoneMin).max(updateWorkerBodyPhoneMax).optional(),
+  "email": zod.string().min(updateWorkerBodyEmailMin).max(updateWorkerBodyEmailMax).optional(),
+  "publicContact": zod.boolean().optional(),
+  "legalName": zod.string().min(updateWorkerBodyLegalNameMin).max(updateWorkerBodyLegalNameMax).optional(),
+  "taxId": zod.string().min(updateWorkerBodyTaxIdMin).max(updateWorkerBodyTaxIdMax).optional()
+})
+
+export const UpdateWorkerResponse = zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "specialties": zod.array(zod.string()),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "about": zod.string(),
+  "experienceYears": zod.number().int().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "status": zod.string(),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean(),
+  "phone": zod.string().nullable(),
+  "email": zod.string().nullable(),
+  "publicContact": zod.boolean(),
+  "legalName": zod.string(),
+  "taxId": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "canManage": zod.boolean(),
+  "isMine": zod.boolean(),
+  "members": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "groups": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+}),
+  "history": zod.array(zod.object({
+  "workId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "role": zod.string(),
+  "viaTeamName": zod.string().nullable(),
+  "city": zod.string(),
+  "homeId": zod.string().nullable(),
+  "homeName": zod.string().nullable(),
+  "homePublicId": zod.string().nullable()
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Invite a registered performer to my team / company
+ */
+export const AddWorkerMemberParams = zod.object({
+  "workerId": zod.coerce.string().uuid()
+})
+
+export const AddWorkerMemberBody = zod.object({
+  "memberWorkerId": zod.string().uuid(),
+  "role": zod.enum(['member', 'representative']).optional()
+})
+
+export const AddWorkerMemberResponse = zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "specialties": zod.array(zod.string()),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "about": zod.string(),
+  "experienceYears": zod.number().int().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "status": zod.string(),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean(),
+  "phone": zod.string().nullable(),
+  "email": zod.string().nullable(),
+  "publicContact": zod.boolean(),
+  "legalName": zod.string(),
+  "taxId": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "canManage": zod.boolean(),
+  "isMine": zod.boolean(),
+  "members": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "groups": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+}),
+  "history": zod.array(zod.object({
+  "workId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "role": zod.string(),
+  "viaTeamName": zod.string().nullable(),
+  "city": zod.string(),
+  "homeId": zod.string().nullable(),
+  "homeName": zod.string().nullable(),
+  "homePublicId": zod.string().nullable()
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Remove a member, leave, or change role; past work stays
+ */
+export const UpdateWorkerMemberParams = zod.object({
+  "workerId": zod.coerce.string().uuid(),
+  "membershipId": zod.coerce.string().uuid()
+})
+
+export const UpdateWorkerMemberBody = zod.object({
+  "status": zod.enum(['left', 'removed']).optional(),
+  "role": zod.enum(['leader', 'member', 'representative']).optional()
+})
+
+export const UpdateWorkerMemberResponse = zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "specialties": zod.array(zod.string()),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "about": zod.string(),
+  "experienceYears": zod.number().int().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "status": zod.string(),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean(),
+  "phone": zod.string().nullable(),
+  "email": zod.string().nullable(),
+  "publicContact": zod.boolean(),
+  "legalName": zod.string(),
+  "taxId": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "canManage": zod.boolean(),
+  "isMine": zod.boolean(),
+  "members": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "groups": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+}),
+  "history": zod.array(zod.object({
+  "workId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "role": zod.string(),
+  "viaTeamName": zod.string().nullable(),
+  "city": zod.string(),
+  "homeId": zod.string().nullable(),
+  "homeName": zod.string().nullable(),
+  "homePublicId": zod.string().nullable()
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Invitation link to join my team / company
+ */
+export const CreateTeamInvitationParams = zod.object({
+  "workerId": zod.coerce.string().uuid()
+})
+
+export const createTeamInvitationBodyNameMin = 0;
+export const createTeamInvitationBodyNameMax = 120;
+
+export const createTeamInvitationBodyContactMin = 0;
+export const createTeamInvitationBodyContactMax = 254;
+
+
+
+export const CreateTeamInvitationBody = zod.object({
+  "role": zod.enum(['member', 'representative']),
+  "name": zod.string().min(createTeamInvitationBodyNameMin).max(createTeamInvitationBodyNameMax).optional(),
+  "contact": zod.string().min(createTeamInvitationBodyContactMin).max(createTeamInvitationBodyContactMax).optional()
+})
+
+export const CreateTeamInvitationResponse = zod.object({
+  "url": zod.string(),
+  "expiresAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary What an invitation link is for (no sign-in)
+ */
+export const getHomeInvitationPathTokenMin = 20;
+export const getHomeInvitationPathTokenMax = 64;
+
+
+export const getHomeInvitationPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const GetHomeInvitationParams = zod.object({
+  "token": zod.coerce.string().min(getHomeInvitationPathTokenMin).max(getHomeInvitationPathTokenMax).regex(getHomeInvitationPathTokenRegExp)
+})
+
+export const GetHomeInvitationResponse = zod.object({
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string(),
+  "expired": zod.boolean(),
+  "homeName": zod.string().nullable(),
+  "workTitle": zod.string().nullable(),
+  "groupName": zod.string().nullable(),
+  "groupKind": zod.string().nullable(),
+  "name": zod.string(),
+  "placeholderName": zod.string().nullable()
+})
+
+
+/**
+ * @summary Accept with the signed-in account
+ */
+export const acceptHomeInvitationPathTokenMin = 20;
+export const acceptHomeInvitationPathTokenMax = 64;
+
+
+export const acceptHomeInvitationPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const AcceptHomeInvitationParams = zod.object({
+  "token": zod.coerce.string().min(acceptHomeInvitationPathTokenMin).max(acceptHomeInvitationPathTokenMax).regex(acceptHomeInvitationPathTokenRegExp)
+})
+
+export const acceptHomeInvitationBodyCreateProfileDisplayNameMin = 2;
+export const acceptHomeInvitationBodyCreateProfileDisplayNameMax = 160;
+
+export const acceptHomeInvitationBodyCreateProfileSpecialtiesMax = 20;
+
+export const acceptHomeInvitationBodyCreateProfileCityMin = 0;
+export const acceptHomeInvitationBodyCreateProfileCityMax = 100;
+
+export const acceptHomeInvitationBodyCreateProfilePhoneMin = 0;
+export const acceptHomeInvitationBodyCreateProfilePhoneMax = 32;
+
+
+
+export const AcceptHomeInvitationBody = zod.object({
+  "workerId": zod.string().uuid().nullish(),
+  "createProfile": zod.object({
+  "displayName": zod.string().min(acceptHomeInvitationBodyCreateProfileDisplayNameMin).max(acceptHomeInvitationBodyCreateProfileDisplayNameMax),
+  "specialties": zod.array(zod.string()).max(acceptHomeInvitationBodyCreateProfileSpecialtiesMax).optional(),
+  "city": zod.string().min(acceptHomeInvitationBodyCreateProfileCityMin).max(acceptHomeInvitationBodyCreateProfileCityMax).optional(),
+  "phone": zod.string().min(acceptHomeInvitationBodyCreateProfilePhoneMin).max(acceptHomeInvitationBodyCreateProfilePhoneMax).optional()
+}).optional()
+})
+
+export const AcceptHomeInvitationResponse = zod.object({
+  "redirect": zod.string()
+})
+
+
+/**
+ * @summary Register uploaded photos/videos for a home, room, work or profile
+ */
+
+export const attachHomeMediaBodyFilesItemOriginalNameMax = 255;
+
+export const attachHomeMediaBodyFilesItemSizeMax = 52428800;
+
+export const attachHomeMediaBodyFilesMax = 20;
+
+export const attachHomeMediaBodyCaptionMin = 0;
+export const attachHomeMediaBodyCaptionMax = 300;
+
+
+
+export const AttachHomeMediaBody = zod.object({
+  "files": zod.array(zod.object({
+  "objectPath": zod.string().min(1),
+  "originalName": zod.string().min(1).max(attachHomeMediaBodyFilesItemOriginalNameMax),
+  "contentType": zod.string(),
+  "size": zod.number().int().min(1).max(attachHomeMediaBodyFilesItemSizeMax)
+})).max(attachHomeMediaBodyFilesMax),
+  "homeId": zod.string().uuid().nullish(),
+  "workId": zod.string().uuid().nullish(),
+  "roomId": zod.string().uuid().nullish(),
+  "workerId": zod.string().uuid().nullish(),
+  "caption": zod.string().min(attachHomeMediaBodyCaptionMin).max(attachHomeMediaBodyCaptionMax).optional(),
+  "phase": zod.enum(['before', 'during', 'after', 'hidden', 'other']).optional()
+})
+
+export const AttachHomeMediaResponseItem = zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "originalName": zod.string(),
+  "caption": zod.string(),
+  "phase": zod.string(),
+  "workId": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "uploadedByMe": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const AttachHomeMediaResponse = zod.array(AttachHomeMediaResponseItem)
+
+
+/**
+ * @summary Media file, after access check (member, participant, public QR or share link)
+ */
+export const GetHomeMediaParams = zod.object({
+  "mediaId": zod.coerce.string().uuid()
+})
+
+export const GetHomeMediaResponse = zod.unknown()
+
+
+/**
+ * @summary Hide media (uploader or owner); the file record is kept for audit
+ */
+export const DeleteHomeMediaParams = zod.object({
+  "mediaId": zod.coerce.string().uuid()
+})
+
+export const DeleteHomeMediaResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary QR page: only what the owner made public
+ */
+export const getPublicHomePathPublicIdMin = 6;
+export const getPublicHomePathPublicIdMax = 16;
+
+
+export const getPublicHomePathPublicIdRegExp = new RegExp('^[a-z0-9]+$');
+
+
+export const GetPublicHomeParams = zod.object({
+  "publicId": zod.coerce.string().min(getPublicHomePathPublicIdMin).max(getPublicHomePathPublicIdMax).regex(getPublicHomePathPublicIdRegExp)
+})
+
+export const GetPublicHomeResponse = zod.object({
+  "publicId": zod.string(),
+  "name": zod.string(),
+  "propertyType": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "address": zod.string().nullable(),
+  "areaM2": zod.number().int().nullable(),
+  "roomCount": zod.number().int().nullable(),
+  "builtYear": zod.number().int().nullable(),
+  "stage": zod.string(),
+  "coverUrl": zod.string().nullable(),
+  "level": zod.string(),
+  "rooms": zod.array(zod.string()),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "performers": zod.array(zod.object({
+  "id": zod.string(),
+  "displayName": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "profilePublic": zod.boolean()
+})),
+  "photos": zod.array(zod.string()),
+  "confirmed": zod.boolean(),
+  "inspected": zod.boolean(),
+  "description": zod.string(),
+  "materials": zod.string()
+})),
+  "equipment": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "brand": zod.string(),
+  "model": zod.string(),
+  "installedAt": zod.string().nullable(),
+  "warrantyUntil": zod.string().nullable(),
+  "roomName": zod.string().nullable()
+})),
+  "infrastructure": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.string(),
+  "label": zod.string(),
+  "notes": zod.string(),
+  "roomName": zod.string().nullable(),
+  "mediaUrl": zod.string().nullable(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})),
+  "source": zod.string(),
+  "verified": zod.boolean()
+})),
+  "shareLabel": zod.string().nullable(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Secret share link view
+ */
+export const getSharedHomePathTokenMin = 20;
+export const getSharedHomePathTokenMax = 64;
+
+
+export const getSharedHomePathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const GetSharedHomeParams = zod.object({
+  "token": zod.coerce.string().min(getSharedHomePathTokenMin).max(getSharedHomePathTokenMax).regex(getSharedHomePathTokenRegExp)
+})
+
+export const GetSharedHomeResponse = zod.object({
+  "publicId": zod.string(),
+  "name": zod.string(),
+  "propertyType": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "address": zod.string().nullable(),
+  "areaM2": zod.number().int().nullable(),
+  "roomCount": zod.number().int().nullable(),
+  "builtYear": zod.number().int().nullable(),
+  "stage": zod.string(),
+  "coverUrl": zod.string().nullable(),
+  "level": zod.string(),
+  "rooms": zod.array(zod.string()),
+  "works": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "performers": zod.array(zod.object({
+  "id": zod.string(),
+  "displayName": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "profilePublic": zod.boolean()
+})),
+  "photos": zod.array(zod.string()),
+  "confirmed": zod.boolean(),
+  "inspected": zod.boolean(),
+  "description": zod.string(),
+  "materials": zod.string()
+})),
+  "equipment": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "brand": zod.string(),
+  "model": zod.string(),
+  "installedAt": zod.string().nullable(),
+  "warrantyUntil": zod.string().nullable(),
+  "roomName": zod.string().nullable()
+})),
+  "infrastructure": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.string(),
+  "label": zod.string(),
+  "notes": zod.string(),
+  "roomName": zod.string().nullable(),
+  "mediaUrl": zod.string().nullable(),
+  "points": zod.array(zod.object({
+  "x": zod.number(),
+  "y": zod.number()
+})),
+  "source": zod.string(),
+  "verified": zod.boolean()
+})),
+  "shareLabel": zod.string().nullable(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Administrator records a separate identity/business check
+ */
+export const SetWorkerIdentityParams = zod.object({
+  "workerId": zod.coerce.string().uuid()
+})
+
+export const SetWorkerIdentityBody = zod.object({
+  "verified": zod.boolean()
+})
+
+export const SetWorkerIdentityResponse = zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "specialties": zod.array(zod.string()),
+  "city": zod.string(),
+  "serviceArea": zod.string(),
+  "about": zod.string(),
+  "experienceYears": zod.number().int().nullable(),
+  "photoMediaId": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
+  "status": zod.string(),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean(),
+  "phone": zod.string().nullable(),
+  "email": zod.string().nullable(),
+  "publicContact": zod.boolean(),
+  "legalName": zod.string(),
+  "taxId": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "canManage": zod.boolean(),
+  "isMine": zod.boolean(),
+  "members": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "groups": zod.array(zod.object({
+  "id": zod.string(),
+  "group": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "member": zod.object({
+  "id": zod.string(),
+  "kind": zod.string(),
+  "displayName": zod.string(),
+  "status": zod.string(),
+  "photoUrl": zod.string().nullable(),
+  "specialties": zod.array(zod.string()),
+  "registered": zod.boolean(),
+  "identityVerified": zod.boolean()
+}),
+  "role": zod.string(),
+  "status": zod.string(),
+  "joinedAt": zod.string().datetime({"offset":true}).nullable(),
+  "leftAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "stats": zod.object({
+  "works": zod.number().int(),
+  "confirmedWorks": zod.number().int(),
+  "homes": zod.number().int(),
+  "reviews": zod.number().int(),
+  "avgRating": zod.number().nullable()
+}),
+  "history": zod.array(zod.object({
+  "workId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "role": zod.string(),
+  "viaTeamName": zod.string().nullable(),
+  "city": zod.string(),
+  "homeId": zod.string().nullable(),
+  "homeName": zod.string().nullable(),
+  "homePublicId": zod.string().nullable()
+})),
+  "reviews": zod.array(zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "workerId": zod.string(),
+  "rating": zod.number().int(),
+  "body": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "reported": zod.boolean(),
+  "mine": zod.boolean()
+}))
+})
+
+

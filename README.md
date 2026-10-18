@@ -20,6 +20,7 @@ Mobile-first renovation project records for homeowners and contractors, in Azerb
 - **WhatsApp automation**: one-tap prepared messages, or WhatsApp Cloud API with a qualifying bot (deal type, district, budget, rooms, timeframe → matching listings → viewing slots → booked appointment), follow-ups and viewing reminders
 
 See [docs/REALTOR.md](docs/REALTOR.md) for the realtor module.
+See [docs/HOME_PASSPORT.md](docs/HOME_PASSPORT.md) for the digital home passport (homes, work history, tradespeople, teams, QR sharing).
 
 **Not a marketplace, payment processor, escrow service, legal adviser or legal e-signature system.** In-app approvals are project audit records. Files in public passport summaries are intentionally omitted; evidence remains available only to authenticated project participants.
 
