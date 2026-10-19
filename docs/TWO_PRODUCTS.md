@@ -15,6 +15,7 @@ Plan istifadəçi tərəfindən təsdiqləndikdən sonra mərhələlərlə icra 
 | **B1. Elan üzrə bazar dəyəri** | | |
 | Linkdən oxuma (Bina.az, Tap.az, Yeniemlak.az və b.) | ✅ Hazır | Yalnız göstərilən bir səhifə; robots.txt-ə əməl olunur; `VALUATION_LINK_FETCH=off` ilə söndürülür |
 | Link oxunmayanda mətn və ya əl ilə daxiletmə | ✅ Hazır | |
+| “Təhvil-ə göndər” əlfəcin düyməsi (kompüter) | ✅ Hazır | Portal serveri bloklayanda (403): elan səhifəsini istifadəçinin öz brauzeri oxuyur, məlumat URL fraqmentində ötürülür; ilk elan əmlak, sonrakılar eyni Təhvil tabında müqayisə elanı olur. Telefonda kopyala-yapışdır |
 | Hesablamadan əvvəl düzəliş | ✅ Hazır | Avtomatik oxunan sahələr işarələnir |
 | Müqayisəli analiz | 🟡 Qismən | Real elanlarla: istifadəçinin əlavə etdiyi və Təhvil bazasındakı (son 180 gün): server tərəfindən linkdən oxunan və dəyişdirilməyən, və ya istifadəçinin portal linki ilə köçürdüyü — “istifadəçi köçürüb” etiketi, hər elan bir dəfə, ağlabatan qiymət/sahə, gündə 30 limit, digərlərindən 2 dəfədən çox fərqlənən istifadə olunmur. Baza boş başlayır → ilk vaxtlar tez-tez “kifayət qədər məlumat yoxdur” |
 | Nəticə: aralıq, mərkəzi təxmin, AZN/m², elanlar (linklə), amillər, mənbə və tarix, etibarlılıq, çatışmayanlar, fərziyyələr | ✅ Hazır | 3-dən az oxşar elan → rəqəm verilmir |
