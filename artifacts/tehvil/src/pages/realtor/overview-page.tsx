@@ -52,7 +52,7 @@ export function RealtorOverviewPage() {
 
   const s = d.stats;
   const welcomeModal = <Modal open={welcome} onClose={closeWelcome} eyebrow="Təhvil.az · Realtor" title={`Xoş gəlmisiniz${d.setup.firstName ? `, ${d.setup.firstName}` : ''}!`} wide>
-    <p className="rl-welcome-lead">Təhvil.az-da satış prosesinizi idarə edə və hər mənzilinizi <b>“Təhvil Sertifikatlı Mənzil”</b> kimi təqdim edə bilərsiniz.</p>
+    <p className="rl-welcome-lead">Təhvil.az-da satış prosesinizi idarə edə və hər mənzilinizi <b>“Təhvil pasportlu mənzil”</b> kimi təqdim edə bilərsiniz.</p>
     <ol className="rl-welcome-steps"><li><b>1</b>İlk elanınızı əlavə edin</li><li><b>2</b>Lead və ya müştəri əlavə edin</li><li><b>3</b>Mənzil üçün Təhvil Pasportu yaradın</li><li><b>4</b>QR kodu paylaşın</li></ol>
     <div className="rl-welcome-actions">
       <button type="button" className="rl-big-action" onClick={() => go('/realtor/listings?new=1')} data-testid="welcome-listing"><Megaphone size={22} /><b>Elan əlavə et</b><small>Mənzili satışa hazırlayın</small></button>
@@ -127,7 +127,7 @@ export function RealtorOverviewPage() {
           <dl className="rl-results">
             <div><dt>Gələn leadlər</dt><dd>{s.leads30d}</dd></div>
             <div><dt>Planlanan görüşlər</dt><dd>{s.appointments30d}</dd></div>
-            <div><dt>Sertifikatlı elanlar</dt><dd>{s.certifiedListings}</dd></div>
+            <div><dt>Pasportlu elanlar</dt><dd>{s.certifiedListings}</dd></div>
             <div><dt>QR skan</dt><dd>{s.qrScans}</dd></div>
             <div><dt>Pasportlu elan baxışı</dt><dd>{num(s.passportListingViews)}</dd></div>
             <div><dt>Brendinizin görünməsi</dt><dd>{num(s.brandImpressions)}</dd></div>

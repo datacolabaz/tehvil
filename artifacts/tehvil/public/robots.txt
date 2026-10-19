@@ -1,5 +1,12 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+# Private links (share, invitation and confirmation tokens) are never for search engines.
+Disallow: /h/s/
+Disallow: /invite/
+Disallow: /invites/
+Disallow: /p/confirm/
+Disallow: /share/
+Disallow: /estimate/
 
 Sitemap: https://tehvil.az/sitemap.xml

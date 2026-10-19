@@ -37,7 +37,7 @@ export function TrustLadder({ level, compact = false }: { level: Trust; compact?
 export function CertifiedSeal({ level, big = false }: { level: Trust; big?: boolean }) {
   return <div className={`rl-seal rl-seal-${level} ${big ? 'big' : ''}`}>
     <span className="rl-seal-mark"><ShieldCheck size={big ? 22 : 16} aria-hidden /></span>
-    <div><strong>Təhvil Sertifikatlı Mənzil</strong><small>{TRUST[level].title}</small></div>
+    <div><strong>Təhvil pasportlu mənzil</strong><small>{TRUST[level].title}</small></div>
   </div>;
 }
 

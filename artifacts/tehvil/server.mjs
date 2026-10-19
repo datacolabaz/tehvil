@@ -40,8 +40,13 @@ app.use(express.static(root, {
     res.setHeader("Cache-Control", file.includes(`${path.sep}assets${path.sep}`) ? "public, max-age=31536000, immutable" : "no-cache");
   },
 }));
-app.get("/{*path}", (_req, res) => {
+// Only the home page of the app is meant for search engines. Every other app route (private share and
+// invitation links, sign-in, dashboards, public profiles, unknown paths) serves the same HTML shell, so it is
+// marked noindex here — a header works even before JavaScript runs. Static guides in /public are indexable.
+const INDEXABLE = new Set(["/"]);
+app.get("/{*path}", (req, res) => {
   res.setHeader("Cache-Control", "no-cache");
+  if (!INDEXABLE.has(req.path)) res.setHeader("X-Robots-Tag", "noindex, nofollow");
   res.sendFile(path.join(root, "index.html"));
 });
 app.listen(port, "0.0.0.0", () => console.log(`Frontend listening on ${port}`));

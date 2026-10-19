@@ -27,13 +27,13 @@ export const TRUST: Record<Trust, { level: number; title: string; short: string;
 
 export const COPY = {
   position: 'Realtor üçün satış və etibar platforması',
-  certified: 'Təhvil Sertifikatlı Mənzil',
+  certified: 'Təhvil pasportlu mənzil',
   verifiedHistory: 'Yoxlanılmış təmir tarixçəsi',
   photoHandover: 'Foto sübutlu təhvil',
   triad: 'Alıcı güvənir, realtor fərqlənir, ev sahibi dəyər qazanır',
   qr: 'QR kodla təmir tarixçəsini yoxlayın',
   flow: 'Lead gəlir, cavab verilir, görüş planlaşır, mənzil etibarla satılır',
-  pitch: 'Siz leadləri, elanları və görüşləri Təhvil.az-da idarə edirsiniz; hər mənzilinizi QR kodlu, foto sübutlu və ev sahibi təsdiqli “Təhvil Sertifikatlı Mənzil” kimi təqdim edirsiniz. Rəqibiniz yalnız satış prosesini idarə edir, siz həm satışı idarə edir, həm də alıcının güvənini qazanırsınız.',
+  pitch: 'Siz leadləri, elanları və görüşləri Təhvil.az-da idarə edirsiniz; hər mənzilinizi QR kodlu, foto sübutlu və ev sahibi təsdiqli “Təhvil pasportlu mənzil” kimi təqdim edirsiniz. Rəqibiniz yalnız satış prosesini idarə edir, siz həm satışı idarə edir, həm də alıcının güvənini qazanırsınız.',
 };
 
 const nf = new Intl.NumberFormat('az-AZ', { maximumFractionDigits: 0 });
@@ -106,7 +106,7 @@ export function listingDescription(l: Pick<RealtorListing, 'title' | 'dealType' 
     `💰 ${price(l.price, l.currency)}`,
   ];
   if (passportPublicId) {
-    lines.push('', '✅ Bu mənzil Təhvil Sertifikatlıdır. QR kod skan edərək təmir tarixçəsini, foto sübutları və təhvil statusunu yoxlaya bilərsiniz.', passportUrl(passportPublicId));
+    lines.push('', '✅ Bu mənzilin Təhvil pasportu var. QR kod skan edərək təmir tarixçəsini, foto sübutları və təhvil statusunu yoxlaya bilərsiniz.', passportUrl(passportPublicId));
   }
   return lines.join('\n');
 }
@@ -125,7 +125,7 @@ export function passportShareText(p: Pick<PropertyPassport, 'title' | 'district'
 /* Suggested WhatsApp replies for manual mode. */
 export function leadScripts(lead: RealtorLead, realtorName: string, matches: RealtorListing[]) {
   const first = lead.fullName.split(' ')[0];
-  const listLines = matches.slice(0, 3).map((l, i) => `${i + 1}) ${l.title} — ${facts(l)} — ${price(l.price, l.currency)}${l.passportPublicId && l.passportStatus === 'published' ? `\n✅ Təhvil Sertifikatlı: ${passportUrl(l.passportPublicId)}` : ''}`).join('\n\n');
+  const listLines = matches.slice(0, 3).map((l, i) => `${i + 1}) ${l.title} — ${facts(l)} — ${price(l.price, l.currency)}${l.passportPublicId && l.passportStatus === 'published' ? `\n✅ Təhvil pasportlu: ${passportUrl(l.passportPublicId)}` : ''}`).join('\n\n');
   return [
     { kind: 'question', label: 'İlk cavab və suallar', text: `Salam, ${first}! Mən ${realtorName}. Sizə ən uyğun mənzili tez tapmaq üçün qısa suallar:\n1) Alqı, yoxsa icarə?\n2) Hansı rayon?\n3) Büdcəniz?\n4) Neçə otaq?\n5) Nə vaxt almaq/köçmək istəyirsiniz?` },
     ...(matches.length ? [{ kind: 'listing', label: 'Uyğun elanları göndər', text: `${first}, sizin üçün seçdiyim variantlar:\n\n${listLines}` }] : []),

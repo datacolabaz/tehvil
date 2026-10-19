@@ -199,3 +199,7 @@
   .lp-svc h1,.lp-svc h2 { font-size:30px; }
   .lp-svc-ctas .button { width:100%;justify-content:center; }
 }
+.lp-hero2 { padding-top:44px;padding-bottom:4px;max-width:900px; }
+.lp-hero2 h1 { margin:0 0 14px;font-size:clamp(34px,4.6vw,58px);line-height:1.05;letter-spacing:-.055em;color:#1e3d35; }
+.lp-hero2 p { margin:0;max-width:760px;color:#4f665a;font-size:17px;line-height:1.7; }
+@media (max-width:760px) { .lp-hero2 { padding-top:26px; } .lp-hero2 h1 { font-size:34px; } .lp-hero2 p { font-size:16px; } }

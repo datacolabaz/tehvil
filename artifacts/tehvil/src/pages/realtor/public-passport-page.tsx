@@ -34,7 +34,7 @@ export function PublicPassportPage({ publicId }: { publicId: string }) {
     scanned.current = true;
     if (new URLSearchParams(window.location.search).get('src') === 'qr') void recordPublicPassportEvent(publicId, { kind: 'qr_scan' }).catch(() => undefined);
   }, [q.data, publicId]);
-  useEffect(() => { if (q.data) document.title = `${q.data.title} — Təhvil Sertifikatlı Mənzil`; }, [q.data]);
+  useEffect(() => { if (q.data) document.title = `${q.data.title} — Təhvil pasportlu mənzil`; }, [q.data]);
   if (q.isLoading) return <PublicState loading />;
   if (!q.data) return <PublicState title="Pasport tapılmadı" text="Bu link aktiv deyil və ya pasport dərcdən çıxarılıb. Realtordan yeni link istəyin." />;
   return <PublicFrame><PassportView p={q.data} publicId={publicId} /></PublicFrame>;
@@ -45,11 +45,11 @@ function PassportView({ p, publicId }: { p: PublicPassport; publicId: string }) 
   const [lightbox, setLightbox] = useState<{ list: RealtorMedia[]; i: number } | null>(null);
   const contactRef = useRef<HTMLDivElement>(null);
   const wa = p.realtor.whatsapp || p.realtor.phone;
-  const waText = `Salam! "${p.title}" (Təhvil Sertifikatlı Mənzil) ilə maraqlanıram: ${p.publicUrl}`;
+  const waText = `Salam! "${p.title}" (Təhvil pasportlu mənzil) ilə maraqlanıram: ${p.publicUrl}`;
   const track = (kind: 'whatsapp_click' | 'share') => { void recordPublicPassportEvent(publicId, { kind }).catch(() => undefined); };
   const share = async () => {
     track('share');
-    const data = { title: p.title, text: `${p.title} — Təhvil Sertifikatlı Mənzil`, url: p.publicUrl };
+    const data = { title: p.title, text: `${p.title} — Təhvil pasportlu mənzil`, url: p.publicUrl };
     try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(p.publicUrl); alertCopied(); } } catch { /* cancelled */ }
   };
   const [copied, setCopied] = useState(false);

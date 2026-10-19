@@ -110,7 +110,7 @@ const REALTOR_NAV = [
   { href: '/realtor/listings', key: 'listings', label: 'Elanlarım', icon: Megaphone },
   { href: '/realtor/leads', key: 'leads', label: 'Müştərilər / Leadlər', icon: Users },
   { href: '/realtor/appointments', key: 'appointments', label: 'Görüşlər', icon: CalendarClock },
-  { href: '/realtor/passports', key: 'passports', label: 'Təhvil Sertifikatlı Mənzil', icon: QrCode },
+  { href: '/realtor/passports', key: 'passports', label: 'Təhvil pasportlu mənzil', icon: QrCode },
   { href: '/realtor/whatsapp', key: 'whatsapp', label: 'WhatsApp avtomatlaşdırma', icon: MessageCircle },
   { href: '/realtor/profile', key: 'profile', label: 'Realtor profili', icon: UserRound },
   { href: '/realtor/team', key: 'team', label: 'Komanda', icon: UsersRound },
