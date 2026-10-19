@@ -23,7 +23,10 @@ import {
   GetHomeRoomParams,
   GetHomeSharingParams,
   ListEquipmentParams,
+  LinkHomeSmetaBody,
+  LinkHomeSmetaParams,
   ListHomeAuditParams,
+  ListHomeSmetasParams,
   ListHomeMediaParams,
   ListHomeMembersParams,
   ListHomePerformersParams,
@@ -188,6 +191,7 @@ router.get("/homes", async (req, res): Promise<void> => {
     const last = works.map((w) => w.endDate ?? w.startDate).filter(Boolean).sort().pop() ?? null;
     out.push({
       id: home.id, publicId: home.publicId, name: home.name, propertyType: home.propertyType, city: home.city, district: home.district, stage: home.stage,
+      address: a.memberRole ? home.address : "",
       coverUrl: home.coverMediaId ? homeMediaUrl(home.coverMediaId) : null, myRole: a.role, areaM2: home.areaM2, roomCount: home.roomCount,
       works: works.length, pendingApproval: manages(a.memberRole) ? works.filter((w) => w.status === "completed").length : 0,
       performers: performerCount[0]?.n ?? 0, lastWorkAt: last, updatedAt: home.updatedAt.toISOString(),
@@ -411,6 +415,9 @@ export async function workValues(homeId: string, userId: string, isOwner: boolea
     title: d.title.trim(), category: d.category ?? "general", kind: d.kind ?? "renovation", roomId, equipmentId,
     description: (d.description ?? "").trim(), materials: (d.materials ?? "").trim(), location: (d.location ?? "").trim(),
     startDate: d.startDate ?? null, endDate: d.endDate ?? null, visibility: d.visibility ?? "public",
+    ...(d.cost !== undefined ? { cost: d.cost == null ? null : Math.max(0, Math.round(d.cost * 100) / 100) } : {}),
+    ...(d.currency ? { currency: d.currency } : {}),
+    ...(d.warrantyNote !== undefined ? { warrantyNote: d.warrantyNote.trim() } : {}),
   };
   if (d.smetaProjectId !== undefined) {
     if (!isOwner) return { error: "Smeta layihəsini yalnız ev sahibi bağlaya bilər" };
@@ -437,16 +444,19 @@ router.post("/homes/:homeId/works", async (req, res): Promise<void> => {
   if ("error" in v) return bad(res, v.error);
   // A performer records a work through the profile they already work in this home with (individual first).
   let performerWorkerId: string | null = null;
-  if (!owner) {
+  if (!a.memberRole) {
     const rows = await db.select({ workerId: workParticipantsTable.workerId }).from(workParticipantsTable)
       .where(and(inArray(workParticipantsTable.workId, [...a.performerWorkIds]), inArray(workParticipantsTable.workerId, a.actor.actingIds), eq(workParticipantsTable.status, "accepted")));
     const ids = rows.map((r) => r.workerId);
     performerWorkerId = a.actor.individual && ids.includes(a.actor.individual.id) ? a.actor.individual.id : ids[0] ?? null;
     if (!performerWorkerId) return forbidden(res);
   }
-  const status = body.data.status ?? "planned";
+  // An owner / home member recording finished work keeps it as their own record — no approval step for themselves.
+  // Work finished by someone else still waits for the owner (status "completed").
+  const requested = body.data.status ?? "planned";
+  const status = requested === "completed" && owner ? "confirmed" : requested;
   const work = await db.transaction(async (tx) => {
-    const [w] = await tx.insert(workRecordsTable).values({ ...v.values, title: v.values.title!, homeId: a.home.id, status, createdByUserId: userId, ...(status === "completed" ? { completedAt: new Date() } : {}) }).returning();
+    const [w] = await tx.insert(workRecordsTable).values({ ...v.values, title: v.values.title!, homeId: a.home.id, status, createdByUserId: userId, ...(status === "completed" || status === "confirmed" ? { completedAt: new Date() } : {}) }).returning();
     await tx.insert(workApprovalsTable).values({ workId: w.id, action: "created", fromStatus: "", toStatus: status, actorUserId: userId, actorRole: a.role });
     if (performerWorkerId) {
       await tx.insert(workParticipantsTable).values({ workId: w.id, workerId: performerWorkerId, role: "lead", status: "accepted", addedByUserId: userId, respondedAt: new Date() });
@@ -787,6 +797,42 @@ router.delete("/homes/:homeId/shares/:shareId", async (req, res): Promise<void> 
 });
 
 /* ---------------------------------------------------------------------- audit */
+
+/* -------------------------------------------------------------- AI Smeta */
+
+async function homeSmetaDtos(homeId: string, userId: string) {
+  const rows = await db.select().from(smetaProjectsTable).where(eq(smetaProjectsTable.homeId, homeId)).orderBy(desc(smetaProjectsTable.updatedAt));
+  return rows.map((r) => ({ id: r.id, name: r.name, district: r.district, areaM2: r.areaM2 ?? null, status: r.status, mine: r.ownerUserId === userId, updatedAt: r.updatedAt.toISOString() }));
+}
+
+// Estimates are planned work: they are listed in the home but never become history records on their own.
+router.get("/homes/:homeId/smetas", async (req, res): Promise<void> => {
+  noStore(res);
+  const p = ListHomeSmetasParams.safeParse(req.params);
+  if (!p.success) return notFound(res, "Ev tapılmadı");
+  const a = await access(req, res, p.data.homeId);
+  if (!a) return;
+  if (!a.memberRole) return forbidden(res);
+  res.json(await homeSmetaDtos(a.home.id, uid(req)));
+});
+
+router.post("/homes/:homeId/smetas", async (req, res): Promise<void> => {
+  const p = LinkHomeSmetaParams.safeParse(req.params);
+  const body = LinkHomeSmetaBody.safeParse(req.body);
+  if (!p.success) return notFound(res, "Ev tapılmadı");
+  if (!body.success) return bad(res);
+  const a = await access(req, res, p.data.homeId);
+  if (!a) return;
+  if (!homePermissions(a).addWorks || !a.memberRole) return forbidden(res);
+  const userId = uid(req);
+  // Only the author of an estimate can save it in a home (or take it out).
+  const [smeta] = await db.select().from(smetaProjectsTable).where(and(eq(smetaProjectsTable.id, body.data.smetaProjectId), eq(smetaProjectsTable.ownerUserId, userId)));
+  if (!smeta) return notFound(res, "Smeta tapılmadı");
+  if (!body.data.linked && smeta.homeId !== a.home.id) return bad(res, "Bu smeta bu evdə saxlanmayıb");
+  await db.update(smetaProjectsTable).set({ homeId: body.data.linked ? a.home.id : null }).where(eq(smetaProjectsTable.id, smeta.id));
+  await audit({ homeId: a.home.id, actorUserId: userId, actorRole: a.role, action: body.data.linked ? "smeta.linked" : "smeta.unlinked", entityType: "smeta", entityId: smeta.id, summary: smeta.name });
+  res.json(await homeSmetaDtos(a.home.id, userId));
+});
 
 router.get("/homes/:homeId/audit", async (req, res): Promise<void> => {
   noStore(res);

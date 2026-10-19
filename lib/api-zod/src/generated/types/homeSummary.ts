@@ -13,6 +13,7 @@ export interface HomeSummary {
   propertyType: string;
   city: string;
   district: string;
+  address: string;
   stage: string;
   /** @nullable */
   coverUrl: string | null;

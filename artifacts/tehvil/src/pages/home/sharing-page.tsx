@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Download, ExternalLink, Link2, LoaderCircle, Plus, QrCode as QrIcon, ShieldOff } from 'lucide-react';
+import { Download, ExternalLink, History, Link2, LoaderCircle, Lock, Plus, QrCode as QrIcon, ShieldOff } from 'lucide-react';
+import { Link } from 'wouter';
 import {
   useCreateHomeShare, useGetHomeSharing, useListEquipment, useListWorks, useRevokeHomeShare, useUpdateHomeSharing, type HomeShare, type HomeShareInputLevel, type HomeSharingInput,
 } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
 import { CopyButton, HomeToaster, Modal, Pill, QrCode, Seg, Skeleton, qrDataUrl, toast } from '@/components/home/ui';
 import { PUBLIC_LEVEL, SHARE_LEVEL, dayTime, refreshHomeData } from '@/lib/home/labels';
-import { HomeMissing, useHome } from './home-pages';
+import { HomeMissing, MembersSection, useHome } from './home-pages';
 
 export function HomeSharingPage({ homeId }: { homeId: string }) {
   const home = useHome(homeId);
@@ -21,7 +22,18 @@ export function HomeSharingPage({ homeId }: { homeId: string }) {
   useEffect(() => { if (q.data && !form) setForm({ publicLevel: q.data.publicLevel as HomeSharingInput['publicLevel'], publicShowAddress: q.data.publicShowAddress, publicShowPhotos: q.data.publicShowPhotos, publicShowEquipment: q.data.publicShowEquipment, showOnWorkerProfiles: q.data.showOnWorkerProfiles }); }, [q.data, form]);
   if (home.isLoading) return <Skeleton rows={3} />;
   if (!home.data) return <HomeMissing />;
-  if (!home.data.home.permissions.manageSharing) return <div className="notice manual-notice">QR və paylaşımı yalnız ev sahibi idarə edir.</div>;
+  const perms = home.data.home.permissions;
+  const intro = <>
+    <p className="hp-private"><Lock size={14} />Ev məlumatları susmaya görə məxfidir. Yalnız aşağıda gördüyünüz şəxslər və linklər vasitəsilə görünür.</p>
+    <MembersSection homeId={homeId} owner={perms.manageMembers} />
+    {perms.viewAudit && <p className="hp-kvline"><Link href={`/homes/${homeId}/audit`} data-testid="link-audit"><History size={14} className="sm-ii" /> Dəyişikliklər tarixçəsi — kim nəyi nə vaxt əlavə edib</Link></p>}
+  </>;
+  if (!perms.manageSharing) return <>
+    <PageHeading eyebrow={home.data.home.name} title="Paylaşım və giriş" description="Bu evə kimin girişi var və nə edə bilər." />
+    {intro}
+    <p className="rl-hint">Paylaşım linklərini və QR kodu yalnız ev sahibi idarə edir.</p>
+    <HomeToaster />
+  </>;
   if (q.isLoading || !q.data || !form) return <Skeleton rows={3} />;
   const s = q.data;
   const qrValue = `${s.publicUrl}?src=qr`;
@@ -29,8 +41,9 @@ export function HomeSharingPage({ homeId }: { homeId: string }) {
   const dirty = JSON.stringify(form) !== JSON.stringify({ publicLevel: s.publicLevel, publicShowAddress: s.publicShowAddress, publicShowPhotos: s.publicShowPhotos, publicShowEquipment: s.publicShowEquipment, showOnWorkerProfiles: s.showOnWorkerProfiles });
   const toggle = (k: keyof HomeSharingInput, label: string, hint: string) => <label className="rl-check"><input type="checkbox" checked={!!form[k]} onChange={e => setForm({ ...form, [k]: e.target.checked })} disabled={form.publicLevel === 'off' && k !== 'showOnWorkerProfiles'} /><span><b>{label}</b><br /><small>{hint}</small></span></label>;
   return <>
-    <PageHeading eyebrow={home.data.home.name} title="Məlumatları paylaş" description="Alıcıya, ustaya və ya mütəxəssisə yalnız seçdiyiniz məlumatları göstərin. Linkin müddətini seçin və istədiyiniz vaxt bağlayın."
+    <PageHeading eyebrow={home.data.home.name} title="Paylaşım və giriş" description="Evin məlumatlarını paylaş — alıcıya, ustaya və ya mütəxəssisə yalnız seçdiyiniz məlumatları göstərin. Linki istədiyiniz vaxt bağlayın."
       action={<button type="button" className="button button-primary" onClick={() => { setCreated(''); setCreating(true); }} data-testid="button-create-share"><Link2 size={16} />Paylaşım linki yarat</button>} />
+    {intro}
     <section className="surface hp-section">
       <h2><Link2 size={15} className="sm-ii" /> Paylaşdığım linklər</h2>
       {!s.shares.length ? <p className="rl-hint">Hələ link yaratmamısınız. Məsələn: alıcıya yalnız hamam və mətbəxdə görülən işləri, santexnikə isə su və kanalizasiya borularının yerini göstərin.</p>
@@ -51,9 +64,9 @@ export function HomeSharingPage({ homeId }: { homeId: string }) {
         <h2>QR kodla kim baxsa, nə görsün?</h2>
         <Seg label="Göstər" value={form.publicLevel} options={Object.entries(PUBLIC_LEVEL) as [HomeSharingInput['publicLevel'], string][]} onChange={v => setForm({ ...form, publicLevel: v })} />
         {toggle('publicShowAddress', 'Ünvan', 'Rayon və şəhər həmişə görünür, dəqiq ünvan yalnız seçsəniz.')}
-        {toggle('publicShowPhotos', 'Təsdiqlənmiş işlərin fotoları', 'Divar bağlanmazdan əvvəl çəkilmiş fotolar QR-da heç vaxt göstərilmir.')}
+        {toggle('publicShowPhotos', 'Görülmüş işlərin fotoları', 'Divar bağlanmazdan əvvəl çəkilmiş fotolar QR-da heç vaxt göstərilmir.')}
         {toggle('publicShowEquipment', 'Avadanlıqlar', 'Seriya nömrəsi göstərilmir.')}
-        {toggle('showOnWorkerProfiles', 'Ustaların profilində bu evdə gördükləri işlər görünsün', 'Ünvan göstərilmir. Yalnız sizin təsdiqlədiyiniz işlər.')}
+        {toggle('showOnWorkerProfiles', 'Ustaların profilində bu evdə gördükləri işlər görünsün', 'Ünvan göstərilmir. Yalnız görülmüş və açıq işlər.')}
         <p className="rl-hint">Naqil və boruların yeri, ustaların telefonları, dəyişikliklər tarixçəsi və şəxsi qeydlər QR kodla heç vaxt görünmür.</p>
         <button type="button" className="button button-primary" disabled={!dirty || save.isPending} onClick={() => save.mutate({ homeId, data: form }, { onSuccess: () => { void refreshHomeData(qc); toast('Yadda saxlanıldı'); } })} data-testid="button-save-sharing">{save.isPending && <LoaderCircle className="spin" size={15} />}Yadda saxla</button>
       </section>

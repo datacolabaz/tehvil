@@ -5,7 +5,7 @@ import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { Route, Switch, Link, Redirect, Router as WouterRouter, useLocation } from 'wouter';
 import {
-  ArrowDownLeft, ArrowRight, ArrowUpRight, BellRing, Boxes, Cable, ClipboardList, HardHat, History, House, Building2, CalendarClock, Calculator, Megaphone, MessageCircle, QrCode, UserRound, Users, UsersRound, Check, CheckCircle2, ChevronDown, ChevronRight,
+  ArrowDownLeft, ArrowRight, ArrowUpRight, BellRing, Settings, Boxes, Cable, ClipboardList, HardHat, History, House, Building2, CalendarClock, Calculator, Megaphone, MessageCircle, QrCode, UserRound, Users, UsersRound, Check, CheckCircle2, ChevronDown, ChevronRight,
   ClipboardCheck, Clock3, DoorOpen, FileCheck2, FilePlus2, FileText, Home, ImagePlus,
   LayoutDashboard, ListChecks, LoaderCircle, LogOut, Menu, Plus, ShieldCheck,
   WalletCards, X,
@@ -77,6 +77,8 @@ const WorkPage = lazy(() => import('@/pages/home/work-page').then(m => ({ defaul
 const WorkersPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.WorkersPage })));
 const WorkerProfilePage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.WorkerProfilePage })));
 const PublicWorkerPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.PublicWorkerPage })));
+const HomeDocumentsPage = lazy(() => import('@/pages/home/documents-page').then(m => ({ default: m.HomeDocumentsPage })));
+const SettingsPage = lazy(() => import('@/pages/home/settings-page').then(m => ({ default: m.SettingsPage })));
 const AllHistoryPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.AllHistoryPage })));
 const MyWorksPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.MyWorksPage })));
 const InboxPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.InboxPage })));
@@ -86,14 +88,13 @@ const SharedHomePage = lazy(() => import('@/pages/home/public-home-page').then(m
 
 /** Sections of one home in the digital home passport (Azerbaijani, like the brief). */
 const HOME_NAV = [
-  { path: '', key: 'profile', label: 'Evin məlumatları', icon: House },
-  { path: '/history', key: 'history', label: 'Təmir tarixçəsi', icon: History },
+  { path: '', key: 'profile', label: 'Ümumi məlumat', icon: House },
   { path: '/rooms', key: 'rooms', label: 'Otaqlar', icon: DoorOpen },
-  { path: '/map', key: 'map', label: 'Evdəki sistemlər', icon: Cable },
-  { path: '/equipment', key: 'equipment', label: 'Avadanlıqlar', icon: Boxes },
-  { path: '/performers', key: 'performers', label: 'Usta və şirkətlər', icon: HardHat },
-  { path: '/sharing', key: 'sharing', label: 'Məlumatları paylaş', icon: QrCode },
-  { path: '/audit', key: 'audit', label: 'Dəyişikliklər tarixçəsi', icon: ClipboardList },
+  { path: '/history', key: 'history', label: 'İşlər və tarixçə', icon: History },
+  { path: '/map', key: 'map', label: 'Texniki məlumatlar', icon: Cable },
+  { path: '/equipment', key: 'equipment', label: 'Materiallar və avadanlıqlar', icon: Boxes },
+  { path: '/documents', key: 'documents', label: 'Sənədlər', icon: FileText },
+  { path: '/sharing', key: 'sharing', label: 'Paylaşım və giriş', icon: QrCode },
 ] as const;
 
 /** Realtor panel sections (the brief's sidebar). Labels are Azerbaijani, like the AI Smeta module. */
@@ -131,7 +132,7 @@ function Brand({ inverse = false }: { inverse?: boolean }) {
   return <Link href="/" className={`brand ${inverse ? 'inverse' : ''}`} data-testid="link-brand"><span className="brand-mark">t.</span><span>Təhvil</span></Link>;
 }
 type Crumb = { label: string; href?: string };
-function AppShell({ children, project, projectId, active, crumbs, lang, change, t, realtorSection, home }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string; realtorSection?: string; home?: { id: string; name: string; section: string; owner: boolean; audit: boolean } }) {
+function AppShell({ children, project, projectId, active, crumbs, lang, change, t, realtorSection, home }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string; realtorSection?: string; home?: { id: string; name: string; section: string; owner: boolean; audit: boolean; member?: boolean } }) {
   const [open, setOpen] = useState(false);
   const { signOut } = useClerk(); const { user } = useUser();
   // Menu by what the account really uses: home owners see the five main actions, masters also see their jobs,
@@ -141,21 +142,13 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
   const pending = (inbox.data?.participations.length ?? 0) + (inbox.data?.memberships.length ?? 0) + (inbox.data?.approvals.length ?? 0);
   const r = roles.data;
   type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number };
+  // Home-first menu: the same three sections on desktop and mobile. Other modules stay reachable from Parametrlər.
   const mainNav: NavItem[] = [
     { href: '/homes', icon: House, key: 'myHomes' },
     { href: '/history', icon: History, key: 'repairHistory' },
-    { href: '/workers', icon: UsersRound, key: 'workersNav' },
-    { href: '/invitations', icon: BellRing, key: 'inboxNav', count: pending },
-  ];
-  const workerNav: NavItem[] = r?.isPerformer ? [
-    { href: '/my-works', icon: HardHat, key: 'myWorks' },
-    { href: '/my-works?tab=done', icon: CheckCircle2, key: 'doneWorks' },
-  ] : [];
-  const extraNav: NavItem[] = [
     { href: '/smeta', icon: Calculator, key: 'smeta' },
-    { href: '/realtor', icon: Building2, key: 'realtor' },
-    ...(r?.hasProjects || projectId ? [{ href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' as TKey }] : []),
   ];
+  void r;
   const projectNav: NavItem[] = projectId ? [
       { href: `/projects/${projectId}`, icon: Home, key: 'projects' as const },
       { href: `/projects/${projectId}/scope`, icon: ListChecks, key: 'scope' as const },
@@ -174,13 +167,12 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
         <Link href="/homes?new=1" onClick={() => setOpen(false)} className="button button-primary hp-side-add" data-testid="nav-add-home"><Plus size={16}/>{t('addHome')}</Link>
         {navList(mainNav)}
       </>}
-      {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => (n.key !== 'sharing' || home.owner) && (n.key !== 'audit' || home.audit)).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${home.section === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{home.section === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
+      {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => (n.key !== 'sharing' && n.key !== 'documents') || !!home.member).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${home.section === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{home.section === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       {realtorSection && <><div className="sidebar-label">{t('realtor')}</div><nav className="side-nav rl-side-nav">{REALTOR_NAV.map(({ href, key, label, icon: Icon }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${realtorSection === key ? 'selected' : ''}`} data-testid={`nav-realtor-${key}`}><Icon size={17}/><span>{label}</span>{realtorSection === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
-      {!projectId && workerNav.length > 0 && <><div className="sidebar-label">{t('masterSection')}</div>{navList(workerNav)}</>}
-      <div className="sidebar-label">{t('extraServices')}</div>{navList(extraNav)}
-      <div className="sidebar-bottom"><div className="privacy-note"><ShieldCheck size={17}/><p>{t('disclaimer')}</p></div><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
+      {projectId && <><div className="sidebar-label">{t('extraServices')}</div>{navList([{ href: '/homes', icon: House, key: 'myHomes' }, { href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' }])}</>}
+      <div className="sidebar-bottom"><Link href="/settings" onClick={() => setOpen(false)} className={`side-link ${active === 'settingsNav' ? 'selected' : ''}`} data-testid="nav-settingsNav"><Settings size={17}/><span>{t('settingsNav')}</span></Link><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
     </aside>
-    <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs">{project && <Link href="/dashboard">{t('dashboard')}</Link>}{project && <><ChevronRight size={13}/><span>{project.name}</span></>}{crumbs?.map((c, i) => <Fragment key={i}>{(project || i > 0) && <ChevronRight size={13}/>}{c.href ? <Link href={c.href}>{c.label}</Link> : <span>{c.label}</span>}</Fragment>)}</div><div className="topbar-tools"><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
+    <div className="workspace-main"><header className="topbar"><button className="mobile-menu" onClick={() => setOpen(true)} aria-label={t('openMenu')}><Menu size={20}/></button><div className="crumbs">{project && <Link href="/dashboard">{t('dashboard')}</Link>}{project && <><ChevronRight size={13}/><span>{project.name}</span></>}{crumbs?.map((c, i) => <Fragment key={i}>{(project || i > 0) && <ChevronRight size={13}/>}{c.href ? <Link href={c.href}>{c.label}</Link> : <span>{c.label}</span>}</Fragment>)}</div><div className="topbar-tools"><Link href="/invitations" className="hp-bell" aria-label={`${t('notifications')}${pending ? ` (${pending})` : ''}`} data-testid="nav-bell"><BellRing size={18}/>{pending > 0 && <span className="nav-count">{pending}</span>}</Link><LanguagePicker lang={lang} change={change} compact/><div className="user-initials">{(user?.firstName||user?.primaryEmailAddress?.emailAddress||'T').charAt(0).toUpperCase()}</div></div></header>
       <main className="page-content">{children}</main>
     </div>{open && <button className="scrim" aria-label={t('close')} onClick={() => setOpen(false)}/>}
   </div>;
@@ -194,7 +186,6 @@ function Landing({ lang, change, t }: { lang: Lang; change: (v: Lang)=>void; t: 
       <div className="hero-art appear-delay"><div className="art-topline"><span><i/> {t('artTop')}</span><span>01 — 03</span></div><div className="blueprint"><div className="blueprint-label">{lang==='az'?'BAKI · YAŞAYIŞ / 02':lang==='ru'?'БАКУ · ЖИЛОЕ / 02':'BAKU · RESIDENTIAL / 02'}</div><div className="blueprint-plan"><div className="plan-room room-living"><span>{t('planLiving')}</span><small>01</small></div><div className="plan-room room-kitchen"><span>{t('planKitchen')}</span><small>02</small></div><div className="plan-room room-bed"><span>{t('planBed')}</span><small>03</small></div><div className="plan-room room-bath"><span>{t('planBath')}</span><small>04</small></div><div className="plan-door"/></div><div className="plan-dim">6.40 m <span>3.80 m</span></div><div className="plan-status"><div className="status-check"><Check size={15}/></div><div><strong>{t('planApproved')}</strong><small>{t('planParties')}</small></div><div className="status-mini">{t('planRecorded')}</div></div></div><div className="art-foot"><span>{t('artOne')}</span><span>40°22' N / 49°50' E</span></div></div>
     </section><div className="trust-strip"><div className="wrap trust-items"><span>{t('trust')}</span><i/><span>{t('clarity')}</span><i/><span>{t('history')}</span></div></div>
     <section className="workflow wrap" id="how"><div className="workflow-intro"><div className="eyebrow">{t('eyCertain')}</div><h2 className="font-display">{t('workflow')}</h2><p>{t('workflowLead')}</p></div><div className="workflow-list">{stages.map((stage, i) => { const Icons=[FileCheck2, ArrowRight, ImagePlus]; const Icon=Icons[i]; return <article className="workflow-row" key={stage}><div className="workflow-number">0{i+1}</div><div className="workflow-icon"><Icon size={20}/></div><div><h3>{stage}</h3><p>{descriptions[i]}</p></div><ChevronRight className="workflow-chevron" size={18}/></article>; })}</div></section>
-    <section className="rl-landing wrap" id="realtor"><div className="rl-landing-copy"><div className="eyebrow"><span className="eyebrow-dot"/>{lang==='az'?'Realtorlar üçün':lang==='ru'?'Для риелторов':'For realtors'}</div><h2 className="font-display">{lang==='az'?'Realtor üçün satış və etibar platforması':lang==='ru'?'Платформа продаж и доверия для риелторов':'A sales and trust platform for realtors'}</h2><p>{lang==='az'?'Siz leadləri, elanları və görüşləri Təhvil.az-da idarə edirsiniz; hər mənzilinizi QR kodlu, foto sübutlu və ev sahibi təsdiqli “Təhvil Sertifikatlı Mənzil” kimi təqdim edirsiniz. Rəqibiniz yalnız satış prosesini idarə edir, siz həm satışı idarə edir, həm də alıcının güvənini qazanırsınız.':lang==='ru'?'Вы ведёте лиды, объявления и показы в Təhvil.az и представляете каждую квартиру как «Квартиру с сертификатом Təhvil» — с QR-кодом, фотодоказательствами и подтверждением владельца. Конкурент управляет только продажей, вы — продажей и доверием покупателя.':'You manage leads, listings and viewings in Təhvil.az and present every apartment as a “Təhvil-certified apartment” with a QR code, photo evidence and owner confirmation. Competitors manage the sale; you manage the sale and earn the buyer\'s trust.'}</p><Link href="/sign-up?realtor=1" className="button button-primary">{lang==='az'?'Realtor kimi başla':lang==='ru'?'Начать как риелтор':'Start as a realtor'}<ArrowRight size={16}/></Link></div><ul className="rl-landing-list"><li><Users size={18}/><span><b>{lang==='az'?'Lead və CRM':lang==='ru'?'Лиды и CRM':'Leads and CRM'}</b>{lang==='az'?'WhatsApp, Instagram, Facebook, sayt — hamısı bir paneldə.':lang==='ru'?'WhatsApp, Instagram, Facebook, сайт — в одной панели.':'WhatsApp, Instagram, Facebook, website — in one panel.'}</span></li><li><MessageCircle size={18}/><span><b>{lang==='az'?'WhatsApp avtomatlaşdırma':lang==='ru'?'Автоматизация WhatsApp':'WhatsApp automation'}</b>{lang==='az'?'Avtomatik cavab, filtr sualları, uyğun elan və görüş təklifi.':lang==='ru'?'Автоответ, уточняющие вопросы, подбор объявлений и время показа.':'Auto-reply, qualifying questions, matching listings and viewing slots.'}</span></li><li><QrCode size={18}/><span><b>{lang==='az'?'Təhvil Sertifikatlı Mənzil':lang==='ru'?'Квартира с сертификатом Təhvil':'Təhvil-certified apartment'}</b>{lang==='az'?'QR kodla təmir tarixçəsini yoxlayın — foto sübut, podratçı və ev sahibi təsdiqi.':lang==='ru'?'История ремонта по QR-коду — фото, подтверждение подрядчика и владельца.':'Verify renovation history by QR — photos, contractor and owner confirmation.'}</span></li></ul></section>
     <section className="closing wrap"><div className="closing-inner"><div className="closing-mark">t.</div><div><div className="eyebrow">{t('tagline')}</div><h2 className="font-display">{t('start')}</h2><p>{t('lead')}</p></div><Link href="/sign-up" className="button button-primary">{t('createFirst')}<ArrowRight size={16}/></Link></div></section>
     <Partners lang={lang}/>
     <footer className="landing-footer wrap"><Brand/><p>{t('disclaimer')}</p><LanguagePicker lang={lang} change={change}/><nav className="landing-legal" aria-label="Bələdçilər"><a href="/temir-tehvil-akti.html">Təhvil-təslim aktı</a><a href="/temir-islerinin-qebulu.html">Təmir işlərinin qəbulu</a><a href="/podratci-ile-razilasma.html">Podratçı ilə razılaşma</a><a href="/temir-elave-isler.html">Əlavə işlər və dəyişikliklər</a></nav><nav className="landing-legal"><a href="/privacy.html">{lang==='az'?'Məxfilik siyasəti':lang==='ru'?'Политика конфиденциальности':'Privacy policy'}</a><a href="/terms.html">{lang==='az'?'İstifadə şərtləri':lang==='ru'?'Условия использования':'Terms of use'}</a></nav><address className="landing-contact"><a href="mailto:support@tehvil.az">support@tehvil.az</a><a href="tel:+994503066626">+994 50 306 66 26</a><a href="https://wa.me/994503066626" target="_blank" rel="noopener noreferrer">WhatsApp</a><span>Bakı, Səbail rayonu, Badamdar qəsəbəsi, 26-cı küçə, 20</span></address></footer>
@@ -335,7 +326,7 @@ function HomeShellInner({ homeId, section, crumbs, children, ...shell }: ShellPr
   const q = useGetHomeOverview(homeId);
   const h = q.data?.home;
   const label = HOME_NAV.find(n => n.key === section)?.label;
-  return <AppShell {...shell} active="myHomes" home={h ? { id: homeId, name: h.name, section, owner: h.permissions.manageSharing, audit: h.permissions.viewAudit } : undefined}
+  return <AppShell {...shell} active="myHomes" home={h ? { id: homeId, name: h.name, section, owner: h.permissions.manageSharing, audit: h.permissions.viewAudit, member: h.myRole !== 'performer' } : undefined}
     crumbs={[{ label: shell.t('myHomes'), href: '/homes' }, ...(h ? [{ label: h.name, href: section === 'profile' && !crumbs?.length ? undefined : `/homes/${homeId}` }] : []), ...(section !== 'profile' && label ? [{ label }] : []), ...(crumbs || [])]}>
     <Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell>;
 }
@@ -346,7 +337,7 @@ function WorkShellInner({ workId, ...shell }: ShellProps & { workId: string }) {
   const w = useGetWork(workId);
   const h = useGetHomeOverview(w.data?.homeId ?? '', { query: { enabled: !!w.data?.homeId, queryKey: [`/api/homes/${w.data?.homeId}`] } });
   const home = h.data?.home;
-  return <AppShell {...shell} active="myHomes" home={home ? { id: home.id, name: home.name, section: 'history', owner: home.permissions.manageSharing, audit: home.permissions.viewAudit } : undefined}
+  return <AppShell {...shell} active="myHomes" home={home ? { id: home.id, name: home.name, section: 'history', owner: home.permissions.manageSharing, audit: home.permissions.viewAudit, member: home.myRole !== 'performer' } : undefined}
     crumbs={[{ label: shell.t('myHomes'), href: '/homes' }, ...(w.data ? [{ label: w.data.homeName, href: `/homes/${w.data.homeId}` }, { label: w.data.title }] : [])]}>
     <Suspense fallback={<Loading t={shell.t}/>}><WorkPage workId={workId}/></Suspense></AppShell>;
 }
@@ -416,16 +407,18 @@ function ClerkRoutes() {
       <Route path="/homes/:homeId/rooms">{params => <HomeShell homeId={params.homeId} section="rooms" lang={lang} change={changeLang} t={t}><HomeRoomsPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/map">{params => <HomeShell homeId={params.homeId} section="map" lang={lang} change={changeLang} t={t}><HomeMapPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/equipment">{params => <HomeShell homeId={params.homeId} section="equipment" lang={lang} change={changeLang} t={t}><HomeEquipmentPage homeId={params.homeId}/></HomeShell>}</Route>
-      <Route path="/homes/:homeId/performers">{params => <HomeShell homeId={params.homeId} section="performers" lang={lang} change={changeLang} t={t}><HomePerformersPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/performers">{params => <HomeShell homeId={params.homeId} section="history" lang={lang} change={changeLang} t={t}><HomePerformersPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/sharing">{params => <HomeShell homeId={params.homeId} section="sharing" lang={lang} change={changeLang} t={t}><HomeSharingPage homeId={params.homeId}/></HomeShell>}</Route>
-      <Route path="/homes/:homeId/audit">{params => <HomeShell homeId={params.homeId} section="audit" lang={lang} change={changeLang} t={t}><HomeAuditPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/documents">{params => <HomeShell homeId={params.homeId} section="documents" lang={lang} change={changeLang} t={t}><HomeDocumentsPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/settings">{() => <PlainShell active="settingsNav" crumbs={[{ label: t('settingsNav') }]} lang={lang} change={changeLang} t={t}><SettingsPage lang={lang} change={changeLang}/></PlainShell>}</Route>
+      <Route path="/homes/:homeId/audit">{params => <HomeShell homeId={params.homeId} section="sharing" lang={lang} change={changeLang} t={t}><HomeAuditPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId">{params => <HomeShell homeId={params.homeId} section="profile" lang={lang} change={changeLang} t={t}><HomeProfilePage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/works/:workId">{params => <WorkShell workId={params.workId} lang={lang} change={changeLang} t={t}/>}</Route>
       <Route path="/my-works">{() => <PlainShell active={new URLSearchParams(window.location.search).get('tab') === 'done' ? 'doneWorks' : 'myWorks'} crumbs={[{ label: t('myWorks') }]} lang={lang} change={changeLang} t={t}><MyWorksPage/></PlainShell>}</Route>
       <Route path="/workers/:workerId">{params => <PlainShell active="workersNav" crumbs={[{ label: t('workersNav'), href: '/workers' }, { label: 'Profil' }]} lang={lang} change={changeLang} t={t}><WorkerProfilePage workerId={params.workerId}/></PlainShell>}</Route>
       <Route path="/workers">{() => <PlainShell active="workersNav" crumbs={[{ label: t('workersNav') }]} lang={lang} change={changeLang} t={t}><WorkersPage/></PlainShell>}</Route>
       <Route path="/history">{() => <PlainShell active="repairHistory" crumbs={[{ label: t('repairHistory') }]} lang={lang} change={changeLang} t={t}><AllHistoryPage/></PlainShell>}</Route>
-      <Route path="/invitations">{() => <PlainShell active="inboxNav" crumbs={[{ label: t('inboxNav') }]} lang={lang} change={changeLang} t={t}><InboxPage tab="invitations"/></PlainShell>}</Route>
+      <Route path="/invitations">{() => <PlainShell active="inboxNav" crumbs={[{ label: t('notifications') }]} lang={lang} change={changeLang} t={t}><InboxPage tab="invitations"/></PlainShell>}</Route>
       <Route path="/approvals">{() => <PlainShell active="inboxNav" crumbs={[{ label: 'Təsdiqinizi gözləyən işlər' }]} lang={lang} change={changeLang} t={t}><InboxPage tab="approvals"/></PlainShell>}</Route>
       <Route path="/" component={()=> <HomeRedirect lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/sign-in/*?" component={SignInPage}/><Route path="/sign-up/*?" component={SignUpPage}/>

@@ -2972,6 +2972,7 @@ export const HomeMediaAttachInputPhase = {
   after: 'after',
   hidden: 'hidden',
   other: 'other',
+  document: 'document',
 } as const;
 
 export interface HomeMediaAttachInput {
@@ -3107,6 +3108,7 @@ export interface HomeSummary {
   propertyType: string;
   city: string;
   district: string;
+  address: string;
   stage: string;
   /** @nullable */
   coverUrl: string | null;
@@ -3249,6 +3251,9 @@ export interface WorkSummary {
   openDefects: number;
   inspected: boolean;
   visibility: string;
+  materials: string;
+  description: string;
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -3378,6 +3383,12 @@ export interface WorkDetail {
   equipmentName: string | null;
   visibility: string;
   /** @nullable */
+  cost: number | null;
+  currency: string;
+  warrantyNote: string;
+  addedByMe: boolean;
+  addedByRole: string;
+  /** @nullable */
   smetaProjectId: string | null;
   /** @nullable */
   smetaProjectName: string | null;
@@ -3451,6 +3462,15 @@ export const WorkInputStatus = {
   completed: 'completed',
 } as const;
 
+export type WorkInputCurrency = typeof WorkInputCurrency[keyof typeof WorkInputCurrency];
+
+
+export const WorkInputCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+  EUR: 'EUR',
+} as const;
+
 export interface WorkInput {
   /**
      * @minLength 2
@@ -3486,6 +3506,14 @@ export interface WorkInput {
   status?: WorkInputStatus;
   /** @nullable */
   smetaProjectId?: string | null;
+  /** @nullable */
+  cost?: number | null;
+  currency?: WorkInputCurrency;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  warrantyNote?: string;
 }
 
 export type WorkStatusInputAction = typeof WorkStatusInputAction[keyof typeof WorkStatusInputAction];
@@ -3508,6 +3536,14 @@ export interface WorkStatusInput {
   note?: string;
 }
 
+export type PlaceholderInputKind = typeof PlaceholderInputKind[keyof typeof PlaceholderInputKind];
+
+
+export const PlaceholderInputKind = {
+  individual: 'individual',
+  company: 'company',
+} as const;
+
 export interface PlaceholderInput {
   /**
      * @minLength 2
@@ -3524,6 +3560,7 @@ export interface PlaceholderInput {
      * @maxLength 60
      */
   specialty?: string;
+  kind?: PlaceholderInputKind;
 }
 
 export type ParticipantInputRole = typeof ParticipantInputRole[keyof typeof ParticipantInputRole];
@@ -3719,6 +3756,9 @@ export const InfrastructureInputType = {
   gas: 'gas',
   ventilation: 'ventilation',
   internet: 'internet',
+  meter: 'meter',
+  valve: 'valve',
+  electrical_panel: 'electrical_panel',
   other: 'other',
 } as const;
 
@@ -4377,6 +4417,22 @@ export interface IdentityInput {
 
 export interface HideInput {
   hidden: boolean;
+}
+
+export interface HomeSmeta {
+  id: string;
+  name: string;
+  district: string;
+  /** @nullable */
+  areaM2: number | null;
+  status: string;
+  mine: boolean;
+  updatedAt: string;
+}
+
+export interface HomeSmetaLinkInput {
+  smetaProjectId: string;
+  linked: boolean;
 }
 
 export interface HomeWorkItem {

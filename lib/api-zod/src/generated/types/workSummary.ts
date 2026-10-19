@@ -27,5 +27,8 @@ export interface WorkSummary {
   openDefects: number;
   inspected: boolean;
   visibility: string;
+  materials: string;
+  description: string;
+  createdAt: string;
   updatedAt: string;
 }

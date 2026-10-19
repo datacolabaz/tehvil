@@ -63,7 +63,9 @@ router.patch("/works/:workId", async (req, res): Promise<void> => {
   if (!workPermissions(a).edit) return forbidden(res, a.work.status === "confirmed" ? "Təsdiqlənmiş işi yalnız ev sahibi dəyişə bilər" : undefined);
   const owner = manages(a.homeAccess.memberRole);
   const { status: _ignored, ...input } = body.data;
-  const v = await workValues(a.work.homeId, uid(req), owner, owner ? input : { ...input, smetaProjectId: undefined });
+  // Cost and warranty are the household's private notes: only home members may set them.
+  const own = a.homeAccess.memberRole ? input : { ...input, cost: undefined, currency: undefined, warrantyNote: undefined };
+  const v = await workValues(a.work.homeId, uid(req), owner, owner ? own : { ...own, smetaProjectId: undefined });
   if ("error" in v) return bad(res, v.error);
   const changes = diff(a.work as unknown as Record<string, unknown>, v.values, Object.keys(v.values) as never[]);
   if (!Object.keys(changes).length) { res.json(await workDetail(a, uid(req))); return; }
@@ -163,7 +165,7 @@ router.post("/works/:workId/participants", async (req, res): Promise<void> => {
     if (!owner) return forbidden(res, "Qeydiyyatsız ustanı yalnız ev sahibi qeyd edə bilər");
     await db.transaction(async (tx) => {
       const [w] = await tx.insert(workersTable).values({
-        kind: "individual", userId: null, managerUserId: null, displayName: d.placeholder!.name.trim(),
+        kind: d.placeholder!.kind === "company" ? "company" : "individual", userId: null, managerUserId: null, displayName: d.placeholder!.name.trim(),
         specialties: d.placeholder!.specialty ? [d.placeholder!.specialty.trim()] : [], phone: (d.placeholder!.phone ?? "").trim(),
         status: "placeholder", createdByUserId: userId,
       }).returning();

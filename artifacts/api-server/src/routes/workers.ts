@@ -37,7 +37,7 @@ import {
   workParticipantsTable,
   workRecordsTable,
 } from "@workspace/db";
-import { audit, isStaff, manages, canManageWorker, diff, getHomeAccess, getWorkAccess, loadActor, workPermissions, type Actor, type WorkerRow } from "../lib/homeAccess";
+import { audit, homesOfUser, isStaff, manages, visibleWorks, canManageWorker, diff, getHomeAccess, getWorkAccess, loadActor, workPermissions, type Actor, type WorkerRow } from "../lib/homeAccess";
 import { loadWorkers, mediaDto, workerRef, workSummaries } from "../lib/homeDtos";
 import { attachHomeMedia, HomeMediaError } from "../lib/homeMedia";
 import { hashToken, newToken, publicOrigin } from "../lib/realtorCore";
@@ -120,17 +120,26 @@ router.get("/me/roles", async (req, res): Promise<void> => {
 });
 
 router.get("/me/home-works", async (req, res): Promise<void> => {
+  // "İş tarixçəsi": every work the account can open, from the same work_records rows as each home's history.
   noStore(res);
   const userId = uid(req);
-  const homes = await db.select({ home: homesTable, role: homeMembersTable.role }).from(homeMembersTable)
-    .innerJoin(homesTable, eq(homesTable.id, homeMembersTable.homeId)).where(and(eq(homeMembersTable.userId, userId), isNull(homesTable.archivedAt)));
-  if (!homes.length) { res.json([]); return; }
-  const works = await db.select().from(workRecordsTable).where(inArray(workRecordsTable.homeId, homes.map((h) => h.home.id)));
-  const summaries = await workSummaries(works);
-  res.json(summaries.map((w) => {
-    const h = homes.find((x) => x.home.id === w.homeId)!;
-    return { work: w, homeName: h.home.name, myRole: h.role === "technician" ? "contributor" : h.role };
-  }));
+  const actor = await loadActor(userId);
+  const memberHomes = await homesOfUser(userId);
+  const performerHomes = actor.actingIds.length
+    ? await db.selectDistinct({ homeId: workRecordsTable.homeId }).from(workParticipantsTable)
+      .innerJoin(workRecordsTable, eq(workRecordsTable.id, workParticipantsTable.workId))
+      .where(and(inArray(workParticipantsTable.workerId, actor.actingIds), inArray(workParticipantsTable.status, ["accepted", "invited"])))
+    : [];
+  const homeIds = [...new Set([...memberHomes.map((h) => h.home.id), ...performerHomes.map((h) => h.homeId)])];
+  const out = [];
+  for (const homeId of homeIds) {
+    const a = await getHomeAccess(userId, homeId, actor);
+    if (!a || a.home.archivedAt) continue;
+    const summaries = await workSummaries(await visibleWorks(a));
+    for (const w of summaries) out.push({ work: w, homeName: a.home.name, myRole: a.role });
+  }
+  out.sort((x, y) => (y.work.startDate ?? y.work.updatedAt).localeCompare(x.work.startDate ?? x.work.updatedAt));
+  res.json(out);
 });
 
 router.get("/me/works", async (req, res): Promise<void> => {

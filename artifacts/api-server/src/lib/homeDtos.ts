@@ -115,7 +115,8 @@ export async function workSummaries(works: WorkRow[]) {
       }),
       mediaCount: mediaCounts.find((m) => m.workId === w.id)?.n ?? 0,
       openDefects: Math.max(0, defects - fixes),
-      inspected: !!w.inspectedAt, visibility: w.visibility, updatedAt: w.updatedAt.toISOString(),
+      inspected: !!w.inspectedAt, visibility: w.visibility, materials: w.materials, description: w.description.slice(0, 300),
+      createdAt: w.createdAt.toISOString(), updatedAt: w.updatedAt.toISOString(),
     };
   });
 }
@@ -150,6 +151,9 @@ export async function workDetail(access: WorkAccess, userId: string) {
     id: work.id, homeId: work.homeId, homeName: homeAccess.home.name, title: work.title, category: work.category, kind: work.kind, status: work.status,
     description: work.description, materials: work.materials, location: work.location, startDate: dateStr(work.startDate), endDate: dateStr(work.endDate),
     roomId: work.roomId, roomName: room?.name ?? null, equipmentId: work.equipmentId, equipmentName: equipment?.name ?? null, visibility: work.visibility,
+    // Private household notes: cost and warranty only for members of the home.
+    cost: homeAccess.memberRole ? work.cost ?? null : null, currency: work.currency, warrantyNote: homeAccess.memberRole ? work.warrantyNote : "",
+    addedByMe: work.createdByUserId === userId, addedByRole: approvals.find((x) => x.action === "created")?.actorRole ?? "owner",
     smetaProjectId: smeta ? work.smetaProjectId : null, smetaProjectName: smeta?.name ?? null,
     completedAt: iso(work.completedAt), confirmedAt: iso(work.confirmedAt), inspectedAt: iso(work.inspectedAt),
     participants: visibleParts.map((p) => {

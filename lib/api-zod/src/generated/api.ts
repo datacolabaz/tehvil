@@ -8504,6 +8504,7 @@ export const ListHomesResponseItem = zod.object({
   "propertyType": zod.string(),
   "city": zod.string(),
   "district": zod.string(),
+  "address": zod.string(),
   "stage": zod.string(),
   "coverUrl": zod.string().nullable(),
   "myRole": zod.string(),
@@ -8639,6 +8640,9 @@ export const CreateHomeResponse = zod.object({
   "openDefects": zod.number().int(),
   "inspected": zod.boolean(),
   "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 })),
   "performers": zod.array(zod.object({
@@ -8755,6 +8759,9 @@ export const GetHomeOverviewResponse = zod.object({
   "openDefects": zod.number().int(),
   "inspected": zod.boolean(),
   "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 })),
   "performers": zod.array(zod.object({
@@ -8906,6 +8913,9 @@ export const UpdateHomeResponse = zod.object({
   "openDefects": zod.number().int(),
   "inspected": zod.boolean(),
   "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 })),
   "performers": zod.array(zod.object({
@@ -9033,6 +9043,9 @@ export const GetHomeRoomResponse = zod.object({
   "openDefects": zod.number().int(),
   "inspected": zod.boolean(),
   "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 })),
   "equipment": zod.array(zod.object({
@@ -9253,6 +9266,9 @@ export const ListWorksResponseItem = zod.object({
   "openDefects": zod.number().int(),
   "inspected": zod.boolean(),
   "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 })
 export const ListWorksResponse = zod.array(ListWorksResponseItem)
@@ -9277,6 +9293,9 @@ export const createWorkBodyMaterialsMax = 3000;
 export const createWorkBodyLocationMin = 0;
 export const createWorkBodyLocationMax = 2000;
 
+export const createWorkBodyWarrantyNoteMin = 0;
+export const createWorkBodyWarrantyNoteMax = 2000;
+
 
 
 export const CreateWorkBody = zod.object({
@@ -9292,7 +9311,10 @@ export const CreateWorkBody = zod.object({
   "endDate": zod.string().date().nullish(),
   "visibility": zod.enum(['public', 'private']).optional(),
   "status": zod.enum(['planned', 'in_progress', 'completed']).optional(),
-  "smetaProjectId": zod.string().uuid().nullish()
+  "smetaProjectId": zod.string().uuid().nullish(),
+  "cost": zod.number().nullish(),
+  "currency": zod.enum(['AZN', 'USD', 'EUR']).optional(),
+  "warrantyNote": zod.string().min(createWorkBodyWarrantyNoteMin).max(createWorkBodyWarrantyNoteMax).optional()
 })
 
 export const CreateWorkResponse = zod.object({
@@ -9313,6 +9335,11 @@ export const CreateWorkResponse = zod.object({
   "equipmentId": zod.string().nullable(),
   "equipmentName": zod.string().nullable(),
   "visibility": zod.string(),
+  "cost": zod.number().nullable(),
+  "currency": zod.string(),
+  "warrantyNote": zod.string(),
+  "addedByMe": zod.boolean(),
+  "addedByRole": zod.string(),
   "smetaProjectId": zod.string().nullable(),
   "smetaProjectName": zod.string().nullable(),
   "completedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -9477,7 +9504,7 @@ export const CreateInfrastructureBody = zod.object({
   "roomId": zod.string().uuid().nullish(),
   "workId": zod.string().uuid().nullish(),
   "mediaId": zod.string().uuid().nullish(),
-  "type": zod.enum(['electric', 'water', 'sewer', 'heating', 'gas', 'ventilation', 'internet', 'other']),
+  "type": zod.enum(['electric', 'water', 'sewer', 'heating', 'gas', 'ventilation', 'internet', 'meter', 'valve', 'electrical_panel', 'other']),
   "label": zod.string().min(createInfrastructureBodyLabelMin).max(createInfrastructureBodyLabelMax).optional(),
   "notes": zod.string().min(createInfrastructureBodyNotesMin).max(createInfrastructureBodyNotesMax).optional(),
   "points": zod.array(zod.object({
@@ -9531,7 +9558,7 @@ export const UpdateInfrastructureBody = zod.object({
   "roomId": zod.string().uuid().nullish(),
   "workId": zod.string().uuid().nullish(),
   "mediaId": zod.string().uuid().nullish(),
-  "type": zod.enum(['electric', 'water', 'sewer', 'heating', 'gas', 'ventilation', 'internet', 'other']),
+  "type": zod.enum(['electric', 'water', 'sewer', 'heating', 'gas', 'ventilation', 'internet', 'meter', 'valve', 'electrical_panel', 'other']),
   "label": zod.string().min(updateInfrastructureBodyLabelMin).max(updateInfrastructureBodyLabelMax).optional(),
   "notes": zod.string().min(updateInfrastructureBodyNotesMin).max(updateInfrastructureBodyNotesMax).optional(),
   "points": zod.array(zod.object({
@@ -9978,6 +10005,49 @@ export const RevokeHomeShareResponse = zod.object({
 
 
 /**
+ * @summary AI Smeta estimates saved in this home (planned work, not history)
+ */
+export const ListHomeSmetasParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListHomeSmetasResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "areaM2": zod.number().nullable(),
+  "status": zod.string(),
+  "mine": zod.boolean(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListHomeSmetasResponse = zod.array(ListHomeSmetasResponseItem)
+
+
+/**
+ * @summary Save one of my estimates in this home, or remove it
+ */
+export const LinkHomeSmetaParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const LinkHomeSmetaBody = zod.object({
+  "smetaProjectId": zod.string().uuid(),
+  "linked": zod.boolean()
+})
+
+export const LinkHomeSmetaResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "areaM2": zod.number().nullable(),
+  "status": zod.string(),
+  "mine": zod.boolean(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const LinkHomeSmetaResponse = zod.array(LinkHomeSmetaResponseItem)
+
+
+/**
  * @summary Audit trail (owner and technician)
  */
 export const ListHomeAuditParams = zod.object({
@@ -10023,6 +10093,11 @@ export const GetWorkResponse = zod.object({
   "equipmentId": zod.string().nullable(),
   "equipmentName": zod.string().nullable(),
   "visibility": zod.string(),
+  "cost": zod.number().nullable(),
+  "currency": zod.string(),
+  "warrantyNote": zod.string(),
+  "addedByMe": zod.boolean(),
+  "addedByRole": zod.string(),
   "smetaProjectId": zod.string().nullable(),
   "smetaProjectName": zod.string().nullable(),
   "completedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -10132,6 +10207,9 @@ export const updateWorkBodyMaterialsMax = 3000;
 export const updateWorkBodyLocationMin = 0;
 export const updateWorkBodyLocationMax = 2000;
 
+export const updateWorkBodyWarrantyNoteMin = 0;
+export const updateWorkBodyWarrantyNoteMax = 2000;
+
 
 
 export const UpdateWorkBody = zod.object({
@@ -10147,7 +10225,10 @@ export const UpdateWorkBody = zod.object({
   "endDate": zod.string().date().nullish(),
   "visibility": zod.enum(['public', 'private']).optional(),
   "status": zod.enum(['planned', 'in_progress', 'completed']).optional(),
-  "smetaProjectId": zod.string().uuid().nullish()
+  "smetaProjectId": zod.string().uuid().nullish(),
+  "cost": zod.number().nullish(),
+  "currency": zod.enum(['AZN', 'USD', 'EUR']).optional(),
+  "warrantyNote": zod.string().min(updateWorkBodyWarrantyNoteMin).max(updateWorkBodyWarrantyNoteMax).optional()
 })
 
 export const UpdateWorkResponse = zod.object({
@@ -10168,6 +10249,11 @@ export const UpdateWorkResponse = zod.object({
   "equipmentId": zod.string().nullable(),
   "equipmentName": zod.string().nullable(),
   "visibility": zod.string(),
+  "cost": zod.number().nullable(),
+  "currency": zod.string(),
+  "warrantyNote": zod.string(),
+  "addedByMe": zod.boolean(),
+  "addedByRole": zod.string(),
   "smetaProjectId": zod.string().nullable(),
   "smetaProjectName": zod.string().nullable(),
   "completedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -10293,6 +10379,11 @@ export const ChangeWorkStatusResponse = zod.object({
   "equipmentId": zod.string().nullable(),
   "equipmentName": zod.string().nullable(),
   "visibility": zod.string(),
+  "cost": zod.number().nullable(),
+  "currency": zod.string(),
+  "warrantyNote": zod.string(),
+  "addedByMe": zod.boolean(),
+  "addedByRole": zod.string(),
   "smetaProjectId": zod.string().nullable(),
   "smetaProjectName": zod.string().nullable(),
   "completedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -10418,6 +10509,11 @@ export const AddWorkNoteResponse = zod.object({
   "equipmentId": zod.string().nullable(),
   "equipmentName": zod.string().nullable(),
   "visibility": zod.string(),
+  "cost": zod.number().nullable(),
+  "currency": zod.string(),
+  "warrantyNote": zod.string(),
+  "addedByMe": zod.boolean(),
+  "addedByRole": zod.string(),
   "smetaProjectId": zod.string().nullable(),
   "smetaProjectName": zod.string().nullable(),
   "completedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -10534,7 +10630,8 @@ export const AddWorkParticipantBody = zod.object({
   "placeholder": zod.object({
   "name": zod.string().min(addWorkParticipantBodyPlaceholderNameMin).max(addWorkParticipantBodyPlaceholderNameMax),
   "phone": zod.string().min(addWorkParticipantBodyPlaceholderPhoneMin).max(addWorkParticipantBodyPlaceholderPhoneMax).optional(),
-  "specialty": zod.string().min(addWorkParticipantBodyPlaceholderSpecialtyMin).max(addWorkParticipantBodyPlaceholderSpecialtyMax).optional()
+  "specialty": zod.string().min(addWorkParticipantBodyPlaceholderSpecialtyMin).max(addWorkParticipantBodyPlaceholderSpecialtyMax).optional(),
+  "kind": zod.enum(['individual', 'company']).optional()
 }).optional(),
   "role": zod.enum(['lead', 'team_lead', 'team_member', 'assistant', 'supervisor', 'inspector']),
   "viaTeamId": zod.string().uuid().nullish(),
@@ -10559,6 +10656,11 @@ export const AddWorkParticipantResponse = zod.object({
   "equipmentId": zod.string().nullable(),
   "equipmentName": zod.string().nullable(),
   "visibility": zod.string(),
+  "cost": zod.number().nullable(),
+  "currency": zod.string(),
+  "warrantyNote": zod.string(),
+  "addedByMe": zod.boolean(),
+  "addedByRole": zod.string(),
   "smetaProjectId": zod.string().nullable(),
   "smetaProjectName": zod.string().nullable(),
   "completedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -10689,6 +10791,11 @@ export const UpdateWorkParticipantResponse = zod.object({
   "equipmentId": zod.string().nullable(),
   "equipmentName": zod.string().nullable(),
   "visibility": zod.string(),
+  "cost": zod.number().nullable(),
+  "currency": zod.string(),
+  "warrantyNote": zod.string(),
+  "addedByMe": zod.boolean(),
+  "addedByRole": zod.string(),
   "smetaProjectId": zod.string().nullable(),
   "smetaProjectName": zod.string().nullable(),
   "completedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -10817,6 +10924,11 @@ export const CreateReviewResponse = zod.object({
   "equipmentId": zod.string().nullable(),
   "equipmentName": zod.string().nullable(),
   "visibility": zod.string(),
+  "cost": zod.number().nullable(),
+  "currency": zod.string(),
+  "warrantyNote": zod.string(),
+  "addedByMe": zod.boolean(),
+  "addedByRole": zod.string(),
   "smetaProjectId": zod.string().nullable(),
   "smetaProjectName": zod.string().nullable(),
   "completedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -11034,6 +11146,9 @@ export const GetMyInboxResponse = zod.object({
   "openDefects": zod.number().int(),
   "inspected": zod.boolean(),
   "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 }),
   "homeName": zod.string()
@@ -11067,6 +11182,9 @@ export const ListMyHomeWorksResponseItem = zod.object({
   "openDefects": zod.number().int(),
   "inspected": zod.boolean(),
   "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 }),
   "homeName": zod.string(),
@@ -11113,6 +11231,9 @@ export const ListMyWorksResponseItem = zod.object({
   "openDefects": zod.number().int(),
   "inspected": zod.boolean(),
   "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
   "updatedAt": zod.string().datetime({"offset":true})
 }),
   "homeName": zod.string(),
@@ -12162,7 +12283,7 @@ export const AttachHomeMediaBody = zod.object({
   "roomId": zod.string().uuid().nullish(),
   "workerId": zod.string().uuid().nullish(),
   "caption": zod.string().min(attachHomeMediaBodyCaptionMin).max(attachHomeMediaBodyCaptionMax).optional(),
-  "phase": zod.enum(['before', 'during', 'after', 'hidden', 'other']).optional()
+  "phase": zod.enum(['before', 'during', 'after', 'hidden', 'other', 'document']).optional()
 })
 
 export const AttachHomeMediaResponseItem = zod.object({

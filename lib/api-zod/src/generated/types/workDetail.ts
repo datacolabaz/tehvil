@@ -37,6 +37,12 @@ export interface WorkDetail {
   equipmentName: string | null;
   visibility: string;
   /** @nullable */
+  cost: number | null;
+  currency: string;
+  warrantyNote: string;
+  addedByMe: boolean;
+  addedByRole: string;
+  /** @nullable */
   smetaProjectId: string | null;
   /** @nullable */
   smetaProjectName: string | null;

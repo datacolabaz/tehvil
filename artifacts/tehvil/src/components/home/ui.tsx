@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { Link } from 'wouter';
-import { BadgeCheck, Building, Camera, CircleDashed, ClipboardCheck, HardHat, ImagePlus, LoaderCircle, Play, ShieldCheck, Trash2, UserRound, UsersRound, X } from 'lucide-react';
+import { BadgeCheck, Building, Camera, CircleDashed, ClipboardCheck, FileText, HardHat, ImagePlus, LoaderCircle, Play, ShieldCheck, Trash2, UserRound, UsersRound, X } from 'lucide-react';
 import { useSearchWorkers, type HomeMedia, type HomeMediaAttachInputPhase, type WorkerRef } from '@workspace/api-client-react';
 import { Pill } from '@/components/smeta/ui';
 import { useHomeUpload } from '@/lib/home/upload';
@@ -51,10 +51,12 @@ export function MediaGrid({ media, onDelete, canDelete }: { media: HomeMedia[]; 
   if (!media.length) return null;
   return <>
     <div className="hp-media-grid">{media.map(m => <figure key={m.id} className="hp-media">
-      <button type="button" onClick={() => setOpen(m)} aria-label={`${PHASE[m.phase] ?? ''} ${m.caption || m.originalName}`}>
-        {m.contentType.startsWith('video/') ? <span className="hp-video"><Play size={22} /></span> : <img src={m.url} alt={m.caption || m.originalName} loading="lazy" />}
-      </button>
-      <figcaption><span className={`hp-phase ph-${m.phase}`}>{PHASE[m.phase] ?? m.phase}</span>{m.caption && <small>{m.caption}</small>}</figcaption>
+      {m.contentType === 'application/pdf'
+        ? <a className="hp-file-tile" href={m.url} target="_blank" rel="noreferrer" title={m.originalName}><FileText size={24} /><span>{m.caption || m.originalName}</span></a>
+        : <button type="button" onClick={() => setOpen(m)} aria-label={`${PHASE[m.phase] ?? ''} ${m.caption || m.originalName}`}>
+          {m.contentType.startsWith('video/') ? <span className="hp-video"><Play size={22} /></span> : <img src={m.url} alt={m.caption || m.originalName} loading="lazy" />}
+        </button>}
+      <figcaption>{m.contentType !== 'application/pdf' && <span className={`hp-phase ph-${m.phase}`}>{PHASE[m.phase] ?? m.phase}</span>}{m.caption && <small>{m.caption}</small>}</figcaption>
       {onDelete && canDelete?.(m) && <button type="button" className="hp-media-del" aria-label="Faylı gizlət" title="Gizlət" onClick={() => onDelete(m)}><Trash2 size={13} /></button>}
     </figure>)}</div>
     {open && <div className="hp-lightbox" role="dialog" aria-modal="true" onClick={() => setOpen(null)}>
@@ -66,7 +68,7 @@ export function MediaGrid({ media, onDelete, canDelete }: { media: HomeMedia[]; 
 }
 
 /** Upload photos / videos to a work, room, home or profile. */
-export function MediaUpload({ target, onDone, phases = true, videos = true, label = 'Foto əlavə et' }: { target: { homeId?: string; workId?: string; roomId?: string; workerId?: string }; onDone: (m: HomeMedia[]) => void; phases?: boolean; videos?: boolean; label?: string }) {
+export function MediaUpload({ target, onDone, phases = true, videos = true, label = 'Foto və ya fayl əlavə et' }: { target: { homeId?: string; workId?: string; roomId?: string; workerId?: string }; onDone: (m: HomeMedia[]) => void; phases?: boolean; videos?: boolean; label?: string }) {
   const { upload, busy, error } = useHomeUpload();
   const [phase, setPhase] = useState('after');
   const [caption, setCaption] = useState('');
@@ -85,7 +87,7 @@ export function MediaUpload({ target, onDone, phases = true, videos = true, labe
     </div>}
     <div className="hp-upload-btns">
       <label className={`button button-secondary ${busy ? 'busy' : ''}`}>
-        <input ref={input} type="file" hidden data-testid="input-home-media" accept={videos ? 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime' : 'image/jpeg,image/png,image/webp,image/gif'} multiple onChange={e => { void add(e.target.files); }} disabled={busy} />
+        <input ref={input} type="file" hidden data-testid="input-home-media" accept={videos ? 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,application/pdf' : 'image/jpeg,image/png,image/webp,image/gif'} multiple onChange={e => { void add(e.target.files); }} disabled={busy} />
         {busy ? <LoaderCircle className="spin" size={15} /> : <ImagePlus size={15} />}{busy ? 'Yüklənir…' : label}
       </label>
       <label className="button button-quiet" title="Kamera ilə çək">

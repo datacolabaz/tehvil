@@ -11,9 +11,9 @@ import {
   type ParticipantInputRole, type WorkDetail, type WorkInput, type WorkNoteInputKind, type WorkStatusInputAction, type WorkerRef,
 } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
-import { CopyButton, HomeToaster, MediaGrid, MediaUpload, Modal, Pill, Seg, Select, Skeleton, WorkStatus, WorkTrust, WorkerLine, WorkerSearch, opts, toast } from '@/components/home/ui';
+import { CopyButton, HomeToaster, MediaGrid, MediaUpload, Modal, Pill, Seg, Select, Skeleton, WorkStatus, WorkerLine, WorkerSearch, opts, toast } from '@/components/home/ui';
 import {
-  NOTE_KIND, PART_ROLE, PART_ROLES, PART_STATUS, PART_TONE, ROOM_KIND, WORK_CATEGORY, WORK_KIND, WORK_STATUS, day, dayTime, range, refreshHomeData,
+  CURRENCY, addedBy, money, NOTE_KIND, PART_ROLE, PART_ROLES, PART_STATUS, PART_TONE, ROOM_KIND, WORK_CATEGORY, WORK_KIND, WORK_STATUS, day, dayTime, range, refreshHomeData,
 } from '@/lib/home/labels';
 
 const STATUS_ACTIONS: { action: WorkStatusInputAction; perm: keyof WorkDetail['permissions']; label: string; icon: typeof Play; tone: string }[] = [
@@ -52,7 +52,12 @@ export function WorkPage({ workId }: { workId: string }) {
       description={[range(w.startDate, w.endDate), w.roomName, w.visibility === 'private' ? 'Şəxsi qeyd (QR-da göstərilmir)' : ''].filter(Boolean).join(' · ')}
       action={p.edit ? <button type="button" className="button button-secondary" onClick={() => setEditing(true)} data-testid="button-edit-work"><Pencil size={15} />Məlumatı dəyiş</button> : undefined} />
     <div className="hp-work-status surface">
-      <div><WorkStatus status={w.status} /><WorkTrust accepted={accepted} confirmed={w.status === 'confirmed'} inspected={!!w.inspectedAt} /></div>
+      <div><WorkStatus status={w.status} />
+        {/* Provenance first; a confirmation badge appears only when another person really confirmed something. */}
+        <span className="hp-provenance">{addedBy(w.addedByRole, w.addedByMe)} · {dayTime(w.createdAt)}</span>
+        {accepted && <span className="hp-badge reg">Usta iştirakını təsdiqləyib</span>}
+        {w.approvals.some(x => x.action === 'confirm') && <span className="hp-badge reg">Ev sahibi qəbul edib</span>}
+        {!!w.inspectedAt && <span className="hp-badge reg">Mütəxəssis yoxlayıb</span>}</div>
       <div className="hp-actions">{STATUS_ACTIONS.filter(a => p[a.perm]).map(a => <button key={a.action} type="button" className={`button button-${a.tone}`} disabled={status.isPending} data-testid={`button-status-${a.action}`}
         onClick={() => (a.action === 'request_revision' || a.action === 'reopen') ? setStatusNote(a.action) : doStatus(a.action)}><a.icon size={15} />{a.label}</button>)}</div>
       {w.status === 'completed' && owner && <p className="rl-hint">Usta işin bitdiyini qeyd edib. Fotolara baxın və təsdiqləyin və ya düzəliş istəyin. Təsdiqlədikdən sonra icraçılar bu işi dəyişə bilməz.</p>}
@@ -64,10 +69,12 @@ export function WorkPage({ workId }: { workId: string }) {
 
     <div className="hp-work-layout">
       <div className="hp-work-main">
-        {(w.description || w.materials || w.location) && <section className="surface hp-section">
-          <h2>İşin təsviri</h2>
+        {(w.description || w.materials || w.location || w.cost != null || w.warrantyNote) && <section className="surface hp-section">
+          <h2>Təsvir</h2>
           {w.description && <p className="hp-text">{w.description}</p>}
-          {w.materials && <div className="hp-kv"><span>Materiallar</span><p>{w.materials}</p></div>}
+          {w.materials && <div className="hp-kv"><span>Material və avadanlıq</span><p>{w.materials}</p></div>}
+          {w.cost != null && <div className="hp-kv"><span>Xərc (faktiki)</span><p>{money(w.cost, w.currency)}</p></div>}
+          {w.warrantyNote && <div className="hp-kv"><span>Zəmanət</span><p>{w.warrantyNote}</p></div>}
           {w.location && <div className="hp-kv"><span><MapPin size={12} className="sm-ii" /> Xətlərin yeri (sözlə)</span><p>{w.location}</p></div>}
         </section>}
 
@@ -79,12 +86,11 @@ export function WorkPage({ workId }: { workId: string }) {
         </section>
 
         <NotesSection w={w} onChanged={refresh} />
-        <ReviewsSection w={w} onChanged={refresh} />
       </div>
 
       <aside className="hp-work-aside">
         <section className="surface hp-section">
-          <div className="section-head"><h2 id="people">Usta və şirkətlər</h2>{p.manageParticipants && <button type="button" className="button button-secondary sm-btn-sm" onClick={() => setAdding(true)} data-testid="button-add-participant"><Plus size={14} />Ustanı işə əlavə et</button>}</div>
+          <div className="section-head"><h2 id="people">İşi görən</h2>{p.manageParticipants && <button type="button" className="button button-secondary sm-btn-sm" onClick={() => setAdding(true)} data-testid="button-add-participant"><Plus size={14} />Ustanı işə əlavə et</button>}</div>
           {!w.participants.length && <p className="rl-hint">Bu işə hələ usta əlavə olunmayıb.</p>}
           <div className="hp-plist">{w.participants.map(x => <ParticipantRow key={x.id} w={w} x={x} onChanged={refresh} />)}</div>
           <p className="rl-hint">Briqadanın hamısı avtomatik əlavə olunmur — yalnız bu işdə həqiqətən işləyənləri əlavə edin.</p>
@@ -153,34 +159,32 @@ function AddParticipantModal({ w, onClose, onChanged }: { w: WorkDetail; onClose
   const owner = w.myRole === 'owner' || w.myRole === 'member';
   const myTeam = w.participants.find(x => x.isMe && x.status === 'accepted' && x.worker.kind !== 'individual');
   const team = useGetWorker(myTeam?.worker.id ?? '', { query: { enabled: !owner && !!myTeam, queryKey: [`/api/workers/${myTeam?.worker.id}`] } });
-  const [tab, setTab] = useState<'registered' | 'placeholder' | 'link'>(owner ? 'registered' : 'registered');
+  const [tab, setTab] = useState<'registered' | 'placeholder' | 'link'>('placeholder');
   const [role, setRole] = useState<ParticipantInputRole>(owner ? 'lead' : 'team_member');
   const [picked, setPicked] = useState<WorkerRef | null>(null);
-  const [ph, setPh] = useState({ name: '', phone: '', specialty: '' });
+  const [ph, setPh] = useState({ name: '', phone: '', specialty: '', note: '', company: false });
   const [inv, setInv] = useState({ name: '', contact: '' });
   const [link, setLink] = useState('');
   const existing = w.participants.filter(x => x.status !== 'removed' && x.status !== 'declined').map(x => x.worker.id);
   const done = () => { onChanged(); toast('Usta işə əlavə olundu'); onClose(); };
   const roles = (owner ? PART_ROLES : ['team_lead', 'team_member', 'assistant'] as const).map(r => [r, PART_ROLE[r]] as [ParticipantInputRole, string]);
   return <Modal open onClose={onClose} eyebrow={w.title} title="Ustanı işə əlavə et" wide>
-    {owner && <div className="rl-seg hp-tabs" role="tablist">{([['registered', 'Hesabı olan usta'], ['placeholder', 'Hesabı olmayan usta'], ['link', 'Link göndər']] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>}
+    {owner && <div className="rl-seg hp-tabs" role="tablist">{([['placeholder', 'Ad və telefon'], ['link', 'Link ilə dəvət et']] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>}
     <Select label="Bu işdəki rolu" name="participant-role" value={role} onChange={v => setRole(v as ParticipantInputRole)} options={roles} />
     {!owner && myTeam && <>
       <p className="rl-hint">Yalnız “{myTeam.worker.displayName}” komandasının aktiv üzvlərini əlavə edə bilərsiniz. Hər üzv iştirakını öz hesabından təsdiqləyəcək.</p>
       <div className="hp-search-list">{(team.data?.members ?? []).filter(m => m.status === 'active' && m.member.kind === 'individual' && !existing.includes(m.member.id)).map(m => <button key={m.id} type="button" className="hp-search-item" data-testid={`pick-member-${m.member.id}`} disabled={add.isPending}
         onClick={() => add.mutate({ workId: w.id, data: { workerId: m.member.id, role, viaTeamId: myTeam.worker.id } }, { onSuccess: done })}><span><strong>{m.member.displayName}</strong><small>{m.member.specialties.join(', ')}</small></span><Plus size={15} /></button>)}</div>
     </>}
-    {owner && tab === 'registered' && (picked ? <div className="hp-picked"><WorkerLine w={picked} right={<button type="button" className="icon-button" aria-label="Dəyiş" onClick={() => setPicked(null)}><X size={15} /></button>} />
-      <button type="button" className="button button-primary full-button" disabled={add.isPending} data-testid="button-invite-worker" onClick={() => add.mutate({ workId: w.id, data: { workerId: picked.id, role } }, { onSuccess: done })}>{add.isPending && <LoaderCircle className="spin" size={15} />}Dəvət göndər</button>
-      <small className="rl-hint">Usta dəvəti “Mənə göndərilən dəvətlər” bölməsində görəcək. Təsdiqləyəndən sonra yanında “İşdə iştirakını təsdiqləyib” yazılacaq.</small></div>
-      : <WorkerSearch onPick={setPicked} exclude={existing} />)}
-    {owner && tab === 'placeholder' && <form className="rl-form" onSubmit={(e: FormEvent) => { e.preventDefault(); add.mutate({ workId: w.id, data: { placeholder: { name: ph.name.trim(), phone: ph.phone.trim(), specialty: ph.specialty.trim() }, role } }, { onSuccess: done }); }}>
-      <p className="rl-hint">Ustanın Təhvil-də hesabı yoxdursa, adını və telefonunu yazın. Yanında “Hesabı yoxdur” görünəcək, telefonu yalnız siz görəcəksiniz. Sonra ona link göndərib bu qeydi onun hesabına bağlaya bilərsiniz.</p>
+    {owner && tab === 'placeholder' && <form className="rl-form" onSubmit={(e: FormEvent) => { e.preventDefault(); add.mutate({ workId: w.id, data: { placeholder: { name: ph.name.trim(), phone: ph.phone.trim(), specialty: ph.specialty.trim(), kind: ph.company ? 'company' : 'individual' }, role, note: ph.note.trim() } }, { onSuccess: done }); }}>
+      <p className="rl-hint">İşi görən usta və ya şirkətin adını və telefonunu yazın — onun Təhvil-də hesabı olmasına ehtiyac yoxdur. Bu sizin qeydinizdir və heç bir hesaba avtomatik bağlanmır; telefonu yalnız evə girişi olanlar görür.</p>
       <div className="field-grid three">
-        <Field label="Ad, soyad" name="ph-name" required value={ph.name} onChange={v => setPh({ ...ph, name: v })} />
+        <Field label={ph.company ? 'Şirkətin adı' : 'Ustanın adı'} name="ph-name" required value={ph.name} onChange={v => setPh({ ...ph, name: v })} />
         <Field label="Telefon (məxfi)" name="ph-phone" type="tel" value={ph.phone} onChange={v => setPh({ ...ph, phone: v })} />
         <Field label="İxtisas" name="ph-specialty" value={ph.specialty} onChange={v => setPh({ ...ph, specialty: v })} placeholder="məs. santexnik" />
       </div>
+      <label className="rl-check"><input type="checkbox" checked={ph.company} onChange={e => setPh({ ...ph, company: e.target.checked })} /><span>Bu şirkətdir</span></label>
+      <Field label="Qeyd" name="ph-note" value={ph.note} onChange={v => setPh({ ...ph, note: v })} />
       <button type="submit" className="button button-primary full-button" disabled={add.isPending || ph.name.trim().length < 2} data-testid="button-add-placeholder">Qeyd et</button>
     </form>}
     {owner && tab === 'link' && (link ? <div className="hp-linkbox"><small>Linki ustaya göndərin (WhatsApp, SMS). Usta qeydiyyatdan keçib və ya daxil olub təsdiqləyəndə bu işə öz profili ilə qoşulacaq. Link 14 gün etibarlıdır və bir dəfə istifadə olunur.</small><code>{link}</code><CopyButton text={link} />
@@ -242,7 +246,7 @@ function ReviewsSection({ w, onChanged }: { w: WorkDetail; onChanged: () => void
 
 /* ------------------------------------------------------------------ form */
 
-const blank = { title: '', category: 'general', kind: 'renovation', roomId: '', equipmentId: '', description: '', materials: '', location: '', startDate: '', endDate: '', visibility: 'public', status: 'planned', smetaProjectId: '' };
+const blank = { title: '', category: 'general', kind: 'renovation', roomId: '', equipmentId: '', description: '', materials: '', location: '', startDate: '', endDate: '', visibility: 'public', status: 'planned', smetaProjectId: '', cost: '', currency: 'AZN', warrantyNote: '' };
 
 export function WorkFormModal({ homeId, work, onClose, onSaved, roomId, kind }: { homeId: string; work?: WorkDetail; onClose: () => void; onSaved: (id: string) => void; roomId?: string; kind?: string }) {
   const create = useCreateWork();
@@ -250,16 +254,18 @@ export function WorkFormModal({ homeId, work, onClose, onSaved, roomId, kind }: 
   const home = useGetHomeOverview(homeId);
   const equipment = useListEquipment(homeId);
   const owner = home.data?.home.myRole === 'owner';
+  const isMember = !!home.data && home.data.home.myRole !== 'performer';
   const smeta = useListSmetaProjects({ query: { enabled: owner, queryKey: ['/api/smeta/projects'] } });
   const [form, setForm] = useState(() => work ? {
     title: work.title, category: work.category, kind: work.kind, roomId: work.roomId ?? '', equipmentId: work.equipmentId ?? '', description: work.description, materials: work.materials,
-    location: work.location, startDate: work.startDate ?? '', endDate: work.endDate ?? '', visibility: work.visibility, status: 'planned', smetaProjectId: work.smetaProjectId ?? '',
+    location: work.location, startDate: work.startDate ?? '', endDate: work.endDate ?? '', visibility: work.visibility, status: 'planned', smetaProjectId: work.smetaProjectId ?? '', cost: work.cost != null ? String(work.cost) : '', currency: work.currency || 'AZN', warrantyNote: work.warrantyNote,
   } : { ...blank, roomId: roomId ?? '', kind: kind ?? blank.kind });
   const set = (k: keyof typeof blank) => (v: string) => setForm(o => ({ ...o, [k]: v }));
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const data: WorkInput = {
       title: form.title.trim(), category: form.category as WorkInput['category'], kind: form.kind as WorkInput['kind'], roomId: form.roomId || null, equipmentId: form.equipmentId || null,
+      ...(isMember ? { cost: form.cost.trim() ? Math.max(0, Number(form.cost.replace(',', '.')) || 0) : null, currency: form.currency as WorkInput['currency'], warrantyNote: form.warrantyNote } : {}),
       description: form.description, materials: form.materials, location: form.location, startDate: form.startDate || null, endDate: form.endDate || null, visibility: form.visibility as WorkInput['visibility'],
       ...(work ? {} : { status: form.status as WorkInput['status'] }), ...(owner ? { smetaProjectId: form.smetaProjectId || null } : {}),
     };
@@ -283,7 +289,12 @@ export function WorkFormModal({ homeId, work, onClose, onSaved, roomId, kind }: 
         {!work ? <Select label="Status" name="work-status" value={form.status} onChange={set('status')} options={[['planned', WORK_STATUS.planned], ['in_progress', WORK_STATUS.in_progress]]} />
           : <Select label="Görünmə" name="work-visibility" value={form.visibility} onChange={set('visibility')} options={[['public', 'QR-da göstərilə bilər'], ['private', 'Şəxsi qeyd']]} />}
       </div>
-      <Field label="Görülən işin təsviri" name="work-description"><textarea rows={3} maxLength={6000} value={form.description} onChange={e => set('description')(e.target.value)} /></Field>
+      {isMember && <div className="field-grid three">
+        <Field label="Xərc" name="edit-cost" type="number" min="0" step="0.01" value={form.cost} onChange={set('cost')} />
+        <Select label="Valyuta" name="edit-currency" value={form.currency} onChange={set('currency')} options={CURRENCY.map(c => [c, c])} />
+        <Field label="Zəmanət" name="edit-warranty" value={form.warrantyNote} onChange={set('warrantyNote')} />
+      </div>}
+      <Field label="Qısa təsvir" name="work-description"><textarea rows={3} maxLength={6000} value={form.description} onChange={e => set('description')(e.target.value)} /></Field>
       <div className="field-grid">
         <Field label="Materiallar" name="work-materials"><textarea rows={2} maxLength={3000} value={form.materials} onChange={e => set('materials')(e.target.value)} placeholder="məs. VVG 3×2.5 kabel, Schneider avtomatlar" /></Field>
         <Field label="Gizli xətlərin yeri (sözlə)" name="work-location"><textarea rows={2} maxLength={2000} value={form.location} onChange={e => set('location')(e.target.value)} placeholder="məs. Sol divar boyunca döşəmədən 30 sm" /></Field>

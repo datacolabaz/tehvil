@@ -42,20 +42,30 @@ export function MyWorksPage() {
   </>;
 }
 
-/** "Təmir tarixçəsi" across all homes the account owns or manages. */
+/** "İş tarixçəsi" across all homes the account owns or manages. */
 export function AllHistoryPage() {
   const q = useListMyHomeWorks();
   const [adding, setAdding] = useState(false);
+  const [homeF, setHomeF] = useState('');
+  const [yearF, setYearF] = useState('');
   const [, setLocation] = useLocation();
   if (q.isLoading) return <Skeleton rows={3} />;
-  const list = q.data ?? [];
-  const homes = new Set(list.map(x => x.homeName));
+  const all = q.data ?? [];
+  const homes = [...new Map(all.map(x => [x.work.homeId, x.homeName])).entries()];
+  const year = (x: typeof all[number]) => (x.work.startDate ?? x.work.createdAt ?? '').slice(0, 4);
+  const years = [...new Set(all.map(year).filter(Boolean))].sort().reverse();
+  const list = all.filter(x => (!homeF || x.work.homeId === homeF) && (!yearF || year(x) === yearF));
   return <>
-    <PageHeading eyebrow="Bütün evlərim" title="Təmir tarixçəsi" description="Evlərinizdə görülən bütün işlər, tarix üzrə. İşə toxunun — fotolar, qeydlər və təsdiqlər açılacaq."
-      action={<button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-history-add"><Plus size={16} />Görülən işi əlavə et</button>} />
-    {!list.length ? <Empty icon={<ClipboardCheck size={28} />} title="Hələ görülən iş yoxdur" text="Evinizi əlavə edin, sonra görülən işləri bir neçə düymə ilə qeyd edin." action={<Link href="/homes?new=1" className="button button-primary"><Plus size={16} />Evimi əlavə et</Link>} />
-      : <div className="hp-wlist">{list.map(x => <WorkRow key={x.work.id} w={x.work} showHome={homes.size > 1 ? x.homeName : undefined} />)}</div>}
-    {adding && <QuickWorkModal onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
+    <PageHeading eyebrow="Bütün evlərim" title="İş tarixçəsi" description="Evlərinizdə görülən bütün işlər, tarix üzrə. Eyni məlumatlar evin “İşlər və tarixçə” bölməsində də görünür."
+      action={<button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-history-add"><Plus size={16} />İş əlavə et</button>} />
+    {all.length > 0 && <div className="hp-filters" role="group" aria-label="Süzgəc">
+      {homes.length > 1 && <label className="field"><span>Ev</span><select value={homeF} onChange={e => setHomeF(e.target.value)} data-testid="filter-home"><option value="">Bütün evlər</option>{homes.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>}
+      {years.length > 0 && <label className="field"><span>İl</span><select value={yearF} onChange={e => setYearF(e.target.value)} data-testid="filter-year"><option value="">Bütün illər</option>{years.map(y => <option key={y} value={y}>{y}</option>)}</select></label>}
+    </div>}
+    {!all.length ? <Empty icon={<ClipboardCheck size={28} />} title="Hələ iş yoxdur" text="Evinizi əlavə edin, sonra görülən işləri — keçmişdə görülənlər də daxil — bir neçə düymə ilə qeyd edin." action={<Link href="/homes?new=1" className="button button-primary"><Plus size={16} />Ev əlavə et</Link>} />
+      : !list.length ? <p className="rl-hint">Bu süzgəcə uyğun iş yoxdur.</p>
+      : <div className="hp-wlist">{list.map(x => <WorkRow key={x.work.id} w={x.work} showHome={homes.length > 1 ? x.homeName : undefined} />)}</div>}
+    {adding && <QuickWorkModal homeId={homeF || undefined} onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
     <HomeToaster />
   </>;
 }
@@ -69,7 +79,7 @@ export function InboxPage({ tab }: { tab: 'invitations' | 'approvals' }) {
   if (q.isLoading) return <Skeleton rows={3} />;
   const d = q.data!;
   return <>
-    <PageHeading eyebrow="Sizə gələnlər" title={tab === 'invitations' ? 'Mənə göndərilən dəvətlər' : 'Təsdiqinizi gözləyən işlər'} description={tab === 'invitations' ? 'Sizi işə və ya briqadaya dəvət edənlər. Təsdiqlədikdən sonra iş sizin tarixçənizə düşür.' : 'Ustanın “bitdi” dediyi işlər. Fotolara baxın, təsdiqləyin və ya düzəliş istəyin.'} />
+    <PageHeading eyebrow="Sizə gələnlər" title={tab === 'invitations' ? 'Bildirişlər' : 'Təsdiqinizi gözləyən işlər'} description={tab === 'invitations' ? 'Sizi evə, işə və ya briqadaya dəvət edənlər. Qəbul etdikdən sonra yalnız həmin ev və ya iş sizə görünür.' : 'Ustanın “bitdi” dediyi işlər. Fotolara baxın, təsdiqləyin və ya düzəliş istəyin.'} />
     <div className="rl-seg hp-tabs" role="tablist"><Link href="/invitations" className={tab === 'invitations' ? 'on' : ''}>Dəvətlər ({d.participations.length + d.memberships.length})</Link><Link href="/approvals" className={tab === 'approvals' ? 'on' : ''}>Təsdiqinizi gözləyən işlər ({d.approvals.length})</Link></div>
     {tab === 'invitations' ? (!d.participations.length && !d.memberships.length ? <Empty icon={<BellRing size={28} />} title="Hələ dəvət yoxdur" text="Ev sahibi sizi işə və ya briqadir briqadaya dəvət edəndə burada görünəcək." />
       : <div className="hp-inbox">

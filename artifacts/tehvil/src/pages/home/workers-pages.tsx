@@ -122,7 +122,6 @@ export function WorkerProfilePage({ workerId, publicView = false }: { workerId: 
       </div>
       <dl className="hp-wstats">
         <div><dt>İş</dt><dd>{w.stats.works}</dd></div><div><dt>Qəbul edilmiş</dt><dd>{w.stats.confirmedWorks}</dd></div><div><dt>Ev</dt><dd>{w.stats.homes}</dd></div>
-        <div><dt>Rəy</dt><dd>{w.stats.avgRating != null ? <><Star size={13} className="on" /> {w.stats.avgRating}</> : '—'} <small>({w.stats.reviews})</small></dd></div>
       </dl>
     </div>
 
@@ -155,8 +154,6 @@ export function WorkerProfilePage({ workerId, publicView = false }: { workerId: 
         </li>)}</ol>}
     </section>
 
-    {w.reviews.length > 0 && <section className="surface hp-section"><h2>Rəylər</h2>{w.reviews.map(r => <div key={r.id} className="hp-review"><span className="hp-stars">{[1, 2, 3, 4, 5].map(i => <Star key={i} size={13} className={i <= r.rating ? 'on' : ''} />)}</span><b>{r.workTitle}</b>{r.reported && <Pill small tone="warn">Mübahisəli</Pill>}<p>{r.body}</p><small>{day(r.createdAt)}</small>
-      {manage && !r.reported && (reporting === r.id ? <div className="hp-inline"><input className="hp-input" value={reason} onChange={e => setReason(e.target.value)} placeholder="Niyə yanlışdır?" maxLength={300} /><button type="button" className="button button-secondary sm-btn-sm" disabled={reason.trim().length < 3} onClick={() => report.mutate({ reviewId: r.id, data: { reason: reason.trim() } }, { onSuccess: () => { setReporting(null); refresh(); } })}>Göndər</button></div> : <button type="button" className="sm-link-btn" onClick={() => setReporting(r.id)}><ThumbsDown size={12} />Etiraz et</button>)}</div>)}</section>}
 
     {editing && <WorkerFormModal kind={w.kind as WorkerInput['kind']} worker={w} onClose={() => setEditing(false)} />}
     {adding && <Modal open onClose={() => setAdding(false)} eyebrow={w.displayName} title="Hesabı olan ustanı dəvət et" wide>

@@ -28,16 +28,16 @@ export function HomeMapPage({ homeId }: { homeId: string }) {
   if (!home.data) return <HomeMissing />;
   const role = home.data.home.myRole;
   const canAdd = role === 'owner' || role === 'technician' || role === 'performer';
-  const photos = (media.data ?? []).filter(m => m.contentType.startsWith('image/')).sort((a, b) => Number(b.phase === 'hidden') - Number(a.phase === 'hidden'));
+  const photos = (media.data ?? []).filter(m => m.contentType.startsWith('image/') && m.phase !== 'document').sort((a, b) => Number(b.phase === 'hidden') - Number(a.phase === 'hidden'));
   const list = (items.data ?? []).filter(i => !type || i.type === type);
   const current = photos.find(p => p.id === photoId) ?? photos.find(p => list.some(i => i.mediaId === p.id)) ?? null;
   const onPhoto = list.filter(i => current && i.mediaId === current.id);
   const refresh = () => void refreshHomeData(qc);
   return <>
-    <PageHeading eyebrow={home.data.home.name} title="Evdəki sistemlər" description="Elektrik naqilləri, su və kanalizasiya boruları, istilik xətləri divarın içindən harada keçir — fotonun üzərində göstərin. Gələcəkdə təmir zamanı yerini tapmaq asan olacaq."
-      action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')} data-testid="button-add-line"><Plus size={16} />Naqil və ya boru qeyd et</button> : undefined} />
+    <PageHeading eyebrow={home.data.home.name} title="Texniki məlumatlar" description="Sonradan görünməyən, amma yadda saxlanması vacib olan detallar: elektrik və su xətlərinin yeri, sayğac, ventil, elektrik lövhəsi — foto, başlıq və izahla."
+      action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')} data-testid="button-add-line"><Plus size={16} />Texniki məlumat əlavə et</button> : undefined} />
     <div className="hp-legend">{Object.entries(INFRA_TYPE).map(([k, l]) => <button key={k} type="button" className={type === k ? 'on' : ''} onClick={() => setType(type === k ? '' : k)}><i style={{ background: INFRA_COLOR[k] }} />{l}<small>{(items.data ?? []).filter(i => i.type === k).length}</small></button>)}</div>
-    {!(items.data ?? []).length && !photos.length ? <Empty icon={<Cable size={28} />} title="Hələ heç nə qeyd olunmayıb" text="Divarlar bağlanmazdan əvvəl naqil və boruların fotosunu çəkin, sonra fotonun üzərində barmağınızla yerini göstərin. Gələcəkdə təmir zamanı onların yerini tapmaq asan olacaq." action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')}><Plus size={16} />İlk qeydi et</button> : undefined} />
+    {!(items.data ?? []).length && !photos.length ? <Empty icon={<Cable size={28} />} title="Hələ texniki məlumat yoxdur" text="Məsələn: “Elektrik lövhəsi dəhlizdə, qapının arxasında” və ya divarlar bağlanmazdan əvvəl çəkilmiş xətlərin fotosu. Fotonun üzərində xəttin yerini göstərmək istəyə bağlıdır." action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')}><Plus size={16} />İlk qeydi et</button> : undefined} />
       : <div className="hp-map-layout">
         <section className="surface hp-section">
           {current ? <PhotoMap photo={current} items={onPhoto} /> : <p className="rl-hint">Fotosu olan xətt yoxdur. Xətt qeyd edərkən foto seçin.</p>}
@@ -57,7 +57,7 @@ export function HomeMapPage({ homeId }: { homeId: string }) {
           </div>
         </article>)}</section>
       </div>}
-    <p className="rl-hint hp-mt">Bu qeydləri ev sahibi, usta və ya mütəxəssis edib. “Mütəxəssis təsdiqləyib” yalnız sizin əlavə etdiyiniz mütəxəssis yoxladıqdan sonra görünür. Divarı deşməzdən əvvəl yerində yoxlayın.</p>
+    <p className="rl-hint hp-mt">Bu məlumatları ev sahibi və ya icazə verdiyi şəxslər daxil edib — yoxlanmış mühəndis planı deyil. “Mütəxəssis təsdiqləyib” yalnız sizin əlavə etdiyiniz mütəxəssis yoxladıqdan sonra görünür. Divarı deşməzdən əvvəl yerində yoxlayın.</p>
     {editing && <LineModal homeId={homeId} item={editing === 'new' ? undefined : editing} photos={photos} role={role} defaultPhoto={current?.id} defaultType={type || undefined} onClose={() => setEditing(null)} onSaved={id => { setEditing(null); refresh(); if (id) setPhotoId(id); }} />}
     <HomeToaster />
   </>;
@@ -106,17 +106,17 @@ function LineModal({ homeId, item, photos, role, defaultPhoto, defaultType, onCl
     const done = { onSuccess: () => { toast(item ? 'Xətt yeniləndi' : 'Xətt qeyd olundu'); onSaved(form.mediaId || null); } };
     if (item) update.mutate({ itemId: item.id, data }, done); else create.mutate({ homeId, data }, done);
   };
-  return <Modal open onClose={onClose} eyebrow="Evdəki sistemlər" title={item ? 'Qeydi dəyiş' : 'Naqil və ya boru qeyd et'} wide
+  return <Modal open onClose={onClose} eyebrow="Texniki məlumatlar" title={item ? 'Qeydi dəyiş' : 'Texniki məlumat əlavə et'} wide
     footer={<button type="button" className="button button-primary" onClick={save} disabled={create.isPending || update.isPending || (performer && !form.workId)} data-testid="button-save-line">Yadda saxla</button>}>
     <div className="rl-form">
       {item?.verified && <p className="rl-warn">Bu xətt mütəxəssis tərəfindən təsdiqlənib. Dəyişiklik etsəniz təsdiq sıfırlanacaq.</p>}
       <div className="field-grid three">
-        <Select label="Nə keçir?" name="line-type" value={form.type} onChange={set('type')} options={opts(INFRA_TYPE)} />
+        <Select label="Nə haqqındadır?" name="line-type" value={form.type} onChange={set('type')} options={opts(INFRA_TYPE)} />
         <Select label="Otaq" name="line-room" value={form.roomId} onChange={set('roomId')} empty="Seçilməyib" options={(home.data?.rooms ?? []).map(r => [r.id, r.name])} />
         <Select label={performer ? 'İş (mütləq)' : 'İş'} name="line-work" value={form.workId} onChange={set('workId')} empty={performer ? 'İşi seçin' : 'Seçilməyib'} options={myWorks.map(w => [w.id, w.title])} />
       </div>
       <div className="field-grid">
-        <Field label="Qısa ad" name="line-label" value={form.label} onChange={set('label')} placeholder="məs. Mətbəx rozetka xətti" />
+        <Field label="Başlıq" name="line-label" value={form.label} onChange={set('label')} placeholder="məs. Su sayğacı, mətbəx şkafının arxasında" />
         {role === 'owner' ? <Select label="Mənbə" name="line-source" value={form.source} onChange={set('source')} options={[['owner', INFRA_SOURCE.owner], ['plan', INFRA_SOURCE.plan]]} />
           : <div className="field"><span>Mənbə</span><p className="rl-hint">{role === 'technician' ? INFRA_SOURCE.specialist : INFRA_SOURCE.worker} (avtomatik)</p></div>}
       </div>
@@ -127,7 +127,7 @@ function LineModal({ homeId, item, photos, role, defaultPhoto, defaultType, onCl
         {performer && !form.workId && <small className="rl-hint">Usta kimi yalnız öz işinizə aid qeyd edə bilərsiniz — əvvəlcə işi seçin.</small>}
       </div>
       {photo && <>
-        <p className="rl-hint"><b>Fotonun üzərinə toxunun</b> — naqil və ya borunun keçdiyi yerləri ardıcıl göstərin.</p>
+        <p className="rl-hint">İstəsəniz <b>fotonun üzərinə toxunun</b> — xəttin keçdiyi və ya obyektin olduğu yeri göstərin. Bu məcburi deyil.</p>
         <PhotoMap photo={photo} items={[]} draft={{ points, color: INFRA_COLOR[form.type] }} onTap={p => setPoints(ps => [...ps, p].slice(0, 200))} />
         <div className="hp-actions"><button type="button" className="button button-quiet sm-btn-sm" disabled={!points.length} onClick={() => setPoints(ps => ps.slice(0, -1))}><Undo2 size={14} />Geri al</button><button type="button" className="button button-quiet sm-btn-sm" disabled={!points.length} onClick={() => setPoints([])}><Eraser size={14} />Təmizlə</button><small>{points.length} nöqtə</small></div>
       </>}

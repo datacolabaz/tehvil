@@ -4,6 +4,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgTable,
   smallint,
   text,
@@ -161,7 +162,7 @@ export const homeMediaTable = pgTable("home_media", {
   contentType: varchar("content_type", { length: 120 }).notNull(),
   size: integer("size").notNull(),
   caption: varchar("caption", { length: 300 }).notNull().default(""),
-  /** before | during | after | hidden (before walls are closed) | other */
+  /** before | during | after | hidden (before walls are closed) | other | document (home documents: private, never shared) */
   phase: varchar("phase", { length: 12 }).notNull().default("other"),
   uploadedByUserId: user("uploaded_by_user_id").notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
@@ -197,6 +198,10 @@ export const workRecordsTable = pgTable("work_records", {
   inspectedAt: timestamp("inspected_at", { withTimezone: true }),
   /** public (may appear on the QR page when the owner shares history) | private */
   visibility: varchar("visibility", { length: 8 }).notNull().default("public"),
+  /** Actual cost the owner paid (separate from any Smeta estimate) and an optional warranty note. */
+  cost: numeric("cost", { precision: 14, scale: 2, mode: "number" }),
+  currency: varchar("currency", { length: 3 }).notNull().default("AZN"),
+  warrantyNote: text("warranty_note").notNull().default(""),
   /** Optional link to an AI Smeta project of the owner. */
   smetaProjectId: uuid("smeta_project_id"),
   createdByUserId: user("created_by_user_id").notNull(),

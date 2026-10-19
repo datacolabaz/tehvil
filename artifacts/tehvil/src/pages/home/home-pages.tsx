@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import {
   useArchiveHome, useCreateHomeInvitation, useCreateHomeRoom, useDeleteHomeRoom, useGetHomeOverview, useGetHomeRoom, useListHomeAudit, useListHomeMembers,
-  useListHomePerformers, useListInfrastructure, useListWorks, useRemoveHomeMember, useUpdateHome, useUpdateHomeRoom, type HomeInvitationInputRole, type HomeOverview, type HomeRoom, type HomeRoomInput, type WorkSummary,
+  useLinkHomeSmeta, useListHomePerformers, useListHomeSmetas, useListInfrastructure, useListSmetaProjects, useListWorks, useRemoveHomeMember, useUpdateHome, useUpdateHomeRoom, type HomeInvitationInputRole, type HomeOverview, type HomeRoom, type HomeRoomInput, type WorkSummary,
 } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
 import { CopyButton, Empty, HomeToaster, MediaGrid, MediaUpload, Modal, Pill, Seg, Select, Skeleton, StatTile, WorkStatus, WorkerLine, opts, toast } from '@/components/home/ui';
@@ -56,7 +56,7 @@ export function HomeProfilePage({ homeId }: { homeId: string }) {
         </dl>
         {home.notes && <p className="hp-text">{home.notes}</p>}
         <div className="hp-actions">
-          {p.addWorks && <button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-quick-work"><Plus size={15} />Görülən işi əlavə et</button>}
+          {p.addWorks && <button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-quick-work"><Plus size={15} />İş əlavə et</button>}
           {p.edit && <button type="button" className="button button-secondary" onClick={() => setEditing(true)} data-testid="button-edit-home"><Pencil size={15} />Məlumatları dəyiş</button>}
           {p.manageSharing && <Link href={`/homes/${homeId}/sharing`} className="button button-secondary"><QrCode size={15} />Məlumatları paylaş</Link>}
           {owner && <button type="button" className="button button-quiet" onClick={() => setArchiving(true)}><Archive size={15} />Arxivlə</button>}
@@ -65,30 +65,54 @@ export function HomeProfilePage({ homeId }: { homeId: string }) {
     </div>
     {p.edit && <NextSteps homeId={homeId} overview={q.data} onAddWork={() => setAdding(true)} />}
     {stats.works > 0 && <div className="hp-stats">
-      <StatTile icon={<ListChecks size={16} />} label="Görülən işlər" value={stats.works} hint={`${stats.confirmed} təsdiqlənib`} />
+      <StatTile icon={<ListChecks size={16} />} label="Görülən işlər" value={stats.works} hint={`${stats.confirmed} görülüb`} />
       <StatTile icon={<HardHat size={16} />} label="Usta və şirkətlər" value={stats.performers} />
       {stats.pendingApproval > 0 && <StatTile icon={<ClipboardCheck size={16} />} label="Təsdiqinizi gözləyir" value={stats.pendingApproval} tone="gold" />}
       {stats.openDefects > 0 && <StatTile icon={<AlertTriangle size={16} />} label="Həll olunmamış problem" value={stats.openDefects} tone="alert" />}
     </div>}
     <div className="hp-two">
       <section className="surface hp-section">
-        <div className="section-head"><h2>Son görülən işlər</h2><Link href={`/homes/${homeId}/history`} className="text-link">Təmir tarixçəsi<ArrowUpRight size={14} /></Link></div>
+        <div className="section-head"><h2>Son görülən işlər</h2><Link href={`/homes/${homeId}/history`} className="text-link">İşlər və tarixçə<ArrowUpRight size={14} /></Link></div>
         {recentWorks.length ? <div className="hp-wlist">{recentWorks.map(w => <WorkRow key={w.id} w={w} />)}</div> : <p className="rl-hint">Hələ görülən iş əlavə etməmisiniz.</p>}
       </section>
       <section className="surface hp-section">
         <div className="section-head"><h2>Otaqlar</h2><Link href={`/homes/${homeId}/rooms`} className="text-link">Hamısı<ArrowUpRight size={14} /></Link></div>
         {rooms.length ? <div className="hp-chips">{rooms.map(r => <Link key={r.id} href={`/homes/${homeId}/rooms/${r.id}`} className="hp-chip">{r.name}<small>{r.works} iş</small></Link>)}</div> : <p className="rl-hint">Hələ otaq əlavə etməmisiniz.</p>}
-        <div className="section-head hp-mt"><h2>Usta və şirkətlər</h2><Link href={`/homes/${homeId}/performers`} className="text-link">Hamısı<ArrowUpRight size={14} /></Link></div>
-        {performers.length ? performers.slice(0, 5).map(x => <WorkerLine key={x.worker.id} w={x.worker} href={x.worker.registered ? `/workers/${x.worker.id}` : null} sub={x.roles.map(r => PART_ROLE[r] ?? r).join(', ')} />) : <p className="rl-hint">Hələ usta əlavə olunmayıb.</p>}
+        <HomeSmetas homeId={homeId} canAdd={p.addWorks} />
       </section>
     </div>
-    {home.myRole !== 'performer' && <MembersSection homeId={homeId} owner={owner} />}
     {adding && <QuickWorkModal homeId={homeId} onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
     {editing && <HomeFormModal open home={home} onClose={() => setEditing(false)} onSaved={() => setEditing(false)} />}
     <Modal open={archiving} onClose={() => setArchiving(false)} eyebrow={home.name} title="Evi arxivə köçürmək" footer={<button type="button" className="button button-danger" disabled={archive.isPending} onClick={() => archive.mutate({ homeId }, { onSuccess: () => { void refreshHomeData(qc); setLocation('/homes'); } })}>Arxivlə</button>}>
       <p className="rl-hint">Ev “Evlərim” siyahısından və QR səhifəsindən gizlənəcək. Heç nə silinmir — təmir tarixçəsi və fotolar saxlanılır.</p>
     </Modal>
     <HomeToaster />
+  </>;
+}
+
+/** AI Smeta estimates saved in this home. They are plans: a work is created only when the user asks for it. */
+function HomeSmetas({ homeId, canAdd }: { homeId: string; canAdd: boolean }) {
+  const list = useListHomeSmetas(homeId);
+  const mine = useListSmetaProjects({ query: { enabled: canAdd, queryKey: ['/api/smeta/projects'] } });
+  const link = useLinkHomeSmeta();
+  const qc = useQueryClient();
+  const [, setLocation] = useLocation();
+  const [pick, setPick] = useState('');
+  const [fromSmeta, setFromSmeta] = useState<{ id: string; name: string } | null>(null);
+  const saved = list.data ?? [];
+  const options = (mine.data ?? []).filter(x => !saved.some(y => y.id === x.id));
+  const save = (smetaProjectId: string, linked: boolean) => link.mutate({ homeId, data: { smetaProjectId, linked } }, { onSuccess: () => { void qc.invalidateQueries({ queryKey: [`/api/homes/${homeId}/smetas`] }); setPick(''); toast(linked ? 'Smeta evdə saxlanıldı' : 'Smeta evdən çıxarıldı'); } });
+  return <>
+    <div className="section-head hp-mt"><h2>Smetalar</h2><Link href="/smeta/new" className="text-link">Yeni smeta<ArrowUpRight size={14} /></Link></div>
+    <p className="rl-hint">Smeta planlaşdırılan işin təxmini hesablamasıdır — tarixçəyə avtomatik düşmür və zəmanətli qiymət deyil.</p>
+    {saved.map(x => <div key={x.id} className="hp-kvline hp-smeta">
+      {x.mine ? <Link href={`/smeta/${x.id}`}><b>{x.name}</b></Link> : <b>{x.name}</b>}
+      <small>{[x.district, x.areaM2 ? `${x.areaM2} m²` : '', `yenilənib ${day(x.updatedAt)}`].filter(Boolean).join(' · ')}</small>
+      {x.mine && canAdd && <span className="hp-prow-actions"><button type="button" className="sm-link-btn" onClick={() => setFromSmeta({ id: x.id, name: x.name })} data-testid={`smeta-to-work-${x.id}`}><Plus size={12} />Bu smetadan iş yarat</button><button type="button" className="sm-link-btn danger" onClick={() => save(x.id, false)}>Evdən çıxar</button></span>}
+    </div>)}
+    {canAdd && options.length > 0 && <div className="hp-inline"><select className="hp-input" value={pick} onChange={e => setPick(e.target.value)} aria-label="Smeta seç" data-testid="select-home-smeta"><option value="">Mövcud smetanı evdə saxla…</option>{options.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}</select><button type="button" className="button button-secondary sm-btn-sm" disabled={!pick || link.isPending} onClick={() => save(pick, true)} data-testid="button-link-smeta">Saxla</button></div>}
+    {!saved.length && !options.length && <p className="rl-hint">Hələ smeta yoxdur.</p>}
+    {fromSmeta && <QuickWorkModal homeId={homeId} smetaProjectId={fromSmeta.id} title={fromSmeta.name} onClose={() => setFromSmeta(null)} onSaved={id => setLocation(`/works/${id}`)} />}
   </>;
 }
 
@@ -100,11 +124,11 @@ function NextSteps({ homeId, overview, onAddWork }: { homeId: string; overview: 
   const has = (types: string[]) => (infra.data ?? []).some(i => types.includes(i.type));
   const steps = [
     { done: overview.rooms.length > 0, title: 'Otaqlar', text: 'Otaqları əlavə edin — işləri və sistemləri yerinə bağlamaq asan olacaq.', href: `/homes/${homeId}/rooms` },
-    { done: overview.stats.works > 0, title: 'İlk görülən iş', text: 'Son təmirdə nə edilib? Bir neçə düymə ilə qeyd edin, fotosunu əlavə edin.', action: onAddWork },
-    { done: has(['electric']), title: 'Elektrik sistemi', text: 'Divarlar bağlanmazdan əvvəl elektrik naqillərinin fotosunu əlavə edin. Gələcəkdə təmir zamanı naqillərin yerini tapmaq daha asan olacaq.', href: `/homes/${homeId}/map?type=electric` },
-    { done: has(['water', 'sewer']), title: 'Su və kanalizasiya', text: 'Boruların harada keçdiyini fotoda göstərin — sızma olanda yeri tez tapılar.', href: `/homes/${homeId}/map?type=water` },
+    { done: overview.stats.works > 0, title: 'İlk iş', text: 'Nə vaxtsa görülmüş bir işi yazın — köhnə tarixli də ola bilər. Foto və ya qəbz əlavə edin.', action: onAddWork },
+    { done: has(['electric', 'electrical_panel']), title: 'Elektrik xətləri və lövhə', text: 'Divarlar bağlanmazdan əvvəl elektrik naqillərinin fotosunu əlavə edin. Gələcəkdə təmir zamanı naqillərin yerini tapmaq daha asan olacaq.', href: `/homes/${homeId}/map?type=electric` },
+    { done: has(['water', 'sewer', 'meter', 'valve']), title: 'Su, kanalizasiya, sayğac və ventillər', text: 'Boruların, sayğacın və ventilin yerini foto və izahla qeyd edin — sızma olanda tez tapılar.', href: `/homes/${homeId}/map?type=water` },
     { done: has(['heating', 'ventilation', 'gas']), title: 'İstilik və soyutma', text: 'Kombi, radiator, kondisioner və qaz xətlərini qeyd edin.', href: `/homes/${homeId}/map?type=heating` },
-    { done: overview.stats.equipment > 0, title: 'Avadanlıqlar', text: 'Kombi, kondisioner, su filtri — zəmanətin nə vaxt bitdiyini unutmayın.', href: `/homes/${homeId}/equipment` },
+    { done: overview.stats.equipment > 0, title: 'Avadanlıqlar və sənədlər', text: 'Kombi, kondisioner, su filtri; texniki pasport və zəmanət kartları.', href: `/homes/${homeId}/equipment` },
   ];
   const left = steps.filter(x => !x.done).length;
   if (hidden || !left) return null;
@@ -119,7 +143,7 @@ function NextSteps({ homeId, overview, onAddWork }: { homeId: string; overview: 
   </section>;
 }
 
-function MembersSection({ homeId, owner }: { homeId: string; owner: boolean }) {
+export function MembersSection({ homeId, owner }: { homeId: string; owner: boolean }) {
   const members = useListHomeMembers(homeId);
   const remove = useRemoveHomeMember();
   const invite = useCreateHomeInvitation();
@@ -174,14 +198,14 @@ export function HomeHistoryPage({ homeId }: { homeId: string }) {
   if (!home.data) return <HomeMissing />;
   const p = home.data.home.permissions;
   return <>
-    <PageHeading eyebrow={home.data.home.name} title="Təmir tarixçəsi" description="Evdə görülən bütün işlər tarix üzrə: nə, harada, nə vaxt və kim. İşə toxunun — fotolar, qeydlər və təsdiqlər açılacaq."
-      action={p.addWorks ? <button type="button" className="button button-primary" onClick={() => setCreating(true)} data-testid="button-create-work"><Plus size={16} />Görülən işi əlavə et</button> : undefined} />
+    <PageHeading eyebrow={home.data.home.name} title="İşlər və tarixçə" description="Evdə görülən bütün işlər tarix üzrə: nə, harada, nə vaxt və kim. İşə toxunun — fotolar, qeydlər və təsdiqlər açılacaq."
+      action={p.addWorks ? <button type="button" className="button button-primary" onClick={() => setCreating(true)} data-testid="button-create-work"><Plus size={16} />İş əlavə et</button> : undefined} />
     <div className="hp-filters">
       <Select label="Kateqoriya" name="f-category" value={category} onChange={setCategory} empty="Hamısı" options={opts(WORK_CATEGORY)} />
       <Select label="Status" name="f-status" value={status} onChange={setStatus} empty="Hamısı" options={opts(WORK_STATUS)} />
       <Select label="Otaq" name="f-room" value={room} onChange={setRoom} empty="Hamısı" options={home.data.rooms.map(r => [r.id, r.name])} />
     </div>
-    {works.isLoading ? <Skeleton rows={3} /> : !list.length ? <Empty icon={<CalendarDays size={28} />} title={works.data?.length ? 'Seçiminizə uyğun iş yoxdur' : 'Hələ görülən iş əlavə etməmisiniz'} text="Elektrik, santexnika, boya, döşəmə — hər işi bir neçə düymə ilə qeyd edin, fotosunu və ustanı əlavə edin." action={p.addWorks ? <button type="button" className="button button-primary" onClick={() => setCreating(true)}><Plus size={16} />Görülən işi əlavə et</button> : undefined} />
+    {works.isLoading ? <Skeleton rows={3} /> : !list.length ? <Empty icon={<CalendarDays size={28} />} title={works.data?.length ? 'Seçiminizə uyğun iş yoxdur' : 'Hələ görülən iş əlavə etməmisiniz'} text="Elektrik, santexnika, boya, döşəmə — hər işi bir neçə düymə ilə qeyd edin, fotosunu və ustanı əlavə edin." action={p.addWorks ? <button type="button" className="button button-primary" onClick={() => setCreating(true)}><Plus size={16} />İş əlavə et</button> : undefined} />
       : <div className="hp-timeline">{byYear.map(([y, ws]) => <section key={y}><h3 className="hp-year">{y}</h3><div className="hp-wlist">{ws.map(w => <WorkRow key={w.id} w={w} />)}</div></section>)}</div>}
     {creating && <QuickWorkModal homeId={homeId} onClose={() => setCreating(false)} onSaved={id => { setCreating(false); void refreshHomeData(qc); setLocation(`/works/${id}`); }} />}
     <HomeToaster />

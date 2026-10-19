@@ -42,13 +42,13 @@ function HomeView({ h, shared }: { h: PublicHome; shared?: boolean }) {
           <div><dt>Tikinti ili</dt><dd>{h.builtYear ?? '—'}</dd></div>
           <div><dt>Mərhələ</dt><dd>{STAGE[h.stage]}</dd></div>
         </dl>
-        {h.works.length > 0 && <p className="hp-pub-summary"><ClipboardCheck size={15} /><b>{h.works.length}</b> görülən iş{shared ? '' : ' — hamısını ev sahibi təsdiqləyib'}{shared ? ` · ${confirmed} təsdiqlənib` : ''}</p>}
+        {h.works.length > 0 && <p className="hp-pub-summary"><ClipboardCheck size={15} /><b>{h.works.length}</b> görülən iş{shared ? '' : ' — ev sahibinin qeydləri'}{shared ? ` · ${confirmed} görülüb` : ''}</p>}
       </div>
     </section>
     {h.rooms.length > 0 && <section className="surface hp-section"><h2>Otaqlar</h2><div className="hp-chips">{h.rooms.map(r => <span key={r} className="hp-chip">{r}</span>)}</div></section>}
-    {h.works.length > 0 && <section className="surface hp-section"><h2>Təmir tarixçəsi</h2>
+    {h.works.length > 0 && <section className="surface hp-section"><h2>İş tarixçəsi</h2>
       <ol className="hp-pub-works">{h.works.map(w => <li key={w.id}>
-        <div className="hp-pub-work-head"><b>{w.title}</b>{w.confirmed ? <Pill small tone="ok" icon={<ClipboardCheck size={11} />}>Ev sahibi təsdiqləyib</Pill> : <Pill small tone="neutral">Təsdiq gözləyir</Pill>}{w.inspected && <Pill small tone="ok" icon={<ShieldCheck size={11} />}>Mütəxəssis yoxlayıb</Pill>}</div>
+        <div className="hp-pub-work-head"><b>{w.title}</b>{w.confirmed ? <Pill small tone="ok" icon={<ClipboardCheck size={11} />}>Görülüb</Pill> : <Pill small tone="neutral">Ev sahibinin qəbulunu gözləyir</Pill>}{w.inspected && <Pill small tone="ok" icon={<ShieldCheck size={11} />}>Mütəxəssis yoxlayıb</Pill>}</div>
         <small>{[WORK_CATEGORY[w.category], WORK_KIND[w.kind], w.roomName, range(w.startDate, w.endDate)].filter(Boolean).join(' · ')}</small>
         {w.description && <p className="hp-text">{w.description}</p>}
         {w.materials && <p className="hp-text"><b>Materiallar:</b> {w.materials}</p>}

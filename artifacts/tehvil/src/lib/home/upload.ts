@@ -3,6 +3,7 @@ import { attachHomeMedia, requestUploadUrl, type HomeMedia, type HomeMediaAttach
 
 const IMAGES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const VIDEOS = ['video/mp4', 'video/webm', 'video/quicktime'];
+const FILES = ['application/pdf'];
 const MAX_EDGE = 2200;
 
 /** Large photos are downscaled in the browser so pages stay fast on mobile data. */
@@ -25,9 +26,9 @@ async function prepare(file: File): Promise<File> {
 export class UploadError extends Error {}
 
 export async function uploadHomeMedia(files: File[], target: Omit<HomeMediaAttachInput, 'files'>, opts: { videos?: boolean } = {}): Promise<HomeMedia[]> {
-  const allowed = opts.videos === false ? IMAGES : [...IMAGES, ...VIDEOS];
+  const allowed = opts.videos === false ? IMAGES : [...IMAGES, ...VIDEOS, ...FILES];
   const bad = files.find(f => !allowed.includes(f.type));
-  if (bad) throw new UploadError(`"${bad.name}" dəstəklənmir. ${opts.videos === false ? 'JPG, PNG və ya WebP şəkil' : 'Şəkil (JPG, PNG, WebP) və ya video (MP4, MOV)'} seçin.`);
+  if (bad) throw new UploadError(`"${bad.name}" dəstəklənmir. ${opts.videos === false ? 'JPG, PNG və ya WebP şəkil' : 'Foto (JPG, PNG, WebP), video (MP4, MOV) və ya PDF'} seçin.`);
   const inputs = [];
   for (const original of files) {
     const file = await prepare(original);

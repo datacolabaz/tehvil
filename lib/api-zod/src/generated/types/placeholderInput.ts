@@ -5,6 +5,7 @@
  * Təhvil renovation project coordination API
  * OpenAPI spec version: 0.1.0
  */
+import type { PlaceholderInputKind } from './placeholderInputKind';
 
 export interface PlaceholderInput {
   /**
@@ -22,4 +23,5 @@ export interface PlaceholderInput {
      * @maxLength 60
      */
   specialty?: string;
+  kind?: PlaceholderInputKind;
 }
