@@ -138,6 +138,21 @@ S["HomeCosts"] = {"byCurrency": "[CostLine]", "byCategory": "[CostLine]", "works
 S["Reminder"] = {"kind": "str", "homeId": "str", "homeName": "str", "equipmentId": "str", "title": "str", "dueDate": "str", "overdue": "bool"}
 S["ServiceInterestInput"] = {"kind": "enum:inspection|pro_account|maintenance|handover", "homeId~": "uuid?", "contact~": "str(0,200)", "note~": "str(0,1000)"}
 S["HomeSmetaLinkInput"] = {"smetaProjectId": "uuid", "linked": "bool"}
+S["ReadLinkInput"] = {"url": "str(5,2000)"}
+S["ReadTextInput"] = {"text": "str(10,20000)"}
+S["ListingFields"] = {"dealType": "str?", "city": "str?", "district": "str?", "areaM2": "num?", "rooms": "int?", "floor": "int?", "floorsTotal": "int?", "buildingType": "str", "renovation": "str", "furnished": "str", "price": "num?", "currency": "str?", "title": "str?", "description": "str?"}
+S["ListingDraft"] = {"snapshotId": "str?", "source": "str", "url": "str?", "portal": "str?", "fields": "ListingFields", "found": "[str]", "warnings": "[str]"}
+S["ListingInput"] = {"snapshotId~": "uuid?", "url~": "str?", "source": "enum:link|text|manual", "dealType~": "enum:sale|rent", "city": "str(0,100)", "district~": "str(0,120)", "areaM2": "num", "rooms~": "int?", "floor~": "int?", "floorsTotal~": "int?", "buildingType~": "enum:new|old|house|unknown", "renovation~": "enum:yes|no|unknown", "furnished~": "enum:yes|no|unknown", "price~": "num?", "currency~": "enum:AZN|USD", "title~": "str(0,300)", "description~": "str(0,4000)"}
+S["ValuationInput"] = {"subject": "ListingInput", "comparables~": "[ListingInput(20)]", "usdRate~": "num?", "usePool~": "bool"}
+S["Listing"] = {"id": "str", "url": "str?", "portal": "str?", "source": "str", "city": "str", "district": "str", "areaM2": "num?", "rooms": "int?", "floor": "int?", "floorsTotal": "int?", "buildingType": "str", "renovation": "str", "furnished": "str", "price": "num?", "currency": "str?", "priceAzn": "num?", "title": "str", "fetchedAt": "dt"}
+S["ValuationComp"] = {"listing": "Listing", "score": "num", "pricePerM2": "num?", "used": "bool", "userAdded": "bool", "notes": "[str]"}
+S["ValuationEstimate"] = {"low": "num", "central": "num", "high": "num", "perM2Low": "num", "perM2": "num", "perM2High": "num"}
+S["ValuationFactor"] = {"effect": "str", "text": "str"}
+S["Valuation"] = {"id": "str", "createdAt": "dt", "status": "str", "confidence": "str", "confidenceReasons": "[str]", "subject": "Listing", "estimate": "ValuationEstimate?", "comparables": "[ValuationComp]", "factors": "[ValuationFactor]", "missing": "[str]", "assumptions": "[str]", "askingNote": "str?", "usdRate": "num", "poolSize": "int"}
+S["ValuationSummary"] = {"id": "str", "createdAt": "dt", "title": "str", "city": "str", "district": "str", "areaM2": "num?", "central": "num?", "confidence": "str", "status": "str"}
+S["ConstructionEstimateInput"] = {"name": "str(1,200)", "data": "any"}
+S["ConstructionEstimate"] = {"id": "str", "name": "str", "data": "any", "createdAt": "dt", "updatedAt": "dt"}
+S["ConstructionEstimateSummary"] = {"id": "str", "name": "str", "updatedAt": "dt", "total": "num?", "unpriced": "int?"}
 S["HomeWorkItem"] = {"work": "WorkSummary", "homeName": "str", "myRole": "str"}
 S["MeRoles"] = {"staff": "bool", "hasHomes": "bool", "managesHomes": "bool", "isPerformer": "bool", "hasProjects": "bool"}
 
@@ -206,6 +221,16 @@ op("/homes/{homeId}/passport", "get", "getHomePassport", "Passport completeness:
 op("/homes/{homeId}/costs", "get", "getHomeCosts", "Actual costs entered on works plus estimates saved in the home (members)", ("HomeId",), resp=ok("Costs", "HomeCosts"))
 op("/me/reminders", "get", "listMyReminders", "Upcoming service dates and warranty ends across my homes (shown in the app only)", resp=ok("Reminders", "Reminder", array=True))
 op("/service-interests", "post", "createServiceInterest", "Register interest in a service that is not available yet", req="ServiceInterestInput", resp=AR)
+op("/valuation/read-link", "post", "readListingLink", "Read one listing page the user linked (allow-listed portals, robots.txt respected)", req="ReadLinkInput", resp=ok("Draft", "ListingDraft"))
+op("/valuation/read-text", "post", "readListingText", "Read listing facts from pasted text", req="ReadTextInput", resp=ok("Draft", "ListingDraft"))
+op("/valuations", "get", "listValuations", "My market-value calculations", resp=ok("Valuations", "ValuationSummary", array=True))
+op("/valuations", "post", "createValuation", "Compare a listing with real comparable listings (asking prices)", req="ValuationInput", resp=ok("Valuation", "Valuation", "201"))
+op("/valuations/{valuationId}", "get", "getValuation", "One saved calculation with its sources", ("ValuationId",), resp=ok("Valuation", "Valuation"))
+op("/construction-estimates", "get", "listConstructionEstimates", "My construction estimates", resp=ok("Estimates", "ConstructionEstimateSummary", array=True))
+op("/construction-estimates", "post", "createConstructionEstimate", "Save a new construction estimate", req="ConstructionEstimateInput", resp=ok("Saved", "ConstructionEstimate", "201"))
+op("/construction-estimates/{estimateId}", "get", "getConstructionEstimate", "One construction estimate (owner only)", ("EstimateId",), resp=ok("Estimate", "ConstructionEstimate"))
+op("/construction-estimates/{estimateId}", "put", "updateConstructionEstimate", "Save changes", ("EstimateId",), "ConstructionEstimateInput", ok("Saved", "ConstructionEstimate"))
+op("/construction-estimates/{estimateId}", "delete", "deleteConstructionEstimate", "Delete (owner only)", ("EstimateId",), resp=AR)
 op("/me/roles", "get", "getMyRoles", "What the signed-in account is (for a menu that shows only relevant sections)", resp=ok("Roles", "MeRoles"))
 op("/me/works", "get", "listMyWorks", "Works I take part in through any of my profiles", resp=ok("Works", "MyWork", array=True))
 op("/me/workers", "get", "getMyWorkers", "My individual profile, teams/companies I manage and my memberships", resp=ok("Profiles", "MyWorkers"))
@@ -232,7 +257,7 @@ op("/staff/reviews/{reviewId}/hide", "post", "hideReview", "Tehvil.az staff hide
 op("/admin/workers/{workerId}/identity", "post", "setWorkerIdentity", "Administrator records a separate identity/business check", ("WorkerId",), "IdentityInput", ok("Saved", "Worker"))
 
 params = {}
-for n, name in [("HomeId", "homeId"), ("RoomId", "roomId"), ("MemberId", "memberId"), ("ItemId", "itemId"), ("EquipmentId", "equipmentId"), ("ShareId", "shareId"), ("WorkId", "workId"), ("ParticipantId", "participantId"), ("ReviewId", "reviewId"), ("MembershipId", "membershipId"), ("WorkerId", "workerId"), ("MediaId", "mediaId")]:
+for n, name in [("HomeId", "homeId"), ("RoomId", "roomId"), ("MemberId", "memberId"), ("ItemId", "itemId"), ("EquipmentId", "equipmentId"), ("ShareId", "shareId"), ("WorkId", "workId"), ("ParticipantId", "participantId"), ("ReviewId", "reviewId"), ("MembershipId", "membershipId"), ("WorkerId", "workerId"), ("MediaId", "mediaId"), ("ValuationId", "valuationId"), ("EstimateId", "estimateId")]:
     params[n] = {"name": name, "in": "path", "required": True, "schema": {"type": "string", "format": "uuid"}}
 params["HomePublicId"] = {"name": "publicId", "in": "path", "required": True, "schema": {"type": "string", "minLength": 6, "maxLength": 16, "pattern": "^[a-z0-9]+$"}}
 params["ShareToken"] = {"name": "token", "in": "path", "required": True, "schema": {"type": "string", "minLength": 20, "maxLength": 64, "pattern": "^[A-Za-z0-9_-]+$"}}

@@ -4570,6 +4570,280 @@ export interface HomeSmetaLinkInput {
   linked: boolean;
 }
 
+export interface ReadLinkInput {
+  /**
+     * @minLength 5
+     * @maxLength 2000
+     */
+  url: string;
+}
+
+export interface ReadTextInput {
+  /**
+     * @minLength 10
+     * @maxLength 20000
+     */
+  text: string;
+}
+
+export interface ListingFields {
+  /** @nullable */
+  dealType: string | null;
+  /** @nullable */
+  city: string | null;
+  /** @nullable */
+  district: string | null;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  rooms: number | null;
+  /** @nullable */
+  floor: number | null;
+  /** @nullable */
+  floorsTotal: number | null;
+  buildingType: string;
+  renovation: string;
+  furnished: string;
+  /** @nullable */
+  price: number | null;
+  /** @nullable */
+  currency: string | null;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  description: string | null;
+}
+
+export interface ListingDraft {
+  /** @nullable */
+  snapshotId: string | null;
+  source: string;
+  /** @nullable */
+  url: string | null;
+  /** @nullable */
+  portal: string | null;
+  fields: ListingFields;
+  found: string[];
+  warnings: string[];
+}
+
+export type ListingInputSource = typeof ListingInputSource[keyof typeof ListingInputSource];
+
+
+export const ListingInputSource = {
+  link: 'link',
+  text: 'text',
+  manual: 'manual',
+} as const;
+
+export type ListingInputDealType = typeof ListingInputDealType[keyof typeof ListingInputDealType];
+
+
+export const ListingInputDealType = {
+  sale: 'sale',
+  rent: 'rent',
+} as const;
+
+export type ListingInputBuildingType = typeof ListingInputBuildingType[keyof typeof ListingInputBuildingType];
+
+
+export const ListingInputBuildingType = {
+  new: 'new',
+  old: 'old',
+  house: 'house',
+  unknown: 'unknown',
+} as const;
+
+export type ListingInputRenovation = typeof ListingInputRenovation[keyof typeof ListingInputRenovation];
+
+
+export const ListingInputRenovation = {
+  yes: 'yes',
+  no: 'no',
+  unknown: 'unknown',
+} as const;
+
+export type ListingInputFurnished = typeof ListingInputFurnished[keyof typeof ListingInputFurnished];
+
+
+export const ListingInputFurnished = {
+  yes: 'yes',
+  no: 'no',
+  unknown: 'unknown',
+} as const;
+
+export type ListingInputCurrency = typeof ListingInputCurrency[keyof typeof ListingInputCurrency];
+
+
+export const ListingInputCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+} as const;
+
+export interface ListingInput {
+  /** @nullable */
+  snapshotId?: string | null;
+  /** @nullable */
+  url?: string | null;
+  source: ListingInputSource;
+  dealType?: ListingInputDealType;
+  /**
+     * @minLength 0
+     * @maxLength 100
+     */
+  city: string;
+  /**
+     * @minLength 0
+     * @maxLength 120
+     */
+  district?: string;
+  areaM2: number;
+  /** @nullable */
+  rooms?: number | null;
+  /** @nullable */
+  floor?: number | null;
+  /** @nullable */
+  floorsTotal?: number | null;
+  buildingType?: ListingInputBuildingType;
+  renovation?: ListingInputRenovation;
+  furnished?: ListingInputFurnished;
+  /** @nullable */
+  price?: number | null;
+  currency?: ListingInputCurrency;
+  /**
+     * @minLength 0
+     * @maxLength 300
+     */
+  title?: string;
+  /**
+     * @minLength 0
+     * @maxLength 4000
+     */
+  description?: string;
+}
+
+export interface ValuationInput {
+  subject: ListingInput;
+  /** @maxItems 20 */
+  comparables?: ListingInput[];
+  /** @nullable */
+  usdRate?: number | null;
+  usePool?: boolean;
+}
+
+export interface Listing {
+  id: string;
+  /** @nullable */
+  url: string | null;
+  /** @nullable */
+  portal: string | null;
+  source: string;
+  city: string;
+  district: string;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  rooms: number | null;
+  /** @nullable */
+  floor: number | null;
+  /** @nullable */
+  floorsTotal: number | null;
+  buildingType: string;
+  renovation: string;
+  furnished: string;
+  /** @nullable */
+  price: number | null;
+  /** @nullable */
+  currency: string | null;
+  /** @nullable */
+  priceAzn: number | null;
+  title: string;
+  fetchedAt: string;
+}
+
+export interface ValuationComp {
+  listing: Listing;
+  score: number;
+  /** @nullable */
+  pricePerM2: number | null;
+  used: boolean;
+  userAdded: boolean;
+  notes: string[];
+}
+
+export interface ValuationEstimate {
+  low: number;
+  central: number;
+  high: number;
+  perM2Low: number;
+  perM2: number;
+  perM2High: number;
+}
+
+export interface ValuationFactor {
+  effect: string;
+  text: string;
+}
+
+export interface Valuation {
+  id: string;
+  createdAt: string;
+  status: string;
+  confidence: string;
+  confidenceReasons: string[];
+  subject: Listing;
+  estimate: ValuationEstimate | null;
+  comparables: ValuationComp[];
+  factors: ValuationFactor[];
+  missing: string[];
+  assumptions: string[];
+  /** @nullable */
+  askingNote: string | null;
+  usdRate: number;
+  poolSize: number;
+}
+
+export interface ValuationSummary {
+  id: string;
+  createdAt: string;
+  title: string;
+  city: string;
+  district: string;
+  /** @nullable */
+  areaM2: number | null;
+  /** @nullable */
+  central: number | null;
+  confidence: string;
+  status: string;
+}
+
+export interface ConstructionEstimateInput {
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  data: unknown;
+}
+
+export interface ConstructionEstimate {
+  id: string;
+  name: string;
+  data: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConstructionEstimateSummary {
+  id: string;
+  name: string;
+  updatedAt: string;
+  /** @nullable */
+  total: number | null;
+  /** @nullable */
+  unpriced: number | null;
+}
+
 export interface HomeWorkItem {
   work: WorkSummary;
   homeName: string;

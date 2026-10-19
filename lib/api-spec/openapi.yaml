@@ -2310,6 +2310,149 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ActionResult'}
+  /valuation/read-link:
+    post:
+      operationId: readListingLink
+      tags: [home]
+      summary: Read one listing page the user linked (allow-listed portals, robots.txt respected)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReadLinkInput'}
+      responses:
+        '200':
+          description: Draft
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ListingDraft'}
+  /valuation/read-text:
+    post:
+      operationId: readListingText
+      tags: [home]
+      summary: Read listing facts from pasted text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReadTextInput'}
+      responses:
+        '200':
+          description: Draft
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ListingDraft'}
+  /valuations:
+    get:
+      operationId: listValuations
+      tags: [home]
+      summary: My market-value calculations
+      responses:
+        '200':
+          description: Valuations
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/ValuationSummary'}
+    post:
+      operationId: createValuation
+      tags: [home]
+      summary: Compare a listing with real comparable listings (asking prices)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ValuationInput'}
+      responses:
+        '201':
+          description: Valuation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Valuation'}
+  /valuations/{valuationId}:
+    get:
+      operationId: getValuation
+      tags: [home]
+      summary: One saved calculation with its sources
+      parameters:
+      - {$ref: '#/components/parameters/ValuationId'}
+      responses:
+        '200':
+          description: Valuation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Valuation'}
+  /construction-estimates:
+    get:
+      operationId: listConstructionEstimates
+      tags: [home]
+      summary: My construction estimates
+      responses:
+        '200':
+          description: Estimates
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/ConstructionEstimateSummary'}
+    post:
+      operationId: createConstructionEstimate
+      tags: [home]
+      summary: Save a new construction estimate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConstructionEstimateInput'}
+      responses:
+        '201':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ConstructionEstimate'}
+  /construction-estimates/{estimateId}:
+    get:
+      operationId: getConstructionEstimate
+      tags: [home]
+      summary: One construction estimate (owner only)
+      parameters:
+      - {$ref: '#/components/parameters/EstimateId'}
+      responses:
+        '200':
+          description: Estimate
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ConstructionEstimate'}
+    put:
+      operationId: updateConstructionEstimate
+      tags: [home]
+      summary: Save changes
+      parameters:
+      - {$ref: '#/components/parameters/EstimateId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConstructionEstimateInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ConstructionEstimate'}
+    delete:
+      operationId: deleteConstructionEstimate
+      tags: [home]
+      summary: Delete (owner only)
+      parameters:
+      - {$ref: '#/components/parameters/EstimateId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
   /me/roles:
     get:
       operationId: getMyRoles
@@ -2729,6 +2872,16 @@ components:
       schema: {type: string, format: uuid}
     MediaId:
       name: mediaId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    ValuationId:
+      name: valuationId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    EstimateId:
+      name: estimateId
       in: path
       required: true
       schema: {type: string, format: uuid}
@@ -5632,6 +5785,248 @@ components:
         smetaProjectId: {type: string, format: uuid}
         linked: {type: boolean}
       required: [smetaProjectId, linked]
+    ReadLinkInput:
+      type: object
+      properties:
+        url: {type: string, minLength: 5, maxLength: 2000}
+      required: [url]
+    ReadTextInput:
+      type: object
+      properties:
+        text: {type: string, minLength: 10, maxLength: 20000}
+      required: [text]
+    ListingFields:
+      type: object
+      properties:
+        dealType:
+          type: [string, 'null']
+        city:
+          type: [string, 'null']
+        district:
+          type: [string, 'null']
+        areaM2:
+          type: [number, 'null']
+        rooms:
+          type: [integer, 'null']
+        floor:
+          type: [integer, 'null']
+        floorsTotal:
+          type: [integer, 'null']
+        buildingType: {type: string}
+        renovation: {type: string}
+        furnished: {type: string}
+        price:
+          type: [number, 'null']
+        currency:
+          type: [string, 'null']
+        title:
+          type: [string, 'null']
+        description:
+          type: [string, 'null']
+      required: [dealType, city, district, areaM2, rooms, floor, floorsTotal, buildingType, renovation, furnished, price, currency, title, description]
+    ListingDraft:
+      type: object
+      properties:
+        snapshotId:
+          type: [string, 'null']
+        source: {type: string}
+        url:
+          type: [string, 'null']
+        portal:
+          type: [string, 'null']
+        fields: {$ref: '#/components/schemas/ListingFields'}
+        found:
+          type: array
+          items: {type: string}
+        warnings:
+          type: array
+          items: {type: string}
+      required: [snapshotId, source, url, portal, fields, found, warnings]
+    ListingInput:
+      type: object
+      properties:
+        snapshotId:
+          type: [string, 'null']
+          format: uuid
+        url:
+          type: [string, 'null']
+        source:
+          type: string
+          enum: [link, text, manual]
+        dealType:
+          type: string
+          enum: [sale, rent]
+        city: {type: string, minLength: 0, maxLength: 100}
+        district: {type: string, minLength: 0, maxLength: 120}
+        areaM2: {type: number}
+        rooms:
+          type: [integer, 'null']
+        floor:
+          type: [integer, 'null']
+        floorsTotal:
+          type: [integer, 'null']
+        buildingType:
+          type: string
+          enum: [new, old, house, unknown]
+        renovation:
+          type: string
+          enum: ['yes', 'no', unknown]
+        furnished:
+          type: string
+          enum: ['yes', 'no', unknown]
+        price:
+          type: [number, 'null']
+        currency:
+          type: string
+          enum: [AZN, USD]
+        title: {type: string, minLength: 0, maxLength: 300}
+        description: {type: string, minLength: 0, maxLength: 4000}
+      required: [source, city, areaM2]
+    ValuationInput:
+      type: object
+      properties:
+        subject: {$ref: '#/components/schemas/ListingInput'}
+        comparables:
+          type: array
+          items: {$ref: '#/components/schemas/ListingInput'}
+          maxItems: 20
+        usdRate:
+          type: [number, 'null']
+        usePool: {type: boolean}
+      required: [subject]
+    Listing:
+      type: object
+      properties:
+        id: {type: string}
+        url:
+          type: [string, 'null']
+        portal:
+          type: [string, 'null']
+        source: {type: string}
+        city: {type: string}
+        district: {type: string}
+        areaM2:
+          type: [number, 'null']
+        rooms:
+          type: [integer, 'null']
+        floor:
+          type: [integer, 'null']
+        floorsTotal:
+          type: [integer, 'null']
+        buildingType: {type: string}
+        renovation: {type: string}
+        furnished: {type: string}
+        price:
+          type: [number, 'null']
+        currency:
+          type: [string, 'null']
+        priceAzn:
+          type: [number, 'null']
+        title: {type: string}
+        fetchedAt: {type: string, format: date-time}
+      required: [id, url, portal, source, city, district, areaM2, rooms, floor, floorsTotal, buildingType, renovation, furnished, price, currency, priceAzn, title, fetchedAt]
+    ValuationComp:
+      type: object
+      properties:
+        listing: {$ref: '#/components/schemas/Listing'}
+        score: {type: number}
+        pricePerM2:
+          type: [number, 'null']
+        used: {type: boolean}
+        userAdded: {type: boolean}
+        notes:
+          type: array
+          items: {type: string}
+      required: [listing, score, pricePerM2, used, userAdded, notes]
+    ValuationEstimate:
+      type: object
+      properties:
+        low: {type: number}
+        central: {type: number}
+        high: {type: number}
+        perM2Low: {type: number}
+        perM2: {type: number}
+        perM2High: {type: number}
+      required: [low, central, high, perM2Low, perM2, perM2High]
+    ValuationFactor:
+      type: object
+      properties:
+        effect: {type: string}
+        text: {type: string}
+      required: [effect, text]
+    Valuation:
+      type: object
+      properties:
+        id: {type: string}
+        createdAt: {type: string, format: date-time}
+        status: {type: string}
+        confidence: {type: string}
+        confidenceReasons:
+          type: array
+          items: {type: string}
+        subject: {$ref: '#/components/schemas/Listing'}
+        estimate:
+          anyOf:
+          - {$ref: '#/components/schemas/ValuationEstimate'}
+          - {type: 'null'}
+        comparables:
+          type: array
+          items: {$ref: '#/components/schemas/ValuationComp'}
+        factors:
+          type: array
+          items: {$ref: '#/components/schemas/ValuationFactor'}
+        missing:
+          type: array
+          items: {type: string}
+        assumptions:
+          type: array
+          items: {type: string}
+        askingNote:
+          type: [string, 'null']
+        usdRate: {type: number}
+        poolSize: {type: integer}
+      required: [id, createdAt, status, confidence, confidenceReasons, subject, estimate, comparables, factors, missing, assumptions, askingNote, usdRate, poolSize]
+    ValuationSummary:
+      type: object
+      properties:
+        id: {type: string}
+        createdAt: {type: string, format: date-time}
+        title: {type: string}
+        city: {type: string}
+        district: {type: string}
+        areaM2:
+          type: [number, 'null']
+        central:
+          type: [number, 'null']
+        confidence: {type: string}
+        status: {type: string}
+      required: [id, createdAt, title, city, district, areaM2, central, confidence, status]
+    ConstructionEstimateInput:
+      type: object
+      properties:
+        name: {type: string, minLength: 1, maxLength: 200}
+        data: {}
+      required: [name, data]
+    ConstructionEstimate:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        data: {}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+      required: [id, name, data, createdAt, updatedAt]
+    ConstructionEstimateSummary:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        updatedAt: {type: string, format: date-time}
+        total:
+          type: [number, 'null']
+        unpriced:
+          type: [integer, 'null']
+      required: [id, name, updatedAt, total, unpriced]
     HomeWorkItem:
       type: object
       properties:

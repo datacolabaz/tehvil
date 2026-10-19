@@ -40,6 +40,7 @@ app.use(cors({ credentials: true, origin: process.env.PUBLIC_APP_URL || true }))
 app.use("/api/whatsapp/webhook", whatsappWebhookRouter);
 // Estimate saves send the whole project document.
 app.use("/api/smeta", express.json({ limit: "2mb" }));
+app.use("/api/construction-estimates", express.json({ limit: "1mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -55,6 +56,10 @@ app.use(
 app.use("/api", router);
 const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
   req.log.error({ err: error }, "Request failed");
+  if (error?.type === "entity.too.large") {
+    res.status(413).json({ error: "Göndərilən məlumat çox böyükdür" });
+    return;
+  }
   const code = error?.code ?? error?.cause?.code;
   if (code === "23505") {
     res.status(409).json({ error: "This record already exists. Refresh and try again." });

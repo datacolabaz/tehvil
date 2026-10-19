@@ -79,6 +79,11 @@ const WorkersPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({
 const WorkerProfilePage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.WorkerProfilePage })));
 const PublicWorkerPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.PublicWorkerPage })));
 const HomeDocumentsPage = lazy(() => import('@/pages/home/documents-page').then(m => ({ default: m.HomeDocumentsPage })));
+const AiSmetaHomePage = lazy(() => import('@/pages/ai/ai-home-page').then(m => ({ default: m.AiSmetaHomePage })));
+const MarketValuePage = lazy(() => import('@/pages/ai/market-page').then(m => ({ default: m.MarketValuePage })));
+const ValuationResultPage = lazy(() => import('@/pages/ai/market-page').then(m => ({ default: m.ValuationResultPage })));
+const ConstructionListPage = lazy(() => import('@/pages/ai/construction-page').then(m => ({ default: m.ConstructionListPage })));
+const ConstructionEditorPage = lazy(() => import('@/pages/ai/construction-page').then(m => ({ default: m.ConstructionEditorPage })));
 const InterestPage = lazy(() => import('@/pages/home/passport-card').then(m => ({ default: m.InterestPage })));
 const SettingsPage = lazy(() => import('@/pages/home/settings-page').then(m => ({ default: m.SettingsPage })));
 const AllHistoryPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.AllHistoryPage })));
@@ -111,7 +116,7 @@ const REALTOR_NAV = [
   { href: '/realtor/team', key: 'team', label: 'Komanda', icon: UsersRound },
 ] as const;
 
-const queryClient = new QueryClient({ mutationCache: new MutationCache({ onError: e => emitFeedback(errorToMsg(e)) }), defaultOptions: { queries: { retry: 1, staleTime: 20_000, refetchOnWindowFocus: true } } });
+const queryClient = new QueryClient({ mutationCache: new MutationCache({ onError: (e, _v, _c, m) => { if (!m.meta?.silent) emitFeedback(errorToMsg(e)); } }), defaultOptions: { queries: { retry: 1, staleTime: 20_000, refetchOnWindowFocus: true } } });
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
@@ -146,7 +151,7 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
   const mainNav: NavItem[] = [
     { href: '/homes', icon: House, key: 'myHomes' },
     { href: '/history', icon: History, key: 'repairHistory' },
-    { href: '/smeta', icon: Calculator, key: 'smeta' },
+    { href: '/ai-smeta', icon: Calculator, key: 'smeta' },
   ];
   void r;
   const projectNav: NavItem[] = projectId ? [
@@ -313,7 +318,7 @@ function Overview(p:any) {
 function NewRoute({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <CreateProjectPage lang={lang} change={change} t={t}/>; }
 type ShellProps = { lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string };
 function SmetaShell({ crumbs, children, ...shell }: ShellProps & { crumbs?: Crumb[]; children: ReactNode }) {
-  return <Protected t={shell.t}><AppShell {...shell} active="smeta" crumbs={[{ label: 'AI Smeta', href: crumbs?.length ? '/smeta' : undefined }, ...(crumbs || [])]}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
+  return <Protected t={shell.t}><AppShell {...shell} active="smeta" crumbs={[{ label: 'AI Smeta', href: crumbs?.length ? '/ai-smeta' : undefined }, ...(crumbs || [])]}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
 }
 function SmetaDetailRoute({ projectId, ...shell }: ShellProps & { projectId: string }) {
   const project = useSmetaProject(projectId);
@@ -438,7 +443,12 @@ function ClerkRoutes() {
       <Route path="/projects/:projectId" component={()=> <ProjectRoute lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/invites/accept" component={()=> <InvitationPage lang={lang} change={changeLang} t={t}/>}/>
       <Route path="/estimate/:publicToken">{params => <Suspense fallback={<Loading t={t}/>}><PublicEstimatePage token={params.publicToken}/></Suspense>}</Route>
-      <Route path="/smeta">{() => <SmetaShell lang={lang} change={changeLang} t={t}><SmetaDashboardPage/></SmetaShell>}</Route>
+      <Route path="/ai-smeta">{() => <SmetaShell lang={lang} change={changeLang} t={t}><AiSmetaHomePage/></SmetaShell>}</Route>
+      <Route path="/ai-smeta/bazar">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Bazar dəyəri' }]}><MarketValuePage/></SmetaShell>}</Route>
+      <Route path="/ai-smeta/bazar/:id">{params => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Bazar dəyəri', href: '/ai-smeta/bazar' }, { label: 'Nəticə' }]}><ValuationResultPage id={params.id}/></SmetaShell>}</Route>
+      <Route path="/ai-smeta/tikinti">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Tikinti smetası' }]}><ConstructionListPage/></SmetaShell>}</Route>
+      <Route path="/ai-smeta/tikinti/:id">{params => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Tikinti smetası', href: '/ai-smeta/tikinti' }, { label: 'Smeta' }]}><ConstructionEditorPage id={params.id}/></SmetaShell>}</Route>
+      <Route path="/smeta">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Təmir smetası (podratçı)' }]}><SmetaDashboardPage/></SmetaShell>}</Route>
       <Route path="/smeta/new">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Yeni smeta' }]}><NewEstimatePage/></SmetaShell>}</Route>
       <Route path="/smeta/:projectId/print">{params => <Protected t={t}><Suspense fallback={<Loading t={t}/>}><EstimatePrintPage projectId={params.projectId}/></Suspense></Protected>}</Route>
       <Route path="/realtor">{() => <RealtorShell section="overview" lang={lang} change={changeLang} t={t}><RealtorOverviewPage/></RealtorShell>}</Route>

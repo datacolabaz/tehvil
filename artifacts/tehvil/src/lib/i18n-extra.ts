@@ -19,7 +19,7 @@ export const extra = {
     act_payment_planned: 'Ödəniş qeydi əlavə edildi', act_payment_marked_sent: 'Ödəniş göndərildi kimi qeyd edildi', act_payment_confirmed_received: 'Ödənişin qəbulu təsdiqləndi',
     ak_change: 'Dəyişikliyə baxın', ak_change_d: 'Qərar gözləyən dəyişiklik təklifi var.', ak_handover: 'Təhvil gözləyir', ak_handover_d: 'Mərhələ qəbul və ya düzəliş qərarı gözləyir.', ak_payment: 'Ödəniş qeydi', ak_payment_d: 'Ödəniş qeydi növbəti addım tələb edir.', ak_scope: 'İş həcmi', ak_scope_d: 'İş həcmi növbəti addım tələb edir.',
     view: 'Bax', download: 'Yüklə', evidence: 'Sübut', receipt: 'Qəbz (istəyə bağlı)', receiptTip: 'Köçürmə qəbzinin şəkli və ya PDF-i', attachFiles: 'Fayl əlavə et',
-    errTitle: 'Əməliyyat alınmadı', errForbidden: 'Bu əməliyyat üçün icazəniz yoxdur.', errState: 'Bu addım indi mümkün deyil — layihənin vəziyyəti dəyişmiş ola bilər. Səhifəni yeniləyin.', errUpload: 'Fayl yüklənmədi. Yenidən cəhd edin.', errTooLarge: 'Fayl 50 MB-dən böyükdür.', errAuth: 'Sessiya başa çatıb. Yenidən daxil olun.',
+    errTitle: 'Əməliyyat alınmadı', errForbidden: 'Bu əməliyyat üçün icazəniz yoxdur.', errState: 'Bu addım indi mümkün deyil. Səhifəni yeniləyin.', errUpload: 'Fayl yüklənmədi. Yenidən cəhd edin.', errTooLarge: 'Fayl 50 MB-dən böyükdür.', errAuth: 'Sessiya başa çatıb. Yenidən daxil olun.',
     dismiss: 'Bağla', close: 'Bağla', openMenu: 'Menyunu aç', copy: 'Kopyala', extraRevision: 'Əlavə düzəliş istəyi', markSentNote: 'Qeyd (istəyə bağlı)', loadingShort: 'Yüklənir', reasonRequired: 'Düzəliş üçün başlıq və təsvir lazımdır.',
   },
   ru: {

@@ -11336,6 +11336,414 @@ export const CreateServiceInterestResponse = zod.object({
 
 
 /**
+ * @summary Read one listing page the user linked (allow-listed portals, robots.txt respected)
+ */
+export const readListingLinkBodyUrlMin = 5;
+export const readListingLinkBodyUrlMax = 2000;
+
+
+
+export const ReadListingLinkBody = zod.object({
+  "url": zod.string().min(readListingLinkBodyUrlMin).max(readListingLinkBodyUrlMax)
+})
+
+export const ReadListingLinkResponse = zod.object({
+  "snapshotId": zod.string().nullable(),
+  "source": zod.string(),
+  "url": zod.string().nullable(),
+  "portal": zod.string().nullable(),
+  "fields": zod.object({
+  "dealType": zod.string().nullable(),
+  "city": zod.string().nullable(),
+  "district": zod.string().nullable(),
+  "areaM2": zod.number().nullable(),
+  "rooms": zod.number().int().nullable(),
+  "floor": zod.number().int().nullable(),
+  "floorsTotal": zod.number().int().nullable(),
+  "buildingType": zod.string(),
+  "renovation": zod.string(),
+  "furnished": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.string().nullable(),
+  "title": zod.string().nullable(),
+  "description": zod.string().nullable()
+}),
+  "found": zod.array(zod.string()),
+  "warnings": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Read listing facts from pasted text
+ */
+export const readListingTextBodyTextMin = 10;
+export const readListingTextBodyTextMax = 20000;
+
+
+
+export const ReadListingTextBody = zod.object({
+  "text": zod.string().min(readListingTextBodyTextMin).max(readListingTextBodyTextMax)
+})
+
+export const ReadListingTextResponse = zod.object({
+  "snapshotId": zod.string().nullable(),
+  "source": zod.string(),
+  "url": zod.string().nullable(),
+  "portal": zod.string().nullable(),
+  "fields": zod.object({
+  "dealType": zod.string().nullable(),
+  "city": zod.string().nullable(),
+  "district": zod.string().nullable(),
+  "areaM2": zod.number().nullable(),
+  "rooms": zod.number().int().nullable(),
+  "floor": zod.number().int().nullable(),
+  "floorsTotal": zod.number().int().nullable(),
+  "buildingType": zod.string(),
+  "renovation": zod.string(),
+  "furnished": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.string().nullable(),
+  "title": zod.string().nullable(),
+  "description": zod.string().nullable()
+}),
+  "found": zod.array(zod.string()),
+  "warnings": zod.array(zod.string())
+})
+
+
+/**
+ * @summary My market-value calculations
+ */
+export const ListValuationsResponseItem = zod.object({
+  "id": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "title": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "areaM2": zod.number().nullable(),
+  "central": zod.number().nullable(),
+  "confidence": zod.string(),
+  "status": zod.string()
+})
+export const ListValuationsResponse = zod.array(ListValuationsResponseItem)
+
+
+/**
+ * @summary Compare a listing with real comparable listings (asking prices)
+ */
+export const createValuationBodySubjectCityMin = 0;
+export const createValuationBodySubjectCityMax = 100;
+
+export const createValuationBodySubjectDistrictMin = 0;
+export const createValuationBodySubjectDistrictMax = 120;
+
+export const createValuationBodySubjectTitleMin = 0;
+export const createValuationBodySubjectTitleMax = 300;
+
+export const createValuationBodySubjectDescriptionMin = 0;
+export const createValuationBodySubjectDescriptionMax = 4000;
+
+export const createValuationBodyComparablesItemCityMin = 0;
+export const createValuationBodyComparablesItemCityMax = 100;
+
+export const createValuationBodyComparablesItemDistrictMin = 0;
+export const createValuationBodyComparablesItemDistrictMax = 120;
+
+export const createValuationBodyComparablesItemTitleMin = 0;
+export const createValuationBodyComparablesItemTitleMax = 300;
+
+export const createValuationBodyComparablesItemDescriptionMin = 0;
+export const createValuationBodyComparablesItemDescriptionMax = 4000;
+
+export const createValuationBodyComparablesMax = 20;
+
+
+
+export const CreateValuationBody = zod.object({
+  "subject": zod.object({
+  "snapshotId": zod.string().uuid().nullish(),
+  "url": zod.string().nullish(),
+  "source": zod.enum(['link', 'text', 'manual']),
+  "dealType": zod.enum(['sale', 'rent']).optional(),
+  "city": zod.string().min(createValuationBodySubjectCityMin).max(createValuationBodySubjectCityMax),
+  "district": zod.string().min(createValuationBodySubjectDistrictMin).max(createValuationBodySubjectDistrictMax).optional(),
+  "areaM2": zod.number(),
+  "rooms": zod.number().int().nullish(),
+  "floor": zod.number().int().nullish(),
+  "floorsTotal": zod.number().int().nullish(),
+  "buildingType": zod.enum(['new', 'old', 'house', 'unknown']).optional(),
+  "renovation": zod.enum(['yes', 'no', 'unknown']).optional(),
+  "furnished": zod.enum(['yes', 'no', 'unknown']).optional(),
+  "price": zod.number().nullish(),
+  "currency": zod.enum(['AZN', 'USD']).optional(),
+  "title": zod.string().min(createValuationBodySubjectTitleMin).max(createValuationBodySubjectTitleMax).optional(),
+  "description": zod.string().min(createValuationBodySubjectDescriptionMin).max(createValuationBodySubjectDescriptionMax).optional()
+}),
+  "comparables": zod.array(zod.object({
+  "snapshotId": zod.string().uuid().nullish(),
+  "url": zod.string().nullish(),
+  "source": zod.enum(['link', 'text', 'manual']),
+  "dealType": zod.enum(['sale', 'rent']).optional(),
+  "city": zod.string().min(createValuationBodyComparablesItemCityMin).max(createValuationBodyComparablesItemCityMax),
+  "district": zod.string().min(createValuationBodyComparablesItemDistrictMin).max(createValuationBodyComparablesItemDistrictMax).optional(),
+  "areaM2": zod.number(),
+  "rooms": zod.number().int().nullish(),
+  "floor": zod.number().int().nullish(),
+  "floorsTotal": zod.number().int().nullish(),
+  "buildingType": zod.enum(['new', 'old', 'house', 'unknown']).optional(),
+  "renovation": zod.enum(['yes', 'no', 'unknown']).optional(),
+  "furnished": zod.enum(['yes', 'no', 'unknown']).optional(),
+  "price": zod.number().nullish(),
+  "currency": zod.enum(['AZN', 'USD']).optional(),
+  "title": zod.string().min(createValuationBodyComparablesItemTitleMin).max(createValuationBodyComparablesItemTitleMax).optional(),
+  "description": zod.string().min(createValuationBodyComparablesItemDescriptionMin).max(createValuationBodyComparablesItemDescriptionMax).optional()
+})).max(createValuationBodyComparablesMax).optional(),
+  "usdRate": zod.number().nullish(),
+  "usePool": zod.boolean().optional()
+})
+
+export const CreateValuationResponse = zod.object({
+  "id": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "status": zod.string(),
+  "confidence": zod.string(),
+  "confidenceReasons": zod.array(zod.string()),
+  "subject": zod.object({
+  "id": zod.string(),
+  "url": zod.string().nullable(),
+  "portal": zod.string().nullable(),
+  "source": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "areaM2": zod.number().nullable(),
+  "rooms": zod.number().int().nullable(),
+  "floor": zod.number().int().nullable(),
+  "floorsTotal": zod.number().int().nullable(),
+  "buildingType": zod.string(),
+  "renovation": zod.string(),
+  "furnished": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.string().nullable(),
+  "priceAzn": zod.number().nullable(),
+  "title": zod.string(),
+  "fetchedAt": zod.string().datetime({"offset":true})
+}),
+  "estimate": zod.union([zod.object({
+  "low": zod.number(),
+  "central": zod.number(),
+  "high": zod.number(),
+  "perM2Low": zod.number(),
+  "perM2": zod.number(),
+  "perM2High": zod.number()
+}),zod.null()]),
+  "comparables": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "url": zod.string().nullable(),
+  "portal": zod.string().nullable(),
+  "source": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "areaM2": zod.number().nullable(),
+  "rooms": zod.number().int().nullable(),
+  "floor": zod.number().int().nullable(),
+  "floorsTotal": zod.number().int().nullable(),
+  "buildingType": zod.string(),
+  "renovation": zod.string(),
+  "furnished": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.string().nullable(),
+  "priceAzn": zod.number().nullable(),
+  "title": zod.string(),
+  "fetchedAt": zod.string().datetime({"offset":true})
+}),
+  "score": zod.number(),
+  "pricePerM2": zod.number().nullable(),
+  "used": zod.boolean(),
+  "userAdded": zod.boolean(),
+  "notes": zod.array(zod.string())
+})),
+  "factors": zod.array(zod.object({
+  "effect": zod.string(),
+  "text": zod.string()
+})),
+  "missing": zod.array(zod.string()),
+  "assumptions": zod.array(zod.string()),
+  "askingNote": zod.string().nullable(),
+  "usdRate": zod.number(),
+  "poolSize": zod.number().int()
+})
+
+
+/**
+ * @summary One saved calculation with its sources
+ */
+export const GetValuationParams = zod.object({
+  "valuationId": zod.coerce.string().uuid()
+})
+
+export const GetValuationResponse = zod.object({
+  "id": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "status": zod.string(),
+  "confidence": zod.string(),
+  "confidenceReasons": zod.array(zod.string()),
+  "subject": zod.object({
+  "id": zod.string(),
+  "url": zod.string().nullable(),
+  "portal": zod.string().nullable(),
+  "source": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "areaM2": zod.number().nullable(),
+  "rooms": zod.number().int().nullable(),
+  "floor": zod.number().int().nullable(),
+  "floorsTotal": zod.number().int().nullable(),
+  "buildingType": zod.string(),
+  "renovation": zod.string(),
+  "furnished": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.string().nullable(),
+  "priceAzn": zod.number().nullable(),
+  "title": zod.string(),
+  "fetchedAt": zod.string().datetime({"offset":true})
+}),
+  "estimate": zod.union([zod.object({
+  "low": zod.number(),
+  "central": zod.number(),
+  "high": zod.number(),
+  "perM2Low": zod.number(),
+  "perM2": zod.number(),
+  "perM2High": zod.number()
+}),zod.null()]),
+  "comparables": zod.array(zod.object({
+  "listing": zod.object({
+  "id": zod.string(),
+  "url": zod.string().nullable(),
+  "portal": zod.string().nullable(),
+  "source": zod.string(),
+  "city": zod.string(),
+  "district": zod.string(),
+  "areaM2": zod.number().nullable(),
+  "rooms": zod.number().int().nullable(),
+  "floor": zod.number().int().nullable(),
+  "floorsTotal": zod.number().int().nullable(),
+  "buildingType": zod.string(),
+  "renovation": zod.string(),
+  "furnished": zod.string(),
+  "price": zod.number().nullable(),
+  "currency": zod.string().nullable(),
+  "priceAzn": zod.number().nullable(),
+  "title": zod.string(),
+  "fetchedAt": zod.string().datetime({"offset":true})
+}),
+  "score": zod.number(),
+  "pricePerM2": zod.number().nullable(),
+  "used": zod.boolean(),
+  "userAdded": zod.boolean(),
+  "notes": zod.array(zod.string())
+})),
+  "factors": zod.array(zod.object({
+  "effect": zod.string(),
+  "text": zod.string()
+})),
+  "missing": zod.array(zod.string()),
+  "assumptions": zod.array(zod.string()),
+  "askingNote": zod.string().nullable(),
+  "usdRate": zod.number(),
+  "poolSize": zod.number().int()
+})
+
+
+/**
+ * @summary My construction estimates
+ */
+export const ListConstructionEstimatesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "total": zod.number().nullable(),
+  "unpriced": zod.number().int().nullable()
+})
+export const ListConstructionEstimatesResponse = zod.array(ListConstructionEstimatesResponseItem)
+
+
+/**
+ * @summary Save a new construction estimate
+ */
+export const createConstructionEstimateBodyNameMax = 200;
+
+
+
+export const CreateConstructionEstimateBody = zod.object({
+  "name": zod.string().min(1).max(createConstructionEstimateBodyNameMax),
+  "data": zod.unknown()
+})
+
+export const CreateConstructionEstimateResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "data": zod.unknown(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary One construction estimate (owner only)
+ */
+export const GetConstructionEstimateParams = zod.object({
+  "estimateId": zod.coerce.string().uuid()
+})
+
+export const GetConstructionEstimateResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "data": zod.unknown(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Save changes
+ */
+export const UpdateConstructionEstimateParams = zod.object({
+  "estimateId": zod.coerce.string().uuid()
+})
+
+export const updateConstructionEstimateBodyNameMax = 200;
+
+
+
+export const UpdateConstructionEstimateBody = zod.object({
+  "name": zod.string().min(1).max(updateConstructionEstimateBodyNameMax),
+  "data": zod.unknown()
+})
+
+export const UpdateConstructionEstimateResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "data": zod.unknown(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Delete (owner only)
+ */
+export const DeleteConstructionEstimateParams = zod.object({
+  "estimateId": zod.coerce.string().uuid()
+})
+
+export const DeleteConstructionEstimateResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
  * @summary What the signed-in account is (for a menu that shows only relevant sections)
  */
 export const GetMyRolesResponse = zod.object({

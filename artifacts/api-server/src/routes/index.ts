@@ -18,6 +18,7 @@ import homesRouter from "./homes";
 import worksRouter from "./works";
 import workersRouter from "./workers";
 import passportRouter from "./passport";
+import valuationRouter from "./valuation";
 
 const router: IRouter = Router();
 
@@ -40,5 +41,6 @@ router.use(homesRouter);
 router.use(worksRouter);
 router.use(workersRouter);
 router.use(passportRouter);
+router.use(valuationRouter);
 
 export default router;

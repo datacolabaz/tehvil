@@ -16918,7 +16918,7 @@ var require_get_intrinsic = __commonJS({
     var max2 = require_max();
     var min = require_min();
     var pow = require_pow();
-    var round = require_round();
+    var round3 = require_round();
     var sign = require_sign();
     var $Function = Function;
     var getEvalledConstructor = function(expressionSyntax) {
@@ -17032,7 +17032,7 @@ var require_get_intrinsic = __commonJS({
       "%Math.max%": max2,
       "%Math.min%": min,
       "%Math.pow%": pow,
-      "%Math.round%": round,
+      "%Math.round%": round3,
       "%Math.sign%": sign,
       "%Reflect.getPrototypeOf%": $ReflectGPO
     };
@@ -20725,27 +20725,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router21;
+    module.exports = Router22;
     module.exports.Route = Route;
-    function Router21(options) {
-      if (!(this instanceof Router21)) {
-        return new Router21(options);
+    function Router22(options) {
+      if (!(this instanceof Router22)) {
+        return new Router22(options);
       }
       const opts = options || {};
-      function router21(req, res, next) {
-        router21.handle(req, res, next);
+      function router22(req, res, next) {
+        router22.handle(req, res, next);
       }
-      Object.setPrototypeOf(router21, this);
-      router21.caseSensitive = opts.caseSensitive;
-      router21.mergeParams = opts.mergeParams;
-      router21.params = {};
-      router21.strict = opts.strict;
-      router21.stack = [];
-      return router21;
+      Object.setPrototypeOf(router22, this);
+      router22.caseSensitive = opts.caseSensitive;
+      router22.mergeParams = opts.mergeParams;
+      router22.params = {};
+      router22.strict = opts.strict;
+      router22.stack = [];
+      return router22;
     }
-    Router21.prototype = function() {
+    Router22.prototype = function() {
     };
-    Router21.prototype.param = function param(name, fn) {
+    Router22.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20765,7 +20765,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router21.prototype.handle = function handle(req, res, callback) {
+    Router22.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20892,7 +20892,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router21.prototype.use = function use(handler) {
+    Router22.prototype.use = function use(handler) {
       let offset = 0;
       let path = "/";
       if (typeof handler !== "function") {
@@ -20925,7 +20925,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router21.prototype.route = function route(path) {
+    Router22.prototype.route = function route(path) {
       const route2 = new Route(path);
       const layer = new Layer(path, {
         sensitive: this.caseSensitive,
@@ -20940,7 +20940,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router21.prototype[method] = function(path) {
+      Router22.prototype[method] = function(path) {
         const route = this.route(path);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21123,13 +21123,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve = __require("node:path").resolve;
     var once = require_once();
-    var Router21 = require_router();
+    var Router22 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router21 = null;
+      var router22 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21138,13 +21138,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router21 === null) {
-            router21 = new Router21({
+          if (router22 === null) {
+            router22 = new Router22({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router21;
+          return router22;
         }
       });
     };
@@ -21215,15 +21215,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router21 = this.router;
+      var router22 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router21.use(path, fn2);
+          return router22.use(path, fn2);
         }
         debug(".use app under %s", path);
         fn2.mountpath = path;
         fn2.parent = this;
-        router21.use(path, function mounted_app(req, res, next) {
+        router22.use(path, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -21912,9 +21912,9 @@ var require_fresh = __commonJS({
         if (!etag) {
           return false;
         }
-        var matches2 = parseTokenList(noneMatch);
-        for (var i = 0; i < matches2.length; i++) {
-          var match2 = matches2[i];
+        var matches3 = parseTokenList(noneMatch);
+        for (var i = 0; i < matches3.length; i++) {
+          var match2 = matches3[i];
           if (match2 === etag || match2 === "W/" + etag || "W/" + match2 === etag) {
             return true;
           }
@@ -23732,7 +23732,7 @@ var require_express = __commonJS({
     var EventEmitter = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router21 = require_router();
+    var Router22 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23754,8 +23754,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router21.Route;
-    exports.Router = Router21;
+    exports.Route = Router22.Route;
+    exports.Router = Router22;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -32330,21 +32330,21 @@ var require_postgres_date = __commonJS({
       if (INFINITY.test(isoDate)) {
         return Number(isoDate.replace("i", "I"));
       }
-      var matches2 = DATE_TIME.exec(isoDate);
-      if (!matches2) {
+      var matches3 = DATE_TIME.exec(isoDate);
+      if (!matches3) {
         return getDate(isoDate) || null;
       }
-      var isBC = !!matches2[8];
-      var year = parseInt(matches2[1], 10);
+      var isBC = !!matches3[8];
+      var year = parseInt(matches3[1], 10);
       if (isBC) {
         year = bcYearToNegativeYear(year);
       }
-      var month = parseInt(matches2[2], 10) - 1;
-      var day = matches2[3];
-      var hour = parseInt(matches2[4], 10);
-      var minute = parseInt(matches2[5], 10);
-      var second = parseInt(matches2[6], 10);
-      var ms = matches2[7];
+      var month = parseInt(matches3[2], 10) - 1;
+      var day = matches3[3];
+      var hour = parseInt(matches3[4], 10);
+      var minute = parseInt(matches3[5], 10);
+      var second = parseInt(matches3[6], 10);
+      var ms = matches3[7];
       ms = ms ? 1e3 * parseFloat(ms) : 0;
       var date2;
       var offset = timeZoneOffset(isoDate);
@@ -32365,17 +32365,17 @@ var require_postgres_date = __commonJS({
       return date2;
     };
     function getDate(isoDate) {
-      var matches2 = DATE.exec(isoDate);
-      if (!matches2) {
+      var matches3 = DATE.exec(isoDate);
+      if (!matches3) {
         return;
       }
-      var year = parseInt(matches2[1], 10);
-      var isBC = !!matches2[4];
+      var year = parseInt(matches3[1], 10);
+      var isBC = !!matches3[4];
       if (isBC) {
         year = bcYearToNegativeYear(year);
       }
-      var month = parseInt(matches2[2], 10) - 1;
-      var day = matches2[3];
+      var month = parseInt(matches3[2], 10) - 1;
+      var day = matches3[3];
       var date2 = new Date(year, month, day);
       if (is0To99(year)) {
         date2.setFullYear(year);
@@ -32497,11 +32497,11 @@ var require_postgres_interval = __commonJS({
     }
     function parse2(interval2) {
       if (!interval2) return {};
-      var matches2 = INTERVAL.exec(interval2);
-      var isNegative = matches2[8] === "-";
+      var matches3 = INTERVAL.exec(interval2);
+      var isNegative = matches3[8] === "-";
       return Object.keys(positions).reduce(function(parsed, property) {
         var position = positions[property];
-        var value = matches2[position];
+        var value = matches3[position];
         if (!value) return parsed;
         value = property === "milliseconds" ? parseMilliseconds(value) : parseInt(value, 10);
         if (!value) return parsed;
@@ -33144,16 +33144,16 @@ var require_pg_types = __commonJS({
 var require_defaults = __commonJS({
   "../../node_modules/.pnpm/pg@8.23.0/node_modules/pg/lib/defaults.js"(exports, module) {
     "use strict";
-    var user2;
+    var user3;
     try {
-      user2 = process.platform === "win32" ? process.env.USERNAME : process.env.USER;
+      user3 = process.platform === "win32" ? process.env.USERNAME : process.env.USER;
     } catch {
     }
     module.exports = {
       // database host. defaults to localhost
       host: "localhost",
       // database user's name
-      user: user2,
+      user: user3,
       // name of database to connect
       database: void 0,
       // database user's password
@@ -33385,8 +33385,8 @@ var require_utils5 = __commonJS({
         return Array.from(new Uint8Array(hash2)).map((b) => b.toString(16).padStart(2, "0")).join("");
       }
     }
-    async function postgresMd5PasswordHash(user2, password, salt) {
-      const inner = await md5(password + user2);
+    async function postgresMd5PasswordHash(user3, password, salt) {
+      const inner = await md5(password + user3);
       const outer = await md5(Buffer.concat([Buffer.from(inner), salt]));
       return "md5" + outer;
     }
@@ -43118,10 +43118,75 @@ var init_home = __esm({
   }
 });
 
+// ../../lib/db/src/schema/valuation.ts
+var createdAt5, user2, money3, listingSnapshotsTable, valuationsTable, constructionEstimatesTable;
+var init_valuation = __esm({
+  "../../lib/db/src/schema/valuation.ts"() {
+    "use strict";
+    init_pg_core();
+    createdAt5 = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
+    user2 = (name) => varchar(name, { length: 128 });
+    money3 = (name) => numeric(name, { precision: 14, scale: 2, mode: "number" });
+    listingSnapshotsTable = pgTable("listing_snapshots", {
+      id: uuid("id").primaryKey().defaultRandom(),
+      url: text("url"),
+      urlHash: varchar("url_hash", { length: 64 }),
+      portal: varchar("portal", { length: 16 }),
+      /** link | text | manual */
+      source: varchar("source", { length: 8 }).notNull(),
+      dealType: varchar("deal_type", { length: 8 }).notNull().default("sale"),
+      city: varchar("city", { length: 100 }).notNull().default(""),
+      district: varchar("district", { length: 120 }).notNull().default(""),
+      areaM2: numeric("area_m2", { precision: 10, scale: 2, mode: "number" }),
+      rooms: integer("rooms"),
+      floor: integer("floor"),
+      floorsTotal: integer("floors_total"),
+      /** new | old | house | unknown */
+      buildingType: varchar("building_type", { length: 8 }).notNull().default("unknown"),
+      /** yes | no | unknown */
+      renovation: varchar("renovation", { length: 8 }).notNull().default("unknown"),
+      furnished: varchar("furnished", { length: 8 }).notNull().default("unknown"),
+      price: money3("price"),
+      currency: varchar("currency", { length: 3 }),
+      priceAzn: money3("price_azn"),
+      title: varchar("title", { length: 300 }).notNull().default(""),
+      description: text("description").notNull().default(""),
+      /** What the server read from the page, kept to show the source and to decide pool membership. */
+      parsed: jsonb("parsed").$type(),
+      inPool: boolean("in_pool").notNull().default(false),
+      fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+      createdByUserId: user2("created_by_user_id").notNull(),
+      createdAt: createdAt5()
+    }, (t) => [
+      index("listing_snapshots_pool_idx").on(t.inPool, t.city, t.fetchedAt),
+      index("listing_snapshots_url_idx").on(t.urlHash)
+    ]);
+    valuationsTable = pgTable("valuations", {
+      id: uuid("id").primaryKey().defaultRandom(),
+      ownerUserId: user2("owner_user_id").notNull(),
+      subjectId: uuid("subject_id").notNull().references(() => listingSnapshotsTable.id, { onDelete: "restrict" }),
+      compIds: jsonb("comp_ids").$type().notNull().default([]),
+      usdRate: numeric("usd_rate", { precision: 8, scale: 4, mode: "number" }).notNull(),
+      result: jsonb("result").$type().notNull(),
+      createdAt: createdAt5()
+    }, (t) => [index("valuations_owner_idx").on(t.ownerUserId, t.createdAt)]);
+    constructionEstimatesTable = pgTable("construction_estimates", {
+      id: uuid("id").primaryKey().defaultRandom(),
+      ownerUserId: user2("owner_user_id").notNull(),
+      name: varchar("name", { length: 200 }).notNull(),
+      /** Measurements, lines, prices and file notes as edited in the browser (validated on save). */
+      data: jsonb("data").$type().notNull(),
+      createdAt: createdAt5(),
+      updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+    }, (t) => [index("construction_estimates_owner_idx").on(t.ownerUserId, t.updatedAt)]);
+  }
+});
+
 // ../../lib/db/src/schema/index.ts
 var schema_exports = {};
 __export(schema_exports, {
   changeOrdersTable: () => changeOrdersTable,
+  constructionEstimatesTable: () => constructionEstimatesTable,
   equipmentTable: () => equipmentTable,
   evidenceUploadsTable: () => evidenceUploadsTable,
   homeAuditTable: () => homeAuditTable,
@@ -43132,6 +43197,7 @@ __export(schema_exports, {
   homeSharesTable: () => homeSharesTable,
   homesTable: () => homesTable,
   infrastructureItemsTable: () => infrastructureItemsTable,
+  listingSnapshotsTable: () => listingSnapshotsTable,
   milestonesTable: () => milestonesTable,
   passportSharesTable: () => passportSharesTable,
   passportWorksTable: () => passportWorksTable,
@@ -43169,6 +43235,7 @@ __export(schema_exports, {
   smetaSectionsTable: () => smetaSectionsTable,
   smetaSharesTable: () => smetaSharesTable,
   timelineEventsTable: () => timelineEventsTable,
+  valuationsTable: () => valuationsTable,
   workApprovalsTable: () => workApprovalsTable,
   workNotesTable: () => workNotesTable,
   workParticipantsTable: () => workParticipantsTable,
@@ -43184,6 +43251,7 @@ var init_schema2 = __esm({
     init_smeta();
     init_realtor();
     init_home();
+    init_valuation();
   }
 });
 
@@ -43191,6 +43259,7 @@ var init_schema2 = __esm({
 var src_exports = {};
 __export(src_exports, {
   changeOrdersTable: () => changeOrdersTable,
+  constructionEstimatesTable: () => constructionEstimatesTable,
   db: () => db,
   equipmentTable: () => equipmentTable,
   evidenceUploadsTable: () => evidenceUploadsTable,
@@ -43202,6 +43271,7 @@ __export(src_exports, {
   homeSharesTable: () => homeSharesTable,
   homesTable: () => homesTable,
   infrastructureItemsTable: () => infrastructureItemsTable,
+  listingSnapshotsTable: () => listingSnapshotsTable,
   milestonesTable: () => milestonesTable,
   passportSharesTable: () => passportSharesTable,
   passportWorksTable: () => passportWorksTable,
@@ -43240,6 +43310,7 @@ __export(src_exports, {
   smetaSectionsTable: () => smetaSectionsTable,
   smetaSharesTable: () => smetaSharesTable,
   timelineEventsTable: () => timelineEventsTable,
+  valuationsTable: () => valuationsTable,
   workApprovalsTable: () => workApprovalsTable,
   workNotesTable: () => workNotesTable,
   workParticipantsTable: () => workParticipantsTable,
@@ -43268,11 +43339,11 @@ var init_src = __esm({
 });
 
 // ../../../../../tmp/claude-0/-home-claude/b445abbd-4d6c-57b9-a945-dfd51fb0a285/scratchpad/harness/harness.ts
-var import_express39 = __toESM(require_express2());
+var import_express41 = __toESM(require_express2());
 var import_pino_http = __toESM(require_logger());
 
 // src/routes/index.ts
-var import_express37 = __toESM(require_express2(), 1);
+var import_express39 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -56263,6 +56334,332 @@ var CreateServiceInterestResponse = objectType({
   "success": booleanType(),
   "message": stringType()
 });
+var readListingLinkBodyUrlMin = 5;
+var readListingLinkBodyUrlMax = 2e3;
+var ReadListingLinkBody = objectType({
+  "url": stringType().min(readListingLinkBodyUrlMin).max(readListingLinkBodyUrlMax)
+});
+var ReadListingLinkResponse = objectType({
+  "snapshotId": stringType().nullable(),
+  "source": stringType(),
+  "url": stringType().nullable(),
+  "portal": stringType().nullable(),
+  "fields": objectType({
+    "dealType": stringType().nullable(),
+    "city": stringType().nullable(),
+    "district": stringType().nullable(),
+    "areaM2": numberType().nullable(),
+    "rooms": numberType().int().nullable(),
+    "floor": numberType().int().nullable(),
+    "floorsTotal": numberType().int().nullable(),
+    "buildingType": stringType(),
+    "renovation": stringType(),
+    "furnished": stringType(),
+    "price": numberType().nullable(),
+    "currency": stringType().nullable(),
+    "title": stringType().nullable(),
+    "description": stringType().nullable()
+  }),
+  "found": arrayType(stringType()),
+  "warnings": arrayType(stringType())
+});
+var readListingTextBodyTextMin = 10;
+var readListingTextBodyTextMax = 2e4;
+var ReadListingTextBody = objectType({
+  "text": stringType().min(readListingTextBodyTextMin).max(readListingTextBodyTextMax)
+});
+var ReadListingTextResponse = objectType({
+  "snapshotId": stringType().nullable(),
+  "source": stringType(),
+  "url": stringType().nullable(),
+  "portal": stringType().nullable(),
+  "fields": objectType({
+    "dealType": stringType().nullable(),
+    "city": stringType().nullable(),
+    "district": stringType().nullable(),
+    "areaM2": numberType().nullable(),
+    "rooms": numberType().int().nullable(),
+    "floor": numberType().int().nullable(),
+    "floorsTotal": numberType().int().nullable(),
+    "buildingType": stringType(),
+    "renovation": stringType(),
+    "furnished": stringType(),
+    "price": numberType().nullable(),
+    "currency": stringType().nullable(),
+    "title": stringType().nullable(),
+    "description": stringType().nullable()
+  }),
+  "found": arrayType(stringType()),
+  "warnings": arrayType(stringType())
+});
+var ListValuationsResponseItem = objectType({
+  "id": stringType(),
+  "createdAt": stringType().datetime({ "offset": true }),
+  "title": stringType(),
+  "city": stringType(),
+  "district": stringType(),
+  "areaM2": numberType().nullable(),
+  "central": numberType().nullable(),
+  "confidence": stringType(),
+  "status": stringType()
+});
+var ListValuationsResponse = arrayType(ListValuationsResponseItem);
+var createValuationBodySubjectCityMin = 0;
+var createValuationBodySubjectCityMax = 100;
+var createValuationBodySubjectDistrictMin = 0;
+var createValuationBodySubjectDistrictMax = 120;
+var createValuationBodySubjectTitleMin = 0;
+var createValuationBodySubjectTitleMax = 300;
+var createValuationBodySubjectDescriptionMin = 0;
+var createValuationBodySubjectDescriptionMax = 4e3;
+var createValuationBodyComparablesItemCityMin = 0;
+var createValuationBodyComparablesItemCityMax = 100;
+var createValuationBodyComparablesItemDistrictMin = 0;
+var createValuationBodyComparablesItemDistrictMax = 120;
+var createValuationBodyComparablesItemTitleMin = 0;
+var createValuationBodyComparablesItemTitleMax = 300;
+var createValuationBodyComparablesItemDescriptionMin = 0;
+var createValuationBodyComparablesItemDescriptionMax = 4e3;
+var createValuationBodyComparablesMax = 20;
+var CreateValuationBody = objectType({
+  "subject": objectType({
+    "snapshotId": stringType().uuid().nullish(),
+    "url": stringType().nullish(),
+    "source": enumType(["link", "text", "manual"]),
+    "dealType": enumType(["sale", "rent"]).optional(),
+    "city": stringType().min(createValuationBodySubjectCityMin).max(createValuationBodySubjectCityMax),
+    "district": stringType().min(createValuationBodySubjectDistrictMin).max(createValuationBodySubjectDistrictMax).optional(),
+    "areaM2": numberType(),
+    "rooms": numberType().int().nullish(),
+    "floor": numberType().int().nullish(),
+    "floorsTotal": numberType().int().nullish(),
+    "buildingType": enumType(["new", "old", "house", "unknown"]).optional(),
+    "renovation": enumType(["yes", "no", "unknown"]).optional(),
+    "furnished": enumType(["yes", "no", "unknown"]).optional(),
+    "price": numberType().nullish(),
+    "currency": enumType(["AZN", "USD"]).optional(),
+    "title": stringType().min(createValuationBodySubjectTitleMin).max(createValuationBodySubjectTitleMax).optional(),
+    "description": stringType().min(createValuationBodySubjectDescriptionMin).max(createValuationBodySubjectDescriptionMax).optional()
+  }),
+  "comparables": arrayType(objectType({
+    "snapshotId": stringType().uuid().nullish(),
+    "url": stringType().nullish(),
+    "source": enumType(["link", "text", "manual"]),
+    "dealType": enumType(["sale", "rent"]).optional(),
+    "city": stringType().min(createValuationBodyComparablesItemCityMin).max(createValuationBodyComparablesItemCityMax),
+    "district": stringType().min(createValuationBodyComparablesItemDistrictMin).max(createValuationBodyComparablesItemDistrictMax).optional(),
+    "areaM2": numberType(),
+    "rooms": numberType().int().nullish(),
+    "floor": numberType().int().nullish(),
+    "floorsTotal": numberType().int().nullish(),
+    "buildingType": enumType(["new", "old", "house", "unknown"]).optional(),
+    "renovation": enumType(["yes", "no", "unknown"]).optional(),
+    "furnished": enumType(["yes", "no", "unknown"]).optional(),
+    "price": numberType().nullish(),
+    "currency": enumType(["AZN", "USD"]).optional(),
+    "title": stringType().min(createValuationBodyComparablesItemTitleMin).max(createValuationBodyComparablesItemTitleMax).optional(),
+    "description": stringType().min(createValuationBodyComparablesItemDescriptionMin).max(createValuationBodyComparablesItemDescriptionMax).optional()
+  })).max(createValuationBodyComparablesMax).optional(),
+  "usdRate": numberType().nullish(),
+  "usePool": booleanType().optional()
+});
+var CreateValuationResponse = objectType({
+  "id": stringType(),
+  "createdAt": stringType().datetime({ "offset": true }),
+  "status": stringType(),
+  "confidence": stringType(),
+  "confidenceReasons": arrayType(stringType()),
+  "subject": objectType({
+    "id": stringType(),
+    "url": stringType().nullable(),
+    "portal": stringType().nullable(),
+    "source": stringType(),
+    "city": stringType(),
+    "district": stringType(),
+    "areaM2": numberType().nullable(),
+    "rooms": numberType().int().nullable(),
+    "floor": numberType().int().nullable(),
+    "floorsTotal": numberType().int().nullable(),
+    "buildingType": stringType(),
+    "renovation": stringType(),
+    "furnished": stringType(),
+    "price": numberType().nullable(),
+    "currency": stringType().nullable(),
+    "priceAzn": numberType().nullable(),
+    "title": stringType(),
+    "fetchedAt": stringType().datetime({ "offset": true })
+  }),
+  "estimate": unionType([objectType({
+    "low": numberType(),
+    "central": numberType(),
+    "high": numberType(),
+    "perM2Low": numberType(),
+    "perM2": numberType(),
+    "perM2High": numberType()
+  }), nullType()]),
+  "comparables": arrayType(objectType({
+    "listing": objectType({
+      "id": stringType(),
+      "url": stringType().nullable(),
+      "portal": stringType().nullable(),
+      "source": stringType(),
+      "city": stringType(),
+      "district": stringType(),
+      "areaM2": numberType().nullable(),
+      "rooms": numberType().int().nullable(),
+      "floor": numberType().int().nullable(),
+      "floorsTotal": numberType().int().nullable(),
+      "buildingType": stringType(),
+      "renovation": stringType(),
+      "furnished": stringType(),
+      "price": numberType().nullable(),
+      "currency": stringType().nullable(),
+      "priceAzn": numberType().nullable(),
+      "title": stringType(),
+      "fetchedAt": stringType().datetime({ "offset": true })
+    }),
+    "score": numberType(),
+    "pricePerM2": numberType().nullable(),
+    "used": booleanType(),
+    "userAdded": booleanType(),
+    "notes": arrayType(stringType())
+  })),
+  "factors": arrayType(objectType({
+    "effect": stringType(),
+    "text": stringType()
+  })),
+  "missing": arrayType(stringType()),
+  "assumptions": arrayType(stringType()),
+  "askingNote": stringType().nullable(),
+  "usdRate": numberType(),
+  "poolSize": numberType().int()
+});
+var GetValuationParams = objectType({
+  "valuationId": coerce.string().uuid()
+});
+var GetValuationResponse = objectType({
+  "id": stringType(),
+  "createdAt": stringType().datetime({ "offset": true }),
+  "status": stringType(),
+  "confidence": stringType(),
+  "confidenceReasons": arrayType(stringType()),
+  "subject": objectType({
+    "id": stringType(),
+    "url": stringType().nullable(),
+    "portal": stringType().nullable(),
+    "source": stringType(),
+    "city": stringType(),
+    "district": stringType(),
+    "areaM2": numberType().nullable(),
+    "rooms": numberType().int().nullable(),
+    "floor": numberType().int().nullable(),
+    "floorsTotal": numberType().int().nullable(),
+    "buildingType": stringType(),
+    "renovation": stringType(),
+    "furnished": stringType(),
+    "price": numberType().nullable(),
+    "currency": stringType().nullable(),
+    "priceAzn": numberType().nullable(),
+    "title": stringType(),
+    "fetchedAt": stringType().datetime({ "offset": true })
+  }),
+  "estimate": unionType([objectType({
+    "low": numberType(),
+    "central": numberType(),
+    "high": numberType(),
+    "perM2Low": numberType(),
+    "perM2": numberType(),
+    "perM2High": numberType()
+  }), nullType()]),
+  "comparables": arrayType(objectType({
+    "listing": objectType({
+      "id": stringType(),
+      "url": stringType().nullable(),
+      "portal": stringType().nullable(),
+      "source": stringType(),
+      "city": stringType(),
+      "district": stringType(),
+      "areaM2": numberType().nullable(),
+      "rooms": numberType().int().nullable(),
+      "floor": numberType().int().nullable(),
+      "floorsTotal": numberType().int().nullable(),
+      "buildingType": stringType(),
+      "renovation": stringType(),
+      "furnished": stringType(),
+      "price": numberType().nullable(),
+      "currency": stringType().nullable(),
+      "priceAzn": numberType().nullable(),
+      "title": stringType(),
+      "fetchedAt": stringType().datetime({ "offset": true })
+    }),
+    "score": numberType(),
+    "pricePerM2": numberType().nullable(),
+    "used": booleanType(),
+    "userAdded": booleanType(),
+    "notes": arrayType(stringType())
+  })),
+  "factors": arrayType(objectType({
+    "effect": stringType(),
+    "text": stringType()
+  })),
+  "missing": arrayType(stringType()),
+  "assumptions": arrayType(stringType()),
+  "askingNote": stringType().nullable(),
+  "usdRate": numberType(),
+  "poolSize": numberType().int()
+});
+var ListConstructionEstimatesResponseItem = objectType({
+  "id": stringType(),
+  "name": stringType(),
+  "updatedAt": stringType().datetime({ "offset": true }),
+  "total": numberType().nullable(),
+  "unpriced": numberType().int().nullable()
+});
+var ListConstructionEstimatesResponse = arrayType(ListConstructionEstimatesResponseItem);
+var createConstructionEstimateBodyNameMax = 200;
+var CreateConstructionEstimateBody = objectType({
+  "name": stringType().min(1).max(createConstructionEstimateBodyNameMax),
+  "data": unknownType()
+});
+var CreateConstructionEstimateResponse = objectType({
+  "id": stringType(),
+  "name": stringType(),
+  "data": unknownType(),
+  "createdAt": stringType().datetime({ "offset": true }),
+  "updatedAt": stringType().datetime({ "offset": true })
+});
+var GetConstructionEstimateParams = objectType({
+  "estimateId": coerce.string().uuid()
+});
+var GetConstructionEstimateResponse = objectType({
+  "id": stringType(),
+  "name": stringType(),
+  "data": unknownType(),
+  "createdAt": stringType().datetime({ "offset": true }),
+  "updatedAt": stringType().datetime({ "offset": true })
+});
+var UpdateConstructionEstimateParams = objectType({
+  "estimateId": coerce.string().uuid()
+});
+var updateConstructionEstimateBodyNameMax = 200;
+var UpdateConstructionEstimateBody = objectType({
+  "name": stringType().min(1).max(updateConstructionEstimateBodyNameMax),
+  "data": unknownType()
+});
+var UpdateConstructionEstimateResponse = objectType({
+  "id": stringType(),
+  "name": stringType(),
+  "data": unknownType(),
+  "createdAt": stringType().datetime({ "offset": true }),
+  "updatedAt": stringType().datetime({ "offset": true })
+});
+var DeleteConstructionEstimateParams = objectType({
+  "estimateId": coerce.string().uuid()
+});
+var DeleteConstructionEstimateResponse = objectType({
+  "success": booleanType(),
+  "message": stringType()
+});
 var GetMyRolesResponse = objectType({
   "staff": booleanType(),
   "hasHomes": booleanType(),
@@ -58075,8 +58472,8 @@ function buildErrorThrower({ packageName, customMessages }) {
   function buildMessage(rawMessage, replacements) {
     if (!replacements) return `${pkg}: ${rawMessage}`;
     let msg = rawMessage;
-    const matches2 = rawMessage.matchAll(/{{([a-zA-Z0-9-_]+)}}/g);
-    for (const match2 of matches2) {
+    const matches3 = rawMessage.matchAll(/{{([a-zA-Z0-9-_]+)}}/g);
+    for (const match2 of matches3) {
       const replacement = (replacements[match2[1]] || "").toString();
       msg = msg.replace(`{{${match2[1]}}}`, replacement);
     }
@@ -58791,10 +59188,10 @@ var checkBillingAuthorization = (params, options) => {
 };
 var splitByScope = (fea) => {
   const org = [];
-  const user2 = [];
+  const user3 = [];
   if (!fea) return {
     org,
-    user: user2
+    user: user3
   };
   const parts = fea.split(",");
   for (let i = 0; i < parts.length; i++) {
@@ -58804,15 +59201,15 @@ var splitByScope = (fea) => {
     const scope = part.slice(0, colonIndex);
     const value = part.slice(colonIndex + 1);
     if (scope === "o") org.push(value);
-    else if (scope === "u") user2.push(value);
+    else if (scope === "u") user3.push(value);
     else if (scope === "ou" || scope === "uo") {
       org.push(value);
-      user2.push(value);
+      user3.push(value);
     }
   }
   return {
     org,
-    user: user2
+    user: user3
   };
 };
 var validateReverificationConfig = (config) => {
@@ -60717,7 +61114,7 @@ var MachineApi = class extends AbstractAPI {
   }
 };
 var IdPOAuthAccessToken = class _IdPOAuthAccessToken {
-  constructor(id2, clientId, type, subject, scopes, revoked, revocationReason, expired, expiration, createdAt5, updatedAt3, aud) {
+  constructor(id2, clientId, type, subject, scopes, revoked, revocationReason, expired, expiration, createdAt6, updatedAt3, aud) {
     this.id = id2;
     this.clientId = clientId;
     this.type = type;
@@ -60727,7 +61124,7 @@ var IdPOAuthAccessToken = class _IdPOAuthAccessToken {
     this.revocationReason = revocationReason;
     this.expired = expired;
     this.expiration = expiration;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.aud = aud;
   }
@@ -60784,7 +61181,7 @@ function extractCustomClaims(payload) {
   return Object.keys(claims).length > 0 ? claims : null;
 }
 var M2MToken = class _M2MToken {
-  constructor(id2, subject, scopes, claims, revoked, revocationReason, expired, expiration, createdAt5, updatedAt3, token) {
+  constructor(id2, subject, scopes, claims, revoked, revocationReason, expired, expiration, createdAt6, updatedAt3, token) {
     this.id = id2;
     this.subject = subject;
     this.scopes = scopes;
@@ -60793,7 +61190,7 @@ var M2MToken = class _M2MToken {
     this.revocationReason = revocationReason;
     this.expired = expired;
     this.expiration = expiration;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.token = token;
   }
@@ -62969,14 +63366,14 @@ var AgentTask = class _AgentTask {
   }
 };
 var ActorToken = class _ActorToken {
-  constructor(id2, status, userId, actor, token, url, createdAt5, updatedAt3) {
+  constructor(id2, status, userId, actor, token, url, createdAt6, updatedAt3) {
     this.id = id2;
     this.status = status;
     this.userId = userId;
     this.actor = actor;
     this.token = token;
     this.url = url;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -62993,11 +63390,11 @@ var ActorToken = class _ActorToken {
   }
 };
 var AllowlistIdentifier = class _AllowlistIdentifier {
-  constructor(id2, identifier, identifierType, createdAt5, updatedAt3, instanceId, invitationId) {
+  constructor(id2, identifier, identifierType, createdAt6, updatedAt3, instanceId, invitationId) {
     this.id = id2;
     this.identifier = identifier;
     this.identifierType = identifierType;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.instanceId = instanceId;
     this.invitationId = invitationId;
@@ -63015,7 +63412,7 @@ var AllowlistIdentifier = class _AllowlistIdentifier {
   }
 };
 var APIKey = class _APIKey {
-  constructor(id2, type, name, subject, scopes, claims, revoked, revocationReason, expired, expiration, createdBy, description, lastUsedAt, createdAt5, updatedAt3, secret) {
+  constructor(id2, type, name, subject, scopes, claims, revoked, revocationReason, expired, expiration, createdBy, description, lastUsedAt, createdAt6, updatedAt3, secret) {
     this.id = id2;
     this.type = type;
     this.name = name;
@@ -63029,7 +63426,7 @@ var APIKey = class _APIKey {
     this.createdBy = createdBy;
     this.description = description;
     this.lastUsedAt = lastUsedAt;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.secret = secret;
   }
@@ -63055,11 +63452,11 @@ var APIKey = class _APIKey {
   }
 };
 var BlocklistIdentifier = class _BlocklistIdentifier {
-  constructor(id2, identifier, identifierType, createdAt5, updatedAt3, instanceId) {
+  constructor(id2, identifier, identifierType, createdAt6, updatedAt3, instanceId) {
     this.id = id2;
     this.identifier = identifier;
     this.identifierType = identifierType;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.instanceId = instanceId;
   }
@@ -63099,7 +63496,7 @@ var SessionActivity = class _SessionActivity {
   }
 };
 var Session = class _Session {
-  constructor(id2, clientId, userId, status, lastActiveAt, expireAt, abandonAt, createdAt5, updatedAt3, lastActiveOrganizationId, latestActivity, actor = null) {
+  constructor(id2, clientId, userId, status, lastActiveAt, expireAt, abandonAt, createdAt6, updatedAt3, lastActiveOrganizationId, latestActivity, actor = null) {
     this.id = id2;
     this.clientId = clientId;
     this.userId = userId;
@@ -63107,7 +63504,7 @@ var Session = class _Session {
     this.lastActiveAt = lastActiveAt;
     this.expireAt = expireAt;
     this.abandonAt = abandonAt;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.lastActiveOrganizationId = lastActiveOrganizationId;
     this.latestActivity = latestActivity;
@@ -63131,7 +63528,7 @@ var Session = class _Session {
   }
 };
 var Client = class _Client {
-  constructor(id2, sessionIds, sessions, signInId, signUpId, lastActiveSessionId, lastAuthenticationStrategy, createdAt5, updatedAt3) {
+  constructor(id2, sessionIds, sessions, signInId, signUpId, lastActiveSessionId, lastAuthenticationStrategy, createdAt6, updatedAt3) {
     this.id = id2;
     this.sessionIds = sessionIds;
     this.sessions = sessions;
@@ -63139,7 +63536,7 @@ var Client = class _Client {
     this.signUpId = signUpId;
     this.lastActiveSessionId = lastActiveSessionId;
     this.lastAuthenticationStrategy = lastAuthenticationStrategy;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -63395,7 +63792,7 @@ var billingSubscriptionItemSeatsFromJSON = (seats) => ({
   })) : void 0
 });
 var BillingSubscriptionItem = class _BillingSubscriptionItem {
-  constructor(id2, instanceId, status, planPeriod, periodStart, nextPayment, amount, plan, planId, priceId, createdAt5, updatedAt3, periodEnd, canceledAt, pastDueAt, endedAt, payerId, isFreeTrial, lifetimePaid, seats) {
+  constructor(id2, instanceId, status, planPeriod, periodStart, nextPayment, amount, plan, planId, priceId, createdAt6, updatedAt3, periodEnd, canceledAt, pastDueAt, endedAt, payerId, isFreeTrial, lifetimePaid, seats) {
     this.id = id2;
     this.instanceId = instanceId;
     this.status = status;
@@ -63406,7 +63803,7 @@ var BillingSubscriptionItem = class _BillingSubscriptionItem {
     this.plan = plan;
     this.planId = planId;
     this.priceId = priceId;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.periodEnd = periodEnd;
     this.canceledAt = canceledAt;
@@ -63449,12 +63846,12 @@ var BillingSubscriptionItem = class _BillingSubscriptionItem {
   }
 };
 var BillingSubscription = class _BillingSubscription {
-  constructor(id2, instanceId, status, payerId, createdAt5, updatedAt3, activeAt, pastDueAt, subscriptionItems, nextPayment, eligibleForFreeTrial) {
+  constructor(id2, instanceId, status, payerId, createdAt6, updatedAt3, activeAt, pastDueAt, subscriptionItems, nextPayment, eligibleForFreeTrial) {
     this.id = id2;
     this.instanceId = instanceId;
     this.status = status;
     this.payerId = payerId;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.activeAt = activeAt;
     this.pastDueAt = pastDueAt;
@@ -63485,7 +63882,7 @@ var BillingSubscription = class _BillingSubscription {
   }
 };
 var EnterpriseAccountConnection = class _EnterpriseAccountConnection {
-  constructor(id2, active, allowIdpInitiated, allowSubdomains, disableAdditionalIdentifications, domain, logoPublicUrl, name, protocol, provider, syncUserAttributes, createdAt5, updatedAt3) {
+  constructor(id2, active, allowIdpInitiated, allowSubdomains, disableAdditionalIdentifications, domain, logoPublicUrl, name, protocol, provider, syncUserAttributes, createdAt6, updatedAt3) {
     this.id = id2;
     this.active = active;
     this.allowIdpInitiated = allowIdpInitiated;
@@ -63497,7 +63894,7 @@ var EnterpriseAccountConnection = class _EnterpriseAccountConnection {
     this.protocol = protocol;
     this.provider = provider;
     this.syncUserAttributes = syncUserAttributes;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -63624,13 +64021,13 @@ var EnterpriseConnectionSamlConnection = class _EnterpriseConnectionSamlConnecti
   }
 };
 var EnterpriseConnectionOauthConfig = class _EnterpriseConnectionOauthConfig {
-  constructor(id2, name, clientId, discoveryUrl, logoPublicUrl, createdAt5, updatedAt3, providerKey, authUrl, tokenUrl, userInfoUrl, requiresPkce) {
+  constructor(id2, name, clientId, discoveryUrl, logoPublicUrl, createdAt6, updatedAt3, providerKey, authUrl, tokenUrl, userInfoUrl, requiresPkce) {
     this.id = id2;
     this.name = name;
     this.clientId = clientId;
     this.discoveryUrl = discoveryUrl;
     this.logoPublicUrl = logoPublicUrl;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.providerKey = providerKey;
     this.authUrl = authUrl;
@@ -63656,7 +64053,7 @@ var EnterpriseConnectionOauthConfig = class _EnterpriseConnectionOauthConfig {
   }
 };
 var EnterpriseConnection = class _EnterpriseConnection {
-  constructor(id2, name, domains, organizationId, active, syncUserAttributes, allowSubdomains, disableAdditionalIdentifications, createdAt5, updatedAt3, samlConnection, oauthConfig, provider, logoPublicUrl, allowOrganizationAccountLinking, authenticatable, disableJitProvisioning, customAttributes) {
+  constructor(id2, name, domains, organizationId, active, syncUserAttributes, allowSubdomains, disableAdditionalIdentifications, createdAt6, updatedAt3, samlConnection, oauthConfig, provider, logoPublicUrl, allowOrganizationAccountLinking, authenticatable, disableJitProvisioning, customAttributes) {
     this.id = id2;
     this.name = name;
     this.domains = domains;
@@ -63665,7 +64062,7 @@ var EnterpriseConnection = class _EnterpriseConnection {
     this.syncUserAttributes = syncUserAttributes;
     this.allowSubdomains = allowSubdomains;
     this.disableAdditionalIdentifications = disableAdditionalIdentifications;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.samlConnection = samlConnection;
     this.oauthConfig = oauthConfig;
@@ -63786,11 +64183,11 @@ var InstanceSettings = class _InstanceSettings {
   }
 };
 var Invitation = class _Invitation {
-  constructor(id2, emailAddress, publicMetadata, createdAt5, updatedAt3, status, url, revoked) {
+  constructor(id2, emailAddress, publicMetadata, createdAt6, updatedAt3, status, url, revoked) {
     this.id = id2;
     this.emailAddress = emailAddress;
     this.publicMetadata = publicMetadata;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.status = status;
     this.url = url;
@@ -63877,7 +64274,7 @@ var ObjectType = {
   Feature: "feature"
 };
 var JwtTemplate = class _JwtTemplate {
-  constructor(id2, name, claims, lifetime, allowedClockSkew, customSigningKey, signingAlgorithm, createdAt5, updatedAt3) {
+  constructor(id2, name, claims, lifetime, allowedClockSkew, customSigningKey, signingAlgorithm, createdAt6, updatedAt3) {
     this.id = id2;
     this.name = name;
     this.claims = claims;
@@ -63885,7 +64282,7 @@ var JwtTemplate = class _JwtTemplate {
     this.allowedClockSkew = allowedClockSkew;
     this.customSigningKey = customSigningKey;
     this.signingAlgorithm = signingAlgorithm;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -63903,11 +64300,11 @@ var JwtTemplate = class _JwtTemplate {
   }
 };
 var Machine = class _Machine {
-  constructor(id2, name, instanceId, createdAt5, updatedAt3, scopedMachines, defaultTokenTtl, secretKey) {
+  constructor(id2, name, instanceId, createdAt6, updatedAt3, scopedMachines, defaultTokenTtl, secretKey) {
     this.id = id2;
     this.name = name;
     this.instanceId = instanceId;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.scopedMachines = scopedMachines;
     this.defaultTokenTtl = defaultTokenTtl;
@@ -63938,10 +64335,10 @@ var Machine = class _Machine {
   }
 };
 var MachineScope = class _MachineScope {
-  constructor(fromMachineId, toMachineId, createdAt5, deleted) {
+  constructor(fromMachineId, toMachineId, createdAt6, deleted) {
     this.fromMachineId = fromMachineId;
     this.toMachineId = toMachineId;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.deleted = deleted;
   }
   static fromJSON(data) {
@@ -63983,7 +64380,7 @@ var OauthAccessToken = class _OauthAccessToken {
   }
 };
 var OAuthApplication = class _OAuthApplication {
-  constructor(id2, instanceId, name, clientId, clientUri, clientImageUrl, dynamicallyRegistered, consentScreenEnabled, pkceRequired, isPublic, scopes, redirectUris, authorizeUrl, tokenFetchUrl, userInfoUrl, discoveryUrl, tokenIntrospectionUrl, createdAt5, updatedAt3, clientSecret) {
+  constructor(id2, instanceId, name, clientId, clientUri, clientImageUrl, dynamicallyRegistered, consentScreenEnabled, pkceRequired, isPublic, scopes, redirectUris, authorizeUrl, tokenFetchUrl, userInfoUrl, discoveryUrl, tokenIntrospectionUrl, createdAt6, updatedAt3, clientSecret) {
     this.id = id2;
     this.instanceId = instanceId;
     this.name = name;
@@ -64001,7 +64398,7 @@ var OAuthApplication = class _OAuthApplication {
     this.userInfoUrl = userInfoUrl;
     this.discoveryUrl = discoveryUrl;
     this.tokenIntrospectionUrl = tokenIntrospectionUrl;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.clientSecret = clientSecret;
   }
@@ -64031,13 +64428,13 @@ var OAuthApplication = class _OAuthApplication {
   }
 };
 var Organization = class _Organization {
-  constructor(id2, name, slug, imageUrl, hasImage, createdAt5, updatedAt3, publicMetadata = {}, privateMetadata = {}, maxAllowedMemberships, adminDeleteEnabled, membersCount, createdBy) {
+  constructor(id2, name, slug, imageUrl, hasImage, createdAt6, updatedAt3, publicMetadata = {}, privateMetadata = {}, maxAllowedMemberships, adminDeleteEnabled, membersCount, createdBy) {
     this.id = id2;
     this.name = name;
     this.slug = slug;
     this.imageUrl = imageUrl;
     this.hasImage = hasImage;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.publicMetadata = publicMetadata;
     this.privateMetadata = privateMetadata;
@@ -64071,13 +64468,13 @@ var Organization = class _Organization {
   }
 };
 var OrganizationInvitation = class _OrganizationInvitation {
-  constructor(id2, emailAddress, role, roleName, organizationId, createdAt5, updatedAt3, expiresAt, url, status, publicMetadata = {}, privateMetadata = {}, publicOrganizationData) {
+  constructor(id2, emailAddress, role, roleName, organizationId, createdAt6, updatedAt3, expiresAt, url, status, publicMetadata = {}, privateMetadata = {}, publicOrganizationData) {
     this.id = id2;
     this.emailAddress = emailAddress;
     this.role = role;
     this.roleName = roleName;
     this.organizationId = organizationId;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.expiresAt = expiresAt;
     this.url = url;
@@ -64111,13 +64508,13 @@ var OrganizationInvitation = class _OrganizationInvitation {
   }
 };
 var OrganizationMembership = class _OrganizationMembership {
-  constructor(id2, role, permissions, publicMetadata = {}, privateMetadata = {}, createdAt5, updatedAt3, organization, publicUserData) {
+  constructor(id2, role, permissions, publicMetadata = {}, privateMetadata = {}, createdAt6, updatedAt3, organization, publicUserData) {
     this.id = id2;
     this.role = role;
     this.permissions = permissions;
     this.publicMetadata = publicMetadata;
     this.privateMetadata = privateMetadata;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.organization = organization;
     this.publicUserData = publicUserData;
@@ -64191,12 +64588,12 @@ var OrganizationSettings = class _OrganizationSettings {
   }
 };
 var Permission = class _Permission {
-  constructor(id2, name, key2, description, createdAt5, updatedAt3) {
+  constructor(id2, name, key2, description, createdAt6, updatedAt3) {
     this.id = id2;
     this.name = name;
     this.key = key2;
     this.description = description;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -64224,13 +64621,13 @@ var PhoneNumber = class _PhoneNumber {
   }
 };
 var ProxyCheck = class _ProxyCheck {
-  constructor(id2, domainId, lastRunAt, proxyUrl, successful, createdAt5, updatedAt3) {
+  constructor(id2, domainId, lastRunAt, proxyUrl, successful, createdAt6, updatedAt3) {
     this.id = id2;
     this.domainId = domainId;
     this.lastRunAt = lastRunAt;
     this.proxyUrl = proxyUrl;
     this.successful = successful;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -64246,10 +64643,10 @@ var ProxyCheck = class _ProxyCheck {
   }
 };
 var RedirectUrl = class _RedirectUrl {
-  constructor(id2, url, createdAt5, updatedAt3) {
+  constructor(id2, url, createdAt6, updatedAt3) {
     this.id = id2;
     this.url = url;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -64257,14 +64654,14 @@ var RedirectUrl = class _RedirectUrl {
   }
 };
 var Role = class _Role {
-  constructor(id2, name, key2, description, permissions, isCreatorEligible, createdAt5, updatedAt3) {
+  constructor(id2, name, key2, description, permissions, isCreatorEligible, createdAt6, updatedAt3) {
     this.id = id2;
     this.name = name;
     this.key = key2;
     this.description = description;
     this.permissions = permissions;
     this.isCreatorEligible = isCreatorEligible;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -64281,12 +64678,12 @@ var Role = class _Role {
   }
 };
 var RoleSetItem = class _RoleSetItem {
-  constructor(id2, name, key2, description, createdAt5, updatedAt3, membersCount, hasMembers) {
+  constructor(id2, name, key2, description, createdAt6, updatedAt3, membersCount, hasMembers) {
     this.id = id2;
     this.name = name;
     this.key = key2;
     this.description = description;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.membersCount = membersCount;
     this.hasMembers = hasMembers;
@@ -64305,7 +64702,7 @@ var RoleSetItem = class _RoleSetItem {
   }
 };
 var RoleSetMigration = class _RoleSetMigration {
-  constructor(id2, organizationId, instanceId, sourceRoleSetId, destRoleSetId, triggerType, status, migratedMembers, mappings, createdAt5, updatedAt3, startedAt, completedAt) {
+  constructor(id2, organizationId, instanceId, sourceRoleSetId, destRoleSetId, triggerType, status, migratedMembers, mappings, createdAt6, updatedAt3, startedAt, completedAt) {
     this.id = id2;
     this.organizationId = organizationId;
     this.instanceId = instanceId;
@@ -64315,7 +64712,7 @@ var RoleSetMigration = class _RoleSetMigration {
     this.status = status;
     this.migratedMembers = migratedMembers;
     this.mappings = mappings;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.startedAt = startedAt;
     this.completedAt = completedAt;
@@ -64339,7 +64736,7 @@ var RoleSetMigration = class _RoleSetMigration {
   }
 };
 var RoleSet = class _RoleSet {
-  constructor(id2, name, key2, description, roles, defaultRole, creatorRole, type, roleSetMigration, createdAt5, updatedAt3) {
+  constructor(id2, name, key2, description, roles, defaultRole, creatorRole, type, roleSetMigration, createdAt6, updatedAt3) {
     this.id = id2;
     this.name = name;
     this.key = key2;
@@ -64349,7 +64746,7 @@ var RoleSet = class _RoleSet {
     this.creatorRole = creatorRole;
     this.type = type;
     this.roleSetMigration = roleSetMigration;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -64369,7 +64766,7 @@ var RoleSet = class _RoleSet {
   }
 };
 var SamlConnection = class _SamlConnection {
-  constructor(id2, name, domain, organizationId, idpEntityId, idpSsoUrl, idpCertificate, idpCertificateIssuedAt, idpCertificateExpiresAt, idpMetadataUrl, idpMetadata, acsUrl, spEntityId, spMetadataUrl, active, provider, userCount, syncUserAttributes, allowSubdomains, allowIdpInitiated, createdAt5, updatedAt3, attributeMapping) {
+  constructor(id2, name, domain, organizationId, idpEntityId, idpSsoUrl, idpCertificate, idpCertificateIssuedAt, idpCertificateExpiresAt, idpMetadataUrl, idpMetadata, acsUrl, spEntityId, spMetadataUrl, active, provider, userCount, syncUserAttributes, allowSubdomains, allowIdpInitiated, createdAt6, updatedAt3, attributeMapping) {
     this.id = id2;
     this.name = name;
     this.domain = domain;
@@ -64390,7 +64787,7 @@ var SamlConnection = class _SamlConnection {
     this.syncUserAttributes = syncUserAttributes;
     this.allowSubdomains = allowSubdomains;
     this.allowIdpInitiated = allowIdpInitiated;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.attributeMapping = attributeMapping;
   }
@@ -64434,13 +64831,13 @@ var AttributeMapping = class _AttributeMapping {
   }
 };
 var SignInToken = class _SignInToken {
-  constructor(id2, userId, token, status, url, createdAt5, updatedAt3) {
+  constructor(id2, userId, token, status, url, createdAt6, updatedAt3) {
     this.id = id2;
     this.userId = userId;
     this.token = token;
     this.status = status;
     this.url = url;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
   }
   static fromJSON(data) {
@@ -64565,7 +64962,7 @@ var Web3Wallet = class _Web3Wallet {
   }
 };
 var User = class _User {
-  constructor(id2, passwordEnabled, totpEnabled, backupCodeEnabled, twoFactorEnabled, banned, locked, createdAt5, updatedAt3, imageUrl, hasImage, primaryEmailAddressId, primaryPhoneNumberId, primaryWeb3WalletId, lastSignInAt, externalId, username, firstName, lastName, publicMetadata = {}, privateMetadata = {}, unsafeMetadata = {}, emailAddresses = [], phoneNumbers = [], web3Wallets = [], externalAccounts = [], enterpriseAccounts = [], lastActiveAt, createOrganizationEnabled, createOrganizationsLimit = null, deleteSelfEnabled, legalAcceptedAt, locale, timezone = null) {
+  constructor(id2, passwordEnabled, totpEnabled, backupCodeEnabled, twoFactorEnabled, banned, locked, createdAt6, updatedAt3, imageUrl, hasImage, primaryEmailAddressId, primaryPhoneNumberId, primaryWeb3WalletId, lastSignInAt, externalId, username, firstName, lastName, publicMetadata = {}, privateMetadata = {}, unsafeMetadata = {}, emailAddresses = [], phoneNumbers = [], web3Wallets = [], externalAccounts = [], enterpriseAccounts = [], lastActiveAt, createOrganizationEnabled, createOrganizationsLimit = null, deleteSelfEnabled, legalAcceptedAt, locale, timezone = null) {
     this.id = id2;
     this.passwordEnabled = passwordEnabled;
     this.totpEnabled = totpEnabled;
@@ -64573,7 +64970,7 @@ var User = class _User {
     this.twoFactorEnabled = twoFactorEnabled;
     this.banned = banned;
     this.locked = locked;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.imageUrl = imageUrl;
     this.hasImage = hasImage;
@@ -64671,12 +65068,12 @@ var User = class _User {
   }
 };
 var WaitlistEntry = class _WaitlistEntry {
-  constructor(id2, emailAddress, status, invitation, createdAt5, updatedAt3, isLocked) {
+  constructor(id2, emailAddress, status, invitation, createdAt6, updatedAt3, isLocked) {
     this.id = id2;
     this.emailAddress = emailAddress;
     this.status = status;
     this.invitation = invitation;
-    this.createdAt = createdAt5;
+    this.createdAt = createdAt6;
     this.updatedAt = updatedAt3;
     this.isLocked = isLocked;
   }
@@ -71159,8 +71556,8 @@ function parseDeal(text2) {
 }
 function parseBudget(text2) {
   const t = text2.toLocaleLowerCase("az").replace(/\s+/g, " ");
-  const matches2 = [...t.matchAll(/(\d+(?:[.,]\d+)?)\s*(k|min|мин|тыс|mln|млн|milyon)?/g)];
-  const values = matches2.map((m) => {
+  const matches3 = [...t.matchAll(/(\d+(?:[.,]\d+)?)\s*(k|min|мин|тыс|mln|млн|milyon)?/g)];
+  const values = matches3.map((m) => {
     let v = Number(m[1].replace(",", "."));
     const unit = m[2] ?? "";
     if (/^(k|min|мин|тыс)$/.test(unit)) v *= 1e3;
@@ -71469,7 +71866,7 @@ function parseListingHtml(html, pageUrl) {
     currency = meta("product:price:currency", "og:price:currency", "pricecurrency");
   }
   if (price == null) {
-    const pm = hay.match(/(\d{1,3}(?:[\s  .]\d{3})+|\d{3,9})\s*(AZN|₼|manat|man\.|USD|\$|€|EUR)/i);
+    const pm = hay.match(/(?<![\d/.,])(\d{1,3}(?:[ \u00a0\u202f.]\d{3})+|\d{3,9})\s*(AZN|₼|manat|man\.|USD|\$|€|EUR)/i);
     if (pm) {
       price = num(pm[1].replace(/\./g, ""));
       currency = /usd|\$/i.test(pm[2]) ? "USD" : /eur|€/i.test(pm[2]) ? "EUR" : "AZN";
@@ -74104,7 +74501,7 @@ async function homeSmetaDtos(homeId, userId) {
   const full = await loadSmetaProjects(rows);
   return rows.map((r) => {
     const f = full.find((x) => x.id === r.id);
-    const round = (v) => Math.round(v * 100) / 100;
+    const round3 = (v) => Math.round(v * 100) / 100;
     return {
       id: r.id,
       name: r.name,
@@ -74113,8 +74510,8 @@ async function homeSmetaDtos(homeId, userId) {
       status: r.status,
       mine: r.ownerUserId === userId,
       updatedAt: r.updatedAt.toISOString(),
-      estimatedTotal: f ? round(estimateTotal(f.estimate, f.projectCosts, f.defaultMarginPercentage)) : null,
-      spentTotal: f ? round(f.expenses.reduce((t, e) => t + e.amount, 0)) : null
+      estimatedTotal: f ? round3(estimateTotal(f.estimate, f.projectCosts, f.defaultMarginPercentage)) : null,
+      spentTotal: f ? round3(f.expenses.reduce((t, e) => t + e.amount, 0)) : null
     };
   });
 }
@@ -75016,33 +75413,529 @@ router18.post("/service-interests", async (req, res) => {
 });
 var passport_default = router18;
 
+// src/routes/valuation.ts
+init_drizzle_orm();
+var import_express38 = __toESM(require_express2(), 1);
+init_src();
+
+// src/lib/valuation.ts
+import { createHash as createHash5 } from "node:crypto";
+var MIN_COMPS = 3;
+var POOL_DAYS = 180;
+var DEFAULT_USD_RATE = 1.7;
+var urlHash = (u) => {
+  try {
+    const url = new URL(u);
+    url.hash = "";
+    url.search = "";
+    return createHash5("sha256").update(url.toString().toLowerCase().replace(/\/$/, "")).digest("hex");
+  } catch {
+    return null;
+  }
+};
+var CITIES = ["Bak\u0131", "Sumqay\u0131t", "G\u0259nc\u0259", "X\u0131rdalan", "Ming\u0259\xE7evir", "L\u0259nk\u0259ran", "\u015Eirvan", "Nax\xE7\u0131van", "\u015E\u0259ki", "Quba", "Q\u0259b\u0259l\u0259", "\u015Eamax\u0131"];
+var fold = (s2) => s2.toLocaleLowerCase("az").replace(/ı/g, "i").replace(/ə/g, "e").replace(/ö/g, "o").replace(/ü/g, "u").replace(/ğ/g, "g").replace(/ş/g, "s").replace(/ç/g, "c");
+var sameText = (a, b) => !!a && !!b && fold(a.trim()) === fold(b.trim());
+function factsFromText(hay) {
+  const t = hay.replace(/\s+/g, " ");
+  const num2 = (s2) => {
+    const n = Number(s2.replace(/[\s  .]/g, "").replace(",", "."));
+    return Number.isFinite(n) ? n : null;
+  };
+  const area = t.match(/(\d{1,5}(?:[.,]\d{1,2})?)\s*(?:m²|m2|kv\.?\s*m|кв\.?\s*м)/i);
+  const rooms = t.match(/(\d{1,2})\s*-?\s*(?:otaql[ıi]|otaq\b|комнат)/i) ?? t.match(/otaq(?:\s*sayı)?\s*:?\s*(\d{1,2})/i);
+  const floor = t.match(/(?:mərtəbə|mertebe|этаж)\s*:?\s*(\d{1,2})\s*\/\s*(\d{1,2})/i) ?? t.match(/(\d{1,2})\s*\/\s*(\d{1,2})\s*(?:mərtəbə|mertebe|этаж)/i);
+  const price = t.match(/(?<![\d/.,])(\d{1,3}(?:[ \u00a0\u202f.]\d{3})+|\d{4,9})\s*(AZN|₼|manat|man\.|USD|\$)/i);
+  const district = t.match(/([A-ZƏÖÜĞIŞÇ][a-zəöüğışç]+)\s+(?:r\.|ray\.|rayonu)/) ?? t.match(/\b([A-ZƏÖÜĞIŞÇ][a-zəöüğışç]+)\s+(?:qəs\.|qəsəbəsi)/) ?? t.match(/\bm\.\s*([A-ZƏÖÜĞIŞÇ][\wəöüğışç]+)/);
+  const city = CITIES.find((c) => new RegExp(`\\b${c}\\b`, "i").test(t) || fold(t).includes(fold(c))) ?? null;
+  const building = /yeni\s*tikili|новостройк/i.test(t) ? "new" : /köhnə\s*tikili|kohne\s*tikili|вторичк|старый фонд/i.test(t) ? "old" : /həyət\s*evi|heyet\s*evi|villa|bağ\s*evi|частный дом/i.test(t) ? "house" : "unknown";
+  const renovation = /təmirsiz|temirsiz|без ремонта|qara karkas/i.test(t) ? "no" : /təmirli|temirli|с ремонтом|euro\s*təmir|əla təmir/i.test(t) ? "yes" : "unknown";
+  const furnished = /əşyasız|esyasiz|без мебели/i.test(t) ? "no" : /əşyalı|esyali|с мебелью|mebelli/i.test(t) ? "yes" : "unknown";
+  const deal = /icar|kiray|аренд/i.test(t) ? "rent" : /sat[ıi]l|satış|satis|продаж/i.test(t) ? "sale" : null;
+  const a = area ? num2(area[1]) : null;
+  const p = price ? num2(price[1].replace(/\./g, "")) : null;
+  return {
+    dealType: deal,
+    city,
+    district: district?.[1] ?? null,
+    areaM2: a && a > 5 && a < 1e5 ? a : null,
+    rooms: rooms ? Number(rooms[1]) || null : null,
+    floor: floor ? Number(floor[1]) : null,
+    floorsTotal: floor ? Number(floor[2]) : null,
+    buildingType: building,
+    renovation,
+    furnished,
+    price: p && p > 100 ? p : null,
+    currency: price ? /usd|\$/i.test(price[2]) ? "USD" : "AZN" : null
+  };
+}
+var FIELD_LABEL = { city: "\u015F\u0259h\u0259r", district: "rayon", areaM2: "sah\u0259", rooms: "otaq say\u0131", floor: "m\u0259rt\u0259b\u0259", floorsTotal: "binan\u0131n m\u0259rt\u0259b\u0259 say\u0131", buildingType: "tikili n\xF6v\xFC", renovation: "t\u0259mir v\u0259ziyy\u0259ti", furnished: "\u0259\u015Fyal\u0131/\u0259\u015Fyas\u0131z", price: "elan qiym\u0259ti", dealType: "sat\u0131\u015F/kiray\u0259" };
+var foundLabels = (f) => Object.entries(FIELD_LABEL).filter(([k]) => {
+  const v = f[k];
+  return v != null && v !== "unknown";
+}).map(([, l]) => l);
+var robotsCache = /* @__PURE__ */ new Map();
+function parseRobots(txt, agent = "tehvilbot") {
+  const groups = [];
+  let cur = null;
+  let lastWasAgent = false;
+  for (const raw of txt.split(/\r?\n/)) {
+    const line2 = raw.replace(/#.*/, "").trim();
+    if (!line2) continue;
+    const [k, ...rest] = line2.split(":");
+    const key2 = k.trim().toLowerCase();
+    const val = rest.join(":").trim();
+    if (key2 === "user-agent") {
+      if (!cur || !lastWasAgent) {
+        cur = { agents: [], allow: [], disallow: [] };
+        groups.push(cur);
+      }
+      cur.agents.push(val.toLowerCase());
+      lastWasAgent = true;
+      continue;
+    }
+    lastWasAgent = false;
+    if (!cur) continue;
+    if (key2 === "allow" && val) cur.allow.push(val);
+    if (key2 === "disallow" && val) cur.disallow.push(val);
+  }
+  const g = groups.find((x) => x.agents.some((a) => a !== "*" && agent.includes(a))) ?? groups.find((x) => x.agents.includes("*"));
+  return { allow: g?.allow ?? [], disallow: g?.disallow ?? [] };
+}
+var matches2 = (path, rule) => {
+  const re = new RegExp("^" + rule.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\\\$$/, "$"));
+  return re.test(path);
+};
+function robotsAllows(rules, path) {
+  const longest = (list) => Math.max(-1, ...list.filter((r) => matches2(path, r)).map((r) => r.length));
+  return longest(rules.allow) >= longest(rules.disallow);
+}
+async function robotsFor(url) {
+  const key2 = url.origin;
+  const hit = robotsCache.get(key2);
+  if (hit && Date.now() - hit.at < 36e5) return hit.rules;
+  let rules;
+  try {
+    const r = await safeFetch(`${url.origin}/robots.txt`, "text/plain", 512 * 1024, (u) => u.origin === url.origin);
+    rules = parseRobots(r.body.toString("utf8"));
+  } catch (err) {
+    const m = err instanceof Error ? err.message : "";
+    rules = /\((4\d\d)\)/.test(m) ? "all" : "none";
+  }
+  robotsCache.set(key2, { at: Date.now(), rules });
+  return rules;
+}
+async function readListingPage(raw) {
+  if ((process.env.VALUATION_LINK_FETCH ?? "on") === "off") throw new ImportError("Linkd\u0259n oxuma m\xFCv\u0259qq\u0259ti s\xF6nd\xFCr\xFCl\xFCb. Elan\u0131n m\u0259tnini yap\u0131\u015Fd\u0131r\u0131n.");
+  let url;
+  try {
+    url = new URL(/^https?:\/\//i.test(raw.trim()) ? raw.trim() : `https://${raw.trim()}`);
+  } catch {
+    throw new ImportError("Link d\xFCzg\xFCn deyil");
+  }
+  const portal = portalFor(url);
+  if (!portal) throw new ImportError("Bu sayt d\u0259st\u0259kl\u0259nmir. Bina.az, Tap.az, Yeniemlak.az v\u0259 dig\u0259r \u0259sas portallar\u0131n elan linkini v\u0259 ya elan\u0131n m\u0259tnini daxil edin.");
+  const rules = await robotsFor(url);
+  if (rules === "none" || rules !== "all" && !robotsAllows(rules, url.pathname + url.search)) throw new ImportError("Bu sayt\u0131n qaydalar\u0131 (robots.txt) s\u0259hif\u0259nin avtomatik oxunmas\u0131na icaz\u0259 vermir. Elan\u0131n m\u0259tnini yap\u0131\u015Fd\u0131r\u0131n v\u0259 ya m\u0259lumatlar\u0131 \u0259l il\u0259 daxil edin.");
+  const page = await safeFetch(url.toString(), "text/html,application/xhtml+xml", 3 * 1024 * 1024, (u) => portalFor(u) !== null);
+  if (!/html|xml/.test(page.contentType)) throw new ImportError("Bu link elan s\u0259hif\u0259si deyil");
+  const html = page.body.toString("utf8");
+  const base = parseListingHtml(html, page.url);
+  const text2 = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ");
+  const extra = factsFromText(`${base.title ?? ""} ${base.description ?? ""} ${text2}`);
+  const facts = {
+    ...extra,
+    dealType: base.dealType ?? extra.dealType,
+    district: base.district ?? extra.district,
+    areaM2: base.areaM2 ?? extra.areaM2,
+    rooms: base.rooms ?? extra.rooms,
+    price: base.price ?? extra.price,
+    currency: base.currency ?? extra.currency,
+    title: base.title,
+    description: base.description
+  };
+  if (base.floor && !facts.floor) {
+    const [f, t] = base.floor.split("/").map(Number);
+    facts.floor = f || null;
+    facts.floorsTotal = t || null;
+  }
+  return { url: page.url.toString(), portal, facts };
+}
+function similarity(s2, c) {
+  const notes = [];
+  if (!c.priceAzn || !c.areaM2) return { score: 0, notes: ["qiym\u0259t v\u0259 ya sah\u0259 yoxdur"], eligible: false };
+  if (!sameText(s2.city, c.city)) return { score: 0, notes: ["ba\u015Fqa \u015F\u0259h\u0259r"], eligible: false };
+  let score = 0;
+  if (sameText(s2.district, c.district)) {
+    score += 3;
+    notes.push("eyni rayon");
+  } else notes.push("ba\u015Fqa rayon");
+  if (s2.buildingType !== "unknown" && c.buildingType !== "unknown") {
+    if (s2.buildingType === c.buildingType) {
+      score += 2;
+      notes.push("eyni tikili n\xF6v\xFC");
+    } else {
+      score -= 2;
+      notes.push("f\u0259rqli tikili n\xF6v\xFC");
+    }
+  }
+  if (s2.rooms && c.rooms) {
+    const d = Math.abs(s2.rooms - c.rooms);
+    score += d === 0 ? 2 : d === 1 ? 1 : -1;
+    if (d) notes.push(`otaq f\u0259rqi ${d}`);
+  }
+  if (s2.areaM2) {
+    const r = Math.abs(c.areaM2 - s2.areaM2) / s2.areaM2;
+    score += r <= 0.2 ? 2 : r <= 0.4 ? 1 : -1;
+    if (r > 0.2) notes.push(`sah\u0259 f\u0259rqi ${Math.round(r * 100)}%`);
+  }
+  if (s2.renovation !== "unknown" && s2.renovation === c.renovation) score += 1;
+  const days = (Date.now() - c.fetchedAt.getTime()) / 864e5;
+  if (days <= 60) score += 1;
+  else notes.push(`${Math.round(days)} g\xFCn \u0259vv\u0259lki elan`);
+  return { score, notes, eligible: score >= 3 };
+}
+function wquantile(values, q) {
+  const s2 = [...values].sort((a, b) => a.v - b.v);
+  const total = s2.reduce((t, x) => t + x.w, 0);
+  let acc = 0;
+  for (const x of s2) {
+    acc += x.w;
+    if (acc >= q * total) return x.v;
+  }
+  return s2[s2.length - 1].v;
+}
+var round = (v, step) => Math.round(v / step) * step;
+function computeValuation(subject, candidates, usdRate, poolSize) {
+  const scored = candidates.map((c) => ({ c, ...similarity(subject, c), ppm2: c.priceAzn && c.areaM2 ? c.priceAzn / c.areaM2 : null }));
+  const used = scored.filter((x) => x.eligible).sort((a, b) => b.score - a.score).slice(0, 12);
+  const missing = [];
+  if (!subject.areaM2) missing.push("Sah\u0259");
+  if (!subject.district) missing.push("Rayon / \u0259razi");
+  if (!subject.rooms) missing.push("Otaq say\u0131");
+  if (subject.buildingType === "unknown") missing.push("Yeni v\u0259 ya k\xF6hn\u0259 tikili");
+  if (subject.renovation === "unknown") missing.push("T\u0259mir v\u0259ziyy\u0259ti");
+  if (!subject.floor || !subject.floorsTotal) missing.push("M\u0259rt\u0259b\u0259 / binan\u0131n m\u0259rt\u0259b\u0259 say\u0131");
+  if (subject.furnished === "unknown") missing.push("\u018F\u015Fyal\u0131 v\u0259 ya \u0259\u015Fyas\u0131z");
+  const assumptions = [
+    "M\xFCqayis\u0259 yaln\u0131z elan qiym\u0259tl\u0259rin\u0259 \u0259saslan\u0131r; faktiki sat\u0131\u015F qiym\u0259tl\u0259ri \u0259l\xE7atan deyil. Sat\u0131\u015F qiym\u0259ti ad\u0259t\u0259n elan qiym\u0259tind\u0259n f\u0259rqli olur.",
+    `Dollarla veril\u0259n qiym\u0259tl\u0259r 1 USD = ${String(usdRate).replace(".", ",")} AZN il\u0259 \xE7evrilib.`,
+    "Ox\u015Farl\u0131q: eyni \u015F\u0259h\u0259r m\u0259cburidir; rayon, tikili n\xF6v\xFC, otaq say\u0131, sah\u0259, t\u0259mir v\u0259 elan\u0131n tarixi bal verir. Bal 3-d\u0259n azd\u0131rsa elan istifad\u0259 olunmur.",
+    "M\u0259rk\u0259zi t\u0259xmin ox\u015Farl\u0131q bal\u0131 il\u0259 \xE7\u0259kilmi\u015F median AZN/m\xB2 \xD7 sah\u0259dir; aral\u0131q 25\u201375% interval\u0131d\u0131r. M\u0259rt\u0259b\u0259, \u0259\u015Fya v\u0259 mikrolokasiya r\u0259q\u0259ml\u0259 d\xFCz\u0259ldilmir \u2014 yaln\u0131z amil kimi g\xF6st\u0259rilir."
+  ];
+  const comps = scored.sort((a, b) => Number(b.eligible) - Number(a.eligible) || b.score - a.score).map((x) => ({ c: x.c, score: x.score, notes: x.notes, used: used.includes(x), ppm2: x.ppm2 }));
+  if (used.length < MIN_COMPS || !subject.areaM2) {
+    return {
+      status: "insufficient",
+      confidence: "none",
+      estimate: null,
+      confidenceReasons: [!subject.areaM2 ? "\u018Fmlak\u0131n sah\u0259si m\u0259lum deyil." : `Yaln\u0131z ${used.length} ox\u015Far elan tap\u0131ld\u0131 \u2014 \u0259n az\u0131 ${MIN_COMPS} laz\u0131md\u0131r. R\u0259q\u0259m g\xF6st\u0259rmirik ki, s\xFCni d\u0259qiqlik yaranmas\u0131n.`],
+      comps,
+      factors: [],
+      missing,
+      assumptions,
+      askingNote: null
+    };
+  }
+  const vals = used.map((x) => ({ v: x.ppm2, w: Math.max(1, x.score) }));
+  const p25 = wquantile(vals, 0.25), p50 = wquantile(vals, 0.5), p75 = wquantile(vals, 0.75);
+  const area = subject.areaM2;
+  const estimate = { low: round(p25 * area, 1e3), central: round(p50 * area, 1e3), high: round(p75 * area, 1e3), perM2Low: round(p25, 10), perM2: round(p50, 10), perM2High: round(p75, 10) };
+  const sameDistrict = used.filter((x) => sameText(x.c.district, subject.district)).length / used.length;
+  const spread = p25 > 0 ? p75 / p25 : 9;
+  const confidence = used.length >= 8 && sameDistrict >= 0.6 && spread < 1.35 ? "high" : used.length >= 5 && spread < 1.6 ? "medium" : "low";
+  const confidenceReasons = [
+    `${used.length} ox\u015Far elan istifad\u0259 olunub (${Math.round(sameDistrict * 100)}%-i eyni rayonda).`,
+    `Elanlar aras\u0131nda AZN/m\xB2 f\u0259rqi: 25% v\u0259 75% n\xF6qt\u0259l\u0259ri aras\u0131nda ${Math.round((spread - 1) * 100)}%.`,
+    ...missing.length ? [`\xC7at\u0131\u015Fmayan m\u0259lumat: ${missing.join(", ").toLowerCase()}.`] : []
+  ];
+  const share = (pred) => used.filter((x) => pred(x.c)).length / used.length;
+  const factors = [];
+  if (subject.renovation === "yes" && share((c) => c.renovation === "no") >= 0.3) factors.push({ effect: "up", text: "\u018Fmlak t\u0259mirlidir, m\xFCqayis\u0259 elanlar\u0131n\u0131n bir hiss\u0259si t\u0259mirsizdir \u2014 qiym\u0259t\u0259 m\xFCsb\u0259t t\u0259sir ed\u0259 bil\u0259r." });
+  if (subject.renovation === "no" && share((c) => c.renovation === "yes") >= 0.3) factors.push({ effect: "down", text: "\u018Fmlak t\u0259mirsizdir, m\xFCqayis\u0259 elanlar\u0131n\u0131n bir hiss\u0259si t\u0259mirlidir \u2014 qiym\u0259t\u0259 m\u0259nfi t\u0259sir ed\u0259 bil\u0259r." });
+  if (subject.floor && subject.floorsTotal && (subject.floor === 1 || subject.floor === subject.floorsTotal)) factors.push({ effect: "down", text: `${subject.floor === 1 ? "Birinci" : "Sonuncu"} m\u0259rt\u0259b\u0259 \u2014 al\u0131c\u0131lar aras\u0131nda ad\u0259t\u0259n daha az t\u0259l\u0259b olunur.` });
+  if (subject.furnished === "yes") factors.push({ effect: "neutral", text: "\u018F\u015Fyal\u0131d\u0131r \u2014 \u0259\u015Fyalar\u0131n d\u0259y\u0259ri \u0259mlak\u0131n d\u0259y\u0259rind\u0259n ayr\u0131ca qiym\u0259tl\u0259ndirilm\u0259lidir." });
+  const avgArea = used.reduce((t, x) => t + (x.c.areaM2 ?? 0), 0) / used.length;
+  if (area > avgArea * 1.3) factors.push({ effect: "down", text: "Sah\u0259 m\xFCqayis\u0259 elanlar\u0131ndan xeyli b\xF6y\xFCkd\xFCr \u2014 b\xF6y\xFCk m\u0259nzill\u0259rd\u0259 1 m\xB2 qiym\u0259ti ad\u0259t\u0259n a\u015Fa\u011F\u0131 olur." });
+  if (area < avgArea * 0.7) factors.push({ effect: "up", text: "Sah\u0259 m\xFCqayis\u0259 elanlar\u0131ndan xeyli ki\xE7ikdir \u2014 ki\xE7ik m\u0259nzill\u0259rd\u0259 1 m\xB2 qiym\u0259ti ad\u0259t\u0259n y\xFCks\u0259k olur." });
+  if (sameDistrict < 0.5) factors.push({ effect: "neutral", text: "M\xFCqayis\u0259 elanlar\u0131n\u0131n \xE7oxu ba\u015Fqa rayondand\u0131r \u2014 mikrolokasiya f\u0259rqi n\u0259z\u0259r\u0259 al\u0131nmay\u0131b." });
+  const asking = subject.price ? subject.currency === "USD" ? subject.price * usdRate : subject.price : null;
+  const askingNote = asking ? asking > estimate.high ? `Elan qiym\u0259ti (${Math.round(asking).toLocaleString("az")} AZN) hesablanm\u0131\u015F aral\u0131\u011F\u0131n yuxar\u0131s\u0131ndad\u0131r.` : asking < estimate.low ? `Elan qiym\u0259ti (${Math.round(asking).toLocaleString("az")} AZN) hesablanm\u0131\u015F aral\u0131\u011F\u0131n a\u015Fa\u011F\u0131s\u0131ndad\u0131r.` : `Elan qiym\u0259ti (${Math.round(asking).toLocaleString("az")} AZN) hesablanm\u0131\u015F aral\u0131\u011F\u0131n i\xE7ind\u0259dir.` : null;
+  return { status: "ok", confidence, estimate, confidenceReasons, comps, factors, missing, assumptions, askingNote, poolSize };
+}
+
+// src/routes/valuation.ts
+var router19 = (0, import_express38.Router)();
+var uid6 = (req) => getAuth(req).userId;
+var readLimit4 = rateLimit({ windowMs: 36e5, max: 60, key: (req) => `vl:${getAuth(req).userId ?? req.ip}` });
+var listingDto = (r) => ({
+  id: r.id,
+  url: r.url,
+  portal: r.portal,
+  source: r.source,
+  city: r.city,
+  district: r.district,
+  areaM2: r.areaM2,
+  rooms: r.rooms,
+  floor: r.floor,
+  floorsTotal: r.floorsTotal,
+  buildingType: r.buildingType,
+  renovation: r.renovation,
+  furnished: r.furnished,
+  price: r.price,
+  currency: r.currency,
+  priceAzn: r.priceAzn,
+  title: r.title,
+  fetchedAt: r.fetchedAt.toISOString()
+});
+var toComp = (r, userAdded) => ({
+  id: r.id,
+  url: r.url,
+  city: r.city,
+  district: r.district,
+  areaM2: r.areaM2,
+  rooms: r.rooms,
+  floor: r.floor,
+  floorsTotal: r.floorsTotal,
+  buildingType: r.buildingType,
+  renovation: r.renovation,
+  furnished: r.furnished,
+  priceAzn: r.priceAzn,
+  fetchedAt: r.fetchedAt,
+  userAdded
+});
+router19.post("/valuation/read-link", readLimit4, async (req, res) => {
+  const body = ReadListingLinkBody.safeParse(req.body);
+  if (!body.success) return bad2(res, "Link d\xFCzg\xFCn deyil");
+  try {
+    const { url, portal, facts } = await readListingPage(body.data.url);
+    const found = foundLabels(facts);
+    const [snap] = await db.insert(listingSnapshotsTable).values({
+      url,
+      urlHash: urlHash(url),
+      portal,
+      source: "link",
+      dealType: facts.dealType ?? "sale",
+      city: facts.city ?? "",
+      district: facts.district ?? "",
+      areaM2: facts.areaM2,
+      rooms: facts.rooms,
+      floor: facts.floor,
+      floorsTotal: facts.floorsTotal,
+      buildingType: facts.buildingType,
+      renovation: facts.renovation,
+      furnished: facts.furnished,
+      price: facts.price,
+      currency: facts.currency,
+      title: (facts.title ?? "").slice(0, 300),
+      description: (facts.description ?? "").slice(0, 4e3),
+      parsed: facts,
+      inPool: false,
+      createdByUserId: uid6(req)
+    }).returning();
+    const warnings = found.length ? [] : ["S\u0259hif\u0259d\u0259n m\u0259lumat oxunmad\u0131 \u2014 elan\u0131n m\u0259tnini yap\u0131\u015Fd\u0131r\u0131n v\u0259 ya sah\u0259l\u0259ri \u0259l il\u0259 doldurun."];
+    if (!facts.price) warnings.push("Elan qiym\u0259ti tap\u0131lmad\u0131.");
+    if (!facts.areaM2) warnings.push("Sah\u0259 tap\u0131lmad\u0131 \u2014 hesablama \xFC\xE7\xFCn m\xFCtl\u0259qdir.");
+    res.json({ snapshotId: snap.id, source: "link", url, portal, fields: facts, found, warnings });
+  } catch (err) {
+    if (err instanceof ImportError) return bad2(res, err.message);
+    req.log.warn({ err: err instanceof Error ? err.message : err }, "valuation.read_link_failed");
+    bad2(res, "S\u0259hif\u0259ni a\xE7maq m\xFCmk\xFCn olmad\u0131. Elan\u0131n m\u0259tnini yap\u0131\u015Fd\u0131r\u0131n v\u0259 ya m\u0259lumatlar\u0131 \u0259l il\u0259 daxil edin.");
+  }
+});
+router19.post("/valuation/read-text", async (req, res) => {
+  const body = ReadListingTextBody.safeParse(req.body);
+  if (!body.success) return bad2(res, "M\u0259tn \xE7ox q\u0131sad\u0131r");
+  const facts = { ...factsFromText(body.data.text), title: body.data.text.trim().split(/\n/)[0].slice(0, 300) || null, description: body.data.text.slice(0, 4e3) };
+  const found = foundLabels(facts);
+  res.json({ snapshotId: null, source: "text", url: null, portal: null, fields: facts, found, warnings: found.length ? [] : ["M\u0259tnd\u0259n m\u0259lumat oxunmad\u0131 \u2014 sah\u0259l\u0259ri \u0259l il\u0259 doldurun."] });
+});
+async function confirmListing(userId, input, usdRate) {
+  const priceAzn = input.price ? Math.round((input.currency === "USD" ? input.price * usdRate : input.price) * 100) / 100 : null;
+  const values = {
+    url: input.url ?? null,
+    urlHash: input.url ? urlHash(input.url) : null,
+    source: input.source,
+    dealType: input.dealType ?? "sale",
+    city: input.city.trim(),
+    district: (input.district ?? "").trim(),
+    areaM2: input.areaM2,
+    rooms: input.rooms ?? null,
+    floor: input.floor ?? null,
+    floorsTotal: input.floorsTotal ?? null,
+    buildingType: input.buildingType ?? "unknown",
+    renovation: input.renovation ?? "unknown",
+    furnished: input.furnished ?? "unknown",
+    price: input.price ?? null,
+    currency: input.price ? input.currency ?? "AZN" : null,
+    priceAzn,
+    title: (input.title ?? "").slice(0, 300),
+    description: (input.description ?? "").slice(0, 4e3)
+  };
+  if (input.snapshotId) {
+    const [draft] = await db.select().from(listingSnapshotsTable).where(and(eq(listingSnapshotsTable.id, input.snapshotId), eq(listingSnapshotsTable.createdByUserId, userId)));
+    if (draft && draft.source === "link") {
+      const p = draft.parsed ?? {};
+      const unchanged = p.price != null && p.areaM2 != null && Number(p.price) === Number(input.price) && Number(p.areaM2) === Number(input.areaM2);
+      const [row2] = await db.update(listingSnapshotsTable).set({ ...values, url: draft.url, urlHash: draft.urlHash, portal: draft.portal, source: "link", inPool: unchanged && values.dealType === "sale" && !!values.city && !!priceAzn }).where(eq(listingSnapshotsTable.id, draft.id)).returning();
+      return row2;
+    }
+  }
+  const [row] = await db.insert(listingSnapshotsTable).values({ ...values, source: input.source === "link" ? "manual" : input.source, inPool: false, createdByUserId: userId }).returning();
+  return row;
+}
+router19.post("/valuations", async (req, res) => {
+  const body = CreateValuationBody.safeParse(req.body);
+  if (!body.success) return bad2(res, "\u018Fmlak\u0131n m\u0259lumatlar\u0131n\u0131 yoxlay\u0131n (sah\u0259 m\xFCtl\u0259qdir)");
+  const userId = uid6(req);
+  const usdRate = body.data.usdRate && body.data.usdRate > 0.5 && body.data.usdRate < 5 ? body.data.usdRate : DEFAULT_USD_RATE;
+  if (!(body.data.subject.areaM2 > 0)) return bad2(res, "Sah\u0259ni daxil edin");
+  const subject = await confirmListing(userId, body.data.subject, usdRate);
+  const added = [];
+  for (const c of body.data.comparables ?? []) added.push(await confirmListing(userId, c, usdRate));
+  const since = new Date(Date.now() - POOL_DAYS * 864e5);
+  const pool2 = body.data.usePool === false ? [] : await db.select().from(listingSnapshotsTable).where(and(
+    eq(listingSnapshotsTable.inPool, true),
+    gt(listingSnapshotsTable.fetchedAt, since),
+    ne(listingSnapshotsTable.id, subject.id),
+    sql`lower(${listingSnapshotsTable.city}) = lower(${subject.city})`
+  )).orderBy(desc(listingSnapshotsTable.fetchedAt)).limit(500);
+  const byUrl = /* @__PURE__ */ new Map();
+  for (const r of pool2) {
+    const k = r.urlHash ?? r.id;
+    if (!byUrl.has(k) && (!subject.urlHash || r.urlHash !== subject.urlHash)) byUrl.set(k, r);
+  }
+  const addedIds = new Set(added.map((a) => a.id));
+  const candidates = [...added.map((r) => toComp(r, true)), ...[...byUrl.values()].filter((r) => !addedIds.has(r.id) && !added.some((a) => a.urlHash && a.urlHash === r.urlHash)).map((r) => toComp(r, false))];
+  const out = computeValuation({ ...toComp(subject, false), price: subject.price, currency: subject.currency }, candidates, usdRate, byUrl.size);
+  const result = {
+    status: out.status,
+    confidence: out.confidence,
+    confidenceReasons: out.confidenceReasons,
+    estimate: out.estimate,
+    factors: out.factors,
+    missing: out.missing,
+    assumptions: out.assumptions,
+    askingNote: out.askingNote,
+    poolSize: byUrl.size,
+    comparables: out.comps.map((x) => ({ id: x.c.id, score: x.score, pricePerM2: x.ppm2 ? Math.round(x.ppm2) : null, used: x.used, userAdded: x.c.userAdded, notes: x.notes }))
+  };
+  const [v] = await db.insert(valuationsTable).values({ ownerUserId: userId, subjectId: subject.id, compIds: candidates.map((c) => c.id), usdRate, result }).returning();
+  res.status(201).json(await valuationDto(v));
+});
+async function valuationDto(v) {
+  const r = v.result;
+  const ids = [v.subjectId, ...r.comparables.map((c) => c.id)];
+  const rows = await db.select().from(listingSnapshotsTable).where(inArray(listingSnapshotsTable.id, ids));
+  const get = (id2) => rows.find((x) => x.id === id2);
+  return {
+    id: v.id,
+    createdAt: v.createdAt.toISOString(),
+    usdRate: v.usdRate,
+    subject: listingDto(get(v.subjectId)),
+    status: r.status,
+    confidence: r.confidence,
+    confidenceReasons: r.confidenceReasons,
+    estimate: r.estimate ?? null,
+    factors: r.factors,
+    missing: r.missing,
+    assumptions: r.assumptions,
+    askingNote: r.askingNote ?? null,
+    poolSize: r.poolSize ?? 0,
+    // Who linked a pool listing is never shown; only the advert's own facts and link.
+    comparables: r.comparables.filter((c) => rows.some((x) => x.id === c.id)).map((c) => ({ listing: listingDto(get(c.id)), score: c.score, pricePerM2: c.pricePerM2, used: c.used, userAdded: c.userAdded, notes: c.notes }))
+  };
+}
+router19.get("/valuations", async (req, res) => {
+  noStore2(res);
+  const list = await db.select({ v: valuationsTable, s: listingSnapshotsTable }).from(valuationsTable).innerJoin(listingSnapshotsTable, eq(listingSnapshotsTable.id, valuationsTable.subjectId)).where(eq(valuationsTable.ownerUserId, uid6(req))).orderBy(desc(valuationsTable.createdAt)).limit(100);
+  res.json(list.map(({ v, s: s2 }) => {
+    const r = v.result;
+    return { id: v.id, createdAt: v.createdAt.toISOString(), title: s2.title || [s2.rooms ? `${s2.rooms} otaql\u0131` : "", s2.areaM2 ? `${s2.areaM2} m\xB2` : ""].filter(Boolean).join(", "), city: s2.city, district: s2.district, areaM2: s2.areaM2, central: r.estimate?.central ?? null, confidence: r.confidence, status: r.status };
+  }));
+});
+router19.get("/valuations/:valuationId", async (req, res) => {
+  noStore2(res);
+  const p = GetValuationParams.safeParse(req.params);
+  if (!p.success) return notFound2(res);
+  const [v] = await db.select().from(valuationsTable).where(and(eq(valuationsTable.id, p.data.valuationId), eq(valuationsTable.ownerUserId, uid6(req))));
+  if (!v) return notFound2(res, "Hesablama tap\u0131lmad\u0131");
+  res.json(await valuationDto(v));
+});
+var MAX_DATA = 4e5;
+var ceDto = (r) => ({ id: r.id, name: r.name, data: r.data, createdAt: r.createdAt.toISOString(), updatedAt: r.updatedAt.toISOString() });
+var sizeOk = (data) => JSON.stringify(data ?? null).length <= MAX_DATA && !!data && typeof data === "object" && !Array.isArray(data);
+router19.get("/construction-estimates", async (req, res) => {
+  noStore2(res);
+  const rows = await db.select().from(constructionEstimatesTable).where(eq(constructionEstimatesTable.ownerUserId, uid6(req))).orderBy(desc(constructionEstimatesTable.updatedAt)).limit(100);
+  res.json(rows.map((r) => {
+    const d = r.data;
+    return { id: r.id, name: r.name, updatedAt: r.updatedAt.toISOString(), total: d.summary?.total ?? null, unpriced: d.summary?.unpriced ?? null };
+  }));
+});
+router19.post("/construction-estimates", async (req, res) => {
+  const body = CreateConstructionEstimateBody.safeParse(req.body);
+  if (!body.success || !sizeOk(body.data.data)) return bad2(res, "Smeta m\u0259lumatlar\u0131 d\xFCzg\xFCn deyil v\u0259 ya \xE7ox b\xF6y\xFCkd\xFCr");
+  const [row] = await db.insert(constructionEstimatesTable).values({ ownerUserId: uid6(req), name: body.data.name.trim(), data: body.data.data }).returning();
+  res.status(201).json(ceDto(row));
+});
+async function ownEstimate(req, id2) {
+  const [row] = await db.select().from(constructionEstimatesTable).where(and(eq(constructionEstimatesTable.id, id2), eq(constructionEstimatesTable.ownerUserId, uid6(req))));
+  return row ?? null;
+}
+router19.get("/construction-estimates/:estimateId", async (req, res) => {
+  noStore2(res);
+  const p = GetConstructionEstimateParams.safeParse(req.params);
+  const row = p.success ? await ownEstimate(req, p.data.estimateId) : null;
+  if (!row) return notFound2(res, "Smeta tap\u0131lmad\u0131");
+  res.json(ceDto(row));
+});
+router19.put("/construction-estimates/:estimateId", async (req, res) => {
+  const p = UpdateConstructionEstimateParams.safeParse(req.params);
+  const body = UpdateConstructionEstimateBody.safeParse(req.body);
+  const row = p.success ? await ownEstimate(req, p.data.estimateId) : null;
+  if (!row) return notFound2(res, "Smeta tap\u0131lmad\u0131");
+  if (!body.success || !sizeOk(body.data.data)) return bad2(res, "Smeta m\u0259lumatlar\u0131 d\xFCzg\xFCn deyil v\u0259 ya \xE7ox b\xF6y\xFCkd\xFCr");
+  const [saved] = await db.update(constructionEstimatesTable).set({ name: body.data.name.trim(), data: body.data.data, updatedAt: /* @__PURE__ */ new Date() }).where(eq(constructionEstimatesTable.id, row.id)).returning();
+  res.json(ceDto(saved));
+});
+router19.delete("/construction-estimates/:estimateId", async (req, res) => {
+  const p = DeleteConstructionEstimateParams.safeParse(req.params);
+  const row = p.success ? await ownEstimate(req, p.data.estimateId) : null;
+  if (!row) return notFound2(res, "Smeta tap\u0131lmad\u0131");
+  await db.delete(constructionEstimatesTable).where(eq(constructionEstimatesTable.id, row.id));
+  res.json({ success: true });
+});
+var valuation_default = router19;
+
 // src/routes/index.ts
-var router19 = (0, import_express37.Router)();
-router19.use(health_default);
-router19.use(sharedEstimates_default);
-router19.use(realtorPublic_default);
-router19.use(homePublic_default);
-router19.use(storage_default);
-router19.use(projectLifecycle_default);
-router19.use(requireAuth_default);
-router19.use(projects_default);
-router19.use(scope_default);
-router19.use(changes_default);
-router19.use(milestones_default);
-router19.use(payments_default);
-router19.use(activity_default);
-router19.use(smeta_default);
-router19.use(realtor_default);
-router19.use(homes_default);
-router19.use(works_default);
-router19.use(workers_default);
-router19.use(passport_default);
-var routes_default = router19;
+var router20 = (0, import_express39.Router)();
+router20.use(health_default);
+router20.use(sharedEstimates_default);
+router20.use(realtorPublic_default);
+router20.use(homePublic_default);
+router20.use(storage_default);
+router20.use(projectLifecycle_default);
+router20.use(requireAuth_default);
+router20.use(projects_default);
+router20.use(scope_default);
+router20.use(changes_default);
+router20.use(milestones_default);
+router20.use(payments_default);
+router20.use(activity_default);
+router20.use(smeta_default);
+router20.use(realtor_default);
+router20.use(homes_default);
+router20.use(works_default);
+router20.use(workers_default);
+router20.use(passport_default);
+router20.use(valuation_default);
+var routes_default = router20;
 
 // src/routes/whatsappWebhook.ts
-var import_express38 = __toESM(require_express2(), 1);
-var router20 = (0, import_express38.Router)();
-router20.get("/", (req, res) => {
+var import_express40 = __toESM(require_express2(), 1);
+var router21 = (0, import_express40.Router)();
+router21.get("/", (req, res) => {
   const token = process.env.WHATSAPP_VERIFY_TOKEN;
   if (token && req.query["hub.mode"] === "subscribe" && req.query["hub.verify_token"] === token) {
     res.type("text/plain").send(String(req.query["hub.challenge"] ?? ""));
@@ -75050,7 +75943,7 @@ router20.get("/", (req, res) => {
   }
   res.sendStatus(403);
 });
-router20.post("/", import_express38.default.raw({ type: "*/*", limit: "1mb" }), (req, res) => {
+router21.post("/", import_express40.default.raw({ type: "*/*", limit: "1mb" }), (req, res) => {
   const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from("");
   if (!verifySignature(raw, req.get("x-hub-signature-256"))) {
     res.sendStatus(401);
@@ -75065,7 +75958,7 @@ router20.post("/", import_express38.default.raw({ type: "*/*", limit: "1mb" }), 
   }
   handleWebhook(payload).catch((err) => logger2.error({ err }, "realtor.whatsapp_webhook_failed"));
 });
-var whatsappWebhook_default = router20;
+var whatsappWebhook_default = router21;
 
 // src/lib/realtorScheduler.ts
 init_drizzle_orm();
@@ -75153,18 +76046,19 @@ function startRealtorScheduler() {
 }
 
 // ../../../../../tmp/claude-0/-home-claude/b445abbd-4d6c-57b9-a945-dfd51fb0a285/scratchpad/harness/harness.ts
-var app = (0, import_express39.default)();
+var app = (0, import_express41.default)();
 app.use((0, import_pino_http.default)({ logger: logger2 }));
 app.use((req, _res, next) => {
-  const user2 = req.headers["x-test-user"] || req.headers.cookie?.match(/test_user=([^;]+)/)?.[1] || null;
-  const fn = () => ({ userId: user2, tokenType: "session_token", sessionClaims: {}, sessionId: user2 ? "sess" : null, isAuthenticated: !!user2 });
+  const user3 = req.headers["x-test-user"] || req.headers.cookie?.match(/test_user=([^;]+)/)?.[1] || null;
+  const fn = () => ({ userId: user3, tokenType: "session_token", sessionClaims: {}, sessionId: user3 ? "sess" : null, isAuthenticated: !!user3 });
   fn[/* @__PURE__ */ Symbol.for("@clerk/express.auth")] = true;
   req.auth = fn;
   next();
 });
 app.use("/api/whatsapp/webhook", whatsappWebhook_default);
-app.use("/api/smeta", import_express39.default.json({ limit: "2mb" }));
-app.use(import_express39.default.json());
+app.use("/api/smeta", import_express41.default.json({ limit: "2mb" }));
+app.use("/api/construction-estimates", import_express41.default.json({ limit: "1mb" }));
+app.use(import_express41.default.json());
 app.post("/__jobs", async (_req, res) => {
   await runRealtorJobs();
   res.json({ ok: true });
@@ -75172,6 +76066,7 @@ app.post("/__jobs", async (_req, res) => {
 app.use("/api", routes_default);
 app.use(((err, req, res, _next) => {
   req.log.error({ err }, "fail");
+  if (err?.type === "entity.too.large") return res.status(413).json({ error: "too large" });
   res.status(500).json({ error: String(err?.message) });
 }));
 app.listen(8080, () => {

@@ -57,7 +57,7 @@ async function assertPublicHost(url: URL) {
 }
 
 /** GET with manual redirects; every hop is re-validated. */
-async function safeFetch(raw: string, accept: string, maxBytes: number, allowHost: (u: URL) => boolean) {
+export async function safeFetch(raw: string, accept: string, maxBytes: number, allowHost: (u: URL) => boolean) {
   let url = new URL(raw);
   for (let hop = 0; hop < 4; hop++) {
     if (!allowHost(url)) throw new ImportError("Bu sayt dəstəklənmir");
@@ -152,7 +152,7 @@ export function parseListingHtml(html: string, pageUrl: URL): ParsedListing {
   const priceMeta = meta("product:price:amount", "og:price:amount", "price");
   if (price == null && priceMeta) { price = num(priceMeta); currency = meta("product:price:currency", "og:price:currency", "pricecurrency"); }
   if (price == null) {
-    const pm = hay.match(/(\d{1,3}(?:[\s  .]\d{3})+|\d{3,9})\s*(AZN|₼|manat|man\.|USD|\$|€|EUR)/i);
+    const pm = hay.match(/(?<![\d/.,])(\d{1,3}(?:[ \u00a0\u202f.]\d{3})+|\d{3,9})\s*(AZN|₼|manat|man\.|USD|\$|€|EUR)/i);
     if (pm) { price = num(pm[1].replace(/\./g, "")); currency = /usd|\$/i.test(pm[2]) ? "USD" : /eur|€/i.test(pm[2]) ? "EUR" : "AZN"; }
   }
   if (currency && /azn|₼|man/i.test(currency)) currency = "AZN";
