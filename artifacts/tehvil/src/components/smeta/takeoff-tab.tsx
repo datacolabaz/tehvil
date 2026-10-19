@@ -100,23 +100,25 @@ export function TakeoffTab({ project: p }: { project: Project }) {
   return <div className="sm-takeoff">
     <div>
       {p.drawing ? <div className="sm-plan-card">
-        <div className="sm-plan-top"><span><i />{p.drawing.fileName.toUpperCase()}</span><span>AI ANALİZİ · {dateAz(p.drawing.uploadedAt).toUpperCase()}</span></div>
-        <div className="sm-plan"><FloorPlan drawing={p.drawing} measurements={p.measurements} selectedRoom={selectedRoom} onSelect={selectRoom} /></div>
+        <div className="sm-plan-top"><span><i />{p.drawing.fileName.toUpperCase()}</span><span>YÜKLƏNİB · {dateAz(p.drawing.uploadedAt).toUpperCase()}</span></div>
+        {p.drawing.rooms.length > 0 && p.drawing.width > 0
+          ? <div className="sm-plan"><FloorPlan drawing={p.drawing} measurements={p.measurements} selectedRoom={selectedRoom} onSelect={selectRoom} /></div>
+          : <p className="rl-hint" style={{ padding: '12px 14px' }}>Plan sxemi yalnız otaqların həndəsəsi məlum olduqda çəkilir. Bu fayldan yalnız mətn oxunur — ölçüləri sağdakı siyahıda yoxlayın.</p>}
         <div className="sm-plan-legend">
           <span>{p.drawing.rooms.length} otaq · {qty(roomArea)} m²</span>
           <span><i style={{ background: '#d9c69b' }} />{p.drawing.openings.filter(o => o.kind === 'door').length} qapı</span>
           <span><i style={{ background: '#9ec4d0' }} />{p.drawing.openings.filter(o => o.kind === 'window').length} pəncərə</span>
           <span><i style={{ background: 'repeating-linear-gradient(90deg,#c9a76f 0 3px,transparent 3px 5px)' }} />Ştrixli zona — ölçü yoxlanmalıdır</span>
         </div>
-      </div> : <div className="surface sm-empty" style={{ marginTop: 0 }}><div className="empty-illustration"><Ruler size={28} /></div><h3>Bu layihə üçün çertyoj yüklənməyib</h3><p>Ölçülər əl ilə daxil edilib. Çertyoj yükləsəniz, AI otaqları və əsas ölçüləri ilkin təklif kimi aşkar edəcək.</p></div>}
+      </div> : <div className="surface sm-empty" style={{ marginTop: 0 }}><div className="empty-illustration"><Ruler size={28} /></div><h3>Bu layihə üçün çertyoj yüklənməyib</h3><p>Ölçülər əl ilə daxil edilib. PDF çertyoj yükləsəniz, mətnində yazılan sahələr təklif kimi göstəriləcək.</p></div>}
       <DrawingUpload project={p} />
     </div>
 
     <div className="surface sm-measure-panel" ref={listRef}>
-      <div className="eyebrow">AI takeoff</div>
-      <h2>AI tərəfindən aşkar edilən ölçülər</h2>
+      <div className="eyebrow">Ölçülər</div>
+      <h2>Çertyojdan və əl ilə daxil edilən ölçülər</h2>
       <p className="sm-muted" style={{ margin: '0 0 12px', fontSize: 13 }}>{p.measurements.length} ölçü · {pending.length ? `${pending.length} ölçü yoxlanmalıdır` : 'hamısı yoxlanılıb'}</p>
-      <div className="sm-ai-notice" role="note"><AlertTriangle size={15} aria-hidden /><span>AI ölçüləri ilkin təklif kimi yaradıb. Smetaya əlavə etməzdən əvvəl yoxlayın.</span></div>
+      <div className="sm-ai-notice" role="note"><AlertTriangle size={15} aria-hidden /><span>PDF-dən oxunan ölçülər yalnız təklifdir. Smetaya əlavə etməzdən əvvəl çertyojla yoxlayın.</span></div>
       {GROUPS.map(g => {
         const list = p.measurements.filter(g.test);
         if (!list.length) return null;
@@ -140,7 +142,7 @@ function MeasurementRow({ p, m, selected, onSelect }: { p: Project; m: Measureme
     setEdit(null);
     toast(`${m.name}: ${qty(parsed!)} ${m.unit} kimi düzəldildi`);
   };
-  const statusText = m.status === 'approved' ? 'Təsdiqlənib' : m.status === 'edited' ? 'Əl ilə düzəldilib' : `AI təklifi · ${Math.round(m.confidence * 100)}%`;
+  const statusText = m.status === 'approved' ? 'Təsdiqlənib' : m.status === 'edited' ? 'Əl ilə düzəldilib' : 'Yoxlanmalıdır';
   return <div className={`sm-measure ${selected ? 'selected' : ''}`} data-mid={m.id} onClick={onSelect}>
     <button type="button" className="sm-measure-name" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }} onClick={e => { e.stopPropagation(); onSelect(); }} aria-pressed={selected}>{m.name}{m.status === 'suggested' && <ConfidenceChip confidence={m.confidence} />}</button>
     <div className="sm-measure-value">{edit !== null
@@ -168,18 +170,18 @@ function DrawingUpload({ project: p }: { project: Project }) {
     if (!/\.(pdf|png|jpe?g)$/i.test(file.name)) { toast('Yalnız PDF, JPG və ya PNG faylı yükləyin'); return; }
     setStep(0);
     try {
-      const { drawing, measurements } = await analyzeDrawing(file, setStep);
+      const { drawing, measurements, note } = await analyzeDrawing(file, setStep);
       smeta.attachDrawing(p.id, drawing, measurements);
-      toast('Çertyoj analiz edildi — ölçüləri yoxlayın');
+      toast(note);
     } finally { setStep(null); }
   };
   if (step !== null) return <div className="surface" style={{ marginTop: 12, padding: 16 }} aria-live="polite">
-    <strong style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#2f4d42' }}><LoaderCircle size={16} className="spin" />AI çertyoju analiz edir…</strong>
+    <strong style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#2f4d42' }}><LoaderCircle size={16} className="spin" />Fayl oxunur…</strong>
     <div className="sm-steps-list">{TAKEOFF_STEPS.map((s, i) => <div key={s} className={i < step ? 'done' : i === step ? 'active' : ''}>{i < step ? <CheckCircle2 size={15} /> : i === step ? <LoaderCircle size={15} className="spin" /> : <span style={{ width: 15 }} />}{s}</div>)}</div>
   </div>;
   return <label className={`sm-drop ${drag ? 'dragging' : ''}`} style={{ minHeight: p.drawing ? 120 : 200 }} onDragOver={e => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) void run(f); }}>
     <input type="file" accept=".pdf,.png,.jpg,.jpeg" aria-label="Çertyoj faylı seçin" onChange={e => { const f = e.target.files?.[0]; if (f) void run(f); e.target.value = ''; }} />
     {p.drawing ? <><FileUp size={20} color="#3b5d50" aria-hidden /><strong>Yeni versiya yüklə</strong><span>PDF, JPG və ya PNG — yeni ölçülər yenidən yoxlanılmalı olacaq</span></>
-      : <><span className="sm-drop-icon"><Upload size={22} /></span><strong>PDF, JPG və ya PNG yükləyin</strong><span>AI çertyojdakı otaqları və əsas ölçüləri təklif edəcək</span><small><AlertTriangle size={12} />Son nəticəni təsdiqləməzdən əvvəl mütləq yoxlayın</small></>}
+      : <><span className="sm-drop-icon"><Upload size={22} /></span><strong>PDF, JPG və ya PNG yükləyin</strong><span>PDF-in mətnində yazılan sahələr təklif kimi göstəriləcək; şəkil və skan oxunmur</span><small><AlertTriangle size={12} />Son nəticəni təsdiqləməzdən əvvəl mütləq yoxlayın</small></>}
   </label>;
 }

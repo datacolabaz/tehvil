@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { FileText, LoaderCircle, Paperclip, Plus, ReceiptText, Sparkles, Trash2 } from 'lucide-react';
 import { Button } from '@/components/kit';
-import { extractReceipt } from '@/lib/smeta/ai';
 import { planVsActual, round2, sumExpenses } from '@/lib/smeta/calc';
 import { CATEGORY_LABEL, CATEGORY_ORDER } from '@/lib/smeta/catalog';
 import { PAYMENT_STATUS_LABEL } from '@/lib/smeta/export';
@@ -91,7 +90,6 @@ function ExpenseModal({ project: p, open, onClose }: { project: Project; open: b
   const [pay, setPay] = useState<PaymentStatus>('paid');
   const [lineId, setLineId] = useState('');
   const [file, setFile] = useState<{ file: File; url: string } | null>(null);
-  const [reading, setReading] = useState(false);
   const [suggestion, setSuggestion] = useState<ReceiptSuggestion | null>(null);
   const [aiFields, setAiFields] = useState<Set<AiKey>>(new Set());
   const [tried, setTried] = useState(false);
@@ -101,20 +99,6 @@ function ExpenseModal({ project: p, open, onClose }: { project: Project; open: b
   const touched = (k: AiKey) => setAiFields(s => { if (!s.has(k)) return s; const n = new Set(s); n.delete(k); return n; });
   const reset = () => { setDate(todayISO()); setKind('material'); setDescription(''); setVendor(''); setAmount(''); setPay('paid'); setLineId(''); setFile(null); setSuggestion(null); setAiFields(new Set()); setTried(false); };
   const close = () => { reset(); onClose(); };
-
-  const readReceipt = async () => {
-    if (!file) return;
-    setReading(true);
-    try {
-      const s = await extractReceipt(file.file);
-      setSuggestion(s);
-      setVendor(s.merchant); setDate(s.date); setAmount(num(s.total, 2)); setCategory(s.category); setKind(s.kind); setLineId('');
-      if (!description.trim()) setDescription(`${CATEGORY_LABEL[s.category].replace(' işləri', '')} materialları`);
-      setAiFields(new Set<AiKey>(['vendor', 'date', 'amount', 'category', 'kind']));
-      toast('Qəbz oxundu — AI təkliflərini yoxlayın');
-    } catch { toast('Qəbzi oxumaq mümkün olmadı. Məlumatları əl ilə daxil edin.'); }
-    finally { setReading(false); }
-  };
 
   const save = () => {
     setTried(true);
@@ -126,20 +110,19 @@ function ExpenseModal({ project: p, open, onClose }: { project: Project; open: b
   };
 
   const ai = (k: AiKey) => aiFields.has(k);
-  const tag = (k: AiKey) => ai(k) ? <span className="sm-ai-tag"><Sparkles size={10} aria-hidden />AI təklifi</span> : null;
+  const tag = (k: AiKey) => ai(k) ? <span className="sm-ai-tag"><Sparkles size={10} aria-hidden />Avtomatik təklif</span> : null;
   const err = (k: keyof typeof errors) => tried && errors[k] ? <small role="alert" className="sm-field-error">{errors[k]}</small> : null;
 
   return <Modal open={open} onClose={close} eyebrow="Xərclər" title="Xərc əlavə et" wide footer={<><Button variant="secondary" onClick={close}>Ləğv et</Button><Button onClick={save}>Xərci yadda saxla</Button></>}>
     {file ? <div className="sm-receipt-preview">
       {file.file.type.startsWith('image/') ? <img src={file.url} alt="Qəbzin önizləməsi" /> : <span className="pdf">PDF</span>}
-      <div><strong>{file.file.name}</strong><small className="sm-muted">{num(file.file.size / 1024, 0)} KB{suggestion ? ` · AI etibarlılığı ${Math.round(suggestion.confidence * 100)}%` : ''}</small></div>
+      <div><strong>{file.file.name}</strong><small className="sm-muted">{num(file.file.size / 1024, 0)} KB{suggestion ? ` · əvvəlki avtomatik təklif` : ''}</small></div>
       <button type="button" className="icon-button" aria-label="Qəbzi sil" onClick={() => { setFile(null); setSuggestion(null); setAiFields(new Set()); }}><Trash2 size={15} /></button>
     </div> : <label className="sm-drop" style={{ minHeight: 120, marginTop: 0 }}>
       <input type="file" accept="image/*,application/pdf" aria-label="Qəbz faylı seçin" onChange={e => { const f = e.target.files?.[0]; if (f) setFile({ file: f, url: URL.createObjectURL(f) }); e.target.value = ''; }} />
       <ReceiptText size={22} color="#3b5d50" aria-hidden /><strong>Qəbz yükləyin</strong><span>Şəkil və ya PDF — istəyə bağlı</span>
     </label>}
-    <Button variant="secondary" onClick={() => { void readReceipt(); }} disabled={!file || reading} className="full-button" testId="button-ai-receipt">{reading ? <LoaderCircle size={15} className="spin" /> : <Sparkles size={15} />}{reading ? 'Qəbz oxunur…' : 'AI ilə qəbzdən məlumatı doldur'}</Button>
-    {suggestion && <div className="sm-ai-notice" role="note" style={{ marginTop: 12 }}><Sparkles size={15} aria-hidden /><span>“AI təklifi” ilə işarələnmiş sahələr qəbzdən avtomatik doldurulub. Saxlamazdan əvvəl məbləği və tarixi qəbzlə müqayisə edin.</span></div>}
+    <p className="rl-hint" style={{ marginTop: 8 }}>Qəbz avtomatik oxunmur — fayl xərcə sübut kimi əlavə olunur. Məbləği, tarixi və təchizatçını qəbzə baxaraq yazın.</p>
 
     <div className="field-grid" style={{ marginTop: 6 }}>
       <label className={`field ${ai('date') ? 'sm-ai-field' : ''}`}><span>Tarix</span>{tag('date')}<input type="date" value={date} onChange={e => { setDate(e.target.value); touched('date'); }} /></label>

@@ -139,7 +139,7 @@ export function NewEstimatePage() {
   const tempProject = { estimate, projectCosts, defaultMarginPercentage: margin / 100, quality: info.quality, areaM2: area || roomSum, renovationKind: info.renovationKind } as Project;
 
   return <>
-    <PageHeading eyebrow="AI Smeta" title="Yeni smeta yarat" description="AI ilkin ölçü və smeta təklif edir — siz yoxlayır, düzəldir və təsdiqləyirsiniz. Sifarişçi yalnız təsdiqlənmiş versiyanı görür." />
+    <PageHeading eyebrow="AI Smeta" title="Yeni smeta yarat" description="Sistem ölçülərə və qiymət cədvəlinə görə ilkin smeta təklif edir — siz yoxlayır, düzəldir və təsdiqləyirsiniz. Sifarişçi yalnız təsdiqlənmiş versiyanı görür." />
     <nav className="sm-stepper" aria-label="Addımlar">
       {STEPS.map((s, i) => <button key={s} type="button" className={`sm-step ${step === i ? 'active' : ''} ${i < step || (i <= reached && i !== step) ? 'done' : ''}`} aria-current={step === i ? 'step' : undefined} disabled={i > reached} onClick={() => go(i)}>
         <span>{i < reached && i !== step ? <Check size={13} /> : `0${i + 1}`}</span>{s}
@@ -169,7 +169,7 @@ export function NewEstimatePage() {
         {step === 1 && <>
           <p className="sm-wizard-lead">Otaqlar və sahələr iş həcmini müəyyən edir. Hər mənbədən sonra ölçüləri yoxlaya və düzəldə bilərsiniz.</p>
           <div className="sm-choices" role="radiogroup" aria-label="Məlumat mənbəyi">
-            <Choice selected={source === 'drawing'} onClick={() => chooseSource('drawing')} icon={<Upload size={19} />} title="Çertyoj yüklə" text="PDF, JPG, PNG — AI otaqları və ölçüləri təklif edir" />
+            <Choice selected={source === 'drawing'} onClick={() => chooseSource('drawing')} icon={<Upload size={19} />} title="Çertyoj yüklə" text="PDF-də yazılı sahələr oxunur; şəkil üçün ölçüləri özünüz daxil edirsiniz" />
             <Choice selected={source === 'manual'} onClick={() => chooseSource('manual')} icon={<PencilRuler size={19} />} title="Ölçüləri əl ilə daxil et" text="Otaqları və sahələri özünüz yazın" />
             <Choice selected={source === 'template'} onClick={() => chooseSource('template')} icon={<LayoutTemplate size={19} />} title="Hazır təmir şablonundan başla" text="Tipik iş həcmi və orta ölçülər" />
           </div>
@@ -185,7 +185,7 @@ export function NewEstimatePage() {
         </>}
 
         {step === 2 && <>
-          <p className="sm-wizard-lead">Miqdarlar otaq sahələrindən hesablanır, qiymətlər {QUALITY_LABEL[info.quality].toLowerCase()} səviyyəsi üçün orta bazar qiymətləridir.</p>
+          <p className="sm-wizard-lead">Miqdarlar otaq sahələrindən hesablanır, qiymətlər {QUALITY_LABEL[info.quality].toLowerCase()} səviyyəsi üçün Təhvil-in ilkin qiymət cədvəlindəndir (06.10.2026, təchizatçı ilə yoxlanmayıb) — öz qiymətlərinizlə əvəz edin.</p>
           <div style={{ display: 'flex', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
             <button type="button" className="sm-link-btn" onClick={() => { setPackages(new Set(DEFAULT_PACKAGES[info.renovationKind])); setPackagesTouched(true); }}><Sparkles size={13} />{RENOVATION_LABEL[info.renovationKind]} təmir üçün tövsiyə olunan</button>
             <button type="button" className="sm-link-btn" onClick={() => { setPackages(new Set(CATEGORY_ORDER)); setPackagesTouched(true); }}>Hamısını seç</button>
@@ -215,7 +215,7 @@ export function NewEstimatePage() {
               <input className="sm-cell-input r num" style={{ width: 58, border: '1px solid #dcded3', background: '#fff' }} inputMode="decimal" aria-label="Podratçı marjası, faizlə" value={margin} onChange={e => { const v = parseNumber(e.target.value); if (v !== null && v >= 0 && v <= 60) setMargin(v); }} />%</span><b>{azn(totals.margin)}</b></div>
             <div className="total"><span>Ümumi məbləğ</span><b>{azn(totals.total)}</b></div>
           </div>
-          <div className="sm-ai-notice" role="note" style={{ marginTop: 14 }}><AlertTriangle size={15} aria-hidden /><span>{source === 'drawing' ? 'Miqdarlar AI tərəfindən aşkar edilən ölçülərə əsaslanır. Smetaya keçdikdən sonra “Çertyoj və ölçülər” bölməsində ölçüləri yoxlayın.' : 'Miqdarlar daxil etdiyiniz otaq sahələrinə əsaslanır. Divar və plintus kimi törəmə ölçülər təxminidir.'}</span></div>
+          <div className="sm-ai-notice" role="note" style={{ marginTop: 14 }}><AlertTriangle size={15} aria-hidden /><span>{source === 'drawing' ? 'Miqdarlar PDF-dən oxunan və sizin təsdiqlədiyiniz ölçülərə əsaslanır. Smetaya keçdikdən sonra “Çertyoj və ölçülər” bölməsində ölçüləri yoxlayın.' : 'Miqdarlar daxil etdiyiniz otaq sahələrinə əsaslanır. Divar və plintus kimi törəmə ölçülər təxminidir.'}</span></div>
           <div className="eyebrow" style={{ margin: '20px 0 10px', fontSize: 11 }}>Alternativ keyfiyyət variantları</div>
           <Scenarios project={tempProject} />
         </>}
@@ -241,7 +241,7 @@ export function NewEstimatePage() {
         <div className="aside-panel">
           <div className="eyebrow">Necə işləyir</div>
           <ul className="sm-list" style={{ marginTop: 8 }}>
-            <li><Sparkles size={14} aria-hidden />AI ölçü və smeta təklif edir</li>
+            <li><Sparkles size={14} aria-hidden />Ölçü və qiymət cədvəlindən ilkin smeta</li>
             <li><PencilRuler size={14} aria-hidden />Siz yoxlayır və düzəldirsiniz</li>
             <li><CheckCircle2 size={14} aria-hidden />Sifarişçi yalnız təsdiqlənmiş versiyanı görür</li>
           </ul>
@@ -275,21 +275,21 @@ function DrawingStep({ drawing, onResult, onClear }: { drawing: { drawing: Drawi
     finally { setStep(null); }
   };
   if (step !== null) return <div className="sm-file-row" aria-live="polite" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><LoaderCircle size={18} className="spin" color="#5f7d6c" /><div style={{ flex: 1, minWidth: 0 }}><strong>{file?.name}</strong><small>AI çertyoju analiz edir…</small></div></div>
+    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><LoaderCircle size={18} className="spin" color="#5f7d6c" /><div style={{ flex: 1, minWidth: 0 }}><strong>{file?.name}</strong><small>Fayl oxunudir…</small></div></div>
     <div className="sm-steps-list">{TAKEOFF_STEPS.map((s, i) => <div key={s} className={i < step ? 'done' : i === step ? 'active' : ''}>{i < step ? <CheckCircle2 size={15} /> : i === step ? <LoaderCircle size={15} className="spin" /> : <span style={{ width: 15 }} />}{s}</div>)}</div>
   </div>;
   if (drawing) {
     const rooms = drawing.measurements.filter(m => m.roomId);
     return <>
-      <div className="sm-file-row"><FileText size={20} aria-hidden /><div><strong>{drawing.drawing.fileName}</strong><small>AI {rooms.length} otaq, {drawing.drawing.openings.filter(o => o.kind === 'door').length} qapı və {drawing.drawing.openings.filter(o => o.kind === 'window').length} pəncərə aşkar etdi · miqyas {drawing.drawing.scale}</small></div><button type="button" className="sm-link-btn" onClick={() => { setFile(null); onClear(); }}>Başqa fayl</button></div>
-      <div className="sm-ai-notice" role="note" style={{ marginTop: 12, marginBottom: 0 }}><AlertTriangle size={15} aria-hidden /><span>AI ölçüləri ilkin təklif kimi yaradıb. “Yoxlanmalıdır” işarəli ölçüləri çertyojla müqayisə edin.</span></div>
+      <div className="sm-file-row"><FileText size={20} aria-hidden /><div><strong>{drawing.drawing.fileName}</strong><small>{(drawing as { note?: string }).note ?? `${rooms.length} sahə yazısı tapıldı`} · miqyas {drawing.drawing.scale}</small></div><button type="button" className="sm-link-btn" onClick={() => { setFile(null); onClear(); }}>Başqa fayl</button></div>
+      <div className="sm-ai-notice" role="note" style={{ marginTop: 12, marginBottom: 0 }}><AlertTriangle size={15} aria-hidden /><span>PDF-dən oxunan ölçülər yalnız təklifdir. “Yoxlanmalıdır” işarəli ölçüləri çertyojla müqayisə edin.</span></div>
     </>;
   }
   return <label className={`sm-drop ${drag ? 'dragging' : ''}`} onDragOver={e => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) void run(f); }}>
     <input type="file" accept=".pdf,.png,.jpg,.jpeg" aria-label="Çertyoj faylı seçin" onChange={e => { const f = e.target.files?.[0]; if (f) void run(f); e.target.value = ''; }} data-testid="input-drawing" />
     <span className="sm-drop-icon"><Upload size={22} /></span>
     <strong>PDF, JPG və ya PNG yükləyin</strong>
-    <span>AI çertyojdakı otaqları və əsas ölçüləri təklif edəcək</span>
+    <span>PDF-in mətnində yazılan sahələr təklif kimi göstəriləcək; şəkil və skan oxunmur</span>
     <small><AlertTriangle size={12} />Son nəticəni təsdiqləməzdən əvvəl mütləq yoxlayın</small>
   </label>;
 }

@@ -16,7 +16,7 @@ import { buildXlsx, downloadBlob, type XCell, type XSheet } from './xlsx';
 
 export const CHANGE_STATUS_LABEL: Record<ChangeOrder['status'], string> = { draft: 'Qaralama', pending: 'Təsdiq gözləyir', approved: 'Sifarişçi təsdiq edib', rejected: 'Rədd edilib' };
 export const PAYMENT_STATUS_LABEL: Record<Expense['paymentStatus'], string> = { paid: 'Ödənilib', partial: 'Qismən ödənilib', unpaid: 'Ödənilməyib' };
-export const PRICE_SOURCE_LABEL = { market: 'Bazar qiyməti', contractor: 'Podratçı qiyməti', manual: 'Manual daxil edilib' } as const;
+export const PRICE_SOURCE_LABEL = { market: 'İlkin cədvəl qiyməti', contractor: 'Podratçı qiyməti', manual: 'Manual daxil edilib' } as const;
 
 const H = (v: string): XCell => ({ v, s: 'header' });
 const M = (v: number): XCell => ({ v: round2(v), s: 'money' });
