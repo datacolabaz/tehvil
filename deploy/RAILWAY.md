@@ -16,7 +16,7 @@ Both deployment branches retain the pnpm workspace and shared libraries. They de
 4. Keep Root Directory `/` on both. Set each service's commands from the table below, or use the optional IaC configuration.
 5. Generate the frontend's public domain. Give the API a domain reachable by the frontend, preferably Railway private networking.
 6. Add the variables below. Railway supplies `PORT`; do not hardcode it.
-7. Apply the database schema once against Railway PostgreSQL **before** serving application traffic. Use `pnpm --filter @workspace/db run push` from a Railway-connected environment; review any proposed destructive changes. This is not an automated destructive migration at every boot.
+7. The backend applies `lib/db/sql/schema.sql` on every start (`pnpm --filter @workspace/api-server run start` runs `lib/db/scripts/apply-schema.mjs` first). The script only creates missing tables, columns and indexes — it never drops or rewrites data — and if a statement fails it is logged and the server still starts. To run it by hand: `DATABASE_URL=… pnpm --filter @workspace/db run apply-schema`.
 
 The frontend serves the production SPA and forwards `/api` to the API service. The browser uses one origin, so session cookies, evidence downloads and share links do not depend on cross-site cookie behavior.
 
