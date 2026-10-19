@@ -28,7 +28,7 @@ export function AssistantDrawer({ project: p, open, onClose }: { project: Projec
   };
   const submit = (e: FormEvent) => { e.preventDefault(); void ask(input); };
 
-  return <Drawer open={open} onClose={onClose} eyebrow="Sınaq rejimi" title="AI Smeta köməkçisi" subtitle={`${p.name} · smeta v${p.estimate.version} məlumatları əsasında`}
+  return <Drawer open={open} onClose={onClose} eyebrow="Sınaq rejimi" title="Smeta köməkçisi (qaydalara əsaslanır, AI modeli deyil)" subtitle={`${p.name} · smeta v${p.estimate.version} məlumatları əsasında`}
     footer={<>
       <form className="sm-ask" onSubmit={submit}>
         <input value={input} onChange={e => setInput(e.target.value)} placeholder="Smeta haqqında sual verin" aria-label="Köməkçiyə sual" disabled={busy} />
@@ -40,8 +40,8 @@ export function AssistantDrawer({ project: p, open, onClose }: { project: Projec
       {ASSISTANT_PROMPTS.map(q => <button key={q} type="button" className="sm-chip-btn" disabled={busy} onClick={() => { void ask(q); }}>{q}</button>)}
     </div>
     <div className="sm-msgs" aria-live="polite">
-      {!msgs.length && <div className="sm-msg ai"><span className="sm-msg-tag"><Sparkles size={12} aria-hidden />AI KÖMƏKÇİ</span>Salam! Bu layihənin smetası, xərcləri və dəyişiklikləri əsasında suallarınıza cavab verə bilərəm. Yuxarıdakı suallardan birini seçin və ya öz sualınızı yazın.</div>}
-      {msgs.map((m, i) => <div key={i} className={`sm-msg ${m.role}`}>{m.role === 'ai' && <span className="sm-msg-tag"><Sparkles size={12} aria-hidden />AI KÖMƏKÇİ</span>}{m.text}</div>)}
+      {!msgs.length && <div className="sm-msg ai"><span className="sm-msg-tag"><Sparkles size={12} aria-hidden />KÖMƏKÇİ</span>Salam! Bu layihənin smetası, xərcləri və dəyişiklikləri əsasında suallarınıza cavab verə bilərəm. Yuxarıdakı suallardan birini seçin və ya öz sualınızı yazın.</div>}
+      {msgs.map((m, i) => <div key={i} className={`sm-msg ${m.role}`}>{m.role === 'ai' && <span className="sm-msg-tag"><Sparkles size={12} aria-hidden />KÖMƏKÇİ</span>}{m.text}</div>)}
       {busy && <div className="sm-msg ai" aria-label="Cavab hazırlanır"><span className="sm-typing"><i /><i /><i /></span></div>}
       <div ref={endRef} />
     </div>

@@ -1,7 +1,7 @@
 import { Fragment, useMemo, useState } from 'react';
 import { Check, ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Copy, LoaderCircle, MoreHorizontal, Plus, RefreshCw, Search, SlidersHorizontal, Sparkles, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/kit';
-import { fetchMarketPrice, isPriceStale } from '@/lib/smeta/ai';
+import { isPriceStale } from '@/lib/smeta/ai';
 import { lineTotals, projectTotals, sectionTotals } from '@/lib/smeta/calc';
 import { CATEGORY_LABEL, CATEGORY_ORDER } from '@/lib/smeta/catalog';
 import { azn, dateAz, num, pct } from '@/lib/smeta/format';
@@ -12,22 +12,11 @@ import { DropItem, DropLabel, DropMenu, DropSep, LineStatusPill, NumberInput, So
 const UNITS: Unit[] = ['m²', 'm', 'ədəd', 'kisə', 'xidmət', 'komplekt', 'litr'];
 
 function useLineActions(p: Project) {
-  const [refreshing, setRefreshing] = useState<Set<string>>(new Set());
-  const refresh = async (it: EstimateLineItem) => {
-    setRefreshing(s => new Set(s).add(it.id));
-    try {
-      const { price, reference } = await fetchMarketPrice(it);
-      smeta.refreshPrice(p.id, it.id, price, reference);
-      toast(price === it.materialUnitPrice ? 'Bazar qiyməti dəyişməyib' : `Bazar qiyməti yeniləndi: ${num(it.materialUnitPrice, 2)} → ${num(price, 2)} AZN`);
-    } finally {
-      setRefreshing(s => { const n = new Set(s); n.delete(it.id); return n; });
-    }
-  };
   const remove = (it: EstimateLineItem) => {
     const undo = smeta.deleteLine(p.id, it.id);
     toast(`“${it.name}” silindi`, undo ? { label: 'Geri qaytar', run: undo } : undefined);
   };
-  return { refreshing, refresh, remove, duplicate: (it: EstimateLineItem) => { smeta.duplicateLine(p.id, it.id); toast('Sətrin surəti yaradıldı'); } };
+  return { remove, duplicate: (it: EstimateLineItem) => { smeta.duplicateLine(p.id, it.id); toast('Sətrin surəti yaradıldı'); } };
 }
 
 export function EstimateTable({ project: p }: { project: Project }) {
@@ -84,7 +73,7 @@ export function EstimateTable({ project: p }: { project: Project }) {
 
     <div className="sm-cards-mobile">{sections.map(({ s, items }) => <MobileSection key={s.id} p={p} s={s} items={items} open={!collapsed.has(s.id) || !!q} onToggle={() => toggle(s.id)} onAdd={() => addLine(s.id)} actions={actions} />)}</div>
 
-    <div className="sm-legend" aria-hidden><span><i style={{ background: '#c28e68' }} />AI təklifi — podratçı yoxlamalıdır</span><span><i style={{ background: '#6f9a80' }} />Sifarişçi təsdiqindən sonra dəyişdirilib</span><span>Cəmi = material + işçilik + əlavə xərc + ehtiyat + marja</span></div>
+    <div className="sm-legend" aria-hidden><span><i style={{ background: '#c28e68' }} />Avtomatik təklif — podratçı yoxlamalıdır</span><span><i style={{ background: '#6f9a80' }} />Sifarişçi təsdiqindən sonra dəyişdirilib</span><span>Cəmi = material + işçilik + əlavə xərc + ehtiyat + marja</span></div>
 
     <ProjectCosts p={p} />
 
@@ -121,11 +110,9 @@ function LineRow({ p, it, code, open, onDetail, actions }: { p: Project; it: Est
       <td><LineStatusPill status={it.status} /></td>
       <td><div className="sm-row-actions">
         {(it.status === 'ai' || it.status === 'draft') && <button type="button" className="icon-button" aria-label="Yoxladım, təsdiqlə" title="Yoxladım, təsdiqlə" onClick={() => smeta.approveLines(p.id, [it.id])}><Check size={15} /></button>}
-        {it.materialUnitPrice > 0 && <button type="button" className="icon-button" aria-label="Qiyməti yenilə" title="Qiyməti yenilə (bazar qiyməti)" disabled={actions.refreshing.has(it.id)} onClick={() => { void actions.refresh(it); }}>{actions.refreshing.has(it.id) ? <LoaderCircle size={15} className="spin" /> : <RefreshCw size={15} />}</button>}
         <button type="button" className="icon-button" aria-label="Ətraflı: ehtiyat, marja, mənbə" aria-expanded={open} title="Ətraflı" onClick={onDetail}><SlidersHorizontal size={15} /></button>
         <DropMenu trigger={<button type="button" className="icon-button" aria-label="Digər əməliyyatlar"><MoreHorizontal size={16} /></button>}>
           <DropItem icon={<Copy size={14} />} onSelect={() => actions.duplicate(it)}>Surətini çıxar</DropItem>
-          {it.materialUnitPrice > 0 && <DropItem icon={<RefreshCw size={14} />} onSelect={() => { void actions.refresh(it); }}>Qiyməti yenilə</DropItem>}
           <DropSep />
           <DropItem icon={<Trash2 size={14} />} onSelect={() => actions.remove(it)}>Sətri sil</DropItem>
         </DropMenu>
@@ -166,7 +153,6 @@ function MobileSection({ p, s, items, open, onToggle, onAdd, actions }: { p: Pro
         <div className="sm-line-card-foot"><span className="sm-muted" style={{ fontSize: 12 }}>Material {num(l.materialTotal, 0)} · İşçilik {num(l.laborTotal, 0)}</span><b className="num">{azn(l.rowTotal, 'auto')}</b></div>
         <div className="sm-row-actions" style={{ justifyContent: 'flex-start', marginTop: 6 }}>
           {(it.status === 'ai' || it.status === 'draft') && <button type="button" className="sm-link-btn" onClick={() => smeta.approveLines(p.id, [it.id])}><Check size={13} />Təsdiqlə</button>}
-          {it.materialUnitPrice > 0 && <button type="button" className="icon-button" aria-label="Qiyməti yenilə" disabled={actions.refreshing.has(it.id)} onClick={() => { void actions.refresh(it); }}>{actions.refreshing.has(it.id) ? <LoaderCircle size={15} className="spin" /> : <RefreshCw size={15} />}</button>}
           <button type="button" className="icon-button" aria-label="Surətini çıxar" onClick={() => actions.duplicate(it)}><Copy size={15} /></button>
           <button type="button" className="icon-button" aria-label="Sətri sil" onClick={() => actions.remove(it)}><Trash2 size={15} /></button>
         </div>

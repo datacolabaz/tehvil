@@ -5,6 +5,7 @@
  * Təhvil renovation project coordination API
  * OpenAPI spec version: 0.1.0
  */
+import type { PassportAttention } from './passportAttention';
 import type { PassportSection } from './passportSection';
 import type { PassportSources } from './passportSources';
 
@@ -16,4 +17,10 @@ export interface HomePassport {
   sources: PassportSources;
   /** @nullable */
   lastChangeAt: string | null;
+  /** @nullable */
+  lastChangeByRole: string | null;
+  lastChangeByMe: boolean;
+  /** @nullable */
+  lastChangeSummary: string | null;
+  attention: PassportAttention[];
 }

@@ -1,63 +1,45 @@
 /**
- * Mock "AI" services for AI Smeta.
+ * AI Smeta helpers.
  *
- * Nothing here runs a model. Drawing takeoff, receipt reading and market
- * prices return deterministic demo results; insights and assistant answers are
- * rule-based on the current project numbers. Every result is a proposal that
- * the contractor reviews before it reaches the client.
- *
- * TODO(ai): connect `analyzeDrawing` to a takeoff service, `extractReceipt` to
- * OCR, `fetchMarketPrice` to a price feed and `askAssistant` to an LLM endpoint
- * that receives the same project context built in `projectContext()`.
+ * No AI model is called. Drawing reading uses the PDF text layer only (see lib/files/pdf-text);
+ * images and scans are not read. Receipts are not read automatically and there is no market
+ * price feed — prices come from the contractor or the person. Insights and the assistant are
+ * rule-based on the current project numbers.
  */
 import { allItems, budgetSummary, changeTotals, lineTotals, planVsActual, projectTotals, round2 } from './calc';
 import { BREAKDOWN_GROUP, CATEGORY_LABEL, CATEGORY_ORDER, DEFAULT_PACKAGES, QUALITY_FACTOR, QUALITY_LABEL, forecastDays } from './catalog';
 import { azn, dateAz, num, pct, todayISO, qty } from './format';
-import { SAMPLE_DRAWING, drawingMeasurements } from './mock-data';
-import type { Drawing, EstimateLineItem, Measurement, Project, QualityLevel, ReceiptSuggestion, WorkCategory } from './types';
+import { readPdf } from '../files/pdf-text';
+import type { Drawing, EstimateLineItem, Measurement, Project, QualityLevel } from './types';
 
-const wait = (ms: number) => new Promise(r => window.setTimeout(r, ms));
+export const TAKEOFF_STEPS = ['Fayl açılır', 'PDF-in mətn qatı oxunur', 'Sahə və miqyas yazıları axtarılır'];
 
-export const TAKEOFF_STEPS = ['Fayl oxunur', 'Divar konturları tanınır', 'Otaqlar və sahələr hesablanır', 'Qapı və pəncərələr aşkarlanır'];
+export interface DrawingReadResult { drawing: Drawing; measurements: Measurement[]; note: string }
 
-export async function analyzeDrawing(file: { name: string }, onStep?: (i: number) => void): Promise<{ drawing: Drawing; measurements: Measurement[] }> {
-  for (let i = 0; i < TAKEOFF_STEPS.length; i++) { onStep?.(i); await wait(550); }
+/**
+ * Reads what a drawing states in text. Found areas become *suggested* measurements that the
+ * contractor must check; nothing is invented when the file has no readable text.
+ */
+export async function analyzeDrawing(file: File, onStep?: (i: number) => void): Promise<DrawingReadResult> {
+  onStep?.(0);
   const ext = file.name.split('.').pop()?.toLowerCase();
   const fileType = ext === 'png' ? 'png' : ext === 'jpg' || ext === 'jpeg' ? 'jpg' : 'pdf';
-  return {
-    drawing: { ...structuredClone(SAMPLE_DRAWING), id: `dr-${Date.now().toString(36)}`, fileName: file.name, fileType, uploadedAt: new Date().toISOString() },
-    measurements: drawingMeasurements(),
-  };
-}
-
-const KNOWN_MERCHANTS: { match: RegExp; merchant: string; category: WorkCategory }[] = [
-  { match: /bauhaus/i, merchant: 'Bauhaus Bakı', category: 'divar' },
-  { match: /keramika|kafel/i, merchant: 'Keramika Evi', category: 'kafel' },
-  { match: /parket|laminat/i, merchant: 'Parket Dünyası', category: 'dosheme' },
-  { match: /santex/i, merchant: 'Santexnika Mərkəzi', category: 'santexnika' },
-  { match: /elektrik|kabel/i, merchant: 'Elektrik Dünyası', category: 'elektrik' },
-];
-
-export async function extractReceipt(file: { name: string; size: number }): Promise<ReceiptSuggestion> {
-  await wait(1300);
-  const known = KNOWN_MERCHANTS.find(m => m.match.test(file.name));
-  const seed = (file.size % 9000) / 100;
-  return {
-    merchant: known?.merchant ?? 'Bakı Tikinti Bazarı',
-    date: todayISO(),
-    total: round2(120 + seed * 3.7),
-    category: known?.category ?? 'elektrik',
-    kind: 'material',
-    confidence: known ? 0.86 : 0.64,
-  };
-}
-
-const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
-
-export async function fetchMarketPrice(item: EstimateLineItem): Promise<{ price: number; reference: string }> {
-  await wait(700);
-  const delta = ((hash(item.id + todayISO()) % 100) / 100) * 0.1 - 0.03;
-  return { price: round2(item.materialUnitPrice * (1 + delta)), reference: 'Bakı tikinti bazarları, orta qiymət' };
+  const drawing: Drawing = { id: `dr-${Date.now().toString(36)}`, fileName: file.name, fileType, uploadedAt: new Date().toISOString(), scale: 'göstərilməyib', width: 0, height: 0, status: 'analyzed', rooms: [], openings: [] };
+  if (fileType !== 'pdf') return { drawing, measurements: [], note: 'Şəkildən ölçülər avtomatik oxunmur. Otaqları və sahələri əl ilə daxil edin.' };
+  onStep?.(1);
+  const pdf = await readPdf(file);
+  onStep?.(2);
+  if (!pdf.hasText) return { drawing, measurements: [], note: 'Bu PDF-də mətn qatı yoxdur (skan və ya yalnız xətlər). Ölçüləri əl ilə daxil edin.' };
+  const scale = pdf.findings.find(f => f.kind === 'scale');
+  if (scale) drawing.scale = `1:${scale.value}`;
+  const rooms = pdf.findings.filter(f => f.kind === 'room_area');
+  const measurements: Measurement[] = rooms.map((f, i) => ({
+    id: `m-pdf-${i}`, kind: 'area', name: f.label, value: f.value, unit: 'm²', confidence: 0.5,
+    source: `PDF, səh. ${f.page}: “${f.snippet}”`, status: 'suggested', roomId: `r-pdf-${i}`,
+  }));
+  const height = pdf.findings.find(f => f.kind === 'height');
+  if (height) measurements.push({ id: 'm-pdf-height', kind: 'height', name: 'Tavan hündürlüyü', value: height.value, unit: 'm', confidence: 0.5, source: `PDF, səh. ${height.page}: “${height.snippet}”`, status: 'suggested' });
+  return { drawing, measurements, note: rooms.length ? `PDF mətnində ${rooms.length} sahə yazısı tapıldı. Hər birini çertyojla yoxlayın.` : 'PDF mətnində sahə yazısı tapılmadı. Ölçüləri əl ilə daxil edin.' };
 }
 
 export const isPriceStale = (item: EstimateLineItem, days = 21) =>
@@ -176,11 +158,11 @@ function answerRisky(p: Project): string {
   const t = projectTotals(p);
   const heavy = items.map(i => ({ i, share: lineTotals(i, p.defaultMarginPercentage).rowTotal / (t.total || 1) })).filter(x => x.share > 0.06).sort((a, b) => b.share - a.share);
   const lines = ['Mövcud məlumatlara əsasən qiymət riski olan sətirlər:'];
-  if (stale.length) lines.push(`Köhnəlmiş bazar qiyməti (21 gündən çox):\n${stale.map(i => `• ${i.name} — son yenilənmə ${dateAz(i.priceSource.updatedAt)}`).join('\n')}`);
+  if (stale.length) lines.push(`Köhnəlmiş qiymət (21 gündən çox yenilənməyib):\n${stale.map(i => `• ${i.name} — son yenilənmə ${dateAz(i.priceSource.updatedAt)}`).join('\n')}`);
   if (manual.length) lines.push(`Mənbəsiz, əl ilə daxil edilmiş qiymətlər:\n${manual.map(i => `• ${i.name} — ${num(i.materialUnitPrice, 2)} AZN/${i.unit}`).join('\n')}`);
   if (heavy.length) lines.push(`Ümumi məbləğə ən çox təsir edən sətirlər:\n${heavy.slice(0, 3).map(x => `• ${x.i.name} — smetanın ${pct(x.share)}`).join('\n')}`);
   if (lines.length === 1) lines.push('Diqqət tələb edən qiymət aşkar etmədim.');
-  lines.push('Yoxlanmalı məqam: “Qiyməti yenilə” ilə bazar qiymətini təzələyin və ya təchizatçıdan yazılı təklif alın.');
+  lines.push('Yoxlanmalı məqam: təchizatçıdan yazılı qiymət təklifi alın və sətrin qiymətini əl ilə yeniləyin.');
   return lines.join('\n\n');
 }
 
@@ -226,7 +208,6 @@ function answerPayments(p: Project): string {
 }
 
 export async function askAssistant(p: Project, prompt: string): Promise<string> {
-  await wait(650 + Math.min(900, prompt.length * 12));
   const q = prompt.toLocaleLowerCase('az');
   if (/çatışm|unud|nə yox/.test(q)) return answerMissing(p);
   if (/azalt|qənaət|ucuz/.test(q)) return answerSavings(p);

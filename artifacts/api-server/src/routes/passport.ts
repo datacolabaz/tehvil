@@ -9,6 +9,7 @@ import {
   homeMediaTable,
   homeRoomsTable,
   infrastructureItemsTable,
+  workNotesTable,
   serviceInterestsTable,
   workApprovalsTable,
   workRecordsTable,
@@ -43,8 +44,11 @@ router.get("/homes/:homeId/passport", async (req, res): Promise<void> => {
     db.select({ id: homeMediaTable.id, workId: homeMediaTable.workId, contentType: homeMediaTable.contentType, phase: homeMediaTable.phase }).from(homeMediaTable).where(and(eq(homeMediaTable.homeId, homeId), isNull(homeMediaTable.deletedAt))),
     db.select().from(infrastructureItemsTable).where(eq(infrastructureItemsTable.homeId, homeId)),
     db.select().from(equipmentTable).where(eq(equipmentTable.homeId, homeId)),
-    db.select({ at: homeAuditTable.createdAt }).from(homeAuditTable).where(eq(homeAuditTable.homeId, homeId)).orderBy(desc(homeAuditTable.createdAt)).limit(1),
+    db.select({ at: homeAuditTable.createdAt, role: homeAuditTable.actorRole, actor: homeAuditTable.actorUserId, action: homeAuditTable.action, summary: homeAuditTable.summary }).from(homeAuditTable).where(eq(homeAuditTable.homeId, homeId)).orderBy(desc(homeAuditTable.createdAt)).limit(1),
   ]);
+  const notes = works.length ? await db.select({ workId: workNotesTable.workId, kind: workNotesTable.kind, body: workNotesTable.body, at: workNotesTable.createdAt }).from(workNotesTable)
+    .where(and(inArray(workNotesTable.workId, works.map((w) => w.id)), inArray(workNotesTable.kind, ["defect", "fix"]))) : [];
+  const roomRows = await db.select({ id: homeRoomsTable.id, name: homeRoomsTable.name, condition: homeRoomsTable.condition }).from(homeRoomsTable).where(eq(homeRoomsTable.homeId, homeId));
   const created = works.length ? await db.select({ workId: workApprovalsTable.workId, role: workApprovalsTable.actorRole }).from(workApprovalsTable)
     .where(and(inArray(workApprovalsTable.workId, works.map((w) => w.id)), eq(workApprovalsTable.action, "created"))) : [];
   const h = a.home;
@@ -82,8 +86,29 @@ router.get("/homes/:homeId/passport", async (req, res): Promise<void> => {
       specialist: works.filter((w) => w.inspectedAt).length + infra.filter((i) => i.verifiedAt).length,
     },
     lastChangeAt: lastAudit?.at.toISOString() ?? null,
+    lastChangeByRole: lastAudit?.role ?? null, lastChangeByMe: lastAudit?.actor === uid(req), lastChangeSummary: lastAudit?.summary || null,
+    attention: attentionList(homeId, works, notes, roomRows, equipment),
   });
 });
+
+/** What needs a repair or a look right now — only from records the people of the home entered. */
+function attentionList(homeId: string, works: (typeof workRecordsTable.$inferSelect)[], notes: { workId: string; kind: string; body: string; at: Date }[],
+  rooms: { id: string; name: string; condition: string }[], equipment: (typeof equipmentTable.$inferSelect)[]) {
+  const out: { kind: string; text: string; path: string; date: string | null }[] = [];
+  const today = new Date().toISOString().slice(0, 10);
+  for (const w of works) {
+    const d = notes.filter((n) => n.workId === w.id && n.kind === "defect"), f = notes.filter((n) => n.workId === w.id && n.kind === "fix");
+    if (d.length > f.length) { const last = d[d.length - 1]; out.push({ kind: "defect", text: `${w.title}: həll olunmamış problem — ${last.body.slice(0, 120)}`, path: `/works/${w.id}`, date: last.at.toISOString().slice(0, 10) }); }
+    if (w.status === "revision") out.push({ kind: "revision", text: `${w.title}: düzəliş istənib`, path: `/works/${w.id}`, date: w.startDate ?? null });
+    if (w.status === "planned" || w.status === "in_progress") out.push({ kind: "planned", text: `${w.title}: ${w.status === "planned" ? "planlaşdırılıb" : "davam edir"}`, path: `/works/${w.id}`, date: w.startDate ?? null });
+  }
+  for (const r of rooms) if (r.condition === "needs_repair") out.push({ kind: "room", text: `${r.name}: təmir lazımdır (otaq qeydinə görə)`, path: `/homes/${homeId}/rooms/${r.id}`, date: null });
+  for (const e of equipment) {
+    if (e.nextServiceAt && e.nextServiceAt <= today) out.push({ kind: "service", text: `${e.name}: texniki xidmət vaxtı keçib`, path: `/homes/${homeId}/equipment`, date: e.nextServiceAt });
+    if (e.warrantyUntil && e.warrantyUntil >= today && e.warrantyUntil <= new Date(Date.now() + 60 * 86_400_000).toISOString().slice(0, 10)) out.push({ kind: "warranty", text: `${e.name}: zəmanət tezliklə bitir`, path: `/homes/${homeId}/equipment`, date: e.warrantyUntil });
+  }
+  return out.slice(0, 20);
+}
 
 router.get("/homes/:homeId/costs", async (req, res): Promise<void> => {
   noStore(res);

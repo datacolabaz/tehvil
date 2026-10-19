@@ -27,6 +27,9 @@ import type {
   ChangeOrderDecision,
   ChangeOrderInput,
   ConfirmLink,
+  ConstructionEstimate,
+  ConstructionEstimateInput,
+  ConstructionEstimateSummary,
   ContractorConfirmInput,
   ContractorConfirmView,
   Dashboard,
@@ -67,6 +70,7 @@ import type {
   InvitationInput,
   InvitationLink,
   InvitationPreview,
+  ListingDraft,
   ListingImport,
   ListingImportInput,
   MeRoles,
@@ -98,6 +102,8 @@ import type {
   PublicPassport,
   PublicPassportEventInput,
   PublicPassportLeadInput,
+  ReadLinkInput,
+  ReadTextInput,
   RealtorAgent,
   RealtorAgentInput,
   RealtorAppointment,
@@ -143,6 +149,9 @@ import type {
   TimelineEvent,
   UploadUrlRequest,
   UploadUrlResponse,
+  Valuation,
+  ValuationInput,
+  ValuationSummary,
   WorkDetail,
   WorkInput,
   WorkNoteInput,
@@ -11914,6 +11923,829 @@ export const useCreateServiceInterest = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateServiceInterestMutationOptions(options));
+    }
+
+export const getReadListingLinkUrl = () => {
+
+
+
+
+  return `/api/valuation/read-link`
+}
+
+/**
+ * @summary Read one listing page the user linked (allow-listed portals, robots.txt respected)
+ */
+export const readListingLink = async (readLinkInput: ReadLinkInput, options?: Parameters<typeof customFetch>[1]): Promise<ListingDraft> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ListingDraft>(getReadListingLinkUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(readLinkInput)
+  }
+);}
+
+
+
+
+
+export const getReadListingLinkMutationKey = () => ['readListingLink'] as const;
+
+export const getReadListingLinkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof readListingLink>>, TError,ReadListingLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof readListingLink>>, TError,ReadListingLinkMutationVariables, TContext> => {
+
+const mutationKey = getReadListingLinkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof readListingLink>>, ReadListingLinkMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  readListingLink(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReadListingLinkMutationResult = NonNullable<Awaited<ReturnType<typeof readListingLink>>>
+    export type ReadListingLinkMutationBody = BodyType<ReadLinkInput>
+    export type ReadListingLinkMutationError = ErrorType<unknown>
+    export type ReadListingLinkMutationVariables = {data: BodyType<ReadLinkInput>}
+
+    /**
+ * @summary Read one listing page the user linked (allow-listed portals, robots.txt respected)
+ */
+export const useReadListingLink = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof readListingLink>>, TError,ReadListingLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof readListingLink>>,
+        TError,
+        ReadListingLinkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReadListingLinkMutationOptions(options));
+    }
+
+export const getReadListingTextUrl = () => {
+
+
+
+
+  return `/api/valuation/read-text`
+}
+
+/**
+ * @summary Read listing facts from pasted text
+ */
+export const readListingText = async (readTextInput: ReadTextInput, options?: Parameters<typeof customFetch>[1]): Promise<ListingDraft> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ListingDraft>(getReadListingTextUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(readTextInput)
+  }
+);}
+
+
+
+
+
+export const getReadListingTextMutationKey = () => ['readListingText'] as const;
+
+export const getReadListingTextMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof readListingText>>, TError,ReadListingTextMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof readListingText>>, TError,ReadListingTextMutationVariables, TContext> => {
+
+const mutationKey = getReadListingTextMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof readListingText>>, ReadListingTextMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  readListingText(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReadListingTextMutationResult = NonNullable<Awaited<ReturnType<typeof readListingText>>>
+    export type ReadListingTextMutationBody = BodyType<ReadTextInput>
+    export type ReadListingTextMutationError = ErrorType<unknown>
+    export type ReadListingTextMutationVariables = {data: BodyType<ReadTextInput>}
+
+    /**
+ * @summary Read listing facts from pasted text
+ */
+export const useReadListingText = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof readListingText>>, TError,ReadListingTextMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof readListingText>>,
+        TError,
+        ReadListingTextMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReadListingTextMutationOptions(options));
+    }
+
+export const getListValuationsUrl = () => {
+
+
+
+
+  return `/api/valuations`
+}
+
+/**
+ * @summary My market-value calculations
+ */
+export const listValuations = async ( options?: Parameters<typeof customFetch>[1]): Promise<ValuationSummary[]> => {
+
+  return customFetch<ValuationSummary[]>(getListValuationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListValuationsQueryKey = () => {
+    return [
+    `/api/valuations`
+    ] as const;
+    }
+
+
+export const getListValuationsQueryOptions = <TData = Awaited<ReturnType<typeof listValuations>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listValuations>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListValuationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listValuations>>> = ({ signal }) => listValuations({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listValuations>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListValuationsQueryResult = NonNullable<Awaited<ReturnType<typeof listValuations>>>
+export type ListValuationsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary My market-value calculations
+ */
+
+export function useListValuations<TData = Awaited<ReturnType<typeof listValuations>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listValuations>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListValuationsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateValuationUrl = () => {
+
+
+
+
+  return `/api/valuations`
+}
+
+/**
+ * @summary Compare a listing with real comparable listings (asking prices)
+ */
+export const createValuation = async (valuationInput: ValuationInput, options?: Parameters<typeof customFetch>[1]): Promise<Valuation> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Valuation>(getCreateValuationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(valuationInput)
+  }
+);}
+
+
+
+
+
+export const getCreateValuationMutationKey = () => ['createValuation'] as const;
+
+export const getCreateValuationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createValuation>>, TError,CreateValuationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createValuation>>, TError,CreateValuationMutationVariables, TContext> => {
+
+const mutationKey = getCreateValuationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createValuation>>, CreateValuationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createValuation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateValuationMutationResult = NonNullable<Awaited<ReturnType<typeof createValuation>>>
+    export type CreateValuationMutationBody = BodyType<ValuationInput>
+    export type CreateValuationMutationError = ErrorType<unknown>
+    export type CreateValuationMutationVariables = {data: BodyType<ValuationInput>}
+
+    /**
+ * @summary Compare a listing with real comparable listings (asking prices)
+ */
+export const useCreateValuation = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createValuation>>, TError,CreateValuationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createValuation>>,
+        TError,
+        CreateValuationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateValuationMutationOptions(options));
+    }
+
+export const getGetValuationUrl = (valuationId: string,) => {
+
+
+
+
+  return `/api/valuations/${valuationId}`
+}
+
+/**
+ * @summary One saved calculation with its sources
+ */
+export const getValuation = async (valuationId: string, options?: Parameters<typeof customFetch>[1]): Promise<Valuation> => {
+
+  return customFetch<Valuation>(getGetValuationUrl(valuationId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetValuationQueryKey = (valuationId: string,) => {
+    return [
+    `/api/valuations/${valuationId}`
+    ] as const;
+    }
+
+
+export const getGetValuationQueryOptions = <TData = Awaited<ReturnType<typeof getValuation>>, TError = ErrorType<unknown>>(valuationId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getValuation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetValuationQueryKey(valuationId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getValuation>>> = ({ signal }) => getValuation(valuationId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: valuationId !== null && valuationId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getValuation>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetValuationQueryResult = NonNullable<Awaited<ReturnType<typeof getValuation>>>
+export type GetValuationQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary One saved calculation with its sources
+ */
+
+export function useGetValuation<TData = Awaited<ReturnType<typeof getValuation>>, TError = ErrorType<unknown>>(
+ valuationId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getValuation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetValuationQueryOptions(valuationId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListConstructionEstimatesUrl = () => {
+
+
+
+
+  return `/api/construction-estimates`
+}
+
+/**
+ * @summary My construction estimates
+ */
+export const listConstructionEstimates = async ( options?: Parameters<typeof customFetch>[1]): Promise<ConstructionEstimateSummary[]> => {
+
+  return customFetch<ConstructionEstimateSummary[]>(getListConstructionEstimatesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListConstructionEstimatesQueryKey = () => {
+    return [
+    `/api/construction-estimates`
+    ] as const;
+    }
+
+
+export const getListConstructionEstimatesQueryOptions = <TData = Awaited<ReturnType<typeof listConstructionEstimates>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listConstructionEstimates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListConstructionEstimatesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listConstructionEstimates>>> = ({ signal }) => listConstructionEstimates({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listConstructionEstimates>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListConstructionEstimatesQueryResult = NonNullable<Awaited<ReturnType<typeof listConstructionEstimates>>>
+export type ListConstructionEstimatesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary My construction estimates
+ */
+
+export function useListConstructionEstimates<TData = Awaited<ReturnType<typeof listConstructionEstimates>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listConstructionEstimates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListConstructionEstimatesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateConstructionEstimateUrl = () => {
+
+
+
+
+  return `/api/construction-estimates`
+}
+
+/**
+ * @summary Save a new construction estimate
+ */
+export const createConstructionEstimate = async (constructionEstimateInput: ConstructionEstimateInput, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionEstimate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ConstructionEstimate>(getCreateConstructionEstimateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(constructionEstimateInput)
+  }
+);}
+
+
+
+
+
+export const getCreateConstructionEstimateMutationKey = () => ['createConstructionEstimate'] as const;
+
+export const getCreateConstructionEstimateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConstructionEstimate>>, TError,CreateConstructionEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createConstructionEstimate>>, TError,CreateConstructionEstimateMutationVariables, TContext> => {
+
+const mutationKey = getCreateConstructionEstimateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createConstructionEstimate>>, CreateConstructionEstimateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createConstructionEstimate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateConstructionEstimateMutationResult = NonNullable<Awaited<ReturnType<typeof createConstructionEstimate>>>
+    export type CreateConstructionEstimateMutationBody = BodyType<ConstructionEstimateInput>
+    export type CreateConstructionEstimateMutationError = ErrorType<unknown>
+    export type CreateConstructionEstimateMutationVariables = {data: BodyType<ConstructionEstimateInput>}
+
+    /**
+ * @summary Save a new construction estimate
+ */
+export const useCreateConstructionEstimate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConstructionEstimate>>, TError,CreateConstructionEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createConstructionEstimate>>,
+        TError,
+        CreateConstructionEstimateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateConstructionEstimateMutationOptions(options));
+    }
+
+export const getGetConstructionEstimateUrl = (estimateId: string,) => {
+
+
+
+
+  return `/api/construction-estimates/${estimateId}`
+}
+
+/**
+ * @summary One construction estimate (owner only)
+ */
+export const getConstructionEstimate = async (estimateId: string, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionEstimate> => {
+
+  return customFetch<ConstructionEstimate>(getGetConstructionEstimateUrl(estimateId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetConstructionEstimateQueryKey = (estimateId: string,) => {
+    return [
+    `/api/construction-estimates/${estimateId}`
+    ] as const;
+    }
+
+
+export const getGetConstructionEstimateQueryOptions = <TData = Awaited<ReturnType<typeof getConstructionEstimate>>, TError = ErrorType<unknown>>(estimateId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionEstimate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetConstructionEstimateQueryKey(estimateId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConstructionEstimate>>> = ({ signal }) => getConstructionEstimate(estimateId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: estimateId !== null && estimateId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConstructionEstimate>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetConstructionEstimateQueryResult = NonNullable<Awaited<ReturnType<typeof getConstructionEstimate>>>
+export type GetConstructionEstimateQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary One construction estimate (owner only)
+ */
+
+export function useGetConstructionEstimate<TData = Awaited<ReturnType<typeof getConstructionEstimate>>, TError = ErrorType<unknown>>(
+ estimateId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConstructionEstimate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetConstructionEstimateQueryOptions(estimateId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateConstructionEstimateUrl = (estimateId: string,) => {
+
+
+
+
+  return `/api/construction-estimates/${estimateId}`
+}
+
+/**
+ * @summary Save changes
+ */
+export const updateConstructionEstimate = async (estimateId: string,
+    constructionEstimateInput: ConstructionEstimateInput, options?: Parameters<typeof customFetch>[1]): Promise<ConstructionEstimate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ConstructionEstimate>(getUpdateConstructionEstimateUrl(estimateId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(constructionEstimateInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateConstructionEstimateMutationKey = () => ['updateConstructionEstimate'] as const;
+
+export const getUpdateConstructionEstimateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateConstructionEstimate>>, TError,UpdateConstructionEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateConstructionEstimate>>, TError,UpdateConstructionEstimateMutationVariables, TContext> => {
+
+const mutationKey = getUpdateConstructionEstimateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateConstructionEstimate>>, UpdateConstructionEstimateMutationVariables> = (props) => {
+          const {estimateId,data} = props ?? {};
+
+          return  updateConstructionEstimate(estimateId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateConstructionEstimateMutationResult = NonNullable<Awaited<ReturnType<typeof updateConstructionEstimate>>>
+    export type UpdateConstructionEstimateMutationBody = BodyType<ConstructionEstimateInput>
+    export type UpdateConstructionEstimateMutationError = ErrorType<unknown>
+    export type UpdateConstructionEstimateMutationVariables = {estimateId: string;data: BodyType<ConstructionEstimateInput>}
+
+    /**
+ * @summary Save changes
+ */
+export const useUpdateConstructionEstimate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateConstructionEstimate>>, TError,UpdateConstructionEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateConstructionEstimate>>,
+        TError,
+        UpdateConstructionEstimateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateConstructionEstimateMutationOptions(options));
+    }
+
+export const getDeleteConstructionEstimateUrl = (estimateId: string,) => {
+
+
+
+
+  return `/api/construction-estimates/${estimateId}`
+}
+
+/**
+ * @summary Delete (owner only)
+ */
+export const deleteConstructionEstimate = async (estimateId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getDeleteConstructionEstimateUrl(estimateId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteConstructionEstimateMutationKey = () => ['deleteConstructionEstimate'] as const;
+
+export const getDeleteConstructionEstimateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteConstructionEstimate>>, TError,DeleteConstructionEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteConstructionEstimate>>, TError,DeleteConstructionEstimateMutationVariables, TContext> => {
+
+const mutationKey = getDeleteConstructionEstimateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteConstructionEstimate>>, DeleteConstructionEstimateMutationVariables> = (props) => {
+          const {estimateId} = props ?? {};
+
+          return  deleteConstructionEstimate(estimateId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteConstructionEstimateMutationResult = NonNullable<Awaited<ReturnType<typeof deleteConstructionEstimate>>>
+
+    export type DeleteConstructionEstimateMutationError = ErrorType<unknown>
+    export type DeleteConstructionEstimateMutationVariables = {estimateId: string}
+
+    /**
+ * @summary Delete (owner only)
+ */
+export const useDeleteConstructionEstimate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteConstructionEstimate>>, TError,DeleteConstructionEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteConstructionEstimate>>,
+        TError,
+        DeleteConstructionEstimateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteConstructionEstimateMutationOptions(options));
     }
 
 export const getGetMyRolesUrl = () => {

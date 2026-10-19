@@ -102,11 +102,11 @@ export function EstimateDetailPage({ projectId }: { projectId: string }) {
       <Button variant="secondary" onClick={() => runExport(p, 'xlsx')} testId="button-export-excel"><FileSpreadsheet size={16} />Excel ixrac et</Button>
       <Button variant="secondary" onClick={() => runExport(p, 'pdf')} testId="button-export-pdf"><FileText size={16} />PDF ixrac et</Button>
       <span className="sm-spacer" />
-      <Button variant="quiet" onClick={() => setAssistantOpen(true)} testId="button-assistant"><Sparkles size={16} />AI köməkçi</Button>
+      <Button variant="quiet" onClick={() => setAssistantOpen(true)} testId="button-assistant"><Sparkles size={16} />Köməkçi</Button>
       <DropMenu trigger={<button type="button" className="icon-button" aria-label="Digər əməliyyatlar" data-testid="button-more"><MoreHorizontal size={18} /></button>}>
         {p.share && <DropItem icon={<ExternalLink size={14} />} onSelect={() => window.open(publicEstimateUrl(p.share!.token), '_blank', 'noopener')}>Sifarişçi görünüşünə bax</DropItem>}
         {p.share && <DropItem icon={<Copy size={14} />} onSelect={() => { void copyText(publicEstimateUrl(p.share!.token)); }}>Paylaşım linkini kopyala</DropItem>}
-        {aiLines > 0 && <DropItem icon={<Check size={14} />} onSelect={() => { setTab('estimate'); }}>AI sətirlərini yoxla ({aiLines})</DropItem>}
+        {aiLines > 0 && <DropItem icon={<Check size={14} />} onSelect={() => { setTab('estimate'); }}>Avtomatik sətirləri yoxla ({aiLines})</DropItem>}
         {pendingMeasures > 0 && <DropItem icon={<Ruler size={14} />} onSelect={() => setTab('drawing')}>Ölçüləri yoxla ({pendingMeasures})</DropItem>}
         <DropSep />
         <DropItem icon={<MessageSquareText size={14} />} onSelect={() => setTab('documents')}>Sifarişçi qərarları və sənədlər</DropItem>

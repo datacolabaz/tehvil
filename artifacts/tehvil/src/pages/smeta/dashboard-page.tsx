@@ -29,7 +29,7 @@ export function SmetaDashboardPage() {
     };
   }, [projects]);
 
-  const heading = <PageHeading eyebrow="Smeta və büdcə" title="AI Smeta" description="Çertyoj, ölçü və bazar qiymətləri əsasında təmir büdcənizi idarə edin." action={<div className="heading-buttons">
+  const heading = <PageHeading eyebrow="Smeta və büdcə" title="AI Smeta" description="Podratçılar üçün təmir smetası: ölçülər, qiymət cədvəli, xərclər və sifarişçi təsdiqi." action={<div className="heading-buttons">
     <Link href="/smeta/new?source=drawing" className="button button-secondary" data-testid="button-upload-drawing"><Upload size={16} />Çertyoj yüklə</Link>
     <Link href="/smeta/new" className="button button-primary" data-testid="button-new-estimate"><Plus size={16} />Yeni smeta yarat</Link>
   </div>} />;
@@ -50,13 +50,13 @@ export function SmetaDashboardPage() {
       <section aria-labelledby="recent-projects">
         <div className="section-head" style={{ marginBottom: 14 }}><div><div className="eyebrow">Son yenilənənlər</div><h2 id="recent-projects">Layihələr</h2></div><span className="count-chip">{String(projects.length).padStart(2, '0')}</span></div>
         {sorted.length ? <div className="sm-project-grid">{sorted.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)}</div>
-          : <div className="sm-empty"><div className="empty-illustration"><Calculator size={30} /></div><h3>Hələ smeta yoxdur</h3><p>Çertyoj yükləyin və ya ölçüləri daxil edin — AI ilkin smeta təklif edəcək, siz isə yoxlayıb təsdiqləyəcəksiniz.</p><Link href="/smeta/new" className="button button-primary"><Plus size={16} />Yeni smeta yarat</Link></div>}
+          : <div className="sm-empty"><div className="empty-illustration"><Calculator size={30} /></div><h3>Hələ smeta yoxdur</h3><p>Çertyoj yükləyin və ya ölçüləri daxil edin — sistem ilkin smeta təklif edəcək, siz isə yoxlayıb təsdiqləyəcəksiniz.</p><Link href="/smeta/new" className="button button-primary"><Plus size={16} />Yeni smeta yarat</Link></div>}
       </section>
 
       <aside className="sm-aside">
         <div className="sm-ai-card">
           <span className="sm-ai-mark"><Sparkles size={17} aria-hidden /></span>
-          <div className="eyebrow">AI tövsiyəsi</div>
+          <div className="eyebrow">Qaydalara əsaslanan tövsiyə</div>
           <h3>{portfolioInsight(projects)}</h3>
           <p>Faktiki xərclər qəbzlər əsasında smeta sətirləri ilə müqayisə olunur.</p>
           <div className="sm-ai-foot"><Info size={13} aria-hidden />İlkin avtomatik qiymətləndirmədir. Qərar verməzdən əvvəl rəqəmləri yoxlayın.</div>
@@ -91,8 +91,8 @@ function PendingActions({ projects }: { projects: Project[] }) {
     if (pending.length) items.push({ href: `/smeta/${p.id}?tab=changes`, icon: FilePlus2, title: `${pending.length} dəyişiklik təsdiq gözləyir`, detail: p.name });
     const ai = p.estimate.sections.flatMap(s => s.items).filter(i => i.status === 'ai').length;
     const review = p.measurements.filter(m => m.status === 'suggested').length;
-    if (review) items.push({ href: `/smeta/${p.id}?tab=drawing`, icon: Ruler, title: `${review} AI ölçüsü yoxlanmalıdır`, detail: p.name });
-    else if (ai) items.push({ href: `/smeta/${p.id}?tab=estimate`, icon: Sparkles, title: `${ai} AI sətri yoxlanmalıdır`, detail: p.name });
+    if (review) items.push({ href: `/smeta/${p.id}?tab=drawing`, icon: Ruler, title: `${review} ölçü yoxlanmalıdır`, detail: p.name });
+    else if (ai) items.push({ href: `/smeta/${p.id}?tab=estimate`, icon: Sparkles, title: `${ai} avtomatik sətir yoxlanmalıdır`, detail: p.name });
     if (p.status === 'revision_requested') items.push({ href: `/smeta/${p.id}?tab=documents`, icon: MessageSquareText, title: 'Sifarişçi düzəliş istəyib', detail: p.name });
     if (p.status === 'draft') items.push({ href: `/smeta/${p.id}`, icon: Clock3, title: 'Smeta sifarişçiyə göndərilməyib', detail: p.name });
   }

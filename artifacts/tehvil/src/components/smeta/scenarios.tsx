@@ -1,5 +1,6 @@
 import { Info } from 'lucide-react';
 import { priceScenarios } from '@/lib/smeta/ai';
+import { QUALITY_FACTOR, QUALITY_LABEL } from '@/lib/smeta/catalog';
 import { azn } from '@/lib/smeta/format';
 import type { Project } from '@/lib/smeta/types';
 import { Pill } from './ui';
@@ -17,6 +18,6 @@ export function Scenarios({ project: p }: { project: Project }) {
       </dl>
       <strong className="num"><small>Təxmini cəmi</small>{s.quality === p.quality ? '' : '≈ '}{azn(s.total)}</strong>
     </article>)}</div>
-    <p className="sm-pva-note" style={{ marginBottom: 0 }}><Info size={14} aria-hidden /><span>Digər variantlar cari iş həcmi əsasında material və işçilik əmsalları ilə təxmini hesablanıb. Konkret material seçimi qiymətləri dəyişə bilər.</span></p>
+    <p className="sm-pva-note" style={{ marginBottom: 0 }}><Info size={14} aria-hidden /><span>Digər variantlar real qiymət məlumatından deyil, sabit əmsallarla hesablanıb ({(['ekonom', 'standart', 'premium'] as const).map(q => `${QUALITY_LABEL[q]}: material ×${String(QUALITY_FACTOR[q].material).replace('.', ',')}, işçilik ×${String(QUALITY_FACTOR[q].labor).replace('.', ',')}`).join('; ')}). Real fərqi konkret material qiymətləri göstərəcək.</span></p>
   </>;
 }

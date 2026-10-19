@@ -13,7 +13,7 @@ const CONTRACTOR = { name: 'Rəşad Hüseynov', company: 'RH Təmir Studiyası',
 /** Signed-in contractor profile used for new estimates. TODO(api): load from the company profile. */
 export const DEFAULT_CONTRACTOR = CONTRACTOR;
 
-const market = (updatedAt = '2026-10-04', reference = 'Bakı tikinti bazarları, orta qiymət'): PriceSource => ({ kind: 'market', reference, updatedAt });
+const market = (updatedAt = '2026-10-04', reference = 'Nümunə qiymət (demo layihə)'): PriceSource => ({ kind: 'market', reference, updatedAt });
 const contractor = (updatedAt = '2026-09-08'): PriceSource => ({ kind: 'contractor', reference: 'Podratçının qiymət cədvəli', updatedAt });
 const manual = (updatedAt = '2026-09-10'): PriceSource => ({ kind: 'manual', updatedAt });
 

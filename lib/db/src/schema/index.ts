@@ -21,3 +21,4 @@ export * from "./renovation";
 export * from "./smeta";
 export * from "./realtor";
 export * from "./home";
+export * from "./valuation";

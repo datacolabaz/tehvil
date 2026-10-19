@@ -1,8 +1,8 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { Link } from 'wouter';
 import {
-  ArrowRight, ArrowUpRight, Bell, BookOpenCheck, Building2, Calculator, Camera, Check, ChevronDown, ClipboardList, FileText, HardHat,
-  History, House, KeyRound, Layers, Lock, Menu, QrCode, Search, ShieldCheck, Sparkles, Wrench, X,
+  ArrowRight, Bell, Building2, Calculator, Camera, ChevronDown, FileText, HardHat,
+  History, House, Layers, Lock, Menu, Search, ShieldCheck, Sparkles, Wrench, X,
 } from 'lucide-react';
 import { Brand } from '@/components/kit';
 import { LanguagePicker } from '@/components/language-picker';
@@ -15,40 +15,26 @@ import './landing.css';
  * Every service card says honestly whether it works today or is still being prepared;
  * nothing here promises a certificate, a guarantee or a price effect.
  */
-type Service = { icon: ReactNode; title: string; text: string; points: string[]; cta: string; href: string; status: 'live' | 'soon'; note?: string };
-
-const SERVICES: Service[] = [
-  { icon: <BookOpenCheck size={22} />, title: 'Evin rəqəmsal pasportu', text: 'Ünvan, otaqlar, tikinti və təmir tarixləri, avadanlıqlar və sənədlər — addım-addım doldurulur.', points: ['Yalnız adla başlayın', 'Məlum olmayan hissə “Məlumat yoxdur” qalır', 'Tamlıq göstəricisi'], cta: 'Pasport yarat', href: '/sign-up', status: 'live' },
-  { icon: <Layers size={22} />, title: 'Gizli kommunikasiyalar', text: 'Divar, döşəmə və tavanın arxasındakı elektrik, su, kanalizasiya, qaz, istilik və internet xətləri — foto üzərində işarə ilə.', points: ['Otaq üzrə qeyd', 'Foto üzərində xətt çəkmək', 'Kim və nə vaxt qeyd edib'], cta: 'Xətləri qeyd et', href: '/sign-up', status: 'live' },
-  { icon: <History size={22} />, title: 'Təmir tarixçəsi', text: 'Nə edildi, nə vaxt, kim etdi — əvvəl/sonra fotoları, materiallar, xərc, qüsur və onun düzəldilməsi.', points: ['Keçmiş işlər də yazılır', 'Usta qeydiyyatsız qeyd olunur', 'Dəyişikliklər jurnalı'], cta: 'Tarixçə yarat', href: '/sign-up', status: 'live' },
-  { icon: <Calculator size={22} />, title: 'Büdcə və xərclər', text: 'AI Smeta ilə ilkin smeta, xərc jurnalı və qəbzlər; görülən işlərin faktiki dəyəri evdə ayrıca toplanır.', points: ['Smeta və faktiki xərc ayrı', 'Valyuta üzrə cəm', 'CSV ixrac'], cta: 'Smeta hazırla', href: '/sign-up', status: 'live', note: 'AI Smeta qaydalara əsaslanan hesablamadır, təxminidir.' },
-  { icon: <Wrench size={22} />, title: 'Texniki xidmət', text: 'Kombi, kondisioner, su filtri, nasos: marka, quraşdırma, zəmanət, son və növbəti xidmət, servis şirkəti.', points: ['Xidmət tarixçəsi', 'Zəmanət bitmə tarixi', 'Saytda xatırlatma'], cta: 'Avadanlıq əlavə et', href: '/sign-up', status: 'live', note: 'Xatırlatmalar hazırda yalnız saytda görünür — SMS və e-poçt göndərilmir.' },
-  { icon: <KeyRound size={22} />, title: 'Evin satışa hazırlanması', text: 'Alıcıya yalnız seçdiyiniz məlumatları məhdud müddətli link və ya QR kodla göstərin; istədiyiniz vaxt bağlayın.', points: ['Ünvan susmaya görə gizli', 'Sənədləri bir-bir seçmək', 'Çap / PDF kimi saxlamaq'], cta: 'Pasportlu ev hazırla', href: '/sign-up', status: 'live' },
-  { icon: <Search size={22} />, title: 'Müstəqil texniki yoxlama', text: 'Görünən qüsurlar, rütubət, santexnika və elektrik üzrə mütəxəssis yoxlaması. Mövcud hesabatı isə indi pasporta əlavə edə bilərsiniz.', points: ['Hesabatı “Sənədlər”ə yükləyin', 'Yoxlayıcını evə dəvət etmək olar'], cta: 'Marağınızı bildirin', href: '/interest/inspection', status: 'soon', note: 'Sifariş xidməti hələ yoxdur — mütəxəssis şəbəkəsi qurulanda açılacaq.' },
-];
-
-const AUDIENCES = [
-  { key: 'sell', label: 'Evini satanlar', title: 'Alıcı eviniz haqqında sual verəndə cavabınız hazır olsun.', text: 'Təmir tarixləri, materiallar, gizli xətlərin fotoları və zəmanətlər — alıcıya yalnız seçdiyiniz hissə.', cta: 'Evim üçün pasport yarat', href: '/sign-up' },
-  { key: 'renovate', label: 'Təmirə başlayanlar', title: 'Divarlar bağlanmamışdan əvvəl elektrik və su xətlərinin yerini qeyd edin.', text: 'Suvaqdan əvvəl çəkilən bir neçə foto illər sonra divarı deşmək lazım olanda işə yarayır.', cta: 'Təmir tarixçəsi yarat', href: '/sign-up' },
-  { key: 'owner', label: 'Ev sahibləri', title: 'Evinizin sənədlərini, avadanlıqlarını və texniki xidmət tarixçəsini bir yerdə saxlayın.', text: 'Kombinin zəmanət kartı, sayğacın yeri, son servis tarixi — lazım olanda telefonunuzda.', cta: 'Evimə başla', href: '/sign-up' },
-  { key: 'buyer', label: 'Yeni ev alanlar', title: 'Eviniz haqqında bildiklərinizi bir yerə toplayın. Bilmədiklərinizi isə tədricən tamamlayın.', text: 'Satıcıdan və ya tikinti şirkətindən aldığınız sənədləri yükləyin; məlum olmayan bölmələr açıq-aydın “Məlumat yoxdur” kimi qalır.', cta: 'Rəqəmsal pasport yarat', href: '/sign-up' },
-  { key: 'pro', label: 'Podratçılar və tikinti şirkətləri', title: 'Müştərinizə yalnız təmir edilmiş ev deyil, onun texniki tarixçəsini də təhvil verin.', text: 'Ev sahibi sizi konkret işə dəvət edir: foto arxivi, gizli xətlər, materiallar və avadanlıq zəmanətlərini öz adınızdan əlavə edirsiniz. Hər qeyddə “Podratçı daxil edib” görünür.', cta: 'Peşəkar hesab yarat', href: '/sign-up' },
-];
+const PASSPORT_POINTS = [
+  [<Layers size={17} key="l" />, 'Elektrik, su, kanalizasiya, qaz, istilik və internet xətləri — foto üzərində, otaq üzrə'],
+  [<History size={17} key="h" />, 'Əvvəlki və yeni təmir işləri, dəyişdirilən borular və avadanlıq, kim nə vaxt dəyişib'],
+  [<Wrench size={17} key="w" />, 'Avadanlıq, zəmanət, son və növbəti texniki xidmət; mövcud qüsurlar və nəyə baxış lazımdır'],
+  [<FileText size={17} key="f" />, 'Foto, video, qəbz və sənədlər; alıcıya yalnız seçdiyiniz hissəni məhdud linklə paylaşmaq'],
+] as const;
 
 const FAQ = [
-  { q: 'Məlumatlarım təhlükəsizdirmi? Kim görə bilər?', a: 'Ev məlumatları susmaya görə məxfidir: yalnız siz və dəvət etdiyiniz şəxslər görür. İcazələr serverdə yoxlanılır. Sənədlər, ünvan, xərclər və telefonlar QR kodla heç vaxt açılmır; paylaşım linkində isə yalnız sizin seçdiyiniz hissə görünür.' },
-  { q: 'Pasportu necə yaradım? Hamısını birdən doldurmalıyam?', a: 'Xeyr. Qeydiyyatdan keçin, evin adını yazın — kifayətdir. Sonra əlinizdə olan foto və sənədləri, işləri və texniki məlumatları istədiyiniz vaxt əlavə edin. Tamlıq göstəricisi hansı bölmələrin boş qaldığını göstərir.' },
-  { q: 'Pasport evin keyfiyyətini təsdiqləyirmi?', a: 'Xeyr. Pasport rəsmi sertifikat deyil və evin qüsursuz olduğuna, qiymətinə və ya satışın baş tutacağına zəmanət vermir. Dəyəri şəffaflıqdadır: hər məlumatın yanında kim daxil edib, sənəd əlavə olunubmu, yoxlanılıbmı — göstərilir. Tamlıq faizi də yalnız məlumatın nə qədər doldurulduğunu göstərir, evin vəziyyətini qiymətləndirmir.' },
-  { q: 'Alıcı ilə paylaşım necə işləyir?', a: 'Paylaşım və giriş bölməsində link yaradırsınız: hansı işlər, fotolar, xətlər, avadanlıqlar və hansı sənədlər görünsün — özünüz seçirsiniz. Ünvan yalnız işarələsəniz görünür. Linkin müddəti var, istənilən vaxt bağlanır; neçə dəfə açıldığını görürsünüz. Səhifəni çap edə və ya PDF kimi saxlaya bilərsiniz.' },
-  { q: 'Texniki yoxlama sifariş edə bilərəmmi?', a: 'Hələ yox. Mütəxəssis şəbəkəsi qurulana qədər yalnız marağınızı bildirə bilərsiniz. Artıq əlinizdə olan yoxlama hesabatını isə “Sənədlər” bölməsinə yükləyə bilərsiniz.' },
-  { q: 'Qiyməti nədir?', a: 'Hazırda ev pasportu üçün ödəniş tələb olunmur və saytda ödəniş mexanizmi yoxdur. Gələcəkdə peşəkarlar üçün ödənişli imkanlar olarsa, bu əvvəlcədən aydın göstəriləcək.' },
+  { q: 'Məlumatlarım təhlükəsizdirmi? Kim görə bilər?', a: 'Ev məlumatları susmaya görə məxfidir: yalnız siz və dəvət etdiyiniz şəxslər görür. İcazələr serverdə yoxlanılır. Sənədlər, ünvan, xərclər və telefonlar QR kodla heç vaxt açılmır; paylaşım linkində yalnız sizin seçdiyiniz hissə görünür və link istənilən vaxt bağlanır.' },
+  { q: 'Pasport evin vəziyyətini və ya keyfiyyətini təsdiqləyirmi?', a: 'Xeyr. Pasport rəsmi sertifikat deyil. Hər qeydin yanında onu kimin daxil etdiyi (ev sahibi, usta, podratçı, dəvət olunmuş yoxlayıcı) və sənəd əlavə olunub-olunmadığı göstərilir. Yoxlanılmamış məlumat təsdiqlənmiş texniki fakt kimi təqdim olunmur.' },
+  { q: 'Bazar dəyəri necə hesablanır?', a: 'Daxil etdiyiniz elan oxşar real elanlarla müqayisə olunur: ərazi, tikili növü, otaq, sahə, təmir və elanın tarixi nəzərə alınır. Nəticədə aralıq, mərkəzi təxmin, AZN/m², istifadə olunan elanların linkləri və etibarlılıq göstərilir. Elan qiymətləri satış qiyməti deyil; 3-dən az oxşar elan varsa, rəqəm verilmir.' },
+  { q: 'Linkdən elanı oxumaq alınmasa nə edim?', a: 'Bəzi saytlar avtomatik oxunmaya icazə vermir və ya səhifə açılmır. Bu halda elanın mətnini yapışdırın və ya məlumatları əl ilə daxil edin — hesablama eyni qaydada aparılır.' },
+  { q: 'Tikinti smetası üçün hansı fayllar qəbul olunur?', a: 'PDF (mətnində yazılan sahə, miqyas, mərtəbə oxunur), JPG/PNG (önizləmə, ölçüləri siz daxil edirsiniz), XLSX və CSV (iş həcmləri və qiymətlər). DWG, DXF, IFC və RVT hələ oxunmur — memardan PDF ixracı və ya ölçü cədvəli istəyin.' },
+  { q: 'Tikinti qiymətləri haradan götürülür?', a: 'Təhvil-də tikinti qiymətləri bazası yoxdur və sistem qiymət uydurmur. Vahid qiymətləri podratçı təklifindən, təchizatçıdan və ya yüklədiyiniz cədvəldən daxil edirsiniz; hər sətirdə mənbə və tarix qalır. Qiyməti olmayan sətir “qiymət yoxdur” kimi göstərilir.' },
+  { q: 'Qiyməti nədir?', a: 'Hazırda ödəniş tələb olunmur və saytda ödəniş mexanizmi yoxdur. Gələcəkdə ödənişli imkanlar olarsa, əvvəlcədən aydın göstəriləcək.' },
 ];
 
 export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: Lang) => void }) {
   const [menu, setMenu] = useState(false);
-  const [aud, setAud] = useState('sell');
-  const current = AUDIENCES.find(a => a.key === aud)!;
-  const nav = [['#services', 'Xidmətlər'], ['#how', 'Necə işləyir'], ['#sell', 'Evini sat'], ['#pros', 'Podratçılar']];
+  const nav = [['#passport', 'Evin texniki pasportu'], ['#smeta', 'AI Smeta'], ['#how', 'Necə işləyir'], ['#faq', 'Suallar']];
   return <div className="lp">
     <header className="lp-nav wrap">
       <Brand />
@@ -57,99 +43,79 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
         <button type="button" className="lp-burger" aria-label="Menyu" aria-expanded={menu} onClick={() => setMenu(!menu)}>{menu ? <X size={20} /> : <Menu size={20} />}</button></div>
     </header>
 
-    <section className="lp-hero wrap">
-      <div className="lp-hero-copy">
-        <div className="eyebrow"><span className="eyebrow-dot" />Evin rəqəmsal pasportu</div>
-        <h1 className="font-display">Evinizin bütün tarixçəsi bir yerdə.</h1>
-        <p>Evinizin texniki pasportunu yaradın. Təmir fotolarını, elektrik və su xətlərinin yerləşməsini, materialları, xərcləri, zəmanətləri və texniki xidmət tarixçəsini bir yerdə qoruyun.</p>
-        <div className="lp-cta"><Link href="/sign-up" className="button button-primary lp-big" data-testid="landing-hero-cta">Evim üçün rəqəmsal pasport yarat<ArrowRight size={17} /></Link><a href="#services" className="button button-secondary lp-big">Bütün xidmətləri kəşf et</a></div>
-        <p className="lp-honest"><ShieldCheck size={16} />Rəsmi sertifikat və ya keyfiyyət zəmanəti deyil — hər məlumatın mənbəyi və yoxlanma statusu göstərilir.</p>
-      </div>
-      <HeroArt />
-    </section>
-
-    <section className="lp-section wrap" id="services">
-      <div className="lp-head"><div className="eyebrow">Xidmətlər</div><h2 className="font-display">Ev haqqında hər şey — bir pasportda.</h2><p>Hər kartda xidmətin bu gün işlədiyi və ya hələ hazırlandığı açıq yazılıb.</p></div>
-      <div className="lp-services">{SERVICES.map(s => <article key={s.title} className={`lp-card ${s.status}`} data-testid="landing-service">
-        <div className="lp-card-top"><span className="lp-icon">{s.icon}</span><span className={`lp-status ${s.status}`}>{s.status === 'live' ? <><Check size={12} />İşləyir</> : 'Hazırlanır'}</span></div>
-        <h3>{s.title}</h3><p>{s.text}</p>
-        <ul>{s.points.map(p => <li key={p}><Check size={13} />{p}</li>)}</ul>
-        {s.note && <small className="lp-note">{s.note}</small>}
-        <Link href={s.href} className="lp-card-cta">{s.cta}<ArrowUpRight size={15} /></Link>
-      </article>)}</div>
-    </section>
-
-    <section className="lp-why"><div className="wrap lp-why-inner">
-      <div className="lp-head light"><div className="eyebrow">Niyə lazımdır?</div><h2 className="font-display">Evin yaddaşı adamların yaddaşından uzun yaşamalıdır.</h2></div>
-      <div className="lp-why-grid">
-        {[[<Camera size={20} key="c" />, 'Divar bağlanandan sonra görünmür', 'Naqil və borunun yeri yalnız suvaqdan əvvəl çəkilmiş fotoda qalır. Rəf asanda, təmirdə, sızma axtaranda lazım olur.'],
-          [<HardHat size={20} key="h" />, 'Usta dəyişir, məlumat itməsin', 'Kim nə vaxt hansı işi görüb, hansı material istifadə olunub — telefon nömrəsi və qəbz itəndə belə.'],
-          [<Bell size={20} key="b" />, 'Zəmanət və servis tarixini unutmayın', 'Kombinin zəmanəti nə vaxt bitir, son servis nə vaxt olub — saytda xatırlatma görürsünüz.'],
-          [<ClipboardList size={20} key="l" />, 'Satışda şəffaflıq', 'Alıcının suallarına sənədlərlə cavab verin. Nəyi göstərəcəyinizə özünüz qərar verirsiniz.']].map(([i, t, d]) =>
-          <div key={String(t)} className="lp-why-item"><span>{i}</span><h3>{t}</h3><p>{d}</p></div>)}
-      </div>
-    </div></section>
-
-    <section className="lp-section wrap lp-sell" id="sell">
-      <div className="lp-sell-copy">
-        <div className="eyebrow">Pasportlu ev</div>
-        <h2 className="font-display">Evinizi satarkən yalnız kvadratmetrləri deyil, onun tarixçəsini də göstərin.</h2>
-        <p>Evinizin tarixçəsini göstərin. Alıcının suallarına sənədlərlə cavab verin.</p>
-        <ul className="lp-checks">{['Təmirin nə vaxt aparıldığı', 'Hansı materialların istifadə olunduğu', 'Gizli kommunikasiyaların fotoları', 'Texniki xidmət tarixçəsi', 'Avadanlıqların zəmanət məlumatları', 'Mövcud yoxlama hesabatları və qəbzlər — yalnız seçdikləriniz'].map(x => <li key={x}><Check size={15} />{x}</li>)}</ul>
-        <Link href="/sign-up" className="button button-primary lp-big">Evim üçün pasport yarat<ArrowRight size={16} /></Link>
-        <p className="lp-disclaimer">Pasport evin qüsursuz olduğuna, bazar qiymətinin yüksək olacağına və ya satışın mütləq baş tutacağına zəmanət vermir. Məhsulun dəyəri məlumatların şəffaflığındadır.</p>
-      </div>
-      <div className="lp-share-mock" aria-label="Paylaşım nümunəsi">
-        <div className="lp-mock-tag">Nümunə görünüş</div>
-        <div className="lp-mock-row"><QrCode size={18} /><b>Alıcı üçün link</b><span className="lp-pill ok">30 gün</span></div>
-        {[['Ümumi məlumat', true], ['Təmir işləri (seçilmiş 6)', true], ['Gizli xətlərin fotoları', true], ['Avadanlıq və zəmanət', true], ['Texniki pasport (PDF)', true], ['Dəqiq ünvan', false], ['Xərclər və telefonlar', false]].map(([l, on]) =>
-          <div key={String(l)} className={`lp-mock-check ${on ? 'on' : ''}`}>{on ? <Check size={14} /> : <Lock size={13} />}{l}</div>)}
-        <small>3 dəfə baxılıb · istənilən vaxt “Linki bağla”</small>
-      </div>
+    <section className="lp-two wrap" aria-label="Əsas xidmətlər">
+      <article className="lp-svc" id="passport" data-testid="landing-service">
+        <div className="eyebrow"><span className="eyebrow-dot" />Xidmət 1 · Evin texniki pasportu</div>
+        <h1 className="font-display">Evinizdə nə haradadır? Hər şey öz yerində, bir yerdə.</h1>
+        <p>Evinizin texniki sistemlərini, dəyişikliklərini, təmir tarixçəsini və mövcud problemlərini rəqəmsal pasportda saxlayın.</p>
+        <ul className="lp-points">{PASSPORT_POINTS.map(([i, t]) => <li key={String(t)}>{i}<span>{t}</span></li>)}</ul>
+        <Link href="/sign-up" className="button button-primary lp-big" data-testid="cta-passport">Evin texniki pasportunu yarat<ArrowRight size={16} /></Link>
+        <p className="lp-honest"><ShieldCheck size={16} />Rəsmi sertifikat və ya keyfiyyət zəmanəti deyil — hər məlumatın mənbəyi (ev sahibi, usta, podratçı, yoxlayıcı) göstərilir.</p>
+        <HeroArt />
+      </article>
+      <article className="lp-svc alt" id="smeta" data-testid="landing-service">
+        <div className="eyebrow"><span className="eyebrow-dot" />Xidmət 2 · AI Smeta</div>
+        <h2 className="font-display">Ev almaq və ya tikdirmək istəyirsiniz? Dəyərini əvvəlcədən hesablayın.</h2>
+        <p>Elan linkini daxil edin və bazar qiymətini təhlil edin. Yaxud memarın layihəsini yükləyin və tikinti büdcənizi hesablayın.</p>
+        <div className="lp-svc-ctas">
+          <Link href="/ai-smeta/bazar" className="button button-primary lp-big" data-testid="cta-market"><Building2 size={16} />Elan üzrə bazar dəyərini hesabla</Link>
+          <Link href="/ai-smeta/tikinti" className="button button-secondary lp-big" data-testid="cta-build"><Calculator size={16} />Layihədən tikinti smetası hazırla</Link>
+        </div>
+        <p className="lp-honest"><ShieldCheck size={16} />İki ayrı hesablama, bir-birinə qarışdırılmır. Elan qiyməti satış qiyməti deyil; tikinti qiymətlərini siz və ya podratçınız daxil edir. Mənbələr və fərziyyələr nəticədə göstərilir.</p>
+        <SampleResults />
+      </article>
     </section>
 
     <section className="lp-section wrap" id="how">
-      <div className="lp-head"><div className="eyebrow">Necə işləyir</div><h2 className="font-display">Təmir zamanı pasport özü yaranır.</h2><p>Əsas əməliyyatlar bir neçə toxunuşla.</p></div>
-      <ol className="lp-steps">{[
-        ['Evi əlavə edin', 'Yalnız ad kifayətdir. Otaqlar, ünvan, sahə — sonra.'],
-        ['Divarlar bağlanmazdan əvvəl çəkin', 'Elektrik və su xətlərinin fotosunu çəkin, üzərində xətti göstərin.'],
-        ['İşi qeyd edin', 'Nə edildi, nə vaxt, kim etdi, material və xərc. Ustanı dəvət edin — öz qeydlərini əlavə etsin.'],
-        ['Sənəd və zəmanətləri yükləyin', 'Qəbz, müqavilə, zəmanət kartı, yoxlama hesabatı.'],
-        ['Lazım olanda paylaşın', 'Alıcıya, ustaya və ya ailəyə — yalnız seçdiyinizi, məhdud müddətə.'],
-      ].map(([t, d], i) => <li key={t}><span className="lp-step-n">{String(i + 1).padStart(2, '0')}</span><h3>{t}</h3><p>{d}</p></li>)}</ol>
-    </section>
-
-    <section className="lp-section wrap" id="pros">
-      <div className="lp-head"><div className="eyebrow">Kimin üçün</div><h2 className="font-display">Ev sahibləri və peşəkarlar üçün.</h2></div>
-      <div className="lp-aud">
-        <div className="lp-aud-tabs" role="tablist">{AUDIENCES.map(a => <button key={a.key} type="button" role="tab" aria-selected={aud === a.key} className={aud === a.key ? 'on' : ''} onClick={() => setAud(a.key)}>{a.key === 'pro' ? <Building2 size={15} /> : <House size={15} />}{a.label}</button>)}</div>
-        <div className="lp-aud-body surface"><h3 className="font-display">{current.title}</h3><p>{current.text}</p><Link href={current.href} className="button button-primary">{current.cta}<ArrowRight size={16} /></Link></div>
+      <div className="lp-head"><div className="eyebrow">Necə işləyir</div><h2 className="font-display">Az addım, aydın nəticə.</h2></div>
+      <div className="lp-how">
+        <div className="lp-how-col"><h3><House size={17} />Pasport</h3><ol className="lp-steps-mini">
+          {['Evi əlavə edin — yalnız ad kifayətdir', 'Otaq üzrə foto və texniki məlumat əlavə edin', 'Dəyişiklik olanda yeniləyin — tarixçə saxlanılır', 'Lazım olanda yalnız seçdiyinizi paylaşın'].map(x => <li key={x}>{x}</li>)}</ol></div>
+        <div className="lp-how-col"><h3><Building2 size={17} />Bazar dəyəri</h3><ol className="lp-steps-mini">
+          {['Elan linkini və ya mətnini daxil edin', 'Oxunan məlumatları yoxlayıb düzəldin', 'Oxşar real elanlarla müqayisə alın', 'Aralıq, mənbələr və etibarlılığa baxın'].map(x => <li key={x}>{x}</li>)}</ol></div>
+        <div className="lp-how-col"><h3><HardHat size={17} />Tikinti smetası</h3><ol className="lp-steps-mini">
+          {['Layihəni yükləyin (PDF, şəkil, XLSX, CSV)', 'Tapılan ölçüləri yoxlayın, çatışanları yazın', 'Qiymətləri təklif və ya cədvəldən daxil edin', 'Excel və ya PDF kimi ixrac edin'].map(x => <li key={x}>{x}</li>)}</ol></div>
       </div>
     </section>
 
-    <section className="lp-section wrap lp-sample">
-      <div className="lp-head"><div className="eyebrow">Pasportun görünüşü</div><h2 className="font-display">Nə doldurulub, nə boşdur — açıq görünür.</h2><p>Aşağıdakı nümunədir, real ev deyil.</p></div>
-      <SamplePassport />
+    <section className="lp-section wrap lp-trust">
+      <div className="lp-head"><div className="eyebrow">Etibar</div><h2 className="font-display">Rəqəmin arxasında nə olduğu görünür.</h2></div>
+      <div className="lp-why-grid light">
+        {[[<ShieldCheck size={20} key="s" />, 'Mənbə həmişə göstərilir', 'Ev sahibi, usta, podratçı və ya dəvət olunmuş yoxlayıcı — kim daxil edibsə, yanında yazılır.'],
+          [<Lock size={20} key="l" />, 'Susmaya görə məxfi', 'Ünvan, sənədlər, xərclər və telefonlar icazəsiz paylaşılmır. Linklər məhduddur və bağlanır.'],
+          [<Search size={20} key="q" />, 'Uydurma yoxdur', 'Müqayisə elanı, vahid qiymət və ya ölçü tapılmayanda “məlumat yoxdur” deyirik.'],
+          [<Bell size={20} key="b" />, 'Qeyri-müəyyənlik gizlədilmir', 'Etibarlılıq səviyyəsi, çatışmayan məlumatlar və fərziyyələr hər nəticədədir.']].map(([i, t, d]) =>
+          <div key={String(t)} className="lp-why-item"><span>{i}</span><h3>{t}</h3><p>{d}</p></div>)}
+      </div>
     </section>
 
-    <section className="lp-section wrap lp-faq">
+    <section className="lp-section wrap lp-faq" id="faq">
       <div className="lp-head"><div className="eyebrow">Suallar</div><h2 className="font-display">Tez-tez verilən suallar</h2></div>
       <div>{FAQ.map(f => <details key={f.q} className="lp-faq-item"><summary>{f.q}<ChevronDown size={17} /></summary><p>{f.a}</p></details>)}</div>
     </section>
 
     <section className="lp-final wrap"><div>
       <Sparkles size={22} />
-      <h2 className="font-display">Evinizin rəqəmsal pasportunu yaradın.</h2>
-      <p>Pulsuz başlayın — ilk evi əlavə edin və bildiklərinizi yazın. Qalanını tədricən tamamlayın.</p>
-      <Link href="/sign-up" className="button button-primary lp-big">Evinizin rəqəmsal pasportunu yaradın<ArrowRight size={16} /></Link>
+      <h2 className="font-display">Evinizi tanıyın, xərcinizi əvvəlcədən bilin.</h2>
+      <p>Pulsuz başlayın — ilk evi əlavə edin və ya ilk hesablamanı aparın.</p>
+      <div className="lp-svc-ctas center"><Link href="/sign-up" className="button button-primary lp-big">Evin texniki pasportunu yarat<ArrowRight size={16} /></Link><Link href="/ai-smeta" className="button button-secondary lp-big">AI Smeta</Link></div>
     </div></section>
 
     <Partners lang={lang} />
-    <footer className="landing-footer wrap"><Brand /><p>Təhvil.az — evin rəqəmsal pasportu. Hesabdakı təsdiq audit qeydidir, hüquqi elektron imza deyil.</p><LanguagePicker lang={lang} change={change} />
+    <footer className="landing-footer wrap"><Brand /><p>Təhvil.az — evin texniki pasportu və AI Smeta. Hesabdakı təsdiq audit qeydidir, hüquqi elektron imza deyil.</p><LanguagePicker lang={lang} change={change} />
       <nav className="landing-legal" aria-label="Bələdçilər"><a href="/temir-tehvil-akti.html">Təhvil-təslim aktı</a><a href="/temir-islerinin-qebulu.html">Təmir işlərinin qəbulu</a><a href="/podratci-ile-razilasma.html">Podratçı ilə razılaşma</a><a href="/temir-elave-isler.html">Əlavə işlər və dəyişikliklər</a></nav>
       <nav className="landing-legal"><a href="/privacy.html">Məxfilik siyasəti</a><a href="/terms.html">İstifadə şərtləri</a></nav>
       <address className="landing-contact"><a href="mailto:support@tehvil.az">support@tehvil.az</a><a href="tel:+994503066626">+994 50 306 66 26</a><a href="https://wa.me/994503066626" target="_blank" rel="noopener noreferrer">WhatsApp</a><span>Bakı, Səbail rayonu, Badamdar qəsəbəsi, 26-cı küçə, 20</span></address>
     </footer>
+  </div>;
+}
+
+/** Example results for the AI Smeta card — clearly marked as a demo, not a real property. */
+function SampleResults() {
+  return <div className="lp-demo" aria-label="Demo nəticələr">
+    <div className="lp-mock-tag">Demo — real hesablama deyil</div>
+    <div className="lp-demo-row"><small>Bazar dəyəri (nümunə)</small><b>178 000 – 196 000 AZN</b><span>Mərkəzi: 186 000 AZN · 1 930 AZN/m² · 7 oxşar elan · etibarlılıq: orta</span></div>
+    <div className="lp-demo-row"><small>Tikinti smetası (nümunə)</small><b>Material 20 752 · İşçilik 8 768 AZN</b><span>13 bölmə · 20 sətirdə qiymət daxil edilməyib — smeta natamamdır</span></div>
   </div>;
 }
 
@@ -168,19 +134,5 @@ function HeroArt() {
     <div className="lp-float one"><Camera size={15} /><div><b>Mətbəx su xətti</b><small>Suvaqdan əvvəl · 3 foto</small></div></div>
     <div className="lp-float two"><Wrench size={15} /><div><b>Kombi — servis</b><small>Növbəti: mart 2027</small></div></div>
     <div className="lp-float three"><FileText size={15} /><div><b>Zəmanət kartı.pdf</b><small>Sənəd əlavə olunub</small></div></div>
-  </div>;
-}
-
-function SamplePassport() {
-  const rows: [string, string, string][] = [
-    ['Ümumi məlumat', '4 sahə', 'ok'], ['Təmir tarixçəsi', '12 iş', 'ok'], ['Foto arxivi', '86 foto', 'ok'], ['Elektrik xətləri', '5 qeyd', 'ok'],
-    ['Su və kanalizasiya', '3 qeyd', 'ok'], ['İstilik, qaz, ventilyasiya', 'Məlumat yoxdur', 'none'], ['Avadanlıqlar', '4', 'ok'], ['Sənədlər', '7', 'ok'], ['Texniki xidmət', 'Məlumat yoxdur', 'none'],
-  ];
-  return <div className="lp-passport surface">
-    <div className="lp-pass-head"><div><div className="eyebrow">Nümunə · real ev deyil</div><h3 className="font-display">Nərimanov mənzili</h3><small>Son dəyişiklik: 2 gün əvvəl</small></div>
-      <div className="lp-meter"><b>69%</b><span>məlumat tamlığı</span><div><i style={{ width: '69%' }} /></div></div></div>
-    <div className="lp-pass-grid">{rows.map(([l, v, s]) => <div key={l} className={`lp-pass-row ${s}`}><span>{l}</span><b>{v}</b></div>)}</div>
-    <div className="lp-sources"><span><i className="s-owner" />Ev sahibi daxil edib</span><span><i className="s-pro" />Podratçı daxil edib</span><span><i className="s-doc" />Sənəd əlavə olunub</span><span><i className="s-spec" />Yoxlanılıb</span><span><i className="s-none" />Məlumat yoxdur</span></div>
-    <p className="lp-note">Tamlıq faizi yalnız bölmələrin nə qədər doldurulduğunu göstərir. Evin texniki vəziyyətinin, təhlükəsizliyinin və ya keyfiyyətinin qiymətləndirilməsi deyil.</p>
   </div>;
 }

@@ -99,8 +99,14 @@ export interface GeneratorContext {
   fromDrawing?: boolean;
 }
 
-const market = (reference = 'Bazar qiymətləri, Bakı'): PriceSource => ({ kind: 'market', reference, updatedAt: todayISO() });
-const contractor = (): PriceSource => ({ kind: 'contractor', reference: 'Podratçının qiymət cədvəli', updatedAt: todayISO() });
+/**
+ * The built-in unit prices were entered by the Təhvil team on this date as a starting point.
+ * They are not a live market feed and were not checked against suppliers, so they are shown
+ * with their real date (and therefore marked as stale) instead of "today".
+ */
+export const CATALOG_PRICES_DATE = '2026-10-06';
+const market = (reference = 'Təhvil-in ilkin qiymət cədvəli (təchizatçı ilə yoxlanmayıb)'): PriceSource => ({ kind: 'market', reference, updatedAt: CATALOG_PRICES_DATE });
+const contractor = (): PriceSource => ({ kind: 'contractor', reference: 'İşçilik: Təhvil-in ilkin cədvəli — podratçı öz qiymətini yazmalıdır', updatedAt: CATALOG_PRICES_DATE });
 
 interface Draft {
   name: string; zone: string; unit: Unit; quantity: number; material: number; labor: number;

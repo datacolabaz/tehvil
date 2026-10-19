@@ -25,7 +25,7 @@ export function StatusBadge({ status }: { status: DisplayStatus }) {
 
 export function ConfidenceChip({ confidence }: { confidence: number }) {
   const high = confidence >= 0.8;
-  return <Pill small tone={high ? 'ok' : 'warn'} icon={high ? <ShieldCheck size={12} aria-hidden /> : <AlertTriangle size={12} aria-hidden />} title={`AI etibarlılıq göstəricisi: ${Math.round(confidence * 100)}%`}>
+  return <Pill small tone={high ? 'ok' : 'warn'} icon={high ? <ShieldCheck size={12} aria-hidden /> : <AlertTriangle size={12} aria-hidden />} title="Avtomatik oxunub — yoxlanmalıdır">
     {high ? 'Yüksək etibarlılıq' : 'Yoxlanmalıdır'}
   </Pill>;
 }
