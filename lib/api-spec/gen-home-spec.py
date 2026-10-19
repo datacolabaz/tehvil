@@ -154,6 +154,13 @@ S["ValuationSummary"] = {"id": "str", "createdAt": "dt", "title": "str", "city":
 S["ConstructionEstimateInput"] = {"name": "str(1,200)", "data": "any"}
 S["ConstructionEstimate"] = {"id": "str", "name": "str", "data": "any", "createdAt": "dt", "updatedAt": "dt"}
 S["ConstructionEstimateSummary"] = {"id": "str", "name": "str", "updatedAt": "dt", "total": "num?", "unpriced": "int?"}
+S["PriceBase"] = {"items": "any", "generatedAt": "dt", "staleDays": "int", "admin": "bool"}
+S["PriceQuoteInput"] = {"itemCode": "str(1,80)", "tier": "enum:ekonom|standart|premium|any", "price": "num", "sourceKind": "enum:supplier|contractor|published", "sourceName": "str(2,200)", "sourceUrl~": "str?", "observedAt": "date", "note~": "str(0,500)"}
+S["PriceImportInput"] = {"csv": "str(1,300000)"}
+S["PriceImportResult"] = {"added": "int", "errors": "[str]"}
+S["RepairEstimateInput"] = {"name": "str(1,200)", "data": "any"}
+S["RepairEstimate"] = {"id": "str", "name": "str", "data": "any", "createdAt": "dt", "updatedAt": "dt"}
+S["RepairEstimateSummary"] = {"id": "str", "name": "str", "updatedAt": "dt", "totalLow": "num?", "total": "num?", "totalHigh": "num?", "area": "num?"}
 S["HomeWorkItem"] = {"work": "WorkSummary", "homeName": "str", "myRole": "str"}
 S["MeRoles"] = {"staff": "bool", "hasHomes": "bool", "managesHomes": "bool", "isPerformer": "bool", "hasProjects": "bool"}
 
@@ -232,6 +239,15 @@ op("/construction-estimates", "post", "createConstructionEstimate", "Save a new 
 op("/construction-estimates/{estimateId}", "get", "getConstructionEstimate", "One construction estimate (owner only)", ("EstimateId",), resp=ok("Estimate", "ConstructionEstimate"))
 op("/construction-estimates/{estimateId}", "put", "updateConstructionEstimate", "Save changes", ("EstimateId",), "ConstructionEstimateInput", ok("Saved", "ConstructionEstimate"))
 op("/construction-estimates/{estimateId}", "delete", "deleteConstructionEstimate", "Delete (owner only)", ("EstimateId",), resp=AR)
+op("/prices", "get", "getPriceBase", "Unit prices for repair estimates: low / median / high per tier with sources and dates (no sign-in)", resp=ok("Prices", "PriceBase"))
+op("/prices/quotes", "post", "addPriceQuote", "Price administrator adds one observed price with its source", req="PriceQuoteInput", resp=ok("Saved", "ActionResult", "201"))
+op("/prices/quotes/{quoteId}", "delete", "removePriceQuote", "Price administrator withdraws a price (kept for history)", ("QuoteId",), resp=AR)
+op("/prices/import", "post", "importPrices", "Price administrator imports prices from CSV", req="PriceImportInput", resp=ok("Imported", "PriceImportResult"))
+op("/repair-estimates", "get", "listRepairEstimates", "My repair estimates", resp=ok("Estimates", "RepairEstimateSummary", array=True))
+op("/repair-estimates", "post", "createRepairEstimate", "Save a repair estimate", req="RepairEstimateInput", resp=ok("Saved", "RepairEstimate", "201"))
+op("/repair-estimates/{estimateId}", "get", "getRepairEstimate", "One repair estimate (owner only)", ("EstimateId",), resp=ok("Estimate", "RepairEstimate"))
+op("/repair-estimates/{estimateId}", "put", "updateRepairEstimate", "Save changes", ("EstimateId",), "RepairEstimateInput", ok("Saved", "RepairEstimate"))
+op("/repair-estimates/{estimateId}", "delete", "deleteRepairEstimate", "Delete (owner only)", ("EstimateId",), resp=AR)
 op("/me/roles", "get", "getMyRoles", "What the signed-in account is (for a menu that shows only relevant sections)", resp=ok("Roles", "MeRoles"))
 op("/me/works", "get", "listMyWorks", "Works I take part in through any of my profiles", resp=ok("Works", "MyWork", array=True))
 op("/me/workers", "get", "getMyWorkers", "My individual profile, teams/companies I manage and my memberships", resp=ok("Profiles", "MyWorkers"))
@@ -258,7 +274,7 @@ op("/staff/reviews/{reviewId}/hide", "post", "hideReview", "Tehvil.az staff hide
 op("/admin/workers/{workerId}/identity", "post", "setWorkerIdentity", "Administrator records a separate identity/business check", ("WorkerId",), "IdentityInput", ok("Saved", "Worker"))
 
 params = {}
-for n, name in [("HomeId", "homeId"), ("RoomId", "roomId"), ("MemberId", "memberId"), ("ItemId", "itemId"), ("EquipmentId", "equipmentId"), ("ShareId", "shareId"), ("WorkId", "workId"), ("ParticipantId", "participantId"), ("ReviewId", "reviewId"), ("MembershipId", "membershipId"), ("WorkerId", "workerId"), ("MediaId", "mediaId"), ("ValuationId", "valuationId"), ("EstimateId", "estimateId")]:
+for n, name in [("HomeId", "homeId"), ("RoomId", "roomId"), ("MemberId", "memberId"), ("ItemId", "itemId"), ("EquipmentId", "equipmentId"), ("ShareId", "shareId"), ("WorkId", "workId"), ("ParticipantId", "participantId"), ("ReviewId", "reviewId"), ("MembershipId", "membershipId"), ("WorkerId", "workerId"), ("MediaId", "mediaId"), ("ValuationId", "valuationId"), ("EstimateId", "estimateId"), ("QuoteId", "quoteId")]:
     params[n] = {"name": name, "in": "path", "required": True, "schema": {"type": "string", "format": "uuid"}}
 params["HomePublicId"] = {"name": "publicId", "in": "path", "required": True, "schema": {"type": "string", "minLength": 6, "maxLength": 16, "pattern": "^[a-z0-9]+$"}}
 params["ShareToken"] = {"name": "token", "in": "path", "required": True, "schema": {"type": "string", "minLength": 20, "maxLength": 64, "pattern": "^[A-Za-z0-9_-]+$"}}

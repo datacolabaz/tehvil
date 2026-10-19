@@ -94,6 +94,10 @@ import type {
   PaymentInput,
   PaymentItem,
   PaymentNote,
+  PriceBase,
+  PriceImportInput,
+  PriceImportResult,
+  PriceQuoteInput,
   Project,
   ProjectInput,
   PropertyPassport,
@@ -126,6 +130,9 @@ import type {
   RealtorWhatsappInput,
   RealtorWhatsappSettings,
   Reminder,
+  RepairEstimate,
+  RepairEstimateInput,
+  RepairEstimateSummary,
   ReportInput,
   RespondInput,
   ReviewInput,
@@ -12746,6 +12753,738 @@ export const useDeleteConstructionEstimate = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteConstructionEstimateMutationOptions(options));
+    }
+
+export const getGetPriceBaseUrl = () => {
+
+
+
+
+  return `/api/prices`
+}
+
+/**
+ * @summary Unit prices for repair estimates: low / median / high per tier with sources and dates (no sign-in)
+ */
+export const getPriceBase = async ( options?: Parameters<typeof customFetch>[1]): Promise<PriceBase> => {
+
+  return customFetch<PriceBase>(getGetPriceBaseUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPriceBaseQueryKey = () => {
+    return [
+    `/api/prices`
+    ] as const;
+    }
+
+
+export const getGetPriceBaseQueryOptions = <TData = Awaited<ReturnType<typeof getPriceBase>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPriceBase>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPriceBaseQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPriceBase>>> = ({ signal }) => getPriceBase({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPriceBase>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPriceBaseQueryResult = NonNullable<Awaited<ReturnType<typeof getPriceBase>>>
+export type GetPriceBaseQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Unit prices for repair estimates: low / median / high per tier with sources and dates (no sign-in)
+ */
+
+export function useGetPriceBase<TData = Awaited<ReturnType<typeof getPriceBase>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPriceBase>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPriceBaseQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAddPriceQuoteUrl = () => {
+
+
+
+
+  return `/api/prices/quotes`
+}
+
+/**
+ * @summary Price administrator adds one observed price with its source
+ */
+export const addPriceQuote = async (priceQuoteInput: PriceQuoteInput, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ActionResult>(getAddPriceQuoteUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(priceQuoteInput)
+  }
+);}
+
+
+
+
+
+export const getAddPriceQuoteMutationKey = () => ['addPriceQuote'] as const;
+
+export const getAddPriceQuoteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPriceQuote>>, TError,AddPriceQuoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addPriceQuote>>, TError,AddPriceQuoteMutationVariables, TContext> => {
+
+const mutationKey = getAddPriceQuoteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addPriceQuote>>, AddPriceQuoteMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  addPriceQuote(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddPriceQuoteMutationResult = NonNullable<Awaited<ReturnType<typeof addPriceQuote>>>
+    export type AddPriceQuoteMutationBody = BodyType<PriceQuoteInput>
+    export type AddPriceQuoteMutationError = ErrorType<unknown>
+    export type AddPriceQuoteMutationVariables = {data: BodyType<PriceQuoteInput>}
+
+    /**
+ * @summary Price administrator adds one observed price with its source
+ */
+export const useAddPriceQuote = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPriceQuote>>, TError,AddPriceQuoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addPriceQuote>>,
+        TError,
+        AddPriceQuoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddPriceQuoteMutationOptions(options));
+    }
+
+export const getRemovePriceQuoteUrl = (quoteId: string,) => {
+
+
+
+
+  return `/api/prices/quotes/${quoteId}`
+}
+
+/**
+ * @summary Price administrator withdraws a price (kept for history)
+ */
+export const removePriceQuote = async (quoteId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getRemovePriceQuoteUrl(quoteId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRemovePriceQuoteMutationKey = () => ['removePriceQuote'] as const;
+
+export const getRemovePriceQuoteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removePriceQuote>>, TError,RemovePriceQuoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removePriceQuote>>, TError,RemovePriceQuoteMutationVariables, TContext> => {
+
+const mutationKey = getRemovePriceQuoteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removePriceQuote>>, RemovePriceQuoteMutationVariables> = (props) => {
+          const {quoteId} = props ?? {};
+
+          return  removePriceQuote(quoteId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemovePriceQuoteMutationResult = NonNullable<Awaited<ReturnType<typeof removePriceQuote>>>
+
+    export type RemovePriceQuoteMutationError = ErrorType<unknown>
+    export type RemovePriceQuoteMutationVariables = {quoteId: string}
+
+    /**
+ * @summary Price administrator withdraws a price (kept for history)
+ */
+export const useRemovePriceQuote = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removePriceQuote>>, TError,RemovePriceQuoteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removePriceQuote>>,
+        TError,
+        RemovePriceQuoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRemovePriceQuoteMutationOptions(options));
+    }
+
+export const getImportPricesUrl = () => {
+
+
+
+
+  return `/api/prices/import`
+}
+
+/**
+ * @summary Price administrator imports prices from CSV
+ */
+export const importPrices = async (priceImportInput: PriceImportInput, options?: Parameters<typeof customFetch>[1]): Promise<PriceImportResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PriceImportResult>(getImportPricesUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(priceImportInput)
+  }
+);}
+
+
+
+
+
+export const getImportPricesMutationKey = () => ['importPrices'] as const;
+
+export const getImportPricesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importPrices>>, TError,ImportPricesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof importPrices>>, TError,ImportPricesMutationVariables, TContext> => {
+
+const mutationKey = getImportPricesMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importPrices>>, ImportPricesMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  importPrices(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportPricesMutationResult = NonNullable<Awaited<ReturnType<typeof importPrices>>>
+    export type ImportPricesMutationBody = BodyType<PriceImportInput>
+    export type ImportPricesMutationError = ErrorType<unknown>
+    export type ImportPricesMutationVariables = {data: BodyType<PriceImportInput>}
+
+    /**
+ * @summary Price administrator imports prices from CSV
+ */
+export const useImportPrices = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importPrices>>, TError,ImportPricesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof importPrices>>,
+        TError,
+        ImportPricesMutationVariables,
+        TContext
+      > => {
+      return useMutation(getImportPricesMutationOptions(options));
+    }
+
+export const getListRepairEstimatesUrl = () => {
+
+
+
+
+  return `/api/repair-estimates`
+}
+
+/**
+ * @summary My repair estimates
+ */
+export const listRepairEstimates = async ( options?: Parameters<typeof customFetch>[1]): Promise<RepairEstimateSummary[]> => {
+
+  return customFetch<RepairEstimateSummary[]>(getListRepairEstimatesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRepairEstimatesQueryKey = () => {
+    return [
+    `/api/repair-estimates`
+    ] as const;
+    }
+
+
+export const getListRepairEstimatesQueryOptions = <TData = Awaited<ReturnType<typeof listRepairEstimates>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRepairEstimates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRepairEstimatesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRepairEstimates>>> = ({ signal }) => listRepairEstimates({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRepairEstimates>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRepairEstimatesQueryResult = NonNullable<Awaited<ReturnType<typeof listRepairEstimates>>>
+export type ListRepairEstimatesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary My repair estimates
+ */
+
+export function useListRepairEstimates<TData = Awaited<ReturnType<typeof listRepairEstimates>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRepairEstimates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRepairEstimatesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateRepairEstimateUrl = () => {
+
+
+
+
+  return `/api/repair-estimates`
+}
+
+/**
+ * @summary Save a repair estimate
+ */
+export const createRepairEstimate = async (repairEstimateInput: RepairEstimateInput, options?: Parameters<typeof customFetch>[1]): Promise<RepairEstimate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RepairEstimate>(getCreateRepairEstimateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(repairEstimateInput)
+  }
+);}
+
+
+
+
+
+export const getCreateRepairEstimateMutationKey = () => ['createRepairEstimate'] as const;
+
+export const getCreateRepairEstimateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRepairEstimate>>, TError,CreateRepairEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRepairEstimate>>, TError,CreateRepairEstimateMutationVariables, TContext> => {
+
+const mutationKey = getCreateRepairEstimateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRepairEstimate>>, CreateRepairEstimateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createRepairEstimate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRepairEstimateMutationResult = NonNullable<Awaited<ReturnType<typeof createRepairEstimate>>>
+    export type CreateRepairEstimateMutationBody = BodyType<RepairEstimateInput>
+    export type CreateRepairEstimateMutationError = ErrorType<unknown>
+    export type CreateRepairEstimateMutationVariables = {data: BodyType<RepairEstimateInput>}
+
+    /**
+ * @summary Save a repair estimate
+ */
+export const useCreateRepairEstimate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRepairEstimate>>, TError,CreateRepairEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createRepairEstimate>>,
+        TError,
+        CreateRepairEstimateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateRepairEstimateMutationOptions(options));
+    }
+
+export const getGetRepairEstimateUrl = (estimateId: string,) => {
+
+
+
+
+  return `/api/repair-estimates/${estimateId}`
+}
+
+/**
+ * @summary One repair estimate (owner only)
+ */
+export const getRepairEstimate = async (estimateId: string, options?: Parameters<typeof customFetch>[1]): Promise<RepairEstimate> => {
+
+  return customFetch<RepairEstimate>(getGetRepairEstimateUrl(estimateId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRepairEstimateQueryKey = (estimateId: string,) => {
+    return [
+    `/api/repair-estimates/${estimateId}`
+    ] as const;
+    }
+
+
+export const getGetRepairEstimateQueryOptions = <TData = Awaited<ReturnType<typeof getRepairEstimate>>, TError = ErrorType<unknown>>(estimateId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRepairEstimate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRepairEstimateQueryKey(estimateId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRepairEstimate>>> = ({ signal }) => getRepairEstimate(estimateId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: estimateId !== null && estimateId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRepairEstimate>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRepairEstimateQueryResult = NonNullable<Awaited<ReturnType<typeof getRepairEstimate>>>
+export type GetRepairEstimateQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary One repair estimate (owner only)
+ */
+
+export function useGetRepairEstimate<TData = Awaited<ReturnType<typeof getRepairEstimate>>, TError = ErrorType<unknown>>(
+ estimateId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRepairEstimate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRepairEstimateQueryOptions(estimateId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateRepairEstimateUrl = (estimateId: string,) => {
+
+
+
+
+  return `/api/repair-estimates/${estimateId}`
+}
+
+/**
+ * @summary Save changes
+ */
+export const updateRepairEstimate = async (estimateId: string,
+    repairEstimateInput: RepairEstimateInput, options?: Parameters<typeof customFetch>[1]): Promise<RepairEstimate> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RepairEstimate>(getUpdateRepairEstimateUrl(estimateId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(repairEstimateInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateRepairEstimateMutationKey = () => ['updateRepairEstimate'] as const;
+
+export const getUpdateRepairEstimateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRepairEstimate>>, TError,UpdateRepairEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRepairEstimate>>, TError,UpdateRepairEstimateMutationVariables, TContext> => {
+
+const mutationKey = getUpdateRepairEstimateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRepairEstimate>>, UpdateRepairEstimateMutationVariables> = (props) => {
+          const {estimateId,data} = props ?? {};
+
+          return  updateRepairEstimate(estimateId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRepairEstimateMutationResult = NonNullable<Awaited<ReturnType<typeof updateRepairEstimate>>>
+    export type UpdateRepairEstimateMutationBody = BodyType<RepairEstimateInput>
+    export type UpdateRepairEstimateMutationError = ErrorType<unknown>
+    export type UpdateRepairEstimateMutationVariables = {estimateId: string;data: BodyType<RepairEstimateInput>}
+
+    /**
+ * @summary Save changes
+ */
+export const useUpdateRepairEstimate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRepairEstimate>>, TError,UpdateRepairEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRepairEstimate>>,
+        TError,
+        UpdateRepairEstimateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateRepairEstimateMutationOptions(options));
+    }
+
+export const getDeleteRepairEstimateUrl = (estimateId: string,) => {
+
+
+
+
+  return `/api/repair-estimates/${estimateId}`
+}
+
+/**
+ * @summary Delete (owner only)
+ */
+export const deleteRepairEstimate = async (estimateId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getDeleteRepairEstimateUrl(estimateId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteRepairEstimateMutationKey = () => ['deleteRepairEstimate'] as const;
+
+export const getDeleteRepairEstimateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRepairEstimate>>, TError,DeleteRepairEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteRepairEstimate>>, TError,DeleteRepairEstimateMutationVariables, TContext> => {
+
+const mutationKey = getDeleteRepairEstimateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRepairEstimate>>, DeleteRepairEstimateMutationVariables> = (props) => {
+          const {estimateId} = props ?? {};
+
+          return  deleteRepairEstimate(estimateId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteRepairEstimateMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRepairEstimate>>>
+
+    export type DeleteRepairEstimateMutationError = ErrorType<unknown>
+    export type DeleteRepairEstimateMutationVariables = {estimateId: string}
+
+    /**
+ * @summary Delete (owner only)
+ */
+export const useDeleteRepairEstimate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRepairEstimate>>, TError,DeleteRepairEstimateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteRepairEstimate>>,
+        TError,
+        DeleteRepairEstimateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteRepairEstimateMutationOptions(options));
     }
 
 export const getGetMyRolesUrl = () => {

@@ -2453,6 +2453,132 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ActionResult'}
+  /prices:
+    get:
+      operationId: getPriceBase
+      tags: [home]
+      summary: 'Unit prices for repair estimates: low / median / high per tier with sources and dates (no sign-in)'
+      responses:
+        '200':
+          description: Prices
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PriceBase'}
+  /prices/quotes:
+    post:
+      operationId: addPriceQuote
+      tags: [home]
+      summary: Price administrator adds one observed price with its source
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PriceQuoteInput'}
+      responses:
+        '201':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /prices/quotes/{quoteId}:
+    delete:
+      operationId: removePriceQuote
+      tags: [home]
+      summary: Price administrator withdraws a price (kept for history)
+      parameters:
+      - {$ref: '#/components/parameters/QuoteId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /prices/import:
+    post:
+      operationId: importPrices
+      tags: [home]
+      summary: Price administrator imports prices from CSV
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PriceImportInput'}
+      responses:
+        '200':
+          description: Imported
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PriceImportResult'}
+  /repair-estimates:
+    get:
+      operationId: listRepairEstimates
+      tags: [home]
+      summary: My repair estimates
+      responses:
+        '200':
+          description: Estimates
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/RepairEstimateSummary'}
+    post:
+      operationId: createRepairEstimate
+      tags: [home]
+      summary: Save a repair estimate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RepairEstimateInput'}
+      responses:
+        '201':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RepairEstimate'}
+  /repair-estimates/{estimateId}:
+    get:
+      operationId: getRepairEstimate
+      tags: [home]
+      summary: One repair estimate (owner only)
+      parameters:
+      - {$ref: '#/components/parameters/EstimateId'}
+      responses:
+        '200':
+          description: Estimate
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RepairEstimate'}
+    put:
+      operationId: updateRepairEstimate
+      tags: [home]
+      summary: Save changes
+      parameters:
+      - {$ref: '#/components/parameters/EstimateId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RepairEstimateInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RepairEstimate'}
+    delete:
+      operationId: deleteRepairEstimate
+      tags: [home]
+      summary: Delete (owner only)
+      parameters:
+      - {$ref: '#/components/parameters/EstimateId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
   /me/roles:
     get:
       operationId: getMyRoles
@@ -2882,6 +3008,11 @@ components:
       schema: {type: string, format: uuid}
     EstimateId:
       name: estimateId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    QuoteId:
+      name: quoteId
       in: path
       required: true
       schema: {type: string, format: uuid}
@@ -6044,6 +6175,74 @@ components:
         unpriced:
           type: [integer, 'null']
       required: [id, name, updatedAt, total, unpriced]
+    PriceBase:
+      type: object
+      properties:
+        items: {}
+        generatedAt: {type: string, format: date-time}
+        staleDays: {type: integer}
+        admin: {type: boolean}
+      required: [items, generatedAt, staleDays, admin]
+    PriceQuoteInput:
+      type: object
+      properties:
+        itemCode: {type: string, minLength: 1, maxLength: 80}
+        tier:
+          type: string
+          enum: [ekonom, standart, premium, any]
+        price: {type: number}
+        sourceKind:
+          type: string
+          enum: [supplier, contractor, published]
+        sourceName: {type: string, minLength: 2, maxLength: 200}
+        sourceUrl:
+          type: [string, 'null']
+        observedAt: {type: string, format: date}
+        note: {type: string, minLength: 0, maxLength: 500}
+      required: [itemCode, tier, price, sourceKind, sourceName, observedAt]
+    PriceImportInput:
+      type: object
+      properties:
+        csv: {type: string, minLength: 1, maxLength: 300000}
+      required: [csv]
+    PriceImportResult:
+      type: object
+      properties:
+        added: {type: integer}
+        errors:
+          type: array
+          items: {type: string}
+      required: [added, errors]
+    RepairEstimateInput:
+      type: object
+      properties:
+        name: {type: string, minLength: 1, maxLength: 200}
+        data: {}
+      required: [name, data]
+    RepairEstimate:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        data: {}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+      required: [id, name, data, createdAt, updatedAt]
+    RepairEstimateSummary:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        updatedAt: {type: string, format: date-time}
+        totalLow:
+          type: [number, 'null']
+        total:
+          type: [number, 'null']
+        totalHigh:
+          type: [number, 'null']
+        area:
+          type: [number, 'null']
+      required: [id, name, updatedAt, totalLow, total, totalHigh, area]
     HomeWorkItem:
       type: object
       properties:
