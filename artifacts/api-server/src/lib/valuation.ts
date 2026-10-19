@@ -136,7 +136,7 @@ export async function readListingPage(raw: string) {
 
 export interface Comp {
   id: string; url: string | null; city: string; district: string; areaM2: number | null; rooms: number | null; floor: number | null; floorsTotal: number | null;
-  buildingType: string; renovation: string; furnished: string; priceAzn: number | null; fetchedAt: Date; userAdded: boolean;
+  buildingType: string; renovation: string; furnished: string; priceAzn: number | null; fetchedAt: Date; userAdded: boolean; copied?: boolean;
 }
 
 export function similarity(s: Comp, c: Comp): { score: number; notes: string[]; eligible: boolean } {
@@ -169,7 +169,12 @@ const round = (v: number, step: number) => Math.round(v / step) * step;
 
 export function computeValuation(subject: Comp & { price: number | null; currency: string | null }, candidates: Comp[], usdRate: number, poolSize: number) {
   const scored = candidates.map((c) => ({ c, ...similarity(subject, c), ppm2: c.priceAzn && c.areaM2 ? c.priceAzn / c.areaM2 : null }));
-  const used = scored.filter((x) => x.eligible).sort((a, b) => b.score - a.score).slice(0, 12);
+  let used = scored.filter((x) => x.eligible).sort((a, b) => b.score - a.score).slice(0, 12);
+  // Copied adverts from the shared pool were not read by Təhvil; one far from the others is left out.
+  const firm = used.filter((x) => !(x.c.copied && !x.c.userAdded)).map((x) => ({ v: x.ppm2!, w: 1 }));
+  const ref = wquantile(used.length >= 3 ? used.map((x) => ({ v: x.ppm2!, w: 1 })) : firm.length ? firm : [{ v: 0, w: 1 }], 0.5);
+  if (ref > 0) for (const x of used) if (x.c.copied && !x.c.userAdded && (x.ppm2! < ref * 0.5 || x.ppm2! > ref * 2)) { x.eligible = false; x.notes.push("qiyməti digər elanlardan kəskin fərqlənir"); }
+  used = used.filter((x) => x.eligible);
   const missing: string[] = [];
   if (!subject.areaM2) missing.push("Sahə");
   if (!subject.district) missing.push("Rayon / ərazi");
@@ -184,6 +189,8 @@ export function computeValuation(subject: Comp & { price: number | null; currenc
     "Oxşarlıq: eyni şəhər məcburidir; rayon, tikili növü, otaq sayı, sahə, təmir və elanın tarixi bal verir. Bal 3-dən azdırsa elan istifadə olunmur.",
     "Mərkəzi təxmin oxşarlıq balı ilə çəkilmiş median AZN/m² × sahədir; aralıq 25–75% intervalıdır. Mərtəbə, əşya və mikrolokasiya rəqəmlə düzəldilmir — yalnız amil kimi göstərilir.",
   ];
+  const copiedUsed = used.filter((x) => x.c.copied && !x.c.userAdded).length;
+  if (copiedUsed) assumptions.push(`${copiedUsed} müqayisə elanı istifadəçilər tərəfindən portal səhifəsindən köçürülüb — Təhvil onları özü oxumayıb. Qiyməti digərlərindən iki dəfədən çox fərqlənən belə elanlar istifadə olunmur.`);
   const comps = scored.sort((a, b) => Number(b.eligible) - Number(a.eligible) || b.score - a.score).map((x) => ({ c: x.c, score: x.score, notes: x.notes, used: used.includes(x), ppm2: x.ppm2 }));
   if (used.length < MIN_COMPS || !subject.areaM2) {
     return {

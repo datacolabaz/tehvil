@@ -7,7 +7,7 @@ import {
 } from "@workspace/api-zod";
 import { constructionEstimatesTable, db, listingSnapshotsTable, valuationsTable, type ListingSnapshotRow } from "@workspace/db";
 import { rateLimit } from "../lib/rateLimit";
-import { ImportError } from "../lib/realtorImport";
+import { ImportError, portalFor } from "../lib/realtorImport";
 import { DEFAULT_USD_RATE, POOL_DAYS, computeValuation, factsFromText, foundLabels, readListingPage, urlHash, type Comp } from "../lib/valuation";
 import { bad, notFound, noStore } from "./homes";
 
@@ -21,7 +21,7 @@ const listingDto = (r: ListingSnapshotRow) => ({
 });
 const toComp = (r: ListingSnapshotRow, userAdded: boolean): Comp => ({
   id: r.id, url: r.url, city: r.city, district: r.district, areaM2: r.areaM2, rooms: r.rooms, floor: r.floor, floorsTotal: r.floorsTotal,
-  buildingType: r.buildingType, renovation: r.renovation, furnished: r.furnished, priceAzn: r.priceAzn, fetchedAt: r.fetchedAt, userAdded,
+  buildingType: r.buildingType, renovation: r.renovation, furnished: r.furnished, priceAzn: r.priceAzn, fetchedAt: r.fetchedAt, userAdded, copied: r.source === "copied",
 });
 
 router.post("/valuation/read-link", readLimit, async (req, res): Promise<void> => {
@@ -77,8 +77,40 @@ async function confirmListing(userId: string, input: Input, usdRate: number) {
       return row;
     }
   }
+  // Text the person copied from a portal page they opened themselves (the portal refused the server).
+  // It joins the shared pool under guards: a supported portal link, one pool entry per advert,
+  // plausible price and area, and a daily cap per person. It is always labelled as copied.
+  const portalUrl = input.source === "text" && input.url ? supportedUrl(input.url) : null;
+  if (portalUrl) {
+    const inPool = values.dealType === "sale" && !!values.city && plausible(priceAzn, values.areaM2) && await copiedPoolSlot(userId, portalUrl.hash);
+    const [row] = await db.insert(listingSnapshotsTable).values({ ...values, url: portalUrl.url, urlHash: portalUrl.hash, portal: portalUrl.portal, source: "copied", inPool, createdByUserId: userId }).returning();
+    return row;
+  }
   const [row] = await db.insert(listingSnapshotsTable).values({ ...values, source: input.source === "link" ? "manual" : input.source, inPool: false, createdByUserId: userId }).returning();
   return row;
+}
+
+export const COPIED_DAILY_CAP = 30;
+function supportedUrl(raw: string) {
+  try {
+    const u = new URL(raw);
+    if (!/^https?:$/.test(u.protocol)) return null;
+    const portal = portalFor(u);
+    const hash = urlHash(u.toString());
+    return portal && hash ? { url: u.toString(), portal, hash } : null;
+  } catch { return null; }
+}
+/** Asking price per m² and area within what Azerbaijani housing adverts actually show. */
+const plausible = (priceAzn: number | null, area: number | null | undefined) =>
+  !!priceAzn && !!area && area >= 10 && area <= 2000 && priceAzn / area >= 100 && priceAzn / area <= 20000;
+async function copiedPoolSlot(userId: string, hash: string) {
+  const since = new Date(Date.now() - POOL_DAYS * 86_400_000);
+  const [dup] = await db.select({ id: listingSnapshotsTable.id }).from(listingSnapshotsTable)
+    .where(and(eq(listingSnapshotsTable.urlHash, hash), eq(listingSnapshotsTable.inPool, true), gt(listingSnapshotsTable.fetchedAt, since))).limit(1);
+  if (dup) return false;
+  const [{ n }] = await db.select({ n: sql<number>`count(*)::int` }).from(listingSnapshotsTable)
+    .where(and(eq(listingSnapshotsTable.createdByUserId, userId), eq(listingSnapshotsTable.source, "copied"), eq(listingSnapshotsTable.inPool, true), gt(listingSnapshotsTable.createdAt, new Date(Date.now() - 86_400_000))));
+  return n < COPIED_DAILY_CAP;
 }
 
 router.post("/valuations", async (req, res): Promise<void> => {
