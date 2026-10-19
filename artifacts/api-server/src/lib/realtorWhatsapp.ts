@@ -227,7 +227,7 @@ export async function listingLines(userId: string, lead: LeadRow, origin: string
   const lines = listings.map((l, i) => {
     const pid = passportFor.get(l.id);
     const facts = [l.district, l.rooms != null ? `${l.rooms} otaq` : "", l.areaM2 ? `${l.areaM2} m²` : "", priceText(l.price, l.currency)].filter(Boolean).join(" · ");
-    return `${i + 1}) ${l.title}\n${facts}${pid ? `\n✅ Təhvil Sertifikatlı — təmir tarixçəsi: ${origin}/p/${pid}` : ""}`;
+    return `${i + 1}) ${l.title}\n${facts}${pid ? `\n✅ Təhvil pasportlu — təmir tarixçəsi: ${origin}/p/${pid}` : ""}`;
   });
   return { listings, text: lines.join("\n\n") };
 }

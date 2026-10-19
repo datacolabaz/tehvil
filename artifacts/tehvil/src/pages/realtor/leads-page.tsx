@@ -255,7 +255,7 @@ function LeadDrawer({ lead, onClose, onChanged }: { lead: RealtorLead; onClose: 
         <div className="eyebrow">Uyğun elanlar</div>
         {matches.isLoading ? <small className="rl-hint">Axtarılır…</small> : matches.data?.length ? matches.data.map(m => <div key={m.id} className="rl-match">
           {m.photos[0] ? <img src={m.photos[0].url} alt="" /> : <span className="rl-match-ph" />}
-          <div><strong>{m.title}</strong><small>{facts(m)} · {price(m.price, m.currency)}</small>{m.passportStatus === 'published' && <small className="rl-cert"><ShieldCheck size={11} className="sm-ii" /> Təhvil Sertifikatlı</small>}</div>
+          <div><strong>{m.title}</strong><small>{facts(m)} · {price(m.price, m.currency)}</small>{m.passportStatus === 'published' && <small className="rl-cert"><ShieldCheck size={11} className="sm-ii" /> Təhvil pasportlu</small>}</div>
         </div>) : <small className="rl-hint">Kriteriyalara uyğun aktiv elan tapılmadı. Rayon, büdcə və otaq sayını dəqiqləşdirin.</small>}
         {(matches.data?.length ?? 0) > 0 && lead.phone && <button type="button" className="button button-secondary sm-btn-sm" onClick={() => { setTab('whatsapp'); setDraft(scripts.find(s => s.kind === 'listing')?.text ?? ''); }}><Send size={13} />WhatsApp ilə göndər</button>}
       </section>

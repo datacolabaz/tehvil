@@ -106,7 +106,7 @@ function SettingsForm({ s }: { s: RealtorWhatsappSettings }) {
       <div className="section-head"><div><div className="eyebrow"><Bot size={12} className="sm-ii" /> Yeni lead</div><h3>Avtomatik ilk cavab və filtr sualları</h3></div><Toggle on={f.autoReplyEnabled} set={set('autoReplyEnabled')} /></div>
       <Field label="Salamlama mesajı" name="wa-greeting"><textarea rows={3} value={f.greeting} onChange={e => set('greeting')(e.target.value)} maxLength={1000} /></Field>
       <ol className="rl-q-list">{QUESTIONS.map((q, i) => <li key={q}><b>{i + 1}/5</b>{q}</li>)}</ol>
-      <p className="rl-hint">Cavablardan sonra bot uyğun elanları (sertifikatlıları pasport linki ilə) göndərir və iş saatları daxilində 3 görüş vaxtı təklif edir.</p>
+      <p className="rl-hint">Cavablardan sonra bot uyğun elanları (pasportluları pasport linki ilə) göndərir və iş saatları daxilində 3 görüş vaxtı təklif edir.</p>
       <div className="field-grid">
         <Field label="İş günü başlayır" name="wa-start"><select value={f.workdayStartHour} onChange={e => set('workdayStartHour')(Number(e.target.value))}>{Array.from({ length: 24 }, (_, h) => <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>)}</select></Field>
         <Field label="İş günü bitir" name="wa-end"><select value={f.workdayEndHour} onChange={e => set('workdayEndHour')(Number(e.target.value))}>{Array.from({ length: 24 }, (_, h) => h + 1).map(h => <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>)}</select></Field>

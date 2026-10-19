@@ -37,7 +37,7 @@ export function RealtorListingsPage() {
     {editing && <ListingDrawer listing={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
     <Modal open={!!describe} onClose={() => setDescribe(null)} eyebrow="Elan üçün hazır təsvir" title={describe?.title ?? ''} footer={describe && <CopyButton text={listingDescription(describe, describe.passportStatus === 'published' ? describe.passportPublicId : null)} label="Mətni kopyala" className="button button-primary" />}>
       {describe && <pre className="rl-pre">{listingDescription(describe, describe.passportStatus === 'published' ? describe.passportPublicId : null)}</pre>}
-      {describe && describe.passportStatus !== 'published' && <p className="rl-hint"><ShieldCheck size={13} className="sm-ii" /> Pasport dərc olunduqdan sonra mətnə “Təhvil Sertifikatlı” bloku və yoxlama linki avtomatik əlavə olunur.</p>}
+      {describe && describe.passportStatus !== 'published' && <p className="rl-hint"><ShieldCheck size={13} className="sm-ii" /> Pasport dərc olunduqdan sonra mətnə “Təhvil pasportu” bloku və yoxlama linki avtomatik əlavə olunur.</p>}
     </Modal>
     <RealtorToaster />
   </>;
@@ -180,7 +180,7 @@ function ListingDrawer({ listing, onClose }: { listing: RealtorListing | null; o
     return <Drawer open onClose={onClose} eyebrow="Elan əlavə olundu" title={created.title}>
       <div className="rl-offer">
         <span className="rl-offer-icon"><ShieldCheck size={26} /></span>
-        <h3>Bu mənzil üçün “Təhvil Sertifikatlı Mənzil” pasportu yaratmaq istəyirsiniz?</h3>
+        <h3>Bu mənzil üçün “Təhvil pasportlu mənzil” pasportu yaratmaq istəyirsiniz?</h3>
         <p>Təmir işləri, əvvəl/sonra fotoları, podratçı və ev sahibi təsdiqi — alıcı QR kodu skan edib hamısını yoxlayır.</p>
         <button type="button" className="button button-primary full-button" onClick={() => { onClose(); setLocation(`/realtor/passports/new?listing=${created.id}`); }} data-testid="button-offer-yes"><ShieldCheck size={16} />Bəli, pasport yarat</button>
         <button type="button" className="button button-quiet full-button" onClick={() => { toast('Elan əlavə olundu'); onClose(); }} data-testid="button-offer-no">Xeyr, sonra yaradaram</button>
