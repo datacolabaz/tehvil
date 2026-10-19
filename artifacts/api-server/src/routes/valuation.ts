@@ -1,6 +1,6 @@
 import { getAuth } from "@clerk/express";
 import { and, desc, eq, gt, inArray, ne, sql } from "drizzle-orm";
-import { Router, type IRouter, type Request } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
 import {
   CreateConstructionEstimateBody, CreateValuationBody, DeleteConstructionEstimateParams, GetConstructionEstimateParams, GetValuationParams,
   ReadListingLinkBody, ReadListingTextBody, UpdateConstructionEstimateBody, UpdateConstructionEstimateParams,
@@ -12,6 +12,10 @@ import { DEFAULT_USD_RATE, POOL_DAYS, computeValuation, factsFromText, foundLabe
 import { bad, notFound, noStore } from "./homes";
 
 const router: IRouter = Router();
+
+// The market-value service was withdrawn on 20.10.2026: nothing new is read or calculated; stored rows stay untouched.
+const withdrawn = (_req: Request, res: Response) => { res.status(410).json({ error: "Bazar dəyəri xidməti dayandırılıb." }); };
+router.post(["/valuation/read-link", "/valuation/read-text", "/valuations"], withdrawn);
 const uid = (req: Request) => getAuth(req).userId!;
 const readLimit = rateLimit({ windowMs: 3_600_000, max: 60, key: (req) => `vl:${getAuth(req).userId ?? req.ip}` });
 

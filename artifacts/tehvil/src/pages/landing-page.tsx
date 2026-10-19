@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
 import {
-  AlertTriangle, ArrowRight, Bell, Building2, Calculator, Camera, ChevronDown, FileText, HardHat,
+  AlertTriangle, ArrowRight, Bell, Calculator, Hammer, Camera, ChevronDown, FileText, HardHat,
   History, House, Layers, Lock, Menu, Search, ShieldCheck, Sparkles, Wrench, X,
 } from 'lucide-react';
 import { Brand } from '@/components/kit';
@@ -27,8 +27,6 @@ const PASSPORT_POINTS = [
 const FAQ = [
   { q: 'Məlumatlarım təhlükəsizdirmi? Kim görə bilər?', a: 'Ev məlumatları susmaya görə məxfidir: yalnız siz və dəvət etdiyiniz şəxslər görür. İcazələr serverdə yoxlanılır. Sənədlər, ünvan, xərclər və telefonlar QR kodla heç vaxt açılmır; paylaşım linkində yalnız sizin seçdiyiniz hissə görünür və link istənilən vaxt bağlanır.' },
   { q: 'Təhvil-təslim qeydləri evin vəziyyətini və ya keyfiyyətini təsdiqləyirmi?', a: 'Xeyr. Bu qeydlər rəsmi sertifikat və ya ekspertiza deyil. Hər qeydin yanında onu kimin daxil etdiyi (ev sahibi, usta, podratçı, dəvət olunmuş yoxlayıcı) və sənəd əlavə olunub-olunmadığı göstərilir. Yoxlanılmamış məlumat təsdiqlənmiş texniki fakt kimi təqdim olunmur.' },
-  { q: 'Bazar dəyəri necə hesablanır?', a: 'Daxil etdiyiniz elan oxşar real elanlarla müqayisə olunur: ərazi, tikili növü, otaq, sahə, təmir və elanın tarixi nəzərə alınır. Nəticədə aralıq, mərkəzi təxmin, AZN/m², istifadə olunan elanların linkləri və etibarlılıq göstərilir. Elan qiymətləri satış qiyməti deyil; 3-dən az oxşar elan varsa, rəqəm verilmir.' },
-  { q: 'Linkdən elanı oxumaq alınmasa nə edim?', a: 'Bəzi saytlar avtomatik oxunmaya icazə vermir və ya səhifə açılmır. Bu halda elanın mətnini yapışdırın və ya məlumatları əl ilə daxil edin — hesablama eyni qaydada aparılır.' },
   { q: 'Tikinti smetası üçün hansı fayllar qəbul olunur?', a: 'PDF (mətnində yazılan sahə, miqyas, mərtəbə oxunur), JPG/PNG (önizləmə, ölçüləri siz daxil edirsiniz), XLSX və CSV (iş həcmləri və qiymətlər). DWG, DXF, IFC və RVT hələ oxunmur — memardan PDF ixracı və ya ölçü cədvəli istəyin.' },
   { q: 'Tikinti qiymətləri haradan götürülür?', a: 'Təhvil-də tikinti qiymətləri bazası yoxdur və sistem qiymət uydurmur. Vahid qiymətləri podratçı təklifindən, təchizatçıdan və ya yüklədiyiniz cədvəldən daxil edirsiniz; hər sətirdə mənbə və tarix qalır. Qiyməti olmayan sətir “qiymət yoxdur” kimi göstərilir.' },
   { q: 'PDF formatında təhvil aktı yaratmaq olurmu?', a: 'Hazırda ayrıca rəsmi təhvil aktı şablonu yoxdur. Evin seçdiyiniz məlumatlarını (işlər, qüsur və düzəlişlər, avadanlıq, sənədlər) paylaşım səhifəsində toplayıb çap edə və ya PDF kimi saxlaya bilərsiniz.' },
@@ -47,8 +45,8 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
     </header>
 
     <section className="lp-hero2 wrap">
-      <h1 className="font-display">Evinizi qeydə alın. Dəyərini və xərclərini əvvəlcədən hesablayın.</h1>
-      <p>Təhvil.az evin otaqlarını, avadanlığını, qüsurlarını və dəyişikliklərini rəqəmsal şəkildə qeydə almağa, həmçinin daşınmaz əmlakın təxmini bazar dəyərini və tikinti xərclərini hesablamağa kömək edir.</p>
+      <h1 className="font-display">Evinizi qeydə alın. Təmir və tikinti xərclərini əvvəlcədən hesablayın.</h1>
+      <p>Təhvil.az evin otaqlarını, avadanlığını, qüsurlarını və dəyişikliklərini rəqəmsal şəkildə qeydə almağa, həmçinin evin təmir və tikinti xərclərini əvvəlcədən hesablamağa kömək edir.</p>
     </section>
 
     <section className="lp-two wrap" aria-label="Əsas xidmətlər">
@@ -64,12 +62,12 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
       <article className="lp-svc alt" id="smeta" data-testid="landing-service">
         <div className="eyebrow"><span className="eyebrow-dot" />Modul B</div>
         <h2 className="font-display">AI smeta</h2>
-        <p>Elan linkindən evin təxmini bazar dəyərini oxşar real elanlarla müqayisə edərək, memarlıq layihəsindən isə tikinti üçün ilkin material və iş smetasını hesablayın.</p>
+        <p>Mənzil və ya ev təmiri üçün iş həcmi və xərc smetası, memarlıq layihəsindən isə tikinti üçün ilkin material və iş smetası hazırlayın.</p>
         <div className="lp-svc-ctas">
-          <Link href="/ai-smeta/bazar" className="button button-primary lp-big" data-testid="cta-market"><Building2 size={16} />Elan üzrə bazar dəyərini hesabla</Link>
+          <Link href="/smeta" className="button button-primary lp-big" data-testid="cta-renovation"><Hammer size={16} />Təmir smetası hazırla</Link>
           <Link href="/ai-smeta/tikinti" className="button button-secondary lp-big" data-testid="cta-build"><Calculator size={16} />Layihədən tikinti smetası hazırla</Link>
         </div>
-        <p className="lp-honest"><ShieldCheck size={16} />İki ayrı hesablama, bir-birinə qarışdırılmır. Elan qiyməti satış qiyməti deyil; tikinti qiymətlərini siz və ya podratçınız daxil edir. Mənbələr və fərziyyələr nəticədə göstərilir.</p>
+        <p className="lp-honest"><ShieldCheck size={16} />Hər qiymətin mənbəyi və tarixi smetada görünür; qiyməti olmayan iş “qiymət yoxdur” kimi qalır, uydurulmur.</p>
         <SampleResults />
       </article>
     </section>
@@ -79,8 +77,6 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
       <div className="lp-how">
         <div className="lp-how-col"><h3><House size={17} />Ev təhvil-təslim</h3><ol className="lp-steps-mini">
           {['Evi əlavə edin — yalnız ad kifayətdir', 'Otaq üzrə foto və texniki məlumat əlavə edin', 'Dəyişiklik olanda yeniləyin — tarixçə saxlanılır', 'Lazım olanda yalnız seçdiyinizi paylaşın'].map(x => <li key={x}>{x}</li>)}</ol></div>
-        <div className="lp-how-col"><h3><Building2 size={17} />Bazar dəyəri</h3><ol className="lp-steps-mini">
-          {['Elan linkini və ya mətnini daxil edin', 'Oxunan məlumatları yoxlayıb düzəldin', 'Oxşar real elanlarla müqayisə alın', 'Aralıq, mənbələr və etibarlılığa baxın'].map(x => <li key={x}>{x}</li>)}</ol></div>
         <div className="lp-how-col"><h3><HardHat size={17} />Tikinti smetası</h3><ol className="lp-steps-mini">
           {['Layihəni yükləyin (PDF, şəkil, XLSX, CSV)', 'Tapılan ölçüləri yoxlayın, çatışanları yazın', 'Qiymətləri təklif və ya cədvəldən daxil edin', 'Excel və ya PDF kimi ixrac edin'].map(x => <li key={x}>{x}</li>)}</ol></div>
       </div>
@@ -91,7 +87,7 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
       <div className="lp-why-grid light">
         {[[<ShieldCheck size={20} key="s" />, 'Mənbə həmişə göstərilir', 'Ev sahibi, usta, podratçı və ya dəvət olunmuş yoxlayıcı — kim daxil edibsə, yanında yazılır.'],
           [<Lock size={20} key="l" />, 'Susmaya görə məxfi', 'Ünvan, sənədlər, xərclər və telefonlar icazəsiz paylaşılmır. Linklər məhduddur və bağlanır.'],
-          [<Search size={20} key="q" />, 'Uydurma yoxdur', 'Müqayisə elanı, vahid qiymət və ya ölçü tapılmayanda “məlumat yoxdur” deyirik.'],
+          [<Search size={20} key="q" />, 'Uydurma yoxdur', 'Vahid qiymət və ya ölçü tapılmayanda “məlumat yoxdur” deyirik.'],
           [<Bell size={20} key="b" />, 'Qeyri-müəyyənlik gizlədilmir', 'Etibarlılıq səviyyəsi, çatışmayan məlumatlar və fərziyyələr hər nəticədədir.']].map(([i, t, d]) =>
           <div key={String(t)} className="lp-why-item"><span>{i}</span><h3>{t}</h3><p>{d}</p></div>)}
       </div>
@@ -111,7 +107,7 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
 
     <Partners lang={lang} />
     <footer className="landing-footer wrap"><Brand /><p>Təhvil.az — ev təhvil-təslim və AI smeta platforması. Hesabdakı təsdiq audit qeydidir, hüquqi elektron imza deyil.</p><LanguagePicker lang={lang} change={change} />
-      <nav className="landing-legal" aria-label="Bələdçilər"><a href="/menzil-tehvil-teslim-akti.html">Mənzil təhvil-təslim aktı</a><a href="/evin-bazar-deyeri-ve-tikinti-smetasi.html">Bazar dəyəri və tikinti smetası</a><a href="/temir-tehvil-akti.html">Təmir işlərinin təhvil aktı</a><a href="/temir-islerinin-qebulu.html">Təmir işlərinin qəbulu</a><a href="/podratci-ile-razilasma.html">Podratçı ilə razılaşma</a><a href="/temir-elave-isler.html">Əlavə işlər və dəyişikliklər</a></nav>
+      <nav className="landing-legal" aria-label="Bələdçilər"><a href="/menzil-tehvil-teslim-akti.html">Mənzil təhvil-təslim aktı</a><a href="/ev-temiri-ve-tikinti-smetasi.html">Təmir və tikinti smetası</a><a href="/temir-tehvil-akti.html">Təmir işlərinin təhvil aktı</a><a href="/temir-islerinin-qebulu.html">Təmir işlərinin qəbulu</a><a href="/podratci-ile-razilasma.html">Podratçı ilə razılaşma</a><a href="/temir-elave-isler.html">Əlavə işlər və dəyişikliklər</a></nav>
       <nav className="landing-legal"><a href="/privacy.html">Məxfilik siyasəti</a><a href="/terms.html">İstifadə şərtləri</a></nav>
       <address className="landing-contact"><a href="mailto:support@tehvil.az">support@tehvil.az</a><a href="tel:+994503066626">+994 50 306 66 26</a><a href="https://wa.me/994503066626" target="_blank" rel="noopener noreferrer">WhatsApp</a><span>Bakı, Səbail rayonu, Badamdar qəsəbəsi, 26-cı küçə, 20</span></address>
     </footer>
@@ -122,7 +118,6 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
 function SampleResults() {
   return <div className="lp-demo" aria-label="Demo nəticələr">
     <div className="lp-mock-tag">Demo — real hesablama deyil</div>
-    <div className="lp-demo-row"><small>Bazar dəyəri (nümunə)</small><b>178 000 – 196 000 AZN</b><span>Mərkəzi: 186 000 AZN · 1 930 AZN/m² · 7 oxşar elan · etibarlılıq: orta</span></div>
     <div className="lp-demo-row"><small>Tikinti smetası (nümunə)</small><b>Material 20 752 · İşçilik 8 768 AZN</b><span>13 bölmə · 20 sətirdə qiymət daxil edilməyib — smeta natamamdır</span></div>
   </div>;
 }

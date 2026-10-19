@@ -27,7 +27,7 @@ export function ConstructionListPage() {
   const create = useCreateConstructionEstimate();
   const [, setLocation] = useLocation();
   return <>
-    <PageHeading eyebrow="AI Smeta · Rejim 2" title="Layihədən tikinti smetası" description="Memarın layihəsindən ölçüləri götürün, qiymətləri öz mənbənizdən daxil edin. Hazır evin bazar dəyəri ilə qarışdırılmır."
+    <PageHeading eyebrow="AI Smeta · Tikinti" title="Layihədən tikinti smetası" description="Memarın layihəsindən ölçüləri götürün, qiymətləri öz mənbənizdən daxil edin."
       action={<button type="button" className="button button-primary" disabled={create.isPending} data-testid="button-new-build" onClick={() => create.mutate({ data: { name: 'Yeni tikinti smetası', data: initial() as unknown as Record<string, unknown> } }, { onSuccess: e => setLocation(`/ai-smeta/tikinti/${e.id}`) })}><Plus size={16} />Yeni smeta</button>} />
     <div className="ai-honest"><Info size={15} /><p>Təhvil-də tikinti qiymətləri bazası yoxdur — vahid qiymətləri podratçı təklifindən, təchizatçı qiymətindən və ya yüklədiyiniz cədvəldən daxil edirsiniz. Qiyməti olmayan sətir “qiymət yoxdur” kimi qalır.</p></div>
     {list.isLoading ? <Skeleton rows={2} /> : !(list.data ?? []).length ? <Empty icon={<HardHat size={28} />} title="Hələ tikinti smetası yoxdur" text="“Yeni smeta” ilə başlayın: layihə faylını yükləyin və ya ölçüləri özünüz yazın." />
