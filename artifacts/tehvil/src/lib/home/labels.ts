@@ -40,17 +40,17 @@ export const WORKER_KIND: Record<string, string> = { individual: 'Usta', team: '
 export const MEMBER_ROLE: Record<string, string> = { leader: 'Briqadir', member: 'Üzv', representative: 'Şirkət nümayəndəsi' };
 export const MEMBER_STATUS: Record<string, string> = { invited: 'Dəvət olunub', active: 'Aktiv', declined: 'İmtina edib', left: 'Ayrılıb', removed: 'Çıxarılıb' };
 
-export const NOTE_KIND: Record<string, string> = { note: 'Qeyd', defect: 'Problem / qüsur', fix: 'Problem düzəldildi', inspection: 'Mütəxəssis yoxlaması' };
+export const NOTE_KIND: Record<string, string> = { note: 'Qeyd', defect: 'Problem / qüsur', fix: 'Problem düzəldildi', inspection: 'Yoxlama qeydi' };
 export const PHASE: Record<string, string> = { before: 'İşdən əvvəl', during: 'İş zamanı', after: 'İşdən sonra', hidden: 'Divar bağlanmazdan əvvəl', other: 'Fayl', document: 'Sənəd' };
 
 export const INFRA_TYPE: Record<string, string> = { electric: 'Elektrik xətləri', water: 'Su xətləri', sewer: 'Kanalizasiya', heating: 'İstilik xətləri', gas: 'Qaz xətti', ventilation: 'Ventilyasiya', internet: 'İnternet və TV kabeli', meter: 'Sayğac', valve: 'Ventil / kran', electrical_panel: 'Elektrik lövhəsi', other: 'Digər' };
 export const INFRA_COLOR: Record<string, string> = { meter: '#8a6a2c', valve: '#1f6f8b', electrical_panel: '#b5651d', electric: '#e0a100', water: '#2477d6', sewer: '#7a5230', heating: '#d6452a', gas: '#e6c419', ventilation: '#3aa39a', internet: '#7b4fd6', other: '#5b6b66' };
-export const INFRA_SOURCE: Record<string, string> = { owner: 'Ev sahibi qeyd edib', worker: 'Usta qeyd edib', plan: 'Plandan / layihədən', specialist: 'Mütəxəssis qeyd edib' };
+export const INFRA_SOURCE: Record<string, string> = { owner: 'Ev sahibi qeyd edib', worker: 'Usta qeyd edib', plan: 'Plandan / layihədən', specialist: 'Mütəxəssis məlumatı' };
 
 export const EQUIP_CATEGORY: Record<string, string> = { boiler: 'Kombi', air_conditioner: 'Kondisioner', water_filter: 'Su filtri', water_heater: 'Su qızdırıcısı', electrical_panel: 'Elektrik paneli', ventilation: 'Ventilyasiya', appliance: 'Məişət texnikası', other: 'Digər' };
 
 export const SHARE_LEVEL: Record<string, string> = { selected: 'Seçdiyim məlumatlar', technical: 'Tam məlumatlar' };
-export const PUBLIC_LEVEL: Record<string, string> = { off: 'Heç nə göstərmə', basic: 'Evin ümumi məlumatları', history: 'Ümumi məlumat + təsdiqlənmiş işlər' };
+export const PUBLIC_LEVEL: Record<string, string> = { off: 'Heç nə göstərmə', basic: 'Evin ümumi məlumatları', history: 'Ümumi məlumat + görülmüş işlər' };
 
 export const AUDIT_ACTION: Record<string, string> = {
   'home.created': 'Ev əlavə olundu', 'home.updated': 'Evin məlumatları dəyişdi', 'home.archived': 'Ev arxivləndi',
@@ -61,7 +61,7 @@ export const AUDIT_ACTION: Record<string, string> = {
   'participant.declined': 'Usta imtina etdi', 'participant.removed': 'Usta işdən çıxarıldı', 'participant.updated': 'Ustanın rolu və ya icazəsi dəyişdi', 'placeholder.claimed': 'Usta qeydi onun öz hesabına bağlandı',
   'note.note': 'Qeyd', 'note.defect': 'Nasazlıq qeydi', 'note.fix': 'Düzəliş qeydi', 'note.inspection': 'Texniki yoxlama',
   'media.added': 'Foto / video əlavə olundu', 'media.hidden': 'Fayl gizlədildi',
-  'infrastructure.created': 'Evdəki sistem qeyd olundu', 'infrastructure.updated': 'Evdəki sistem dəyişdi', 'infrastructure.deleted': 'Evdəki sistem silindi', 'infrastructure.verified': 'Mütəxəssis təsdiqlədi',
+  'infrastructure.created': 'Evdəki sistem qeyd olundu', 'infrastructure.updated': 'Evdəki sistem dəyişdi', 'infrastructure.deleted': 'Evdəki sistem silindi', 'infrastructure.verified': 'Xətt yoxlanıldı',
   'equipment.created': 'Avadanlıq əlavə olundu', 'equipment.updated': 'Avadanlıq dəyişdi', 'equipment.deleted': 'Avadanlıq silindi',
   'invitation.created': 'Dəvət linki yaradıldı', 'smeta.linked': 'Smeta evdə saxlanıldı', 'smeta.unlinked': 'Smeta evdən çıxarıldı', 'member.joined': 'Üzv qoşuldu', 'member.removed': 'Üzv çıxarıldı',
   'sharing.updated': 'QR kodla baxış ayarları dəyişdi', 'share.created': 'Paylaşım linki yaradıldı', 'share.revoked': 'Paylaşım linki bağlandı',

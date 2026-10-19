@@ -3704,6 +3704,11 @@ export interface Equipment {
   photoUrl: string | null;
   notes: string;
   services: EquipmentService[];
+  /** @nullable */
+  lastServiceAt: string | null;
+  /** @nullable */
+  nextServiceAt: string | null;
+  serviceContact: string;
 }
 
 export interface MarkerPoint {
@@ -3846,6 +3851,13 @@ export interface EquipmentInput {
      * @maxLength 3000
      */
   notes?: string;
+  /** @nullable */
+  nextServiceAt?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 300
+     */
+  serviceContact?: string;
 }
 
 export type HomeInvitationInputKind = typeof HomeInvitationInputKind[keyof typeof HomeInvitationInputKind];
@@ -4239,12 +4251,24 @@ export interface MembershipPatch {
   role?: MembershipPatchRole;
 }
 
+export type ShareScopePurpose = typeof ShareScopePurpose[keyof typeof ShareScopePurpose];
+
+
+export const ShareScopePurpose = {
+  general: 'general',
+  sale: 'sale',
+  handover: 'handover',
+} as const;
+
 export interface ShareScope {
   roomIds: string[];
   workIds: string[];
   equipmentIds: string[];
   includePhotos: boolean;
   includeInfrastructure: boolean;
+  includeAddress?: boolean;
+  documentIds?: string[];
+  purpose?: ShareScopePurpose;
 }
 
 export interface HomeShare {
@@ -4336,6 +4360,15 @@ export interface PublicPerformer {
   profilePublic: boolean;
 }
 
+export interface PublicWorkNote {
+  kind: string;
+  body: string;
+  /** @nullable */
+  result: string | null;
+  authorRole: string;
+  createdAt: string;
+}
+
 export interface PublicWork {
   id: string;
   title: string;
@@ -4354,6 +4387,18 @@ export interface PublicWork {
   inspected: boolean;
   description: string;
   materials: string;
+  source: string;
+  hasDocuments: boolean;
+  notes: PublicWorkNote[];
+  updatedAt: string;
+}
+
+export interface PublicDocument {
+  id: string;
+  title: string;
+  url: string;
+  contentType: string;
+  createdAt: string;
 }
 
 export interface PublicEquipment {
@@ -4368,6 +4413,10 @@ export interface PublicEquipment {
   warrantyUntil: string | null;
   /** @nullable */
   roomName: string | null;
+  /** @nullable */
+  lastServiceAt: string | null;
+  /** @nullable */
+  nextServiceAt: string | null;
 }
 
 export interface PublicInfrastructure {
@@ -4382,6 +4431,7 @@ export interface PublicInfrastructure {
   points: MarkerPoint[];
   source: string;
   verified: boolean;
+  createdAt: string;
 }
 
 export interface PublicHome {
@@ -4406,9 +4456,13 @@ export interface PublicHome {
   works: PublicWork[];
   equipment: PublicEquipment[];
   infrastructure: PublicInfrastructure[];
+  documents: PublicDocument[];
+  purpose: string;
   /** @nullable */
   shareLabel: string | null;
   updatedAt: string;
+  /** @nullable */
+  lastChangeAt: string | null;
 }
 
 export interface IdentityInput {
@@ -4428,6 +4482,87 @@ export interface HomeSmeta {
   status: string;
   mine: boolean;
   updatedAt: string;
+  /** @nullable */
+  estimatedTotal: number | null;
+  /** @nullable */
+  spentTotal: number | null;
+}
+
+export interface PassportSection {
+  key: string;
+  label: string;
+  count: number;
+  filled: boolean;
+  hint: string;
+  path: string;
+}
+
+export interface PassportSources {
+  owner: number;
+  contractor: number;
+  documented: number;
+  specialist: number;
+}
+
+export interface HomePassport {
+  percent: number;
+  filledSections: number;
+  totalSections: number;
+  sections: PassportSection[];
+  sources: PassportSources;
+  /** @nullable */
+  lastChangeAt: string | null;
+}
+
+export interface CostLine {
+  key: string;
+  currency: string;
+  total: number;
+  count: number;
+}
+
+export interface HomeCosts {
+  byCurrency: CostLine[];
+  byCategory: CostLine[];
+  worksWithCost: number;
+  worksWithoutCost: number;
+  estimates: HomeSmeta[];
+}
+
+export interface Reminder {
+  kind: string;
+  homeId: string;
+  homeName: string;
+  equipmentId: string;
+  title: string;
+  dueDate: string;
+  overdue: boolean;
+}
+
+export type ServiceInterestInputKind = typeof ServiceInterestInputKind[keyof typeof ServiceInterestInputKind];
+
+
+export const ServiceInterestInputKind = {
+  inspection: 'inspection',
+  pro_account: 'pro_account',
+  maintenance: 'maintenance',
+  handover: 'handover',
+} as const;
+
+export interface ServiceInterestInput {
+  kind: ServiceInterestInputKind;
+  /** @nullable */
+  homeId?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 200
+     */
+  contact?: string;
+  /**
+     * @minLength 0
+     * @maxLength 1000
+     */
+  note?: string;
 }
 
 export interface HomeSmetaLinkInput {

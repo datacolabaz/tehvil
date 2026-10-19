@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { PublicPerformer } from './publicPerformer';
+import type { PublicWorkNote } from './publicWorkNote';
 
 export interface PublicWork {
   id: string;
@@ -25,4 +26,8 @@ export interface PublicWork {
   inspected: boolean;
   description: string;
   materials: string;
+  source: string;
+  hasDocuments: boolean;
+  notes: PublicWorkNote[];
+  updatedAt: string;
 }

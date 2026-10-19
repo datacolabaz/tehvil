@@ -18,4 +18,8 @@ export interface PublicEquipment {
   warrantyUntil: string | null;
   /** @nullable */
   roomName: string | null;
+  /** @nullable */
+  lastServiceAt: string | null;
+  /** @nullable */
+  nextServiceAt: string | null;
 }

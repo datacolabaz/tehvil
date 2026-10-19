@@ -602,6 +602,8 @@ CREATE TABLE IF NOT EXISTS "equipment" (
 	"warranty_until" date,
 	"photo_media_id" uuid,
 	"notes" text DEFAULT '' NOT NULL,
+	"next_service_at" date,
+	"service_contact" text DEFAULT '' NOT NULL,
 	"created_by_user_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -737,6 +739,16 @@ CREATE TABLE IF NOT EXISTS "infrastructure_items" (
 	"verified_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "service_interests" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" varchar(128) NOT NULL,
+	"kind" varchar(16) NOT NULL,
+	"home_id" uuid,
+	"contact" varchar(200) DEFAULT '' NOT NULL,
+	"note" text DEFAULT '' NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "work_approvals" (
@@ -1803,6 +1815,10 @@ ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "photo_media_id" uuid;
 --> statement
 ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "notes" text DEFAULT '' NOT NULL;
 --> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "next_service_at" date;
+--> statement
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "service_contact" text DEFAULT '' NOT NULL;
+--> statement
 ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
 --> statement
 ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
@@ -2024,6 +2040,20 @@ ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "verified_at" timest
 ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
 ALTER TABLE "infrastructure_items" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "kind" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "home_id" uuid;
+--> statement
+ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "contact" varchar(200) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
 ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
@@ -2500,6 +2530,11 @@ EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 --> statement
 DO $$ BEGIN
+  ALTER TABLE "service_interests" ADD CONSTRAINT "service_interests_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
   ALTER TABLE "work_approvals" ADD CONSTRAINT "work_approvals_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
@@ -2664,6 +2699,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS "homes_public_id_idx" ON "homes" USING btree (
 CREATE INDEX IF NOT EXISTS "homes_creator_idx" ON "homes" USING btree ("created_by_user_id");
 --> statement
 CREATE INDEX IF NOT EXISTS "infrastructure_items_home_idx" ON "infrastructure_items" USING btree ("home_id","type");
+--> statement
+CREATE INDEX IF NOT EXISTS "service_interests_kind_idx" ON "service_interests" USING btree ("kind","created_at");
 --> statement
 CREATE INDEX IF NOT EXISTS "work_approvals_work_idx" ON "work_approvals" USING btree ("work_id","created_at");
 --> statement

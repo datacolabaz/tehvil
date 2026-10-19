@@ -24,7 +24,7 @@ const STATUS_ACTIONS: { action: WorkStatusInputAction; perm: keyof WorkDetail['p
   { action: 'reopen', perm: 'reopen', label: 'Yenidən aç', icon: RotateCcw, tone: 'quiet' },
 ];
 const APPROVAL_LABEL: Record<string, string> = { created: 'Qeyd yaradıldı', start: 'İşə başlanıldı', complete: 'Tamamlandı', confirm: 'Ev sahibi qəbul etdi', request_revision: 'Düzəliş istənildi', reopen: 'Yenidən açıldı', inspected: 'Mütəxəssis yoxladı — qüsur yoxdur', inspection_issues: 'Mütəxəssis yoxladı — iradlar var' };
-const ROLE_OF: Record<string, string> = { owner: 'Ev sahibi', member: 'Ev üzvü', contributor: 'Mütəxəssis', technician: 'Mütəxəssis', viewer: 'Ev üzvü', performer: 'Usta', staff: 'Tehvil.az' };
+const ROLE_OF: Record<string, string> = { owner: 'Ev sahibi', member: 'Ev üzvü', contributor: 'Redaktə icazəli şəxs', technician: 'Redaktə icazəli şəxs', viewer: 'Ev üzvü', performer: 'Usta', staff: 'Tehvil.az' };
 
 export function WorkPage({ workId }: { workId: string }) {
   const q = useGetWork(workId);
@@ -57,7 +57,7 @@ export function WorkPage({ workId }: { workId: string }) {
         <span className="hp-provenance">{addedBy(w.addedByRole, w.addedByMe)} · {dayTime(w.createdAt)}</span>
         {accepted && <span className="hp-badge reg">Usta iştirakını təsdiqləyib</span>}
         {w.approvals.some(x => x.action === 'confirm') && <span className="hp-badge reg">Ev sahibi qəbul edib</span>}
-        {!!w.inspectedAt && <span className="hp-badge reg">Mütəxəssis yoxlayıb</span>}</div>
+        {!!w.inspectedAt && <span className="hp-badge reg" title="Ev sahibinin giriş verdiyi şəxs yoxlama qeydi yazıb">Yoxlama qeydi var</span>}</div>
       <div className="hp-actions">{STATUS_ACTIONS.filter(a => p[a.perm]).map(a => <button key={a.action} type="button" className={`button button-${a.tone}`} disabled={status.isPending} data-testid={`button-status-${a.action}`}
         onClick={() => (a.action === 'request_revision' || a.action === 'reopen') ? setStatusNote(a.action) : doStatus(a.action)}><a.icon size={15} />{a.label}</button>)}</div>
       {w.status === 'completed' && owner && <p className="rl-hint">Usta işin bitdiyini qeyd edib. Fotolara baxın və təsdiqləyin və ya düzəliş istəyin. Təsdiqlədikdən sonra icraçılar bu işi dəyişə bilməz.</p>}

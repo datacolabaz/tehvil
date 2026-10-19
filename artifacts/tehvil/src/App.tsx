@@ -20,14 +20,15 @@ import {
   useGetRenovationPassport, getListProjectsQueryKey, getGetProjectDashboardQueryKey,
   getListRoomsQueryKey, getListScopeItemsQueryKey, getListChangeOrdersQueryKey,
   getListMilestonesQueryKey, getListPaymentsQueryKey,
-  getListTimelineQueryKey, getGetRenovationPassportQueryKey, useGetHomeOverview, useGetWork, useGetMyRoles, useGetMyInbox,
+  getListTimelineQueryKey, getGetRenovationPassportQueryKey, useGetHomeOverview, useGetWork, useGetMyRoles, useGetMyInbox, useListMyReminders,
 } from '@workspace/api-client-react';
 import type { Project, ProjectInput, Room, ScopeItem } from '@workspace/api-client-react';
 import { copy, type Lang, type TKey } from '@/lib/i18n';
 import { emitFeedback, errorToMsg, onFeedback, type FeedbackMsg } from '@/lib/feedback';
-import { Button, ErrorNotice, EmptyLine, Field, Loading, PageHeading, Status, actionItemText, date, money, propLabel, roleLabel, typeLabel } from '@/components/kit';
+import { Brand, Button, ErrorNotice, EmptyLine, Field, Loading, PageHeading, Status, actionItemText, date, money, propLabel, roleLabel, typeLabel } from '@/components/kit';
 import { LanguagePicker } from '@/components/language-picker';
 import { Partners } from '@/components/partners';
+import { HomePassportLanding } from '@/pages/landing-page';
 import { ScopePage } from '@/pages/scope-page';
 import { ChangesPage } from '@/pages/changes-page';
 import { MilestonesPage } from '@/pages/milestones-page';
@@ -78,6 +79,7 @@ const WorkersPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({
 const WorkerProfilePage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.WorkerProfilePage })));
 const PublicWorkerPage = lazy(() => import('@/pages/home/workers-pages').then(m => ({ default: m.PublicWorkerPage })));
 const HomeDocumentsPage = lazy(() => import('@/pages/home/documents-page').then(m => ({ default: m.HomeDocumentsPage })));
+const InterestPage = lazy(() => import('@/pages/home/passport-card').then(m => ({ default: m.InterestPage })));
 const SettingsPage = lazy(() => import('@/pages/home/settings-page').then(m => ({ default: m.SettingsPage })));
 const AllHistoryPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.AllHistoryPage })));
 const MyWorksPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.MyWorksPage })));
@@ -128,9 +130,6 @@ function useLanguage() {
   const change = (value: Lang) => { localStorage.setItem('tehvil-language', value); setLang(value); };
   return { lang, t, change };
 }
-function Brand({ inverse = false }: { inverse?: boolean }) {
-  return <Link href="/" className={`brand ${inverse ? 'inverse' : ''}`} data-testid="link-brand"><span className="brand-mark">t.</span><span>Təhvil</span></Link>;
-}
 type Crumb = { label: string; href?: string };
 function AppShell({ children, project, projectId, active, crumbs, lang, change, t, realtorSection, home }: { children: ReactNode; project?: Project; projectId?: string; active?: string; crumbs?: Crumb[]; lang: Lang; change: (v: Lang) => void; t: (k: TKey) => string; realtorSection?: string; home?: { id: string; name: string; section: string; owner: boolean; audit: boolean; member?: boolean } }) {
   const [open, setOpen] = useState(false);
@@ -139,7 +138,8 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
   // extra services sit at the bottom and the older project workspace appears only for people who have projects.
   const roles = useGetMyRoles({ query: { staleTime: 60_000, queryKey: ['/api/me/roles'] } });
   const inbox = useGetMyInbox({ query: { staleTime: 30_000, queryKey: ['/api/me/inbox'] } });
-  const pending = (inbox.data?.participations.length ?? 0) + (inbox.data?.memberships.length ?? 0) + (inbox.data?.approvals.length ?? 0);
+  const reminders = useListMyReminders({ query: { staleTime: 60_000, queryKey: ['/api/me/reminders'] } });
+  const pending = (inbox.data?.participations.length ?? 0) + (inbox.data?.memberships.length ?? 0) + (inbox.data?.approvals.length ?? 0) + (reminders.data?.length ?? 0);
   const r = roles.data;
   type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number };
   // Home-first menu: the same three sections on desktop and mobile. Other modules stay reachable from Parametrlər.
@@ -177,7 +177,11 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
     </div>{open && <button className="scrim" aria-label={t('close')} onClick={() => setOpen(false)}/>}
   </div>;
 }
-function Landing({ lang, change, t }: { lang: Lang; change: (v: Lang)=>void; t: (k:TKey)=>string }) {
+function Landing(props: { lang: Lang; change: (v: Lang)=>void; t: (k:TKey)=>string }) {
+  // The home-passport landing is written in Azerbaijani; Russian and English keep the earlier page for now.
+  return props.lang === 'az' ? <HomePassportLanding lang={props.lang} change={props.change} /> : <LegacyLanding {...props} />;
+}
+function LegacyLanding({ lang, change, t }: { lang: Lang; change: (v: Lang)=>void; t: (k:TKey)=>string }) {
   const [, setLocation] = useLocation();
   const stages = copy[lang].stages;
   const descriptions = copy[lang].stageDescs;
@@ -410,6 +414,7 @@ function ClerkRoutes() {
       <Route path="/homes/:homeId/performers">{params => <HomeShell homeId={params.homeId} section="history" lang={lang} change={changeLang} t={t}><HomePerformersPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/sharing">{params => <HomeShell homeId={params.homeId} section="sharing" lang={lang} change={changeLang} t={t}><HomeSharingPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/documents">{params => <HomeShell homeId={params.homeId} section="documents" lang={lang} change={changeLang} t={t}><HomeDocumentsPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/interest/:kind">{params => <PlainShell active="myHomes" crumbs={[{ label: 'Xidmətlər' }]} lang={lang} change={changeLang} t={t}><InterestPage kind={params.kind}/></PlainShell>}</Route>
       <Route path="/settings">{() => <PlainShell active="settingsNav" crumbs={[{ label: t('settingsNav') }]} lang={lang} change={changeLang} t={t}><SettingsPage lang={lang} change={changeLang}/></PlainShell>}</Route>
       <Route path="/homes/:homeId/audit">{params => <HomeShell homeId={params.homeId} section="sharing" lang={lang} change={changeLang} t={t}><HomeAuditPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId">{params => <HomeShell homeId={params.homeId} section="profile" lang={lang} change={changeLang} t={t}><HomeProfilePage homeId={params.homeId}/></HomeShell>}</Route>

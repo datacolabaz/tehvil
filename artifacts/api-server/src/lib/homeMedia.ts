@@ -75,7 +75,7 @@ export function shareIncludesWork(scope: ShareScope, level: string, work: { id: 
  *  - its uploader; members of the home; performers of the work it belongs to
  *  - anyone, for a performer's profile photo
  *  - anyone with the QR link, if the owner made photos public and the work is public & confirmed
- *  - anyone with a valid share link whose scope covers it
+ *  - anyone with a valid share link whose scope covers it (documents: only if picked for that link)
  */
 export async function canReadMedia(media: MediaRow, userId: string | null, shareToken: string | null): Promise<"private" | "public" | null> {
   if (media.deletedAt) return null;
@@ -89,6 +89,12 @@ export async function canReadMedia(media: MediaRow, userId: string | null, share
   const [home] = await db.select().from(homesTable).where(eq(homesTable.id, media.homeId));
   if (!home || home.archivedAt) return null;
   const [work] = media.workId ? await db.select().from(workRecordsTable).where(eq(workRecordsTable.id, media.workId)) : [];
+  if (shareToken && media.phase === "document") {
+    // A document opens through a link only when the owner picked that exact document for it.
+    const s = await activeShare(shareToken);
+    if (s && s.home.id === home.id && (s.share.scope.documentIds ?? []).includes(media.id)) return "private";
+    return null;
+  }
   if (shareToken && isVisual(media)) {
     const s = await activeShare(shareToken);
     if (s && s.home.id === home.id) {
