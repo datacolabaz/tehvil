@@ -128,6 +128,7 @@ export * from './participantPatch';
 export * from './participantPatchRole';
 export * from './participantPatchStatus';
 export * from './passport';
+export * from './passportAttention';
 export * from './passportRealtor';
 export * from './passportRealtorInput';
 export * from './passportSection';

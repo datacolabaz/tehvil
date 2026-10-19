@@ -16,6 +16,7 @@ import { AUDIT_ACTION, EQUIP_CATEGORY, HOME_ROLE, HOME_ROLE_HINT, INFRA_TYPE, PA
 import { HomeFormModal } from './homes-page';
 import { QuickWorkModal } from './quick-work';
 import { HomeCostsCard, HomeReminders, PassportCard } from './passport-card';
+import { HomeSearch } from './home-search';
 
 export function useHome(homeId: string) { return useGetHomeOverview(homeId); }
 
@@ -68,6 +69,7 @@ export function HomeProfilePage({ homeId }: { homeId: string }) {
       </div>
     </div>
     {home.myRole !== 'performer' && <PassportCard homeId={homeId} />}
+    {home.myRole !== 'performer' && <HomeSearch homeId={homeId} />}
     {home.myRole !== 'performer' && home.myRole !== 'viewer' && <HomeReminders homeId={homeId} />}
     {p.edit && <NextSteps homeId={homeId} overview={q.data} onAddWork={() => setAdding(true)} />}
     {stats.works > 0 && <div className="hp-stats">

@@ -5711,6 +5711,15 @@ components:
         hint: {type: string}
         path: {type: string}
       required: [key, label, count, filled, hint, path]
+    PassportAttention:
+      type: object
+      properties:
+        kind: {type: string}
+        text: {type: string}
+        path: {type: string}
+        date:
+          type: [string, 'null']
+      required: [kind, text, path, date]
     HomePassport:
       type: object
       properties:
@@ -5724,7 +5733,15 @@ components:
         lastChangeAt:
           type: [string, 'null']
           format: date-time
-      required: [percent, filledSections, totalSections, sections, sources, lastChangeAt]
+        lastChangeByRole:
+          type: [string, 'null']
+        lastChangeByMe: {type: boolean}
+        lastChangeSummary:
+          type: [string, 'null']
+        attention:
+          type: array
+          items: {$ref: '#/components/schemas/PassportAttention'}
+      required: [percent, filledSections, totalSections, sections, sources, lastChangeAt, lastChangeByRole, lastChangeByMe, lastChangeSummary, attention]
     PassportSources:
       type: object
       properties:

@@ -11256,7 +11256,16 @@ export const GetHomePassportResponse = zod.object({
   "documented": zod.number().int(),
   "specialist": zod.number().int()
 }),
-  "lastChangeAt": zod.string().datetime({"offset":true}).nullable()
+  "lastChangeAt": zod.string().datetime({"offset":true}).nullable(),
+  "lastChangeByRole": zod.string().nullable(),
+  "lastChangeByMe": zod.boolean(),
+  "lastChangeSummary": zod.string().nullable(),
+  "attention": zod.array(zod.object({
+  "kind": zod.string(),
+  "text": zod.string(),
+  "path": zod.string(),
+  "date": zod.string().nullable()
+}))
 })
 
 

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { BellRing, Calculator, CheckCircle2, Circle, Download, Info, Search } from 'lucide-react';
+import { AlertTriangle, BellRing, Calculator, CheckCircle2, Circle, Download, Info, Search } from 'lucide-react';
 import { useCreateServiceInterest, useGetHomeCosts, useGetHomePassport, useListMyReminders, type HomeCosts } from '@workspace/api-client-react';
 import { PageHeading } from '@/components/kit';
 import { Modal, toast } from '@/components/home/ui';
 import { WORK_CATEGORY, day, dayTime, money } from '@/lib/home/labels';
+
+const WHO: Record<string, string> = { owner: 'ev sahibi', member: 'evi idarə edən şəxs', contributor: 'redaktə icazəli şəxs', technician: 'redaktə icazəli şəxs', viewer: 'ev üzvü', performer: 'usta / podratçı', staff: 'Təhvil' };
 
 /** What the passport contains. The percent counts filled sections only — it is not a rating of the home. */
 export function PassportCard({ homeId }: { homeId: string }) {
@@ -15,9 +17,12 @@ export function PassportCard({ homeId }: { homeId: string }) {
   const shown = open ? p.sections : p.sections.slice(0, 6);
   return <section className="surface hp-section hp-passport" data-testid="passport-card">
     <div className="hp-pass-top">
-      <div><h2>Evin pasportu</h2><small>{p.lastChangeAt ? `Son dəyişiklik: ${dayTime(p.lastChangeAt)}` : 'Hələ məlumat yoxdur'}</small></div>
+      <div><h2>Evin pasportu</h2><small data-testid="passport-last-change">{p.lastChangeAt ? `Son dəyişiklik: ${dayTime(p.lastChangeAt)} · ${p.lastChangeByMe ? 'siz' : WHO[p.lastChangeByRole ?? ''] ?? 'ev üzvü'}${p.lastChangeSummary ? ` — ${p.lastChangeSummary}` : ''}` : 'Hələ məlumat yoxdur'}</small></div>
       <div className="hp-pass-meter" aria-label={`Məlumat tamlığı ${p.percent}%`}><b data-testid="passport-percent">{p.percent}%</b><span>məlumat tamlığı · {p.filledSections}/{p.totalSections} bölmə</span><div><i style={{ width: `${p.percent}%` }} /></div></div>
     </div>
+    {p.attention.length > 0 && <div className="hp-attention" data-testid="passport-attention"><b><AlertTriangle size={14} className="sm-ii" /> Hazırda diqqət tələb edənlər</b>
+      <ul>{p.attention.map((a, i) => <li key={i} className={`k-${a.kind}`}><Link href={a.path}>{a.text}</Link>{a.date && <small>{day(a.date)}</small>}</li>)}</ul>
+      <small className="rl-hint">Siyahı yalnız evə daxil edilmiş qeydlərdən (problem, otaq vəziyyəti, xidmət tarixi) yaranır — texniki yoxlama nəticəsi deyil.</small></div>}
     <div className="hp-pass-grid">{shown.map(s => <Link key={s.key} href={s.path} className={`hp-pass-row ${s.filled ? 'on' : ''}`} data-testid={`passport-${s.key}`}>
       {s.filled ? <CheckCircle2 size={15} /> : <Circle size={15} />}<span><b>{s.label}</b><small>{s.filled ? `${s.count} qeyd` : 'Məlumat yoxdur'} · {s.hint}</small></span>
     </Link>)}</div>

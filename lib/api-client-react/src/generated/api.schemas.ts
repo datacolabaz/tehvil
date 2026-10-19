@@ -4497,6 +4497,14 @@ export interface PassportSection {
   path: string;
 }
 
+export interface PassportAttention {
+  kind: string;
+  text: string;
+  path: string;
+  /** @nullable */
+  date: string | null;
+}
+
 export interface PassportSources {
   owner: number;
   contractor: number;
@@ -4512,6 +4520,12 @@ export interface HomePassport {
   sources: PassportSources;
   /** @nullable */
   lastChangeAt: string | null;
+  /** @nullable */
+  lastChangeByRole: string | null;
+  lastChangeByMe: boolean;
+  /** @nullable */
+  lastChangeSummary: string | null;
+  attention: PassportAttention[];
 }
 
 export interface CostLine {
