@@ -203,7 +203,14 @@ export async function homePerformers(homeId: string, viewerUserId: string, onlyW
 
 /* ------------------------------------------------- equipment & utilities */
 
-export async function equipmentDtos(rows: EquipmentRow[]) {
+/** `member`: contacts of the service company are only for people who belong to the home. */
+/** Date of the latest finished service/repair work linked to the equipment. */
+export function lastService(services: { status: string; startDate: string | null }[]): string | null {
+  const done = services.filter((s) => (s.status === "completed" || s.status === "confirmed") && s.startDate).map((s) => s.startDate!);
+  return done.sort().at(-1) ?? null;
+}
+
+export async function equipmentDtos(rows: EquipmentRow[], member = true) {
   if (!rows.length) return [];
   const roomIds = uniq(rows.map((r) => r.roomId));
   const workIds = uniq(rows.map((r) => r.installWorkId));
@@ -223,6 +230,8 @@ export async function equipmentDtos(rows: EquipmentRow[]) {
     installedAt: dateStr(e.installedAt), warrantyUntil: dateStr(e.warrantyUntil), photoMediaId: e.photoMediaId,
     photoUrl: e.photoMediaId ? homeMediaUrl(e.photoMediaId) : null, notes: e.notes,
     services: services.filter((s) => s.equipmentId === e.id).map((s) => ({ id: s.id, title: s.title, status: s.status, startDate: dateStr(s.startDate) })),
+    lastServiceAt: lastService(services.filter((s) => s.equipmentId === e.id)),
+    nextServiceAt: dateStr(e.nextServiceAt), serviceContact: member ? e.serviceContact : "",
   }));
 }
 

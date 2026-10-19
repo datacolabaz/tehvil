@@ -17,6 +17,12 @@ function warranty(e: Equipment) {
   return <Pill small tone="ok" icon={<ShieldCheck size={11} />}>Zəmanət {day(e.warrantyUntil)}-dək</Pill>;
 }
 
+function nextService(e: Equipment) {
+  if (!e.nextServiceAt) return null;
+  const late = e.nextServiceAt < today();
+  return <Pill small tone={late ? 'warn' : 'neutral'} icon={<Wrench size={11} />}>{late ? `Xidmət vaxtı keçib (${day(e.nextServiceAt)})` : `Növbəti xidmət: ${day(e.nextServiceAt)}`}</Pill>;
+}
+
 export function HomeEquipmentPage({ homeId }: { homeId: string }) {
   const home = useHome(homeId);
   const q = useListEquipment(homeId);
@@ -43,7 +49,8 @@ export function HomeEquipmentPage({ homeId }: { homeId: string }) {
           <div className="eyebrow">{EQUIP_CATEGORY[e.category] ?? e.category}{e.roomName ? ` · ${e.roomName}` : ''}</div>
           <h3>{e.name}</h3>
           <small>{[e.brand, e.model, e.serialNumber ? `S/N ${e.serialNumber}` : ''].filter(Boolean).join(' · ') || 'Marka və model qeyd edilməyib'}</small>
-          <div className="hp-badges">{e.installedAt && <Pill small tone="info">Quraşdırılıb: {day(e.installedAt)}</Pill>}{warranty(e)}</div>
+          <div className="hp-badges">{e.installedAt && <Pill small tone="info">Quraşdırılıb: {day(e.installedAt)}</Pill>}{warranty(e)}{nextService(e)}</div>
+          <p className="hp-kvline"><small>Son xidmət: {e.lastServiceAt ? day(e.lastServiceAt) : 'Məlumat yoxdur'}{e.serviceContact ? ` · Servis: ${e.serviceContact}` : ''}</small></p>
           {e.installWorkTitle && <p className="hp-kvline"><b>Quraşdırma:</b> <Link href={`/works/${e.installWorkId}`}>{e.installWorkTitle}</Link></p>}
           {e.installers.length > 0 && <div className="hp-installers">{e.installers.map(w => <Link key={w.id} href={w.registered ? `/workers/${w.id}` : '#'} className="hp-installer"><WorkerAvatar w={w} size={22} />{w.displayName}</Link>)}</div>}
           {e.notes && <p className="hp-text">{e.notes}</p>}
@@ -72,11 +79,11 @@ function EquipmentModal({ homeId, item, performer, onClose }: { homeId: string; 
   const create = useCreateEquipment();
   const update = useUpdateEquipment();
   const qc = useQueryClient();
-  const [form, setForm] = useState({ name: item?.name ?? '', category: item?.category ?? 'boiler', roomId: item?.roomId ?? '', installWorkId: item?.installWorkId ?? '', brand: item?.brand ?? '', model: item?.model ?? '', serialNumber: item?.serialNumber ?? '', installedAt: item?.installedAt ?? '', warrantyUntil: item?.warrantyUntil ?? '', notes: item?.notes ?? '', photoMediaId: item?.photoMediaId ?? '' });
+  const [form, setForm] = useState({ name: item?.name ?? '', category: item?.category ?? 'boiler', roomId: item?.roomId ?? '', installWorkId: item?.installWorkId ?? '', brand: item?.brand ?? '', model: item?.model ?? '', serialNumber: item?.serialNumber ?? '', installedAt: item?.installedAt ?? '', warrantyUntil: item?.warrantyUntil ?? '', notes: item?.notes ?? '', photoMediaId: item?.photoMediaId ?? '', nextServiceAt: item?.nextServiceAt ?? '', serviceContact: item?.serviceContact ?? '' });
   const [photoUrl, setPhotoUrl] = useState(item?.photoUrl ?? '');
   const set = (k: keyof typeof form) => (v: string) => setForm(o => ({ ...o, [k]: v }));
   const save = () => {
-    const data: EquipmentInput = { ...form, name: form.name.trim(), category: form.category as EquipmentInput['category'], roomId: form.roomId || null, installWorkId: form.installWorkId || null, installedAt: form.installedAt || null, warrantyUntil: form.warrantyUntil || null, photoMediaId: form.photoMediaId || null };
+    const data: EquipmentInput = { ...form, name: form.name.trim(), category: form.category as EquipmentInput['category'], roomId: form.roomId || null, installWorkId: form.installWorkId || null, installedAt: form.installedAt || null, warrantyUntil: form.warrantyUntil || null, photoMediaId: form.photoMediaId || null, nextServiceAt: form.nextServiceAt || null, serviceContact: form.serviceContact.trim() };
     const done = { onSuccess: () => { void refreshHomeData(qc); toast(item ? 'Avadanlıq yeniləndi' : 'Avadanlıq əlavə olundu'); onClose(); } };
     if (item) update.mutate({ equipmentId: item.id, data }, done); else create.mutate({ homeId, data }, done);
   };
@@ -88,6 +95,7 @@ function EquipmentModal({ homeId, item, performer, onClose }: { homeId: string; 
       <div className="field-grid"><Select label="Otaq" name="eq-room" value={form.roomId} onChange={set('roomId')} empty="Seçilməyib" options={(home.data?.rooms ?? []).map(r => [r.id, r.name])} />
         <Select label={performer ? 'Quraşdırma işi (mütləq)' : 'Quraşdırma işi'} name="eq-work" value={form.installWorkId} onChange={set('installWorkId')} empty="Seçilməyib" options={(works.data ?? []).map(w => [w.id, w.title])} /></div>
       <div className="field-grid"><Field label="Quraşdırılma tarixi" name="eq-installed" type="date" value={form.installedAt} onChange={set('installedAt')} /><Field label="Zəmanət bitir" name="eq-warranty" type="date" value={form.warrantyUntil} onChange={set('warrantyUntil')} /></div>
+      {!performer && <div className="field-grid"><Field label="Növbəti xidmət tarixi" name="eq-next-service" type="date" value={form.nextServiceAt} onChange={set('nextServiceAt')} /><Field label="Servis şirkəti / əlaqə" name="eq-service-contact" value={form.serviceContact} onChange={set('serviceContact')} placeholder="məs. Servis MMC, +994…" /></div>}
       <Field label="Qeyd" name="eq-notes"><textarea rows={2} maxLength={3000} value={form.notes} onChange={e => set('notes')(e.target.value)} /></Field>
       <div className="field"><span>Foto (etiket, seriya nömrəsi)</span>{photoUrl && <img src={photoUrl} alt="" className="hp-eq-photo-preview" />}
         <MediaUpload target={performer ? { workId: form.installWorkId || undefined } : { homeId }} phases={false} videos={false} label={photoUrl ? 'Fotonu dəyiş' : 'Foto əlavə et'} onDone={m => { if (m[0]) { set('photoMediaId')(m[0].id); setPhotoUrl(m[0].url); } }} /></div>

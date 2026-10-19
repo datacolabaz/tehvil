@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 import { getAuth } from "@clerk/express";
-import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { Router, type IRouter, type Response } from "express";
 import { GetHomeInvitationParams, GetHomeMediaParams, GetPublicHomeParams, GetSharedHomeParams, GetWorkerParams } from "@workspace/api-zod";
 import {
@@ -10,8 +10,11 @@ import {
   homeMediaTable,
   homeRoomsTable,
   homeSharesTable,
+  homeAuditTable,
   homesTable,
   infrastructureItemsTable,
+  workApprovalsTable,
+  workNotesTable,
   workersTable,
   workParticipantsTable,
   workRecordsTable,
@@ -21,7 +24,7 @@ import { ObjectNotFoundError, ObjectStorageService } from "../lib/objectStorage"
 import { rateLimit } from "../lib/rateLimit";
 import { hashToken } from "../lib/realtorCore";
 import { activeShare, canReadMedia, shareIncludesWork } from "../lib/homeMedia";
-import { homeMediaUrl, loadWorkers } from "../lib/homeDtos";
+import { homeMediaUrl, lastService, loadWorkers } from "../lib/homeDtos";
 import { loadWorker, workerProfile } from "../lib/workerProfile";
 import type { HomeRow, WorkRow } from "../lib/homeAccess";
 
@@ -88,6 +91,17 @@ async function publicHomeDto(home: HomeRow, opts: { mode: "qr" } | { mode: "shar
     ? await db.select().from(homeMediaTable).where(and(inArray(homeMediaTable.workId, ids), isNull(homeMediaTable.deletedAt))).orderBy(homeMediaTable.createdAt)
     : [];
   const technical = share?.level === "technical";
+  // Who entered each work (owner / someone they gave access / the contractor) — shown as the data source.
+  const created = ids.length ? await db.select({ workId: workApprovalsTable.workId, actorRole: workApprovalsTable.actorRole }).from(workApprovalsTable).where(and(inArray(workApprovalsTable.workId, ids), eq(workApprovalsTable.action, "created"))) : [];
+  const files = ids.length ? await db.select({ workId: homeMediaTable.workId, contentType: homeMediaTable.contentType }).from(homeMediaTable).where(and(inArray(homeMediaTable.workId, ids), isNull(homeMediaTable.deletedAt))) : [];
+  // Defects, fixes and inspection notes are part of the history a buyer may ask about — only through a link the owner made.
+  const notes = share && ids.length ? await db.select().from(workNotesTable).where(and(inArray(workNotesTable.workId, ids), inArray(workNotesTable.kind, ["defect", "fix", "inspection"]))).orderBy(workNotesTable.createdAt) : [];
+  const docIds = share?.scope.documentIds ?? [];
+  const documents = share && docIds.length
+    ? await db.select().from(homeMediaTable).where(and(eq(homeMediaTable.homeId, home.id), inArray(homeMediaTable.id, docIds), eq(homeMediaTable.phase, "document"), isNull(homeMediaTable.deletedAt))).orderBy(desc(homeMediaTable.createdAt))
+    : [];
+  const services = allServices(await db.select({ equipmentId: workRecordsTable.equipmentId, status: workRecordsTable.status, startDate: workRecordsTable.startDate }).from(workRecordsTable).where(eq(workRecordsTable.homeId, home.id)));
+  const [lastAudit] = await db.select({ at: homeAuditTable.createdAt }).from(homeAuditTable).where(eq(homeAuditTable.homeId, home.id)).orderBy(desc(homeAuditTable.createdAt)).limit(1);
 
   const allEquipment = await db.select().from(equipmentTable).where(eq(equipmentTable.homeId, home.id));
   const equipment = share
@@ -101,7 +115,8 @@ async function publicHomeDto(home: HomeRow, opts: { mode: "qr" } | { mode: "shar
 
   return {
     publicId: home.publicId, name: home.name, propertyType: home.propertyType, city: home.city, district: home.district,
-    address: share || home.publicShowAddress ? home.address || null : null,
+    // Links made before the address option existed kept showing it; new links show it only when ticked.
+    address: (share ? share.scope.includeAddress ?? true : home.publicShowAddress) ? home.address || null : null,
     areaM2: home.areaM2, roomCount: home.roomCount, builtYear: home.builtYear, stage: home.stage,
     coverUrl: home.coverMediaId && showPhotos ? homeMediaUrl(home.coverMediaId, share?.token) : null,
     level: share ? share.level : home.publicLevel,
@@ -117,18 +132,32 @@ async function publicHomeDto(home: HomeRow, opts: { mode: "qr" } | { mode: "shar
       }),
       photos: media.filter((m) => m.workId === w.id && m.contentType.startsWith("image/") && (technical || m.phase !== "hidden" || !!share)).map((m) => homeMediaUrl(m.id, share?.token)),
       confirmed: w.status === "confirmed", inspected: !!w.inspectedAt, description: w.description, materials: share ? w.materials : "",
+      source: created.find((c) => c.workId === w.id)?.actorRole ?? "owner",
+      hasDocuments: files.some((f) => f.workId === w.id && !f.contentType.startsWith("image/") && !f.contentType.startsWith("video/")),
+      notes: notes.filter((n) => n.workId === w.id).map((n) => ({ kind: n.kind, body: n.body, result: n.result ?? null, authorRole: n.authorRole, createdAt: n.createdAt.toISOString() })),
+      updatedAt: w.updatedAt.toISOString(),
     })),
     equipment: equipment.map((e) => ({
       id: e.id, name: e.name, category: e.category, brand: e.brand, model: e.model, installedAt: e.installedAt ?? null, warrantyUntil: e.warrantyUntil ?? null,
       roomName: e.roomId ? roomName.get(e.roomId) ?? null : null,
+      lastServiceAt: lastService(services.get(e.id) ?? []), nextServiceAt: e.nextServiceAt ?? null,
     })),
     infrastructure: infra.map((i) => ({
       id: i.id, type: i.type, label: i.label, notes: i.notes, roomName: i.roomId ? roomName.get(i.roomId) ?? null : null,
-      mediaUrl: i.mediaId && share ? homeMediaUrl(i.mediaId, share.token) : null, points: i.points ?? [], source: i.source, verified: !!i.verifiedAt,
+      mediaUrl: i.mediaId && share ? homeMediaUrl(i.mediaId, share.token) : null, points: i.points ?? [], source: i.source, verified: !!i.verifiedAt, createdAt: i.createdAt.toISOString(),
     })),
+    documents: documents.map((d) => ({ id: d.id, title: d.caption || d.originalName, url: homeMediaUrl(d.id, share!.token), contentType: d.contentType, createdAt: d.createdAt.toISOString() })),
+    purpose: share?.scope.purpose ?? "general",
     shareLabel: share?.label || null,
     updatedAt: home.updatedAt.toISOString(),
+    lastChangeAt: lastAudit?.at.toISOString() ?? null,
   };
+}
+
+function allServices(rows: { equipmentId: string | null; status: string; startDate: string | null }[]) {
+  const map = new Map<string, { status: string; startDate: string | null }[]>();
+  for (const r of rows) if (r.equipmentId) map.set(r.equipmentId, [...(map.get(r.equipmentId) ?? []), r]);
+  return map;
 }
 
 router.get("/public/homes/:publicId", readLimit, async (req, res): Promise<void> => {

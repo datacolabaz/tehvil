@@ -3,7 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
 import { Show } from '@clerk/react';
 import { BellRing, Camera, Check, ClipboardCheck, HardHat, Home, LoaderCircle, LogIn, Plus, UserPlus, UsersRound, X } from 'lucide-react';
-import { useAcceptHomeInvitation, useGetHomeInvitation, useGetMyInbox, useGetMyWorkers, useListMyHomeWorks, useListMyWorks, useRespondMembership, useRespondParticipation } from '@workspace/api-client-react';
+import { useAcceptHomeInvitation, useGetHomeInvitation, useGetMyInbox, useGetMyWorkers, useListMyHomeWorks, useListMyReminders, useListMyWorks, useRespondMembership, useRespondParticipation } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
 import { Empty, HomeToaster, Pill, Skeleton, WorkerLine, toast } from '@/components/home/ui';
 import { HOME_ROLE, MEMBER_ROLE, PART_ROLE, PART_STATUS, PART_TONE, WORKER_KIND, day, refreshHomeData } from '@/lib/home/labels';
@@ -70,6 +70,18 @@ export function AllHistoryPage() {
   </>;
 }
 
+/** Service dates and warranty ends across my homes — in the app only, no SMS or e-mail. */
+function MyReminders() {
+  const q = useListMyReminders();
+  const list = q.data ?? [];
+  if (!list.length) return null;
+  return <section className="surface hp-section hp-reminders" data-testid="my-reminders">
+    <h2><BellRing size={15} className="sm-ii" /> Xatırlatmalar</h2>
+    <ul>{list.map(r => <li key={`${r.kind}-${r.equipmentId}`} className={r.overdue ? 'late' : ''}><Link href={`/homes/${r.homeId}/equipment`}><b>{r.title}</b><small>{r.homeName} · {r.overdue ? `vaxtı keçib: ${day(r.dueDate)}` : day(r.dueDate)}</small></Link></li>)}</ul>
+    <small className="rl-hint">Xatırlatmalar yalnız saytda görünür — SMS, WhatsApp və ya e-poçt göndərilmir.</small>
+  </section>;
+}
+
 export function InboxPage({ tab }: { tab: 'invitations' | 'approvals' }) {
   const q = useGetMyInbox();
   const respond = useRespondParticipation();
@@ -80,6 +92,7 @@ export function InboxPage({ tab }: { tab: 'invitations' | 'approvals' }) {
   const d = q.data!;
   return <>
     <PageHeading eyebrow="Sizə gələnlər" title={tab === 'invitations' ? 'Bildirişlər' : 'Təsdiqinizi gözləyən işlər'} description={tab === 'invitations' ? 'Sizi evə, işə və ya briqadaya dəvət edənlər. Qəbul etdikdən sonra yalnız həmin ev və ya iş sizə görünür.' : 'Ustanın “bitdi” dediyi işlər. Fotolara baxın, təsdiqləyin və ya düzəliş istəyin.'} />
+    {tab === 'invitations' && <MyReminders />}
     <div className="rl-seg hp-tabs" role="tablist"><Link href="/invitations" className={tab === 'invitations' ? 'on' : ''}>Dəvətlər ({d.participations.length + d.memberships.length})</Link><Link href="/approvals" className={tab === 'approvals' ? 'on' : ''}>Təsdiqinizi gözləyən işlər ({d.approvals.length})</Link></div>
     {tab === 'invitations' ? (!d.participations.length && !d.memberships.length ? <Empty icon={<BellRing size={28} />} title="Hələ dəvət yoxdur" text="Ev sahibi sizi işə və ya briqadir briqadaya dəvət edəndə burada görünəcək." />
       : <div className="hp-inbox">

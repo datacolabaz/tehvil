@@ -38,6 +38,11 @@ export interface ShareScopeJson {
   equipmentIds: string[];
   includePhotos: boolean;
   includeInfrastructure: boolean;
+  /** Missing on links created before this option existed: those links showed the address. */
+  includeAddress?: boolean;
+  /** Documents are private; only the ones listed here are visible through this link. */
+  documentIds?: string[];
+  purpose?: "general" | "sale" | "handover";
 }
 
 /* ------------------------------------------------------------------ homes */
@@ -299,6 +304,9 @@ export const equipmentTable = pgTable("equipment", {
   warrantyUntil: date("warranty_until"),
   photoMediaId: uuid("photo_media_id"),
   notes: text("notes").notNull().default(""),
+  /** Next planned service date (set by the user); reminders are shown in the app only. */
+  nextServiceAt: date("next_service_at"),
+  serviceContact: text("service_contact").notNull().default(""),
   createdByUserId: user("created_by_user_id").notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
@@ -376,3 +384,16 @@ export const workerReviewsTable = pgTable("worker_reviews", {
   hiddenAt: timestamp("hidden_at", { withTimezone: true }),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex("worker_reviews_unique_idx").on(t.workId, t.workerId, t.authorUserId), index("worker_reviews_worker_idx").on(t.workerId)]);
+
+/* ------------------------------------------------------- service interest */
+
+/** "Let us know you are interested" for services that do not exist yet (inspection, pro accounts…). Nothing is ordered or paid. */
+export const serviceInterestsTable = pgTable("service_interests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: user("user_id").notNull(),
+  kind: varchar("kind", { length: 16 }).notNull(), // inspection | pro_account | maintenance | handover
+  homeId: uuid("home_id").references(() => homesTable.id, { onDelete: "set null" }),
+  contact: varchar("contact", { length: 200 }).notNull().default(""),
+  note: text("note").notNull().default(""),
+  createdAt: createdAt(),
+}, (t) => [index("service_interests_kind_idx").on(t.kind, t.createdAt)]);

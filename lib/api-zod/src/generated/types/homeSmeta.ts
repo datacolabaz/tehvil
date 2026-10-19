@@ -15,4 +15,8 @@ export interface HomeSmeta {
   status: string;
   mine: boolean;
   updatedAt: string;
+  /** @nullable */
+  estimatedTotal: number | null;
+  /** @nullable */
+  spentTotal: number | null;
 }

@@ -1,6 +1,6 @@
 import { useRef, useState, type MouseEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Cable, Eraser, Pencil, Plus, Trash2, Undo2 } from 'lucide-react';
+import { BadgeCheck, Cable, Eraser, Pencil, Plus, Search, Trash2, Undo2 } from 'lucide-react';
 import {
   useCreateInfrastructure, useDeleteInfrastructure, useListHomeMedia, useListInfrastructure, useListWorks, useUpdateInfrastructure, useVerifyInfrastructure,
   type HomeMedia, type InfrastructureInput, type InfrastructureItem, type MarkerPoint,
@@ -24,18 +24,22 @@ export function HomeMapPage({ homeId }: { homeId: string }) {
   const [photoId, setPhotoId] = useState<string | null>(null);
   const [type, setType] = useState(() => new URLSearchParams(window.location.search).get('type') ?? '');
   const [editing, setEditing] = useState<InfrastructureItem | 'new' | null>(null);
+  const [query, setQuery] = useState('');
   if (home.isLoading || items.isLoading) return <Skeleton rows={3} />;
   if (!home.data) return <HomeMissing />;
   const role = home.data.home.myRole;
-  const canAdd = role === 'owner' || role === 'technician' || role === 'performer';
+  const canAdd = role !== 'viewer';
   const photos = (media.data ?? []).filter(m => m.contentType.startsWith('image/') && m.phase !== 'document').sort((a, b) => Number(b.phase === 'hidden') - Number(a.phase === 'hidden'));
-  const list = (items.data ?? []).filter(i => !type || i.type === type);
+  const needle = query.trim().toLocaleLowerCase('az');
+  const matches = (i: InfrastructureItem) => !needle || [i.label, i.notes, i.roomName, i.workTitle, INFRA_TYPE[i.type]].some(v => (v ?? '').toLocaleLowerCase('az').includes(needle));
+  const list = (items.data ?? []).filter(i => (!type || i.type === type) && matches(i));
   const current = photos.find(p => p.id === photoId) ?? photos.find(p => list.some(i => i.mediaId === p.id)) ?? null;
   const onPhoto = list.filter(i => current && i.mediaId === current.id);
   const refresh = () => void refreshHomeData(qc);
   return <>
     <PageHeading eyebrow={home.data.home.name} title="Texniki məlumatlar" description="Sonradan görünməyən, amma yadda saxlanması vacib olan detallar: elektrik və su xətlərinin yeri, sayğac, ventil, elektrik lövhəsi — foto, başlıq və izahla."
       action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')} data-testid="button-add-line"><Plus size={16} />Texniki məlumat əlavə et</button> : undefined} />
+    {(items.data ?? []).length > 0 && <label className="hp-search"><Search size={15} /><input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Axtar: məs. mətbəx, kombi, ventil…" aria-label="Texniki məlumatlarda axtar" data-testid="input-infra-search" /></label>}
     <div className="hp-legend">{Object.entries(INFRA_TYPE).map(([k, l]) => <button key={k} type="button" className={type === k ? 'on' : ''} onClick={() => setType(type === k ? '' : k)}><i style={{ background: INFRA_COLOR[k] }} />{l}<small>{(items.data ?? []).filter(i => i.type === k).length}</small></button>)}</div>
     {!(items.data ?? []).length && !photos.length ? <Empty icon={<Cable size={28} />} title="Hələ texniki məlumat yoxdur" text="Məsələn: “Elektrik lövhəsi dəhlizdə, qapının arxasında” və ya divarlar bağlanmazdan əvvəl çəkilmiş xətlərin fotosu. Fotonun üzərində xəttin yerini göstərmək istəyə bağlıdır." action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')}><Plus size={16} />İlk qeydi et</button> : undefined} />
       : <div className="hp-map-layout">
@@ -44,20 +48,20 @@ export function HomeMapPage({ homeId }: { homeId: string }) {
           {photos.length > 0 && <div className="hp-thumbs" aria-label="Fotolar">{photos.map(p => <button key={p.id} type="button" className={current?.id === p.id ? 'on' : ''} onClick={() => setPhotoId(p.id)} title={PHASE[p.phase]}>
             <img src={p.url} alt="" loading="lazy" />{(items.data ?? []).some(i => i.mediaId === p.id) && <span className="hp-thumb-dot" />}</button>)}</div>}
         </section>
-        <section className="hp-lines">{list.map(i => <article key={i.id} className={`surface hp-line ${current && i.mediaId === current.id ? 'on-photo' : ''}`}>
-          <header><i style={{ background: INFRA_COLOR[i.type] }} /><b>{INFRA_TYPE[i.type]}</b>{i.verified ? <Pill small tone="ok" icon={<BadgeCheck size={11} />}>Mütəxəssis təsdiqləyib</Pill> : <Pill small tone="neutral">Mütəxəssis yoxlamayıb</Pill>}</header>
+        <section className="hp-lines">{!list.length && <p className="rl-hint">Axtarışa uyğun qeyd tapılmadı.</p>}{list.map(i => <article key={i.id} className={`surface hp-line ${current && i.mediaId === current.id ? 'on-photo' : ''}`}>
+          <header><i style={{ background: INFRA_COLOR[i.type] }} /><b>{INFRA_TYPE[i.type]}</b>{i.verified ? <Pill small tone="ok" icon={<BadgeCheck size={11} />}>Yoxlanılıb</Pill> : <Pill small tone="neutral">Yoxlanılmayıb</Pill>}</header>
           {i.label && <p><strong>{i.label}</strong></p>}
           {i.notes && <p className="hp-text">{i.notes}</p>}
           <small>{[INFRA_SOURCE[i.source], i.roomName, i.workTitle ? `İş: ${i.workTitle}` : '', dayTime(i.createdAt)].filter(Boolean).join(' · ')}</small>
           <div className="hp-prow-actions">
             {i.mediaId && <button type="button" className="sm-link-btn" onClick={() => setPhotoId(i.mediaId!)}>Fotoda göstər</button>}
-            {role === 'technician' && !i.verified && <button type="button" className="sm-link-btn" data-testid={`button-verify-${i.id}`} onClick={() => verify.mutate({ itemId: i.id }, { onSuccess: () => { refresh(); toast('Xətt təsdiqləndi'); } })}><BadgeCheck size={13} />Təsdiqlə</button>}
-            {(i.createdByMe || role === 'owner') && <><button type="button" className="sm-link-btn" onClick={() => setEditing(i)}><Pencil size={13} />Dəyiş</button>
+            {(role === 'contributor' || role === 'technician') && !i.verified && <button type="button" className="sm-link-btn" data-testid={`button-verify-${i.id}`} onClick={() => verify.mutate({ itemId: i.id }, { onSuccess: () => { refresh(); toast('Xətt təsdiqləndi'); } })}><BadgeCheck size={13} />Təsdiqlə</button>}
+            {(i.createdByMe || role === 'owner' || role === 'member') && <><button type="button" className="sm-link-btn" onClick={() => setEditing(i)}><Pencil size={13} />Dəyiş</button>
               <button type="button" className="sm-link-btn danger" onClick={() => remove.mutate({ itemId: i.id }, { onSuccess: () => { refresh(); toast('Xətt silindi'); } })}><Trash2 size={13} />Sil</button></>}
           </div>
         </article>)}</section>
       </div>}
-    <p className="rl-hint hp-mt">Bu məlumatları ev sahibi və ya icazə verdiyi şəxslər daxil edib — yoxlanmış mühəndis planı deyil. “Mütəxəssis təsdiqləyib” yalnız sizin əlavə etdiyiniz mütəxəssis yoxladıqdan sonra görünür. Divarı deşməzdən əvvəl yerində yoxlayın.</p>
+    <p className="rl-hint hp-mt">Bu məlumatları ev sahibi və ya icazə verdiyi şəxslər daxil edib — yoxlanmış mühəndis planı deyil. “Yoxlanılıb” yalnız sizin “Redaktə edə bilər” girişi verdiyiniz şəxs (məs. mütəxəssis) təsdiqləyəndə görünür; Təhvil.az həmin şəxsin peşəkarlığını yoxlamır. Divarı deşməzdən əvvəl yerində yoxlayın.</p>
     {editing && <LineModal homeId={homeId} item={editing === 'new' ? undefined : editing} photos={photos} role={role} defaultPhoto={current?.id} defaultType={type || undefined} onClose={() => setEditing(null)} onSaved={id => { setEditing(null); refresh(); if (id) setPhotoId(id); }} />}
     <HomeToaster />
   </>;

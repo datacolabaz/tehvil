@@ -5,6 +5,7 @@
  * Təhvil renovation project coordination API
  * OpenAPI spec version: 0.1.0
  */
+import type { PublicDocument } from './publicDocument';
 import type { PublicEquipment } from './publicEquipment';
 import type { PublicInfrastructure } from './publicInfrastructure';
 import type { PublicWork } from './publicWork';
@@ -31,7 +32,11 @@ export interface PublicHome {
   works: PublicWork[];
   equipment: PublicEquipment[];
   infrastructure: PublicInfrastructure[];
+  documents: PublicDocument[];
+  purpose: string;
   /** @nullable */
   shareLabel: string | null;
   updatedAt: string;
+  /** @nullable */
+  lastChangeAt: string | null;
 }

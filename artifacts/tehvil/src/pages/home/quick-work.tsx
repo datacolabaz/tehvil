@@ -121,6 +121,7 @@ export function QuickWorkModal({ homeId: fixedHome, roomId, category, equipmentI
         </div>}
         <div className="field"><span>İşin növü</span>
           <div className="hp-chipset">{QUICK_CATEGORIES.map(c => <button key={c} type="button" className={f.category === c ? 'on' : ''} onClick={() => set('category', f.category === c ? '' : c)} data-testid={`chip-cat-${c}`}>{WORK_CATEGORY[c]}</button>)}</div>
+          {['electrical', 'plumbing', 'heating', 'hvac'].includes(f.category) && <small className="hp-tip" data-testid="hint-hidden-lines">Xatırlatma: suvaq və üzlük işlərindən əvvəl xətlərin fotosunu çəkin — sonra “Texniki məlumatlar”da foto üzərində yerini göstərə bilərsiniz.</small>}
         </div>
         <Field label="Material və avadanlıq" name="work-materials"><textarea rows={2} maxLength={3000} value={f.materials} onChange={e => set('materials', e.target.value)} placeholder="məs. PPR boru 20 mm, Baxi kombi Eco 4s" /></Field>
 

@@ -9079,7 +9079,10 @@ export const GetHomeRoomResponse = zod.object({
   "title": zod.string(),
   "status": zod.string(),
   "startDate": zod.string().nullable()
-}))
+})),
+  "lastServiceAt": zod.string().nullable(),
+  "nextServiceAt": zod.string().nullable(),
+  "serviceContact": zod.string()
 })),
   "infrastructure": zod.array(zod.object({
   "id": zod.string(),
@@ -9672,7 +9675,10 @@ export const ListEquipmentResponseItem = zod.object({
   "title": zod.string(),
   "status": zod.string(),
   "startDate": zod.string().nullable()
-}))
+})),
+  "lastServiceAt": zod.string().nullable(),
+  "nextServiceAt": zod.string().nullable(),
+  "serviceContact": zod.string()
 })
 export const ListEquipmentResponse = zod.array(ListEquipmentResponseItem)
 
@@ -9698,6 +9704,9 @@ export const createEquipmentBodySerialNumberMax = 120;
 export const createEquipmentBodyNotesMin = 0;
 export const createEquipmentBodyNotesMax = 3000;
 
+export const createEquipmentBodyServiceContactMin = 0;
+export const createEquipmentBodyServiceContactMax = 300;
+
 
 
 export const CreateEquipmentBody = zod.object({
@@ -9711,7 +9720,9 @@ export const CreateEquipmentBody = zod.object({
   "installedAt": zod.string().date().nullish(),
   "warrantyUntil": zod.string().date().nullish(),
   "photoMediaId": zod.string().uuid().nullish(),
-  "notes": zod.string().min(createEquipmentBodyNotesMin).max(createEquipmentBodyNotesMax).optional()
+  "notes": zod.string().min(createEquipmentBodyNotesMin).max(createEquipmentBodyNotesMax).optional(),
+  "nextServiceAt": zod.string().date().nullish(),
+  "serviceContact": zod.string().min(createEquipmentBodyServiceContactMin).max(createEquipmentBodyServiceContactMax).optional()
 })
 
 export const CreateEquipmentResponse = zod.object({
@@ -9745,7 +9756,10 @@ export const CreateEquipmentResponse = zod.object({
   "title": zod.string(),
   "status": zod.string(),
   "startDate": zod.string().nullable()
-}))
+})),
+  "lastServiceAt": zod.string().nullable(),
+  "nextServiceAt": zod.string().nullable(),
+  "serviceContact": zod.string()
 })
 
 
@@ -9770,6 +9784,9 @@ export const updateEquipmentBodySerialNumberMax = 120;
 export const updateEquipmentBodyNotesMin = 0;
 export const updateEquipmentBodyNotesMax = 3000;
 
+export const updateEquipmentBodyServiceContactMin = 0;
+export const updateEquipmentBodyServiceContactMax = 300;
+
 
 
 export const UpdateEquipmentBody = zod.object({
@@ -9783,7 +9800,9 @@ export const UpdateEquipmentBody = zod.object({
   "installedAt": zod.string().date().nullish(),
   "warrantyUntil": zod.string().date().nullish(),
   "photoMediaId": zod.string().uuid().nullish(),
-  "notes": zod.string().min(updateEquipmentBodyNotesMin).max(updateEquipmentBodyNotesMax).optional()
+  "notes": zod.string().min(updateEquipmentBodyNotesMin).max(updateEquipmentBodyNotesMax).optional(),
+  "nextServiceAt": zod.string().date().nullish(),
+  "serviceContact": zod.string().min(updateEquipmentBodyServiceContactMin).max(updateEquipmentBodyServiceContactMax).optional()
 })
 
 export const UpdateEquipmentResponse = zod.object({
@@ -9817,7 +9836,10 @@ export const UpdateEquipmentResponse = zod.object({
   "title": zod.string(),
   "status": zod.string(),
   "startDate": zod.string().nullable()
-}))
+})),
+  "lastServiceAt": zod.string().nullable(),
+  "nextServiceAt": zod.string().nullable(),
+  "serviceContact": zod.string()
 })
 
 
@@ -9887,7 +9909,10 @@ export const GetHomeSharingResponse = zod.object({
   "workIds": zod.array(zod.string()),
   "equipmentIds": zod.array(zod.string()),
   "includePhotos": zod.boolean(),
-  "includeInfrastructure": zod.boolean()
+  "includeInfrastructure": zod.boolean(),
+  "includeAddress": zod.boolean().optional(),
+  "documentIds": zod.array(zod.string()).optional(),
+  "purpose": zod.enum(['general', 'sale', 'handover']).optional()
 }),
   "expiresAt": zod.string().datetime({"offset":true}).nullable(),
   "revokedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -9930,7 +9955,10 @@ export const UpdateHomeSharingResponse = zod.object({
   "workIds": zod.array(zod.string()),
   "equipmentIds": zod.array(zod.string()),
   "includePhotos": zod.boolean(),
-  "includeInfrastructure": zod.boolean()
+  "includeInfrastructure": zod.boolean(),
+  "includeAddress": zod.boolean().optional(),
+  "documentIds": zod.array(zod.string()).optional(),
+  "purpose": zod.enum(['general', 'sale', 'handover']).optional()
 }),
   "expiresAt": zod.string().datetime({"offset":true}).nullable(),
   "revokedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -9962,7 +9990,10 @@ export const CreateHomeShareBody = zod.object({
   "workIds": zod.array(zod.string()),
   "equipmentIds": zod.array(zod.string()),
   "includePhotos": zod.boolean(),
-  "includeInfrastructure": zod.boolean()
+  "includeInfrastructure": zod.boolean(),
+  "includeAddress": zod.boolean().optional(),
+  "documentIds": zod.array(zod.string()).optional(),
+  "purpose": zod.enum(['general', 'sale', 'handover']).optional()
 }),
   "expiresInDays": zod.number().int().nullish()
 })
@@ -9977,7 +10008,10 @@ export const CreateHomeShareResponse = zod.object({
   "workIds": zod.array(zod.string()),
   "equipmentIds": zod.array(zod.string()),
   "includePhotos": zod.boolean(),
-  "includeInfrastructure": zod.boolean()
+  "includeInfrastructure": zod.boolean(),
+  "includeAddress": zod.boolean().optional(),
+  "documentIds": zod.array(zod.string()).optional(),
+  "purpose": zod.enum(['general', 'sale', 'handover']).optional()
 }),
   "expiresAt": zod.string().datetime({"offset":true}).nullable(),
   "revokedAt": zod.string().datetime({"offset":true}).nullable(),
@@ -10018,7 +10052,9 @@ export const ListHomeSmetasResponseItem = zod.object({
   "areaM2": zod.number().nullable(),
   "status": zod.string(),
   "mine": zod.boolean(),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "estimatedTotal": zod.number().nullable(),
+  "spentTotal": zod.number().nullable()
 })
 export const ListHomeSmetasResponse = zod.array(ListHomeSmetasResponseItem)
 
@@ -10042,7 +10078,9 @@ export const LinkHomeSmetaResponseItem = zod.object({
   "areaM2": zod.number().nullable(),
   "status": zod.string(),
   "mine": zod.boolean(),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "estimatedTotal": zod.number().nullable(),
+  "spentTotal": zod.number().nullable()
 })
 export const LinkHomeSmetaResponse = zod.array(LinkHomeSmetaResponseItem)
 
@@ -11191,6 +11229,110 @@ export const ListMyHomeWorksResponseItem = zod.object({
   "myRole": zod.string()
 })
 export const ListMyHomeWorksResponse = zod.array(ListMyHomeWorksResponseItem)
+
+
+/**
+ * @summary Passport completeness: which sections have data (not a quality score)
+ */
+export const GetHomePassportParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const GetHomePassportResponse = zod.object({
+  "percent": zod.number().int(),
+  "filledSections": zod.number().int(),
+  "totalSections": zod.number().int(),
+  "sections": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "count": zod.number().int(),
+  "filled": zod.boolean(),
+  "hint": zod.string(),
+  "path": zod.string()
+})),
+  "sources": zod.object({
+  "owner": zod.number().int(),
+  "contractor": zod.number().int(),
+  "documented": zod.number().int(),
+  "specialist": zod.number().int()
+}),
+  "lastChangeAt": zod.string().datetime({"offset":true}).nullable()
+})
+
+
+/**
+ * @summary Actual costs entered on works plus estimates saved in the home (members)
+ */
+export const GetHomeCostsParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const GetHomeCostsResponse = zod.object({
+  "byCurrency": zod.array(zod.object({
+  "key": zod.string(),
+  "currency": zod.string(),
+  "total": zod.number(),
+  "count": zod.number().int()
+})),
+  "byCategory": zod.array(zod.object({
+  "key": zod.string(),
+  "currency": zod.string(),
+  "total": zod.number(),
+  "count": zod.number().int()
+})),
+  "worksWithCost": zod.number().int(),
+  "worksWithoutCost": zod.number().int(),
+  "estimates": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "district": zod.string(),
+  "areaM2": zod.number().nullable(),
+  "status": zod.string(),
+  "mine": zod.boolean(),
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "estimatedTotal": zod.number().nullable(),
+  "spentTotal": zod.number().nullable()
+}))
+})
+
+
+/**
+ * @summary Upcoming service dates and warranty ends across my homes (shown in the app only)
+ */
+export const ListMyRemindersResponseItem = zod.object({
+  "kind": zod.string(),
+  "homeId": zod.string(),
+  "homeName": zod.string(),
+  "equipmentId": zod.string(),
+  "title": zod.string(),
+  "dueDate": zod.string(),
+  "overdue": zod.boolean()
+})
+export const ListMyRemindersResponse = zod.array(ListMyRemindersResponseItem)
+
+
+/**
+ * @summary Register interest in a service that is not available yet
+ */
+export const createServiceInterestBodyContactMin = 0;
+export const createServiceInterestBodyContactMax = 200;
+
+export const createServiceInterestBodyNoteMin = 0;
+export const createServiceInterestBodyNoteMax = 1000;
+
+
+
+export const CreateServiceInterestBody = zod.object({
+  "kind": zod.enum(['inspection', 'pro_account', 'maintenance', 'handover']),
+  "homeId": zod.string().uuid().nullish(),
+  "contact": zod.string().min(createServiceInterestBodyContactMin).max(createServiceInterestBodyContactMax).optional(),
+  "note": zod.string().min(createServiceInterestBodyNoteMin).max(createServiceInterestBodyNoteMax).optional()
+})
+
+export const CreateServiceInterestResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
 
 
 /**
@@ -12372,7 +12514,17 @@ export const GetPublicHomeResponse = zod.object({
   "confirmed": zod.boolean(),
   "inspected": zod.boolean(),
   "description": zod.string(),
-  "materials": zod.string()
+  "materials": zod.string(),
+  "source": zod.string(),
+  "hasDocuments": zod.boolean(),
+  "notes": zod.array(zod.object({
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "updatedAt": zod.string().datetime({"offset":true})
 })),
   "equipment": zod.array(zod.object({
   "id": zod.string(),
@@ -12382,7 +12534,9 @@ export const GetPublicHomeResponse = zod.object({
   "model": zod.string(),
   "installedAt": zod.string().nullable(),
   "warrantyUntil": zod.string().nullable(),
-  "roomName": zod.string().nullable()
+  "roomName": zod.string().nullable(),
+  "lastServiceAt": zod.string().nullable(),
+  "nextServiceAt": zod.string().nullable()
 })),
   "infrastructure": zod.array(zod.object({
   "id": zod.string(),
@@ -12396,10 +12550,20 @@ export const GetPublicHomeResponse = zod.object({
   "y": zod.number()
 })),
   "source": zod.string(),
-  "verified": zod.boolean()
+  "verified": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
 })),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "purpose": zod.string(),
   "shareLabel": zod.string().nullable(),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "lastChangeAt": zod.string().datetime({"offset":true}).nullable()
 })
 
 
@@ -12451,7 +12615,17 @@ export const GetSharedHomeResponse = zod.object({
   "confirmed": zod.boolean(),
   "inspected": zod.boolean(),
   "description": zod.string(),
-  "materials": zod.string()
+  "materials": zod.string(),
+  "source": zod.string(),
+  "hasDocuments": zod.boolean(),
+  "notes": zod.array(zod.object({
+  "kind": zod.string(),
+  "body": zod.string(),
+  "result": zod.string().nullable(),
+  "authorRole": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "updatedAt": zod.string().datetime({"offset":true})
 })),
   "equipment": zod.array(zod.object({
   "id": zod.string(),
@@ -12461,7 +12635,9 @@ export const GetSharedHomeResponse = zod.object({
   "model": zod.string(),
   "installedAt": zod.string().nullable(),
   "warrantyUntil": zod.string().nullable(),
-  "roomName": zod.string().nullable()
+  "roomName": zod.string().nullable(),
+  "lastServiceAt": zod.string().nullable(),
+  "nextServiceAt": zod.string().nullable()
 })),
   "infrastructure": zod.array(zod.object({
   "id": zod.string(),
@@ -12475,10 +12651,20 @@ export const GetSharedHomeResponse = zod.object({
   "y": zod.number()
 })),
   "source": zod.string(),
-  "verified": zod.boolean()
+  "verified": zod.boolean(),
+  "createdAt": zod.string().datetime({"offset":true})
 })),
+  "documents": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "url": zod.string(),
+  "contentType": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "purpose": zod.string(),
   "shareLabel": zod.string().nullable(),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "lastChangeAt": zod.string().datetime({"offset":true}).nullable()
 })
 
 

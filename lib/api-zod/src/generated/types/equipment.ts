@@ -34,4 +34,9 @@ export interface Equipment {
   photoUrl: string | null;
   notes: string;
   services: EquipmentService[];
+  /** @nullable */
+  lastServiceAt: string | null;
+  /** @nullable */
+  nextServiceAt: string | null;
+  serviceContact: string;
 }

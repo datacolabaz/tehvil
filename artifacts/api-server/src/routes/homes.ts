@@ -89,6 +89,8 @@ import {
 } from "../lib/homeDtos";
 import { getWorkAccess } from "../lib/homeAccess";
 import { hashToken, newPublicId, newToken, publicOrigin } from "../lib/realtorCore";
+import { loadSmetaProjects } from "../lib/smetaRecords";
+import { estimateTotal } from "../lib/smetaCalc";
 
 const router: IRouter = Router();
 const uid = (req: Request) => getAuth(req).userId!;
@@ -313,7 +315,7 @@ router.get("/homes/:homeId/rooms/:roomId", async (req, res): Promise<void> => {
   res.json({
     room: (await roomDtos(a.home.id, [room], workIds))[0],
     works: await workSummaries(works),
-    equipment: await equipmentDtos(equipment.filter(allowed)),
+    equipment: await equipmentDtos(equipment.filter(allowed), !!a.memberRole),
     infrastructure: await infraDtos(infra.filter(allowed), userId),
     media: media.filter(allowed).map((m) => mediaDto(m, userId)),
   });
@@ -599,7 +601,7 @@ router.get("/homes/:homeId/equipment", async (req, res): Promise<void> => {
   const a = await access(req, res, p.data.homeId);
   if (!a) return;
   const rows = await db.select().from(equipmentTable).where(eq(equipmentTable.homeId, a.home.id)).orderBy(equipmentTable.createdAt);
-  res.json(await equipmentDtos(rows.filter(equipmentVisible(a, uid(req)))));
+  res.json(await equipmentDtos(rows.filter(equipmentVisible(a, uid(req))), !!a.memberRole));
 });
 
 async function equipmentValues(a: HomeAccess, d: ReturnType<typeof CreateEquipmentBody.parse>) {
@@ -614,6 +616,7 @@ async function equipmentValues(a: HomeAccess, d: ReturnType<typeof CreateEquipme
   return { values: {
     name: d.name.trim(), category: d.category ?? "other", roomId, installWorkId, brand: (d.brand ?? "").trim(), model: (d.model ?? "").trim(),
     serialNumber: (d.serialNumber ?? "").trim(), installedAt: d.installedAt ?? null, warrantyUntil: d.warrantyUntil ?? null, photoMediaId, notes: (d.notes ?? "").trim(),
+    nextServiceAt: d.nextServiceAt ?? null, serviceContact: (d.serviceContact ?? "").trim(),
   } };
 }
 
@@ -763,15 +766,18 @@ router.post("/homes/:homeId/shares", async (req, res): Promise<void> => {
   if (!a) return;
   if (!homePermissions(a).manageSharing) return forbidden(res);
   const d = body.data;
-  const [rooms, works, equipment] = await Promise.all([
+  const [rooms, works, equipment, docs] = await Promise.all([
     db.select({ id: homeRoomsTable.id }).from(homeRoomsTable).where(eq(homeRoomsTable.homeId, a.home.id)),
     db.select({ id: workRecordsTable.id }).from(workRecordsTable).where(eq(workRecordsTable.homeId, a.home.id)),
     db.select({ id: equipmentTable.id }).from(equipmentTable).where(eq(equipmentTable.homeId, a.home.id)),
+    // Only home documents (not work files) can be picked one by one for a link.
+    db.select({ id: homeMediaTable.id }).from(homeMediaTable).where(and(eq(homeMediaTable.homeId, a.home.id), eq(homeMediaTable.phase, "document"), isNull(homeMediaTable.deletedAt))),
   ]);
   const keep = (ids: string[], all: { id: string }[]) => [...new Set(ids)].filter((id) => all.some((x) => x.id === id));
   const scope: ShareScopeJson = {
     roomIds: keep(d.scope.roomIds, rooms), workIds: keep(d.scope.workIds, works), equipmentIds: keep(d.scope.equipmentIds, equipment),
     includePhotos: d.scope.includePhotos, includeInfrastructure: d.level === "technical" ? true : d.scope.includeInfrastructure,
+    includeAddress: d.scope.includeAddress ?? false, documentIds: keep(d.scope.documentIds ?? [], docs), purpose: d.scope.purpose ?? "general",
   };
   const days = d.expiresInDays == null ? null : Math.min(365, Math.max(1, Math.round(d.expiresInDays)));
   const token = newToken();
@@ -800,9 +806,19 @@ router.delete("/homes/:homeId/shares/:shareId", async (req, res): Promise<void> 
 
 /* -------------------------------------------------------------- AI Smeta */
 
-async function homeSmetaDtos(homeId: string, userId: string) {
+/** Estimates saved in a home, with the planned total and what was spent according to the estimate's own expense log. */
+export async function homeSmetaDtos(homeId: string, userId: string) {
   const rows = await db.select().from(smetaProjectsTable).where(eq(smetaProjectsTable.homeId, homeId)).orderBy(desc(smetaProjectsTable.updatedAt));
-  return rows.map((r) => ({ id: r.id, name: r.name, district: r.district, areaM2: r.areaM2 ?? null, status: r.status, mine: r.ownerUserId === userId, updatedAt: r.updatedAt.toISOString() }));
+  const full = await loadSmetaProjects(rows);
+  return rows.map((r) => {
+    const f = full.find((x) => x.id === r.id);
+    const round = (v: number) => Math.round(v * 100) / 100;
+    return {
+      id: r.id, name: r.name, district: r.district, areaM2: r.areaM2 ?? null, status: r.status, mine: r.ownerUserId === userId, updatedAt: r.updatedAt.toISOString(),
+      estimatedTotal: f ? round(estimateTotal(f.estimate, f.projectCosts, f.defaultMarginPercentage)) : null,
+      spentTotal: f ? round(f.expenses.reduce((t, e) => t + e.amount, 0)) : null,
+    };
+  });
 }
 
 // Estimates are planned work: they are listed in the home but never become history records on their own.

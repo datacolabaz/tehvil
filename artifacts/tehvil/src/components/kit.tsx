@@ -1,3 +1,4 @@
+import { Link } from 'wouter';
 import type { ReactNode } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { TKey } from '@/lib/i18n';
@@ -41,4 +42,8 @@ export function actionItemText(it: { kind?: string; label: string; detail?: stri
   const key = k.includes('change') ? 'change' : k.includes('handover') || k.includes('milestone') ? 'handover' : k.includes('payment') ? 'payment' : k.includes('scope') ? 'scope' : '';
   if (!key) return { label: t('actions'), detail: t('workflowLead') };
   return { label: t(('ak_' + key) as TKey), detail: t(('ak_' + key + '_d') as TKey) };
+}
+
+export function Brand({ inverse = false }: { inverse?: boolean }) {
+  return <Link href="/" className={`brand ${inverse ? 'inverse' : ''}`} data-testid="link-brand"><span className="brand-mark">t.</span><span>Təhvil</span></Link>;
 }

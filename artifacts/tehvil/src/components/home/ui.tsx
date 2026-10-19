@@ -42,7 +42,7 @@ export function WorkTrust({ accepted, confirmed, inspected }: { accepted: boolea
   return <span className="hp-trust">
     <span className={accepted ? 'on' : ''} title="Usta bu işdə iştirak etdiyini öz hesabından təsdiqləyib"><HardHat size={12} />Usta təsdiqləyib</span>
     <span className={confirmed ? 'on' : ''} title="Ev sahibi işi qəbul edib"><ClipboardCheck size={12} />Ev sahibi təsdiqləyib</span>
-    <span className={inspected ? 'on' : ''} title="Ev sahibinin əlavə etdiyi mütəxəssis yoxlayıb"><ShieldCheck size={12} />Mütəxəssis yoxlayıb</span>
+    <span className={inspected ? 'on' : ''} title="Ev sahibinin giriş verdiyi şəxs yoxlayıb"><ShieldCheck size={12} />Yoxlanılıb</span>
   </span>;
 }
 

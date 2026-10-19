@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Download, ExternalLink, History, Link2, LoaderCircle, Lock, Plus, QrCode as QrIcon, ShieldOff } from 'lucide-react';
 import { Link } from 'wouter';
 import {
-  useCreateHomeShare, useGetHomeSharing, useListEquipment, useListWorks, useRevokeHomeShare, useUpdateHomeSharing, type HomeShare, type HomeShareInputLevel, type HomeSharingInput,
+  useCreateHomeShare, useGetHomeSharing, useListEquipment, useListHomeMedia, useListWorks, useRevokeHomeShare, useUpdateHomeSharing, type HomeShare, type HomeShareInputLevel, type HomeSharingInput,
 } from '@workspace/api-client-react';
 import { Field, PageHeading } from '@/components/kit';
 import { CopyButton, HomeToaster, Modal, Pill, QrCode, Seg, Skeleton, qrDataUrl, toast } from '@/components/home/ui';
@@ -77,8 +77,9 @@ export function HomeSharingPage({ homeId }: { homeId: string }) {
 }
 
 function shareSummary(sh: HomeShare) {
-  if (sh.level === 'technical') return 'Tam məlumatlar';
-  const parts = ['Ümumi məlumat'];
+  const extra = [sh.scope.purpose === 'sale' ? 'Satış üçün' : '', sh.scope.includeAddress !== false ? 'ünvan' : '', sh.scope.documentIds?.length ? `${sh.scope.documentIds.length} sənəd` : ''].filter(Boolean);
+  if (sh.level === 'technical') return ['Tam məlumatlar', ...extra].join(' · ');
+  const parts = ['Ümumi məlumat', ...extra];
   if (sh.scope.roomIds.length) parts.push(`${sh.scope.roomIds.length} otaq`);
   if (sh.scope.workIds.length) parts.push(`${sh.scope.workIds.length} iş`);
   if (sh.scope.equipmentIds.length) parts.push('avadanlıqlar');
@@ -94,9 +95,19 @@ function ShareModal({ homeId, created, onCreated, onClose }: { homeId: string; c
   const create = useCreateHomeShare();
   const [label, setLabel] = useState('');
   const [days, setDays] = useState('30');
-  const [pick, setPick] = useState({ rooms: false, works: false, equipment: false, systems: false, photos: true, full: false });
+  const media = useListHomeMedia(homeId);
+  const [pick, setPick] = useState({ rooms: false, works: false, equipment: false, systems: false, photos: true, full: false, address: false });
   const [roomIds, setRoomIds] = useState<string[]>([]);
   const [workIds, setWorkIds] = useState<string[]>([]);
+  const [docIds, setDocIds] = useState<string[]>([]);
+  const [purpose, setPurpose] = useState<'general' | 'sale'>('general');
+  const docs = (media.data ?? []).filter(m => m.phase === 'document');
+  // "Satış üçün": a ready selection for a buyer — done works with photos, hidden lines, equipment. Address and documents stay off until ticked.
+  const forSale = () => {
+    setPurpose('sale'); setLabel(l => l || 'Alıcı'); setDays('30');
+    setWorkIds((works.data ?? []).filter(w => w.status === 'completed' || w.status === 'confirmed').map(w => w.id));
+    setPick({ rooms: false, works: true, equipment: true, systems: true, photos: true, full: false, address: false });
+  };
   const flip = (list: string[], set: (v: string[]) => void, id: string) => set(list.includes(id) ? list.filter(x => x !== id) : [...list, id]);
   if (created) return <Modal open onClose={onClose} eyebrow="Məlumatları paylaş" title="Link hazırdır">
     <div className="hp-share-done">
@@ -111,12 +122,15 @@ function ShareModal({ homeId, created, onCreated, onClose }: { homeId: string; c
   </label>;
   const submit = () => create.mutate({ homeId, data: { label: label.trim(), level, expiresInDays: days ? Number(days) : null, scope: {
     roomIds: pick.rooms ? roomIds : [], workIds: pick.works ? workIds : [], equipmentIds: pick.equipment ? (equipment.data ?? []).map(e => e.id) : [],
-    includePhotos: pick.photos, includeInfrastructure: pick.systems,
+    includePhotos: pick.photos, includeInfrastructure: pick.systems, includeAddress: pick.address, documentIds: docIds, purpose,
   } } }, { onSuccess: r => onCreated(r.url) });
   return <Modal open onClose={onClose} eyebrow="Məlumatları paylaş" title="Nəyi paylaşırsınız?" wide
     footer={<button type="button" className="button button-primary hp-big" disabled={create.isPending} data-testid="button-save-share" onClick={submit}>Link yarat</button>}>
     <div className="rl-form">
-      <label className="hp-sharecheck on"><input type="checkbox" checked disabled /><span><b>Evin ümumi məlumatları</b><small>Ad, növ, sahə, ünvan.</small></span></label>
+      <div className="rl-seg hp-tabs" role="tablist" aria-label="Məqsəd"><button type="button" role="tab" aria-selected={purpose === 'general'} className={purpose === 'general' ? 'on' : ''} onClick={() => setPurpose('general')}>Ümumi paylaşım</button><button type="button" role="tab" aria-selected={purpose === 'sale'} className={purpose === 'sale' ? 'on' : ''} onClick={forSale} data-testid="share-for-sale">Satış üçün (alıcıya)</button></div>
+      {purpose === 'sale' && <p className="rl-hint">Alıcı üçün hazır seçim: görülmüş işlər, fotolar, gizli xətlər və avadanlıqlar. Ünvan və sənədlər yalnız işarələsəniz görünür. Xərclər, telefonlar və şəxsi qeydlər heç vaxt görünmür. Pasport evin vəziyyətinə zəmanət deyil — alıcının səhifəsində də bu yazılır.</p>}
+      <label className="hp-sharecheck on"><input type="checkbox" checked disabled /><span><b>Evin ümumi məlumatları</b><small>Ad, növ, sahə, şəhər və rayon.</small></span></label>
+      {check('address', 'Dəqiq ünvan', 'Susmaya görə gizlidir.', 'share-address')}
       {check('rooms', 'Seçilmiş otaqlar', 'Otaqda görülən bütün işlər də görünür.', 'share-rooms')}
       {pick.rooms && !pick.full && <div className="hp-chipset">{(home.data?.rooms ?? []).map(r => <button key={r.id} type="button" className={roomIds.includes(r.id) ? 'on' : ''} onClick={() => flip(roomIds, setRoomIds, r.id)}>{r.name}</button>)}</div>}
       {check('works', 'Seçilmiş təmir işləri', 'Yalnız seçdiyiniz işlər.', 'share-works')}
@@ -124,6 +138,7 @@ function ShareModal({ homeId, created, onCreated, onClose }: { homeId: string; c
       {check('equipment', 'Avadanlıqlar', 'Kombi, kondisioner və s. — marka, model, zəmanət.', 'share-equipment')}
       {check('systems', 'Evin texniki sistemləri', 'Naqil və boruların harada keçdiyi (seçilmiş otaq və işlər üzrə).', 'share-systems')}
       {check('photos', 'Fotolar', 'Seçilmiş işlərin fotoları.', 'share-photos')}
+      {docs.length > 0 && <div className="hp-sharedocs"><b>Sənədlər</b><small>Yalnız işarələdiyiniz sənədlər bu linklə açılır.</small>{docs.map(d => <label key={d.id} className="rl-check"><input type="checkbox" checked={docIds.includes(d.id)} onChange={() => flip(docIds, setDocIds, d.id)} data-testid={`share-doc-${d.id}`} /><span>{d.caption || d.originalName}</span></label>)}</div>}
       {check('full', 'Tam məlumatlar', 'Bütün işlər, materiallar, avadanlıqlar və evdəki sistemlər. Yalnız etibar etdiyiniz usta və ya mütəxəssis üçün.', 'share-full')}
       <div className="field-grid">
         <Field label="Kimin üçün (özünüz üçün qeyd)" name="share-label" value={label} onChange={setLabel} placeholder="məs. Alıcı — Murad" />

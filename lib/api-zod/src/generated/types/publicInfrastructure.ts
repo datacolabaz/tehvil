@@ -19,4 +19,5 @@ export interface PublicInfrastructure {
   points: MarkerPoint[];
   source: string;
   verified: boolean;
+  createdAt: string;
 }

@@ -15,8 +15,12 @@ import { CopyButton, Empty, HomeToaster, MediaGrid, MediaUpload, Modal, Pill, Se
 import { AUDIT_ACTION, EQUIP_CATEGORY, HOME_ROLE, HOME_ROLE_HINT, INFRA_TYPE, PART_ROLE, PROPERTY, ROOM_CONDITION, ROOM_KIND, STAGE, WORK_CATEGORY, WORK_STATUS, day, dayTime, range, refreshHomeData } from '@/lib/home/labels';
 import { HomeFormModal } from './homes-page';
 import { QuickWorkModal } from './quick-work';
+import { HomeCostsCard, HomeReminders, PassportCard } from './passport-card';
 
 export function useHome(homeId: string) { return useGetHomeOverview(homeId); }
+
+/** Unknown facts are shown as unknown — the app never guesses them. */
+export function NoData() { return <span className="hp-nodata">Məlumat yoxdur</span>; }
 
 export function HomeMissing() {
   return <div className="notice error-notice" role="alert"><p>Ev tapılmadı və ya baxmaq icazəniz yoxdur.</p><Link href="/homes" className="button button-secondary">Mənim evlərim</Link></div>;
@@ -49,10 +53,10 @@ export function HomeProfilePage({ homeId }: { homeId: string }) {
         <h1 className="font-display">{home.name}</h1>
         <p>{[home.district, home.city].filter(Boolean).join(', ')}{home.address ? ` · ${home.address}` : ''}</p>
         <dl className="hp-facts">
-          <div><dt>Sahə</dt><dd>{home.areaM2 ? `${home.areaM2} m²` : '—'}</dd></div>
-          <div><dt>Otaq sayı</dt><dd>{home.roomCount ?? '—'}</dd></div>
-          <div><dt>Mərtəbə</dt><dd>{home.floor || '—'}</dd></div>
-          <div><dt>Tikinti ili</dt><dd>{home.builtYear ?? '—'}</dd></div>
+          <div><dt>Sahə</dt><dd>{home.areaM2 ? `${home.areaM2} m²` : <NoData />}</dd></div>
+          <div><dt>Otaq sayı</dt><dd>{home.roomCount ?? <NoData />}</dd></div>
+          <div><dt>Mərtəbə</dt><dd>{home.floor || <NoData />}</dd></div>
+          <div><dt>Tikinti ili</dt><dd>{home.builtYear ?? <NoData />}</dd></div>
         </dl>
         {home.notes && <p className="hp-text">{home.notes}</p>}
         <div className="hp-actions">
@@ -63,6 +67,8 @@ export function HomeProfilePage({ homeId }: { homeId: string }) {
         </div>
       </div>
     </div>
+    {home.myRole !== 'performer' && <PassportCard homeId={homeId} />}
+    {home.myRole !== 'performer' && home.myRole !== 'viewer' && <HomeReminders homeId={homeId} />}
     {p.edit && <NextSteps homeId={homeId} overview={q.data} onAddWork={() => setAdding(true)} />}
     {stats.works > 0 && <div className="hp-stats">
       <StatTile icon={<ListChecks size={16} />} label="Görülən işlər" value={stats.works} hint={`${stats.confirmed} görülüb`} />
@@ -81,6 +87,7 @@ export function HomeProfilePage({ homeId }: { homeId: string }) {
         <HomeSmetas homeId={homeId} canAdd={p.addWorks} />
       </section>
     </div>
+    {home.myRole !== 'performer' && <HomeCostsCard homeId={homeId} homeName={home.name} />}
     {adding && <QuickWorkModal homeId={homeId} onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
     {editing && <HomeFormModal open home={home} onClose={() => setEditing(false)} onSaved={() => setEditing(false)} />}
     <Modal open={archiving} onClose={() => setArchiving(false)} eyebrow={home.name} title="Evi arxivə köçürmək" footer={<button type="button" className="button button-danger" disabled={archive.isPending} onClick={() => archive.mutate({ homeId }, { onSuccess: () => { void refreshHomeData(qc); setLocation('/homes'); } })}>Arxivlə</button>}>
