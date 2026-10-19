@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { AlertTriangle, ArrowDown, ArrowUp, ExternalLink, FileText, Info, Link2, LoaderCircle, Minus, PencilLine, Plus, Printer, Search, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ClipboardPaste, ArrowUp, ExternalLink, FileText, Info, Link2, LoaderCircle, Minus, PencilLine, Plus, Printer, Search, Trash2 } from 'lucide-react';
 import {
   useCreateValuation, useGetValuation, useListValuations, useReadListingLink, useReadListingText,
   type ListingDraft, type ListingInput, type Valuation,
@@ -33,15 +33,34 @@ function ListingReader({ onRead, compact }: { onRead: (f: Form, warnings: string
   const [url, setUrl] = useState('');
   const [text, setText] = useState('');
   const [error, setError] = useState('');
+  // When a portal refuses the server (403, anti-bot), the person opens the listing in their own browser and copies its text here.
+  const [assist, setAssist] = useState('');
   // Errors are shown next to the field, not as a global popup.
   const link = useReadListingLink({ mutation: { meta: { silent: true } } });
   const paste = useReadListingText({ mutation: { meta: { silent: true } } });
   const fail = (e: unknown) => setError((e as { data?: { error?: string } })?.data?.error ?? 'Oxumaq alınmadı. Mətni yapışdırın və ya əl ilə daxil edin.');
+  const linkFail = (e: unknown) => {
+    const msg = (e as { data?: { error?: string } })?.data?.error ?? '';
+    // A wrong or unsupported link stays a plain error; a page the server could not open gets the copy-paste helper.
+    if (/düzgün deyil|dəstəklənmir|elan səhifəsi deyil/.test(msg)) return setError(msg);
+    setAssist(/robots\.txt/.test(msg) ? 'saytın robots.txt qaydası' : msg || 'Səhifə açılmadı');
+  };
+  const href = /^https?:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`;
+  const readCopied = (raw: string) => {
+    const t = raw.replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim().slice(0, 20000);
+    if (t.length < 10) return setError('Kopyalanan mətn çox qısadır. Elan səhifəsində hamısını seçib yenidən kopyalayın.');
+    setError(''); setText(t);
+    paste.mutate({ data: { text: t } }, { onSuccess: d => onRead({ ...fromDraft(d), url: href }, d.warnings), onError: fail });
+  };
+  const pasteFromClipboard = async () => {
+    try { readCopied(await navigator.clipboard.readText()); }
+    catch { setError('Brauzer buferə girişə icazə vermədi. Mətni aşağıdakı xanaya yapışdırın.'); }
+  };
   return <div className="ai-reader">
     <div className="rl-seg hp-tabs" role="tablist">
-      {([['link', 'Elan linki'], ['text', 'Elanın mətni'], ['manual', 'Əl ilə']] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={mode === k} className={mode === k ? 'on' : ''} onClick={() => { setMode(k); setError(''); }}>{l}</button>)}
+      {([['link', 'Elan linki'], ['text', 'Elanın mətni'], ['manual', 'Əl ilə']] as const).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={mode === k} className={mode === k ? 'on' : ''} onClick={() => { setMode(k); setError(''); setAssist(''); }}>{l}</button>)}
     </div>
-    {mode === 'link' && <form className="ai-row" onSubmit={e => { e.preventDefault(); setError(''); link.mutate({ data: { url: url.trim() } }, { onSuccess: d => onRead(fromDraft(d), d.warnings), onError: fail }); }}>
+    {mode === 'link' && <form className="ai-row" onSubmit={e => { e.preventDefault(); setError(''); setAssist(''); link.mutate({ data: { url: url.trim() } }, { onSuccess: d => onRead(fromDraft(d), d.warnings), onError: linkFail }); }}>
       <input className="hp-input" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://bina.az/items/…" inputMode="url" aria-label="Elan linki" data-testid={compact ? 'input-comp-link' : 'input-listing-link'} />
       <button type="submit" className="button button-primary" disabled={url.trim().length < 5 || link.isPending} data-testid={compact ? 'button-comp-link' : 'button-read-link'}>{link.isPending ? <LoaderCircle size={15} className="spin" /> : <Link2 size={15} />}Oxu</button>
     </form>}
@@ -51,7 +70,17 @@ function ListingReader({ onRead, compact }: { onRead: (f: Form, warnings: string
     </form>}
     {mode === 'manual' && <button type="button" className="button button-secondary" onClick={() => onRead(empty(), [])} data-testid={compact ? 'button-comp-manual' : 'button-manual'}><PencilLine size={15} />Boş forma aç</button>}
     {error && <p className="ai-error" role="alert"><AlertTriangle size={14} />{error}</p>}
-    {mode === 'link' && <small className="rl-hint">Yalnız göstərdiyiniz bir səhifə oxunur və saytın robots.txt qaydalarına əməl olunur. Link oxunmasa, elanın mətnini yapışdırın.</small>}
+    {mode === 'link' && assist && <div className="ai-assist" data-testid="link-assist">
+      <p><strong>Sayt elanı avtomatik oxumağa icazə vermədi</strong> <span className="ai-assist-why">({assist})</span>. Elanı özünüz açın və mətnini köçürün — Təhvil məlumatları ondan oxuyacaq:</p>
+      <ol>
+        <li><a className="button button-secondary" href={href} target="_blank" rel="noopener noreferrer" data-testid="button-open-listing"><ExternalLink size={15} />Elanı aç</a></li>
+        <li>Elan səhifəsində hamısını seçib kopyalayın. <span className="ai-assist-how">Telefonda: mətnə uzun basın → “Hamısını seç” → “Kopyala”. Kompüterdə: Ctrl+A, Ctrl+C (Mac: ⌘A, ⌘C).</span></li>
+        <li>Bura qayıdıb basın: <button type="button" className="button button-primary" onClick={pasteFromClipboard} disabled={paste.isPending} data-testid="button-paste-read">{paste.isPending ? <LoaderCircle size={15} className="spin" /> : <ClipboardPaste size={15} />}Yapışdır və oxu</button></li>
+      </ol>
+      <textarea className="hp-input" rows={2} placeholder="və ya mətni buraya yapışdırın — dərhal oxunacaq" aria-label="Elanın kopyalanmış mətni" data-testid="input-assist-text"
+        onPaste={e => { const t = e.clipboardData.getData('text'); if (t.trim().length >= 10) { e.preventDefault(); readCopied(t); } }} />
+    </div>}
+    {mode === 'link' && !assist && <small className="rl-hint">Yalnız göstərdiyiniz bir səhifə oxunur və saytın robots.txt qaydalarına əməl olunur. Sayt icazə verməsə, elanı açıb mətnini köçürməyiniz üçün sadə yol göstəriləcək.</small>}
   </div>;
 }
 
