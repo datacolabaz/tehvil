@@ -2007,6 +2007,40 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ActionResult'}
+  /homes/{homeId}/smetas:
+    get:
+      operationId: listHomeSmetas
+      tags: [home]
+      summary: AI Smeta estimates saved in this home (planned work, not history)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Smetas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/HomeSmeta'}
+    post:
+      operationId: linkHomeSmeta
+      tags: [home]
+      summary: Save one of my estimates in this home, or remove it
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/HomeSmetaLinkInput'}
+      responses:
+        '200':
+          description: Smetas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/HomeSmeta'}
   /homes/{homeId}/audit:
     get:
       operationId: listHomeAudit
@@ -4235,7 +4269,7 @@ components:
         caption: {type: string, minLength: 0, maxLength: 300}
         phase:
           type: string
-          enum: [before, during, after, hidden, other]
+          enum: [before, during, after, hidden, other, document]
       required: [files]
     HomePermissions:
       type: object
@@ -4317,6 +4351,7 @@ components:
         propertyType: {type: string}
         city: {type: string}
         district: {type: string}
+        address: {type: string}
         stage: {type: string}
         coverUrl:
           type: [string, 'null']
@@ -4331,7 +4366,7 @@ components:
         lastWorkAt:
           type: [string, 'null']
         updatedAt: {type: string, format: date-time}
-      required: [id, publicId, name, propertyType, city, district, stage, coverUrl, myRole, areaM2, roomCount, works, pendingApproval, performers, lastWorkAt, updatedAt]
+      required: [id, publicId, name, propertyType, city, district, address, stage, coverUrl, myRole, areaM2, roomCount, works, pendingApproval, performers, lastWorkAt, updatedAt]
     HomeRoom:
       type: object
       properties:
@@ -4437,8 +4472,11 @@ components:
         openDefects: {type: integer}
         inspected: {type: boolean}
         visibility: {type: string}
+        materials: {type: string}
+        description: {type: string}
+        createdAt: {type: string, format: date-time}
         updatedAt: {type: string, format: date-time}
-      required: [id, homeId, title, category, kind, status, startDate, endDate, roomId, roomName, participants, mediaCount, openDefects, inspected, visibility, updatedAt]
+      required: [id, homeId, title, category, kind, status, startDate, endDate, roomId, roomName, participants, mediaCount, openDefects, inspected, visibility, materials, description, createdAt, updatedAt]
     WorkNote:
       type: object
       properties:
@@ -4539,6 +4577,12 @@ components:
         equipmentName:
           type: [string, 'null']
         visibility: {type: string}
+        cost:
+          type: [number, 'null']
+        currency: {type: string}
+        warrantyNote: {type: string}
+        addedByMe: {type: boolean}
+        addedByRole: {type: string}
         smetaProjectId:
           type: [string, 'null']
         smetaProjectName:
@@ -4571,8 +4615,8 @@ components:
         permissions: {$ref: '#/components/schemas/WorkPermissions'}
         createdAt: {type: string, format: date-time}
         updatedAt: {type: string, format: date-time}
-      required: [id, homeId, homeName, title, category, kind, status, description, materials, location, startDate, endDate, roomId, roomName, equipmentId, equipmentName, visibility, smetaProjectId, smetaProjectName,
-        completedAt, confirmedAt, inspectedAt, participants, media, notes, approvals, reviews, myRole, permissions, createdAt, updatedAt]
+      required: [id, homeId, homeName, title, category, kind, status, description, materials, location, startDate, endDate, roomId, roomName, equipmentId, equipmentName, visibility, cost, currency, warrantyNote,
+        addedByMe, addedByRole, smetaProjectId, smetaProjectName, completedAt, confirmedAt, inspectedAt, participants, media, notes, approvals, reviews, myRole, permissions, createdAt, updatedAt]
     WorkInput:
       type: object
       properties:
@@ -4607,6 +4651,12 @@ components:
         smetaProjectId:
           type: [string, 'null']
           format: uuid
+        cost:
+          type: [number, 'null']
+        currency:
+          type: string
+          enum: [AZN, USD, EUR]
+        warrantyNote: {type: string, minLength: 0, maxLength: 2000}
       required: [title]
     WorkStatusInput:
       type: object
@@ -4622,6 +4672,9 @@ components:
         name: {type: string, minLength: 2, maxLength: 120}
         phone: {type: string, minLength: 0, maxLength: 32}
         specialty: {type: string, minLength: 0, maxLength: 60}
+        kind:
+          type: string
+          enum: [individual, company]
       required: [name]
     ParticipantInput:
       type: object
@@ -4783,7 +4836,7 @@ components:
           format: uuid
         type:
           type: string
-          enum: [electric, water, sewer, heating, gas, ventilation, internet, other]
+          enum: [electric, water, sewer, heating, gas, ventilation, internet, meter, valve, electrical_panel, other]
         label: {type: string, minLength: 0, maxLength: 160}
         notes: {type: string, minLength: 0, maxLength: 2000}
         points:
@@ -5369,6 +5422,24 @@ components:
       properties:
         hidden: {type: boolean}
       required: [hidden]
+    HomeSmeta:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        district: {type: string}
+        areaM2:
+          type: [number, 'null']
+        status: {type: string}
+        mine: {type: boolean}
+        updatedAt: {type: string, format: date-time}
+      required: [id, name, district, areaM2, status, mine, updatedAt]
+    HomeSmetaLinkInput:
+      type: object
+      properties:
+        smetaProjectId: {type: string, format: uuid}
+        linked: {type: boolean}
+      required: [smetaProjectId, linked]
     HomeWorkItem:
       type: object
       properties:

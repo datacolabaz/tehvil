@@ -141,7 +141,7 @@ export function homePermissions(access: HomeAccess) {
     edit: manager,
     manageMembers: owner,
     manageSharing: owner,
-    addWorks: manager || access.performerWorkIds.size > 0,
+    addWorks: manager || contributor || access.performerWorkIds.size > 0,
     confirmWorks: manager,
     inspect: contributor,
     viewAudit: manager || contributor,
@@ -188,12 +188,13 @@ export function workPermissions(access: WorkAccess) {
   const managesTeamHere = accepted.some((p) => homeAccess.actor.managed.some((m) => m.id === p.workerId));
   const open = work.status !== "confirmed";
   return {
-    edit: owner || (canEditWork && open),
+    // "Redaktə edə bilər" (contributor) edits records of the home; performers only their own open works.
+    edit: owner || tech || (canEditWork && open),
     manageParticipants: owner || (managesTeamHere && open),
     addMedia: owner || tech || (canMedia && open),
     addNote: owner || tech || canNotes,
-    start: (owner || leading || canEditWork) && (work.status === "planned" || work.status === "revision"),
-    complete: (owner || leading || canEditWork) && ["planned", "in_progress", "revision"].includes(work.status),
+    start: (owner || tech || leading || canEditWork) && (work.status === "planned" || work.status === "revision"),
+    complete: (owner || tech || leading || canEditWork) && ["planned", "in_progress", "revision"].includes(work.status),
     confirm: owner && work.status === "completed",
     requestRevision: owner && work.status === "completed",
     reopen: owner && (work.status === "confirmed" || work.status === "completed" || work.status === "revision"),

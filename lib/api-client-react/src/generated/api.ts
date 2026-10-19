@@ -51,6 +51,8 @@ import type {
   HomeShareInput,
   HomeSharing,
   HomeSharingInput,
+  HomeSmeta,
+  HomeSmetaLinkInput,
   HomeSummary,
   HomeWorkItem,
   IdentityInput,
@@ -10312,6 +10314,172 @@ export const useRevokeHomeShare = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getRevokeHomeShareMutationOptions(options));
+    }
+
+export const getListHomeSmetasUrl = (homeId: string,) => {
+
+
+
+
+  return `/api/homes/${homeId}/smetas`
+}
+
+/**
+ * @summary AI Smeta estimates saved in this home (planned work, not history)
+ */
+export const listHomeSmetas = async (homeId: string, options?: Parameters<typeof customFetch>[1]): Promise<HomeSmeta[]> => {
+
+  return customFetch<HomeSmeta[]>(getListHomeSmetasUrl(homeId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListHomeSmetasQueryKey = (homeId: string,) => {
+    return [
+    `/api/homes/${homeId}/smetas`
+    ] as const;
+    }
+
+
+export const getListHomeSmetasQueryOptions = <TData = Awaited<ReturnType<typeof listHomeSmetas>>, TError = ErrorType<unknown>>(homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listHomeSmetas>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListHomeSmetasQueryKey(homeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listHomeSmetas>>> = ({ signal }) => listHomeSmetas(homeId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: homeId !== null && homeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listHomeSmetas>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListHomeSmetasQueryResult = NonNullable<Awaited<ReturnType<typeof listHomeSmetas>>>
+export type ListHomeSmetasQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary AI Smeta estimates saved in this home (planned work, not history)
+ */
+
+export function useListHomeSmetas<TData = Awaited<ReturnType<typeof listHomeSmetas>>, TError = ErrorType<unknown>>(
+ homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listHomeSmetas>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListHomeSmetasQueryOptions(homeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getLinkHomeSmetaUrl = (homeId: string,) => {
+
+
+
+
+  return `/api/homes/${homeId}/smetas`
+}
+
+/**
+ * @summary Save one of my estimates in this home, or remove it
+ */
+export const linkHomeSmeta = async (homeId: string,
+    homeSmetaLinkInput: HomeSmetaLinkInput, options?: Parameters<typeof customFetch>[1]): Promise<HomeSmeta[]> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<HomeSmeta[]>(getLinkHomeSmetaUrl(homeId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(homeSmetaLinkInput)
+  }
+);}
+
+
+
+
+
+export const getLinkHomeSmetaMutationKey = () => ['linkHomeSmeta'] as const;
+
+export const getLinkHomeSmetaMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkHomeSmeta>>, TError,LinkHomeSmetaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof linkHomeSmeta>>, TError,LinkHomeSmetaMutationVariables, TContext> => {
+
+const mutationKey = getLinkHomeSmetaMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof linkHomeSmeta>>, LinkHomeSmetaMutationVariables> = (props) => {
+          const {homeId,data} = props ?? {};
+
+          return  linkHomeSmeta(homeId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LinkHomeSmetaMutationResult = NonNullable<Awaited<ReturnType<typeof linkHomeSmeta>>>
+    export type LinkHomeSmetaMutationBody = BodyType<HomeSmetaLinkInput>
+    export type LinkHomeSmetaMutationError = ErrorType<unknown>
+    export type LinkHomeSmetaMutationVariables = {homeId: string;data: BodyType<HomeSmetaLinkInput>}
+
+    /**
+ * @summary Save one of my estimates in this home, or remove it
+ */
+export const useLinkHomeSmeta = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkHomeSmeta>>, TError,LinkHomeSmetaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof linkHomeSmeta>>,
+        TError,
+        LinkHomeSmetaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLinkHomeSmetaMutationOptions(options));
     }
 
 export const getListHomeAuditUrl = (homeId: string,) => {

@@ -6,11 +6,11 @@ export const PROPERTY: Record<string, string> = { apartment: 'Mənzil', house: '
 /** The three choices shown when a home is added; the rest stay valid for older records. */
 export const PROPERTY_SIMPLE: [string, string][] = [['apartment', 'Mənzil'], ['house', 'Həyət evi'], ['other', 'Digər']];
 export const STAGE: Record<string, string> = { construction: 'Tikilir', renovation: 'Təmirdədir', living: 'Yaşayış üçün hazırdır' };
-export const HOME_ROLE: Record<string, string> = { owner: 'Ev sahibi', member: 'Ev üzvü', contributor: 'Məlumat əlavə edə bilər', technician: 'Məlumat əlavə edə bilər', viewer: 'Yalnız baxa bilər', performer: 'Usta', staff: 'Tehvil.az əməkdaşı' };
+export const HOME_ROLE: Record<string, string> = { owner: 'Ev sahibi', member: 'İdarə edir', contributor: 'Redaktə edə bilər', technician: 'Redaktə edə bilər', viewer: 'Yalnız baxa bilər', performer: 'Usta', staff: 'Tehvil.az əməkdaşı' };
 /** One sentence per access level, shown wherever access is given. */
 export const HOME_ROLE_HINT: Record<string, string> = {
-  member: 'Evin məlumatlarını və təmir işlərini idarə edir, ustaları işə əlavə edir. Paylaşım və giriş icazələri yalnız sizdə qalır.',
-  contributor: 'Foto, qeyd, yoxlama, evdəki sistemlər və avadanlıq əlavə edə bilər. Məsələn, elektrik və ya santexnika mütəxəssisi.',
+  member: 'Evi sizinlə birlikdə idarə edir: işləri, otaqları, məlumatları. Paylaşım və giriş icazələri yalnız sizdə qalır.',
+  contributor: 'İş, foto, fayl, texniki məlumat və avadanlıq əlavə edə və dəyişə bilər. Paylaşım və giriş verə bilməz.',
   viewer: 'Evin məlumatlarına yalnız baxa bilər, heç nə dəyişə bilməz.',
 };
 
@@ -28,7 +28,7 @@ export const WORK_CATEGORY: Record<string, string> = {
 };
 export const QUICK_CATEGORIES = ['electrical', 'plumbing', 'waterproofing', 'plaster', 'painting', 'flooring', 'doors_windows', 'heating', 'hvac', 'other'];
 export const WORK_KIND: Record<string, string> = { construction: 'Tikinti', renovation: 'Təmir', installation: 'Quraşdırma', maintenance: 'Baxım və təmir', repair: 'Nasazlığın aradan qaldırılması', inspection: 'Yoxlama' };
-export const WORK_STATUS: Record<string, string> = { planned: 'Planlaşdırılıb', in_progress: 'Davam edir', completed: 'Bitib, təsdiq gözləyir', confirmed: 'Ev sahibi təsdiqləyib', revision: 'Düzəliş istənib' };
+export const WORK_STATUS: Record<string, string> = { planned: 'Planlaşdırılır', in_progress: 'Davam edir', completed: 'Görülüb — təsdiqinizi gözləyir', confirmed: 'Görülüb', revision: 'Düzəliş istənib' };
 export const WORK_TONE: Record<string, 'ok' | 'warn' | 'info' | 'neutral' | 'risk'> = { planned: 'neutral', in_progress: 'info', completed: 'warn', confirmed: 'ok', revision: 'risk' };
 
 export const PART_ROLE: Record<string, string> = { lead: 'Əsas usta', team_lead: 'Briqadir', team_member: 'Briqada üzvü', assistant: 'Köməkçi', supervisor: 'Nəzarətçi', inspector: 'Yoxlayan mütəxəssis' };
@@ -41,10 +41,10 @@ export const MEMBER_ROLE: Record<string, string> = { leader: 'Briqadir', member:
 export const MEMBER_STATUS: Record<string, string> = { invited: 'Dəvət olunub', active: 'Aktiv', declined: 'İmtina edib', left: 'Ayrılıb', removed: 'Çıxarılıb' };
 
 export const NOTE_KIND: Record<string, string> = { note: 'Qeyd', defect: 'Problem / qüsur', fix: 'Problem düzəldildi', inspection: 'Mütəxəssis yoxlaması' };
-export const PHASE: Record<string, string> = { before: 'İşdən əvvəl', during: 'İş zamanı', after: 'İşdən sonra', hidden: 'Divar bağlanmazdan əvvəl', other: 'Digər' };
+export const PHASE: Record<string, string> = { before: 'İşdən əvvəl', during: 'İş zamanı', after: 'İşdən sonra', hidden: 'Divar bağlanmazdan əvvəl', other: 'Fayl', document: 'Sənəd' };
 
-export const INFRA_TYPE: Record<string, string> = { electric: 'Elektrik naqilləri', water: 'Su boruları', sewer: 'Kanalizasiya', heating: 'İstilik boruları', gas: 'Qaz xətti', ventilation: 'Ventilyasiya', internet: 'İnternet və TV kabeli', other: 'Digər' };
-export const INFRA_COLOR: Record<string, string> = { electric: '#e0a100', water: '#2477d6', sewer: '#7a5230', heating: '#d6452a', gas: '#e6c419', ventilation: '#3aa39a', internet: '#7b4fd6', other: '#5b6b66' };
+export const INFRA_TYPE: Record<string, string> = { electric: 'Elektrik xətləri', water: 'Su xətləri', sewer: 'Kanalizasiya', heating: 'İstilik xətləri', gas: 'Qaz xətti', ventilation: 'Ventilyasiya', internet: 'İnternet və TV kabeli', meter: 'Sayğac', valve: 'Ventil / kran', electrical_panel: 'Elektrik lövhəsi', other: 'Digər' };
+export const INFRA_COLOR: Record<string, string> = { meter: '#8a6a2c', valve: '#1f6f8b', electrical_panel: '#b5651d', electric: '#e0a100', water: '#2477d6', sewer: '#7a5230', heating: '#d6452a', gas: '#e6c419', ventilation: '#3aa39a', internet: '#7b4fd6', other: '#5b6b66' };
 export const INFRA_SOURCE: Record<string, string> = { owner: 'Ev sahibi qeyd edib', worker: 'Usta qeyd edib', plan: 'Plandan / layihədən', specialist: 'Mütəxəssis qeyd edib' };
 
 export const EQUIP_CATEGORY: Record<string, string> = { boiler: 'Kombi', air_conditioner: 'Kondisioner', water_filter: 'Su filtri', water_heater: 'Su qızdırıcısı', electrical_panel: 'Elektrik paneli', ventilation: 'Ventilyasiya', appliance: 'Məişət texnikası', other: 'Digər' };
@@ -63,7 +63,7 @@ export const AUDIT_ACTION: Record<string, string> = {
   'media.added': 'Foto / video əlavə olundu', 'media.hidden': 'Fayl gizlədildi',
   'infrastructure.created': 'Evdəki sistem qeyd olundu', 'infrastructure.updated': 'Evdəki sistem dəyişdi', 'infrastructure.deleted': 'Evdəki sistem silindi', 'infrastructure.verified': 'Mütəxəssis təsdiqlədi',
   'equipment.created': 'Avadanlıq əlavə olundu', 'equipment.updated': 'Avadanlıq dəyişdi', 'equipment.deleted': 'Avadanlıq silindi',
-  'invitation.created': 'Dəvət linki yaradıldı', 'member.joined': 'Üzv qoşuldu', 'member.removed': 'Üzv çıxarıldı',
+  'invitation.created': 'Dəvət linki yaradıldı', 'smeta.linked': 'Smeta evdə saxlanıldı', 'smeta.unlinked': 'Smeta evdən çıxarıldı', 'member.joined': 'Üzv qoşuldu', 'member.removed': 'Üzv çıxarıldı',
   'sharing.updated': 'QR kodla baxış ayarları dəyişdi', 'share.created': 'Paylaşım linki yaradıldı', 'share.revoked': 'Paylaşım linki bağlandı',
   'review.created': 'Rəy yazıldı', 'review.reported': 'Rəyə etiraz edildi', 'review.hidden': 'Rəy gizlədildi', 'review.restored': 'Rəy bərpa olundu',
 };
@@ -99,3 +99,11 @@ export function loadDraft<T>(key: string): T | null {
 }
 export function saveDraft(key: string, value: unknown) { try { localStorage.setItem(`tehvil-draft:${key}`, JSON.stringify(value)); } catch { /* storage unavailable */ } }
 export function clearDraft(key: string) { try { localStorage.removeItem(`tehvil-draft:${key}`); } catch { /* storage unavailable */ } }
+
+export const CURRENCY = ['AZN', 'USD', 'EUR'] as const;
+export const money = (v: number | null | undefined, c = 'AZN') => (v == null ? '' : `${new Intl.NumberFormat('az-AZ', { maximumFractionDigits: 2 }).format(v)} ${c}`);
+/** Who added a record, in plain words (provenance, not a confirmation). */
+export function addedBy(role: string, me: boolean) {
+  if (me) return 'Siz əlavə etmisiniz';
+  return ({ owner: 'Ev sahibi əlavə edib', member: 'Evi idarə edən şəxs əlavə edib', contributor: 'Redaktə icazəsi olan şəxs əlavə edib', technician: 'Redaktə icazəsi olan şəxs əlavə edib', performer: 'Usta əlavə edib' } as Record<string, string>)[role] ?? 'Əlavə edilib';
+}

@@ -7,7 +7,9 @@ import type { ShareScopeJson as ShareScope } from "@workspace/db";
 import { getHomeAccess, loadActor } from "./homeAccess";
 import type { MediaRow } from "./homeDtos";
 
-export const HOME_MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm", "video/quicktime"];
+export const HOME_MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm", "video/quicktime", "application/pdf"];
+/** Only photos and videos can ever leave the account (QR page, share links); files and documents stay private. */
+const isVisual = (m: { contentType: string; phase: string }) => (m.contentType.startsWith("image/") || m.contentType.startsWith("video/")) && m.phase !== "document";
 const MAX_BYTES = 50 * 1024 * 1024;
 
 export class HomeMediaError extends Error {}
@@ -19,7 +21,7 @@ export async function attachHomeMedia(userId: string, files: MediaInputValue[], 
   const storage = new ObjectStorageService();
   for (const file of files) {
     if (!file.objectPath.startsWith("/objects/uploads/") || !HOME_MEDIA_TYPES.includes(file.contentType) || file.size < 1 || file.size > MAX_BYTES) {
-      throw new HomeMediaError("Yalnız 50 MB-a qədər şəkil (JPG, PNG, WebP, GIF) və ya video (MP4, WebM, MOV) əlavə oluna bilər");
+      throw new HomeMediaError("Yalnız 50 MB-a qədər foto (JPG, PNG, WebP), video (MP4, MOV) və ya PDF fayl əlavə etmək olar");
     }
     const [upload] = await db.select().from(evidenceUploadsTable).where(and(
       eq(evidenceUploadsTable.objectPath, file.objectPath),
@@ -87,7 +89,7 @@ export async function canReadMedia(media: MediaRow, userId: string | null, share
   const [home] = await db.select().from(homesTable).where(eq(homesTable.id, media.homeId));
   if (!home || home.archivedAt) return null;
   const [work] = media.workId ? await db.select().from(workRecordsTable).where(eq(workRecordsTable.id, media.workId)) : [];
-  if (shareToken) {
+  if (shareToken && isVisual(media)) {
     const s = await activeShare(shareToken);
     if (s && s.home.id === home.id) {
       const scope = s.share.scope;
@@ -96,7 +98,7 @@ export async function canReadMedia(media: MediaRow, userId: string | null, share
       if (scope.includePhotos && !work && media.roomId && (s.share.level === "technical" || scope.roomIds.includes(media.roomId))) return "private";
     }
   }
-  if (home.publicLevel !== "off" && home.publicShowPhotos) {
+  if (home.publicLevel !== "off" && home.publicShowPhotos && isVisual(media)) {
     if (home.coverMediaId === media.id) return "public";
     if (home.publicLevel === "history" && work && work.visibility === "public" && work.status === "confirmed" && media.phase !== "hidden") return "public";
   }

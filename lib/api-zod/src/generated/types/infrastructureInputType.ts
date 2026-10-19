@@ -17,5 +17,8 @@ export const InfrastructureInputType = {
   gas: 'gas',
   ventilation: 'ventilation',
   internet: 'internet',
+  meter: 'meter',
+  valve: 'valve',
+  electrical_panel: 'electrical_panel',
   other: 'other',
 } as const;

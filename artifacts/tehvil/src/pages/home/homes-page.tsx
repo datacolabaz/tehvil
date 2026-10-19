@@ -26,31 +26,24 @@ export function HomesPage() {
   const approvals = inbox.data?.approvals.length ?? 0;
   const firstVisit = !homes.isLoading && !list.length;
   return <>
-    {!firstVisit && <PageHeading eyebrow="Evlərim" title="Evlərim" description="Hər evin təmir tarixçəsi, evdəki sistemlər, avadanlıqlar və orada işləmiş ustalar."
-      action={<button type="button" className="button button-primary" onClick={() => setCreating(true)} data-testid="button-create-home"><Plus size={16} />Evimi əlavə et</button>} />}
+    {!firstVisit && <PageHeading eyebrow="Evlərim" title="Evlərim" description="Evinizin işləri, texniki məlumatları və sənədləri."
+      action={<button type="button" className="button button-primary" onClick={() => setCreating(true)} data-testid="button-create-home"><Plus size={16} />Ev əlavə et</button>} />}
     {(pendingInvites > 0 || approvals > 0) && <div className="hp-alerts">
       {approvals > 0 && <Link href="/approvals" className="hp-alert warn" data-testid="link-approvals"><ClipboardCheck size={17} /><span><b>{approvals} iş</b> sizin təsdiqinizi gözləyir</span><ArrowUpRight size={15} /></Link>}
-      {pendingInvites > 0 && <Link href="/invitations" className="hp-alert" data-testid="link-invitations"><BellRing size={17} /><span>Sizə <b>{pendingInvites} dəvət</b> göndərilib</span><ArrowUpRight size={15} /></Link>}
+      {pendingInvites > 0 && <Link href="/invitations" className="hp-alert" data-testid="link-invitations"><BellRing size={17} /><span>Sizi <b>{pendingInvites}</b> evə və ya işə dəvət ediblər</span><ArrowUpRight size={15} /></Link>}
     </div>}
     {homes.isLoading ? <Skeleton rows={3} /> : firstVisit ? <section className="hp-welcome">
-      <h1 className="font-display">Xoş gəlmisiniz!</h1>
-      <p>Təhvil-də evinizdə görülən bütün işlər — kim, nə vaxt, harada — fotolarla bir yerdə saxlanılır. Başlamaq üçün seçin:</p>
-      <div className="hp-choice">
-        <button type="button" className="hp-choice-card" onClick={() => setCreating(true)} data-testid="button-create-home">
-          <House size={28} /><b>Ev sahibiyəm</b><span>Evimi əlavə edim və görülən işləri qeyd edim.</span><em>Evimi əlavə et <ArrowRight size={14} /></em>
-        </button>
-        <Link href="/workers?create=individual" className="hp-choice-card" data-testid="link-start-master">
-          <HardHat size={28} /><b>Ustayam, briqadirəm və ya şirkətəm</b><span>Gördüyüm işləri, fotoları və materialları qeyd edim.</span><em>Usta profili yarat <ArrowRight size={14} /></em>
-        </Link>
-      </div>
-      {roles.data?.isPerformer && <p className="rl-hint"><HardHat size={13} className="sm-ii" /> Sizin usta hesabınız var — işləriniz <Link href="/my-works">İşlərim</Link> bölməsindədir.</p>}
-      <p className="rl-hint">Sizi kimsə evinə və ya işə dəvət edibsə, dəvət <Link href="/invitations">Mənə göndərilən dəvətlər</Link> bölməsində görünür.</p>
+      <div className="hp-welcome-mark"><House size={34} /></div>
+      <h1 className="font-display">Evinin məlumatları bir yerdə.</h1>
+      <p>Görülən işləri, fotoları və vacib detalları saxla — lazım olanda paylaş. Başlamaq üçün yalnız evin adı kifayətdir.</p>
+      <button type="button" className="button button-primary hp-big hp-welcome-cta" onClick={() => setCreating(true)} data-testid="button-create-home"><Plus size={18} />İlk evini əlavə et</button>
+      <ol className="hp-welcome-steps"><li><b>1</b>Ev əlavə et</li><li><b>2</b>İş və foto əlavə et</li><li><b>3</b>Lazım olanda paylaş</li></ol>
     </section> : <div className="hp-home-grid">{list.map(h => <Link key={h.id} href={`/homes/${h.id}`} className="hp-home-card" data-testid={`card-home-${h.id}`}>
       <div className="hp-home-cover">{h.coverUrl ? <img src={h.coverUrl} alt="" loading="lazy" /> : <Home size={30} />}<Pill small tone={h.myRole === 'owner' ? 'ok' : 'info'}>{HOME_ROLE[h.myRole] ?? h.myRole}</Pill></div>
       <div className="hp-home-body">
         <h3>{h.name}</h3>
-        <small><MapPin size={12} className="sm-ii" /> {[PROPERTY[h.propertyType], h.district, h.city].filter(Boolean).join(' · ')}</small>
-        <div className="hp-home-meta"><span><b>{h.works}</b> görülən iş</span><span><b>{h.performers}</b> usta</span>{h.lastWorkAt && <span>son iş: {day(h.lastWorkAt)}</span>}</div>
+        <small><MapPin size={12} className="sm-ii" /> {[h.address, h.district, h.city].filter(Boolean).join(', ') || PROPERTY[h.propertyType]}</small>
+        <div className="hp-home-meta"><span><b>{h.works}</b> iş</span>{h.lastWorkAt && <span>son iş: {day(h.lastWorkAt)}</span>}</div>
         {h.pendingApproval > 0 && <span className="hp-pending"><ClipboardCheck size={13} />{h.pendingApproval} iş təsdiqinizi gözləyir</span>}
       </div>
     </Link>)}</div>}
@@ -72,7 +65,7 @@ export function AddHomeModal({ onClose, onSaved }: { onClose: () => void; onSave
   useEffect(() => { saveDraft(DRAFT, form); }, [form]);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (form.name.trim().length < 2) { setError('Evə ad verin, məsələn “Bakıdakı evim”.'); return; }
+    if (form.name.trim().length < 2) { setError('Evin adını yazın, məsələn “Bakıdakı evim”.'); return; }
     setBusy(true); setError('');
     try {
       const data: HomeInput = { name: form.name.trim(), propertyType: form.propertyType as HomeInput['propertyType'], address: form.address.trim(), city: 'Bakı' };
@@ -89,17 +82,18 @@ export function AddHomeModal({ onClose, onSaved }: { onClose: () => void; onSave
     } catch { setError('Ev əlavə olunmadı. İnternet bağlantısını yoxlayıb yenidən cəhd edin.'); }
     finally { setBusy(false); }
   };
-  return <Modal open onClose={onClose} eyebrow="1-ci addım" title="Evimi əlavə et"
+  return <Modal open onClose={onClose} eyebrow="Yeni ev" title="Ev əlavə et"
     footer={<button type="submit" form="add-home" className="button button-primary hp-big" disabled={busy} data-testid="button-save-home">{busy && <LoaderCircle className="spin" size={15} />}Evi əlavə et</button>}>
     <form id="add-home" className="rl-form" onSubmit={e => { void submit(e); }}>
       <Field label="Evin adı" name="home-name" required value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="məs. Bakıdakı evim" />
       <Seg label="Ev növü" value={form.propertyType} options={PROPERTY_SIMPLE} onChange={v => setForm({ ...form, propertyType: v })} />
-      <Field label="Ünvan (istəyə bağlı)" name="home-address" value={form.address} onChange={v => setForm({ ...form, address: v })} placeholder="məs. Yasamal, Şərifzadə küç." />
+      <Field label="Ünvan və ya qısa təsvir (istəyə bağlı)" name="home-address" value={form.address} onChange={v => setForm({ ...form, address: v })} placeholder="məs. Yasamal, 3 otaqlı mənzil" />
       <small className="rl-hint">Ünvanı yalnız siz görürsünüz. Başqasına göstərmək sizin seçiminizdir.</small>
       <label className="field"><span>Şəkil (istəyə bağlı)</span>
         <span className="hp-file"><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => setPhoto(e.target.files?.[0] ?? null)} data-testid="input-home-photo" /><ImagePlus size={16} />{photo ? photo.name : 'Şəkil seç'}</span>
       </label>
-      <p className="rl-hint">Qalan məlumatları — otaqları, elektrik, su və istilik sistemlərini, avadanlıqları — sonra, istədiyiniz vaxt əlavə edə bilərsiniz.</p>
+      <p className="rl-hint">Qalan məlumatları — otaqları, işləri, texniki məlumatları, sənədləri — sonra, istədiyiniz vaxt əlavə edə bilərsiniz.</p>
+      <p className="rl-hint">Ev əlavə etmək mülkiyyətin rəsmi təsdiqi deyil — bu, sizin öz qeydlərinizdir.</p>
       {error && <p className="sm-field-error" role="alert">{error}</p>}
     </form>
   </Modal>;

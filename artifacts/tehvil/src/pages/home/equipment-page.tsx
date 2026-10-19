@@ -20,6 +20,7 @@ function warranty(e: Equipment) {
 export function HomeEquipmentPage({ homeId }: { homeId: string }) {
   const home = useHome(homeId);
   const q = useListEquipment(homeId);
+  const works = useListWorks(homeId);
   const remove = useDeleteEquipment();
   const qc = useQueryClient();
   const [, setLocation] = useLocation();
@@ -28,10 +29,12 @@ export function HomeEquipmentPage({ homeId }: { homeId: string }) {
   if (home.isLoading || q.isLoading) return <Skeleton rows={3} />;
   if (!home.data) return <HomeMissing />;
   const role = home.data.home.myRole;
-  const canAdd = role === 'owner' || role === 'technician' || role === 'performer';
+  const canAdd = role !== 'viewer';
+  const canEdit = role === 'owner' || role === 'member' || role === 'contributor' || role === 'technician';
   const list = q.data ?? [];
+  const materials = (works.data ?? []).filter(w => w.materials?.trim()).map(w => ({ id: w.id, title: w.title, date: w.startDate, materials: w.materials.trim() }));
   return <>
-    <PageHeading eyebrow={home.data.home.name} title="Avadanlıqlar" description="Kombi, kondisioner, su filtri, elektrik paneli… Kim quraşdırıb, zəmanət nə vaxt bitir, nə vaxt baxımdan keçib."
+    <PageHeading eyebrow={home.data.home.name} title="Materiallar və avadanlıqlar" description="Kombi, kondisioner, su filtri… və işlərdə istifadə olunan materiallar. Kim quraşdırıb, zəmanət nə vaxt bitir."
       action={canAdd ? <button type="button" className="button button-primary" onClick={() => setEditing('new')} data-testid="button-add-equipment"><Plus size={16} />Avadanlıq əlavə et</button> : undefined} />
     {!list.length ? <Empty icon={<Boxes size={28} />} title="Hələ avadanlıq əlavə etməmisiniz" text="Kombi, kondisioner, su filtri — əlavə edin ki, kim quraşdırıb və zəmanət nə vaxt bitir, həmişə əlinizin altında olsun." />
       : <div className="hp-equip-grid">{list.map(e => <article key={e.id} className="surface hp-equip" data-testid={`card-equipment-${e.id}`}>
@@ -47,11 +50,16 @@ export function HomeEquipmentPage({ homeId }: { homeId: string }) {
           <div className="hp-services"><b><Wrench size={13} className="sm-ii" /> Baxım və təmir</b>{e.services.length ? <ul>{e.services.map(s => <li key={s.id}><Link href={`/works/${s.id}`}>{s.title}</Link><small>{day(s.startDate)} · {WORK_STATUS[s.status]}</small></li>)}</ul> : <small className="rl-hint">Qeyd yoxdur.</small>}</div>
           <div className="hp-prow-actions">
             {home.data!.home.permissions.addWorks && <button type="button" className="sm-link-btn" onClick={() => setService(e)}><Plus size={13} />Baxım və ya təmir qeyd et</button>}
-            {(role === 'owner' || role === 'technician' || role === 'performer') && <button type="button" className="sm-link-btn" onClick={() => setEditing(e)}><Pencil size={13} />Dəyiş</button>}
-            {role === 'owner' && <button type="button" className="sm-link-btn danger" onClick={() => remove.mutate({ equipmentId: e.id }, { onSuccess: () => { void refreshHomeData(qc); toast('Avadanlıq silindi'); } })}><Trash2 size={13} />Sil</button>}
+            {canEdit && <button type="button" className="sm-link-btn" onClick={() => setEditing(e)}><Pencil size={13} />Dəyiş</button>}
+            {(role === 'owner' || role === 'member') && <button type="button" className="sm-link-btn danger" onClick={() => remove.mutate({ equipmentId: e.id }, { onSuccess: () => { void refreshHomeData(qc); toast('Avadanlıq silindi'); } })}><Trash2 size={13} />Sil</button>}
           </div>
         </div>
       </article>)}</div>}
+    <section className="surface hp-section" data-testid="section-materials">
+      <h2>İşlərdə istifadə olunan materiallar</h2>
+      {materials.length ? <ul className="hp-materials">{materials.map(m => <li key={m.id}><Link href={`/works/${m.id}`}><b>{m.title}</b></Link>{m.date && <small>{day(m.date)}</small>}<p className="hp-text">{m.materials}</p></li>)}</ul>
+        : <p className="rl-hint">Hələ material qeyd olunmayıb. İş əlavə edərkən “Əlavə məlumat” bölməsində materialları yazın — burada görünəcək.</p>}
+    </section>
     {editing && <EquipmentModal homeId={homeId} item={editing === 'new' ? undefined : editing} performer={role === 'performer'} onClose={() => setEditing(null)} />}
     {service && <QuickWorkModal homeId={homeId} equipmentId={service.id} roomId={service.roomId ?? undefined} category={service.category === 'air_conditioner' ? 'hvac' : service.category === 'boiler' || service.category === 'water_heater' ? 'heating' : 'other'} onClose={() => setService(null)} onSaved={id => setLocation(`/works/${id}`)} key={service.id} />}
     <HomeToaster />

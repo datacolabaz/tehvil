@@ -304,6 +304,7 @@ CREATE TABLE IF NOT EXISTS "smeta_project_costs" (
 CREATE TABLE IF NOT EXISTS "smeta_projects" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"owner_user_id" text NOT NULL,
+	"home_id" uuid,
 	"name" varchar(120) NOT NULL,
 	"district" varchar(100) NOT NULL,
 	"address" varchar(250) NOT NULL,
@@ -796,6 +797,9 @@ CREATE TABLE IF NOT EXISTS "work_records" (
 	"confirmed_at" timestamp with time zone,
 	"inspected_at" timestamp with time zone,
 	"visibility" varchar(8) DEFAULT 'public' NOT NULL,
+	"cost" numeric(14, 2),
+	"currency" varchar(3) DEFAULT 'AZN' NOT NULL,
+	"warranty_note" text DEFAULT '' NOT NULL,
 	"smeta_project_id" uuid,
 	"created_by_user_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -1312,6 +1316,8 @@ ALTER TABLE "smeta_project_costs" ADD COLUMN IF NOT EXISTS "amount" numeric(14, 
 ALTER TABLE "smeta_projects" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "smeta_projects" ADD COLUMN IF NOT EXISTS "owner_user_id" text NOT NULL;
+--> statement
+ALTER TABLE "smeta_projects" ADD COLUMN IF NOT EXISTS "home_id" uuid;
 --> statement
 ALTER TABLE "smeta_projects" ADD COLUMN IF NOT EXISTS "name" varchar(120) NOT NULL;
 --> statement
@@ -2114,6 +2120,12 @@ ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "confirmed_at" timestamp wit
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "inspected_at" timestamp with time zone;
 --> statement
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "visibility" varchar(8) DEFAULT 'public' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "cost" numeric(14, 2);
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'AZN' NOT NULL;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "warranty_note" text DEFAULT '' NOT NULL;
 --> statement
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "smeta_project_id" uuid;
 --> statement

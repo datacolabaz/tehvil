@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { WorkInputCategory } from './workInputCategory';
+import type { WorkInputCurrency } from './workInputCurrency';
 import type { WorkInputKind } from './workInputKind';
 import type { WorkInputStatus } from './workInputStatus';
 import type { WorkInputVisibility } from './workInputVisibility';
@@ -45,4 +46,12 @@ export interface WorkInput {
   status?: WorkInputStatus;
   /** @nullable */
   smetaProjectId?: string | null;
+  /** @nullable */
+  cost?: number | null;
+  currency?: WorkInputCurrency;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  warrantyNote?: string;
 }

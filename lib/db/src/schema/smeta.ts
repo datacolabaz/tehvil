@@ -86,6 +86,8 @@ export const smetaProjectsTable = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     ownerUserId: text("owner_user_id").notNull(),
+    /** Home the estimate is saved in (digital home passport). Planned work only; never a history record. */
+    homeId: uuid("home_id"),
     name: varchar("name", { length: 120 }).notNull(),
     district: varchar("district", { length: 100 }).notNull(),
     address: varchar("address", { length: 250 }).notNull(),

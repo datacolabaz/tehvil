@@ -15,4 +15,5 @@ export const HomeMediaAttachInputPhase = {
   after: 'after',
   hidden: 'hidden',
   other: 'other',
+  document: 'document',
 } as const;
