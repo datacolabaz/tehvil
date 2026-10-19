@@ -16,7 +16,7 @@ Plan istifadəçi tərəfindən təsdiqləndikdən sonra mərhələlərlə icra 
 | Linkdən oxuma (Bina.az, Tap.az, Yeniemlak.az və b.) | ✅ Hazır | Yalnız göstərilən bir səhifə; robots.txt-ə əməl olunur; `VALUATION_LINK_FETCH=off` ilə söndürülür |
 | Link oxunmayanda mətn və ya əl ilə daxiletmə | ✅ Hazır | |
 | Hesablamadan əvvəl düzəliş | ✅ Hazır | Avtomatik oxunan sahələr işarələnir |
-| Müqayisəli analiz | 🟡 Qismən | Real elanlarla: istifadəçinin əlavə etdiyi və Təhvil bazasındakı (server tərəfindən linkdən oxunan, qiyməti/sahəsi dəyişdirilməyən, son 180 gün). Baza boş başlayır → ilk vaxtlar tez-tez “kifayət qədər məlumat yoxdur” |
+| Müqayisəli analiz | 🟡 Qismən | Real elanlarla: istifadəçinin əlavə etdiyi və Təhvil bazasındakı (son 180 gün): server tərəfindən linkdən oxunan və dəyişdirilməyən, və ya istifadəçinin portal linki ilə köçürdüyü — “istifadəçi köçürüb” etiketi, hər elan bir dəfə, ağlabatan qiymət/sahə, gündə 30 limit, digərlərindən 2 dəfədən çox fərqlənən istifadə olunmur. Baza boş başlayır → ilk vaxtlar tez-tez “kifayət qədər məlumat yoxdur” |
 | Nəticə: aralıq, mərkəzi təxmin, AZN/m², elanlar (linklə), amillər, mənbə və tarix, etibarlılıq, çatışmayanlar, fərziyyələr | ✅ Hazır | 3-dən az oxşar elan → rəqəm verilmir |
 | Faktiki satış qiymətləri | ⛔ Xarici məlumat lazımdır | Açıq mənbə yoxdur — yalnız elan qiymətləri, açıq etiketlə |
 | **B2. Layihədən tikinti smetası** | | |

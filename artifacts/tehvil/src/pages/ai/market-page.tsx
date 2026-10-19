@@ -12,7 +12,7 @@ import './ai.css';
 
 const az = (n: number) => fmtNum(n, 0);
 const day = (s: string) => { const d = new Date(s); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`; };
-const PORTAL: Record<string, string> = { bina: 'Bina.az', tap: 'Tap.az', yeniemlak: 'Yeniemlak.az', other: 'digər portal', link: 'elan linki', text: 'yapışdırılmış mətn', manual: 'əl ilə daxil edilmiş' };
+const PORTAL: Record<string, string> = { bina: 'Bina.az', tap: 'Tap.az', yeniemlak: 'Yeniemlak.az', other: 'digər portal', link: 'elan linki', text: 'yapışdırılmış mətn', copied: 'portaldan köçürülmüş mətn', manual: 'əl ilə daxil edilmiş' };
 const BUILDING: Record<string, string> = { new: 'Yeni tikili', old: 'Köhnə tikili', house: 'Həyət evi / villa', unknown: 'Məlum deyil' };
 const TRI: Record<string, string> = { yes: 'Bəli', no: 'Xeyr', unknown: 'Məlum deyil' };
 const CONF: Record<string, [string, 'ok' | 'info' | 'warn' | 'neutral']> = { high: ['Yüksək', 'ok'], medium: ['Orta', 'info'], low: ['Aşağı', 'warn'], none: ['Hesablanmadı', 'neutral'] };
@@ -136,7 +136,7 @@ export function MarketValuePage() {
         <ListingForm f={subject} set={setSubject} warnings={warnings} title="1. Əmlakın məlumatları" />
         <section className="surface hp-section" data-testid="comps">
           <h2>2. Müqayisə üçün elanlar</h2>
-          <label className="rl-check"><input type="checkbox" checked={usePool} onChange={e => setUsePool(e.target.checked)} data-testid="use-pool" /><span><b>Təhvil bazasındakı elanlardan istifadə et</b><br /><small>Digər istifadəçilərin linklə oxutduğu və dəyişmədiyi real elanlar (son 180 gün). Kim tərəfindən əlavə olunduğu göstərilmir.</small></span></label>
+          <label className="rl-check"><input type="checkbox" checked={usePool} onChange={e => setUsePool(e.target.checked)} data-testid="use-pool" /><span><b>Təhvil bazasındakı elanlardan istifadə et</b><br /><small>Real portal elanları (son 180 gün): Təhvil-in linkdən oxuduğu və ya istifadəçilərin elan səhifəsindən köçürdüyü. Köçürülənlər ayrıca işarələnir. Kim tərəfindən əlavə olunduğu göstərilmir.</small></span></label>
           {comps.length > 0 && <ul className="ai-comp-list">{comps.map((c, i) => <li key={i}><span><b>{c.title || `${c.rooms ?? '?'} otaqlı, ${c.areaM2} m²`}</b><small>{[c.district, c.city, c.price ? `${az(c.price)} ${c.currency}` : 'qiymət yoxdur'].filter(Boolean).join(' · ')}</small></span><button type="button" className="icon-button" aria-label="Sil" onClick={() => setComps(comps.filter((_, j) => j !== i))}><Trash2 size={14} /></button></li>)}</ul>}
           {compDraft ? <div className="ai-comp-draft">
             <ListingForm f={compDraft} set={setCompDraft} warnings={[]} title="Müqayisə elanı" />
@@ -207,7 +207,7 @@ function ValuationView({ v }: { v: Valuation }) {
 function CompRow({ c }: { c: Valuation['comparables'][number] }) {
   const l = c.listing;
   return <tr className={c.used ? '' : 'muted'}>
-    <td>{l.url ? <a href={l.url} target="_blank" rel="noreferrer noopener">{l.title || 'Elan'}<ExternalLink size={11} /></a> : (l.title || 'Elan')}<small>{c.userAdded ? 'sizin əlavə etdiyiniz' : 'Təhvil bazası'}{c.notes.length ? ` · ${c.notes.join(', ')}` : ''}</small></td>
+    <td>{l.url ? <a href={l.url} target="_blank" rel="noreferrer noopener">{l.title || 'Elan'}<ExternalLink size={11} /></a> : (l.title || 'Elan')}<small>{c.userAdded ? 'sizin əlavə etdiyiniz' : c.listing.source === 'copied' ? 'Təhvil bazası · istifadəçi köçürüb' : 'Təhvil bazası'}{c.notes.length ? ` · ${c.notes.join(', ')}` : ''}</small></td>
     <td>{[l.district, l.city].filter(Boolean).join(', ')}</td><td>{l.areaM2 ?? '—'} m²</td><td>{l.rooms ?? '—'}</td>
     <td>{l.price ? `${az(l.price)} ${l.currency}` : '—'}</td><td>{c.pricePerM2 ? az(c.pricePerM2) : '—'}</td><td>{day(l.fetchedAt)}</td>
   </tr>;

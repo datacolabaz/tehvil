@@ -6,8 +6,9 @@ const money = (name: string) => numeric(name, { precision: 14, scale: 2, mode: "
 
 /**
  * A listing as it was seen at one moment: read from a portal page the user linked, pasted as
- * text, or typed in. Only listings read by the server from a portal page — and not changed
- * afterwards in price or area — join the shared comparison pool (`inPool`).
+ * text, or typed in. The shared comparison pool (`inPool`) takes listings read by the server
+ * from a portal page and not changed afterwards in price or area, and listings the person copied
+ * from a portal page they opened themselves (`copied`, guarded and labelled; see routes/valuation).
  * These are asking prices from adverts, never sale prices.
  */
 export const listingSnapshotsTable = pgTable("listing_snapshots", {
@@ -15,7 +16,7 @@ export const listingSnapshotsTable = pgTable("listing_snapshots", {
   url: text("url"),
   urlHash: varchar("url_hash", { length: 64 }),
   portal: varchar("portal", { length: 16 }),
-  /** link | text | manual */
+  /** link | text | copied | manual */
   source: varchar("source", { length: 8 }).notNull(),
   dealType: varchar("deal_type", { length: 8 }).notNull().default("sale"),
   city: varchar("city", { length: 100 }).notNull().default(""),
