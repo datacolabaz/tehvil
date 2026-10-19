@@ -81,6 +81,8 @@ const PublicWorkerPage = lazy(() => import('@/pages/home/workers-pages').then(m 
 const HomeDocumentsPage = lazy(() => import('@/pages/home/documents-page').then(m => ({ default: m.HomeDocumentsPage })));
 const AiSmetaHomePage = lazy(() => import('@/pages/ai/ai-home-page').then(m => ({ default: m.AiSmetaHomePage })));
 const ConstructionListPage = lazy(() => import('@/pages/ai/construction-page').then(m => ({ default: m.ConstructionListPage })));
+const RepairEstimatePage = lazy(() => import('@/pages/ai/repair-page').then(m => ({ default: m.RepairEstimatePage })));
+const PriceBasePage = lazy(() => import('@/pages/ai/prices-page').then(m => ({ default: m.PriceBasePage })));
 const ConstructionEditorPage = lazy(() => import('@/pages/ai/construction-page').then(m => ({ default: m.ConstructionEditorPage })));
 const InterestPage = lazy(() => import('@/pages/home/passport-card').then(m => ({ default: m.InterestPage })));
 const SettingsPage = lazy(() => import('@/pages/home/settings-page').then(m => ({ default: m.SettingsPage })));
@@ -445,6 +447,9 @@ function ClerkRoutes() {
       {/* The market-value service was withdrawn (20.10.2026); old links land on AI Smeta. */}
       <Route path="/ai-smeta/bazar">{() => <Redirect to="/ai-smeta" replace />}</Route>
       <Route path="/ai-smeta/bazar/:id">{() => <Redirect to="/ai-smeta" replace />}</Route>
+      <Route path="/ai-smeta/temir">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Təmir smetası' }]}><RepairEstimatePage/></SmetaShell>}</Route>
+      <Route path="/ai-smeta/temir/:id">{params => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Təmir smetası', href: '/ai-smeta/temir' }, { label: 'Smeta' }]}><RepairEstimatePage id={params.id}/></SmetaShell>}</Route>
+      <Route path="/ai-smeta/qiymetler">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Qiymət bazası' }]}><PriceBasePage/></SmetaShell>}</Route>
       <Route path="/ai-smeta/tikinti">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Tikinti smetası' }]}><ConstructionListPage/></SmetaShell>}</Route>
       <Route path="/ai-smeta/tikinti/:id">{params => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Tikinti smetası', href: '/ai-smeta/tikinti' }, { label: 'Smeta' }]}><ConstructionEditorPage id={params.id}/></SmetaShell>}</Route>
       <Route path="/smeta">{() => <SmetaShell lang={lang} change={changeLang} t={t} crumbs={[{ label: 'Təmir smetası (podratçı)' }]}><SmetaDashboardPage/></SmetaShell>}</Route>

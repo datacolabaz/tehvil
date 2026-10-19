@@ -4858,6 +4858,100 @@ export interface ConstructionEstimateSummary {
   unpriced: number | null;
 }
 
+export interface PriceBase {
+  items: unknown;
+  generatedAt: string;
+  staleDays: number;
+  admin: boolean;
+}
+
+export type PriceQuoteInputTier = typeof PriceQuoteInputTier[keyof typeof PriceQuoteInputTier];
+
+
+export const PriceQuoteInputTier = {
+  ekonom: 'ekonom',
+  standart: 'standart',
+  premium: 'premium',
+  any: 'any',
+} as const;
+
+export type PriceQuoteInputSourceKind = typeof PriceQuoteInputSourceKind[keyof typeof PriceQuoteInputSourceKind];
+
+
+export const PriceQuoteInputSourceKind = {
+  supplier: 'supplier',
+  contractor: 'contractor',
+  published: 'published',
+} as const;
+
+export interface PriceQuoteInput {
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  itemCode: string;
+  tier: PriceQuoteInputTier;
+  price: number;
+  sourceKind: PriceQuoteInputSourceKind;
+  /**
+     * @minLength 2
+     * @maxLength 200
+     */
+  sourceName: string;
+  /** @nullable */
+  sourceUrl?: string | null;
+  observedAt: string;
+  /**
+     * @minLength 0
+     * @maxLength 500
+     */
+  note?: string;
+}
+
+export interface PriceImportInput {
+  /**
+     * @minLength 1
+     * @maxLength 300000
+     */
+  csv: string;
+}
+
+export interface PriceImportResult {
+  added: number;
+  errors: string[];
+}
+
+export interface RepairEstimateInput {
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  data: unknown;
+}
+
+export interface RepairEstimate {
+  id: string;
+  name: string;
+  data: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RepairEstimateSummary {
+  id: string;
+  name: string;
+  updatedAt: string;
+  /** @nullable */
+  totalLow: number | null;
+  /** @nullable */
+  total: number | null;
+  /** @nullable */
+  totalHigh: number | null;
+  /** @nullable */
+  area: number | null;
+}
+
 export interface HomeWorkItem {
   work: WorkSummary;
   homeName: string;

@@ -916,6 +916,31 @@ CREATE TABLE IF NOT EXISTS "valuations" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement
+CREATE TABLE IF NOT EXISTS "price_quotes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"item_code" varchar(80) NOT NULL,
+	"tier" varchar(10) DEFAULT 'any' NOT NULL,
+	"price" numeric(12, 2) NOT NULL,
+	"currency" varchar(3) DEFAULT 'AZN' NOT NULL,
+	"source_kind" varchar(16) NOT NULL,
+	"source_name" varchar(200) NOT NULL,
+	"source_url" text,
+	"observed_at" date NOT NULL,
+	"note" text DEFAULT '' NOT NULL,
+	"active" boolean DEFAULT true NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "repair_estimates" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"owner_user_id" varchar(128) NOT NULL,
+	"name" varchar(200) NOT NULL,
+	"data" jsonb NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
 ALTER TABLE "change_orders" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "change_orders" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
@@ -2372,6 +2397,44 @@ ALTER TABLE "valuations" ADD COLUMN IF NOT EXISTS "result" jsonb NOT NULL;
 --> statement
 ALTER TABLE "valuations" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "item_code" varchar(80) NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "tier" varchar(10) DEFAULT 'any' NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "price" numeric(12, 2) NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'AZN' NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "source_kind" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "source_name" varchar(200) NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "source_url" text;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "observed_at" date NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "active" boolean DEFAULT true NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "price_quotes" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "repair_estimates" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "repair_estimates" ADD COLUMN IF NOT EXISTS "owner_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "repair_estimates" ADD COLUMN IF NOT EXISTS "name" varchar(200) NOT NULL;
+--> statement
+ALTER TABLE "repair_estimates" ADD COLUMN IF NOT EXISTS "data" jsonb NOT NULL;
+--> statement
+ALTER TABLE "repair_estimates" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "repair_estimates" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
 DO $$ BEGIN
   ALTER TABLE "change_orders" ADD CONSTRAINT "change_orders_project_id_renovation_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."renovation_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
@@ -2863,3 +2926,7 @@ CREATE INDEX IF NOT EXISTS "listing_snapshots_pool_idx" ON "listing_snapshots" U
 CREATE INDEX IF NOT EXISTS "listing_snapshots_url_idx" ON "listing_snapshots" USING btree ("url_hash");
 --> statement
 CREATE INDEX IF NOT EXISTS "valuations_owner_idx" ON "valuations" USING btree ("owner_user_id","created_at");
+--> statement
+CREATE INDEX IF NOT EXISTS "price_quotes_item_idx" ON "price_quotes" USING btree ("item_code","active");
+--> statement
+CREATE INDEX IF NOT EXISTS "repair_estimates_owner_idx" ON "repair_estimates" USING btree ("owner_user_id","updated_at");

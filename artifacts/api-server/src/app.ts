@@ -41,6 +41,8 @@ app.use("/api/whatsapp/webhook", whatsappWebhookRouter);
 // Estimate saves send the whole project document.
 app.use("/api/smeta", express.json({ limit: "2mb" }));
 app.use("/api/construction-estimates", express.json({ limit: "1mb" }));
+app.use("/api/repair-estimates", express.json({ limit: "1mb" }));
+app.use("/api/prices/import", express.json({ limit: "1mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(

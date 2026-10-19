@@ -64,7 +64,7 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
         <h2 className="font-display">AI smeta</h2>
         <p>Mənzil və ya ev təmiri üçün iş həcmi və xərc smetası, memarlıq layihəsindən isə tikinti üçün ilkin material və iş smetası hazırlayın.</p>
         <div className="lp-svc-ctas">
-          <Link href="/smeta" className="button button-primary lp-big" data-testid="cta-renovation"><Hammer size={16} />Təmir smetası hazırla</Link>
+          <Link href="/ai-smeta/temir" className="button button-primary lp-big" data-testid="cta-renovation"><Hammer size={16} />Təmir smetası hazırla</Link>
           <Link href="/ai-smeta/tikinti" className="button button-secondary lp-big" data-testid="cta-build"><Calculator size={16} />Layihədən tikinti smetası hazırla</Link>
         </div>
         <p className="lp-honest"><ShieldCheck size={16} />Hər qiymətin mənbəyi və tarixi smetada görünür; qiyməti olmayan iş “qiymət yoxdur” kimi qalır, uydurulmur.</p>

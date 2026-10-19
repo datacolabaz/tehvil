@@ -11753,6 +11753,167 @@ export const DeleteConstructionEstimateResponse = zod.object({
 
 
 /**
+ * @summary Unit prices for repair estimates: low / median / high per tier with sources and dates (no sign-in)
+ */
+export const GetPriceBaseResponse = zod.object({
+  "items": zod.unknown(),
+  "generatedAt": zod.string().datetime({"offset":true}),
+  "staleDays": zod.number().int(),
+  "admin": zod.boolean()
+})
+
+
+/**
+ * @summary Price administrator adds one observed price with its source
+ */
+export const addPriceQuoteBodyItemCodeMax = 80;
+
+export const addPriceQuoteBodySourceNameMin = 2;
+export const addPriceQuoteBodySourceNameMax = 200;
+
+export const addPriceQuoteBodyNoteMin = 0;
+export const addPriceQuoteBodyNoteMax = 500;
+
+
+
+export const AddPriceQuoteBody = zod.object({
+  "itemCode": zod.string().min(1).max(addPriceQuoteBodyItemCodeMax),
+  "tier": zod.enum(['ekonom', 'standart', 'premium', 'any']),
+  "price": zod.number(),
+  "sourceKind": zod.enum(['supplier', 'contractor', 'published']),
+  "sourceName": zod.string().min(addPriceQuoteBodySourceNameMin).max(addPriceQuoteBodySourceNameMax),
+  "sourceUrl": zod.string().nullish(),
+  "observedAt": zod.string().date(),
+  "note": zod.string().min(addPriceQuoteBodyNoteMin).max(addPriceQuoteBodyNoteMax).optional()
+})
+
+export const AddPriceQuoteResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Price administrator withdraws a price (kept for history)
+ */
+export const RemovePriceQuoteParams = zod.object({
+  "quoteId": zod.coerce.string().uuid()
+})
+
+export const RemovePriceQuoteResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Price administrator imports prices from CSV
+ */
+export const importPricesBodyCsvMax = 300000;
+
+
+
+export const ImportPricesBody = zod.object({
+  "csv": zod.string().min(1).max(importPricesBodyCsvMax)
+})
+
+export const ImportPricesResponse = zod.object({
+  "added": zod.number().int(),
+  "errors": zod.array(zod.string())
+})
+
+
+/**
+ * @summary My repair estimates
+ */
+export const ListRepairEstimatesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "totalLow": zod.number().nullable(),
+  "total": zod.number().nullable(),
+  "totalHigh": zod.number().nullable(),
+  "area": zod.number().nullable()
+})
+export const ListRepairEstimatesResponse = zod.array(ListRepairEstimatesResponseItem)
+
+
+/**
+ * @summary Save a repair estimate
+ */
+export const createRepairEstimateBodyNameMax = 200;
+
+
+
+export const CreateRepairEstimateBody = zod.object({
+  "name": zod.string().min(1).max(createRepairEstimateBodyNameMax),
+  "data": zod.unknown()
+})
+
+export const CreateRepairEstimateResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "data": zod.unknown(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary One repair estimate (owner only)
+ */
+export const GetRepairEstimateParams = zod.object({
+  "estimateId": zod.coerce.string().uuid()
+})
+
+export const GetRepairEstimateResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "data": zod.unknown(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Save changes
+ */
+export const UpdateRepairEstimateParams = zod.object({
+  "estimateId": zod.coerce.string().uuid()
+})
+
+export const updateRepairEstimateBodyNameMax = 200;
+
+
+
+export const UpdateRepairEstimateBody = zod.object({
+  "name": zod.string().min(1).max(updateRepairEstimateBodyNameMax),
+  "data": zod.unknown()
+})
+
+export const UpdateRepairEstimateResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "data": zod.unknown(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * @summary Delete (owner only)
+ */
+export const DeleteRepairEstimateParams = zod.object({
+  "estimateId": zod.coerce.string().uuid()
+})
+
+export const DeleteRepairEstimateResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
  * @summary What the signed-in account is (for a menu that shows only relevant sections)
  */
 export const GetMyRolesResponse = zod.object({
