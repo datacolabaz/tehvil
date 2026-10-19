@@ -44,4 +44,11 @@ export interface EquipmentInput {
      * @maxLength 3000
      */
   notes?: string;
+  /** @nullable */
+  nextServiceAt?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 300
+     */
+  serviceContact?: string;
 }

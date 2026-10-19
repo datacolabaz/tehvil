@@ -2255,6 +2255,61 @@ paths:
               schema:
                 type: array
                 items: {$ref: '#/components/schemas/HomeWorkItem'}
+  /homes/{homeId}/passport:
+    get:
+      operationId: getHomePassport
+      tags: [home]
+      summary: 'Passport completeness: which sections have data (not a quality score)'
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Passport
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomePassport'}
+  /homes/{homeId}/costs:
+    get:
+      operationId: getHomeCosts
+      tags: [home]
+      summary: Actual costs entered on works plus estimates saved in the home (members)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Costs
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/HomeCosts'}
+  /me/reminders:
+    get:
+      operationId: listMyReminders
+      tags: [home]
+      summary: Upcoming service dates and warranty ends across my homes (shown in the app only)
+      responses:
+        '200':
+          description: Reminders
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Reminder'}
+  /service-interests:
+    post:
+      operationId: createServiceInterest
+      tags: [home]
+      summary: Register interest in a service that is not available yet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ServiceInterestInput'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
   /me/roles:
     get:
       operationId: getMyRoles
@@ -4888,7 +4943,13 @@ components:
         services:
           type: array
           items: {$ref: '#/components/schemas/EquipmentService'}
-      required: [id, roomId, roomName, installWorkId, installWorkTitle, installers, name, category, brand, model, serialNumber, installedAt, warrantyUntil, photoMediaId, photoUrl, notes, services]
+        lastServiceAt:
+          type: [string, 'null']
+        nextServiceAt:
+          type: [string, 'null']
+        serviceContact: {type: string}
+      required: [id, roomId, roomName, installWorkId, installWorkTitle, installers, name, category, brand, model, serialNumber, installedAt, warrantyUntil, photoMediaId, photoUrl, notes, services, lastServiceAt,
+        nextServiceAt, serviceContact]
     EquipmentInput:
       type: object
       properties:
@@ -4915,6 +4976,10 @@ components:
           type: [string, 'null']
           format: uuid
         notes: {type: string, minLength: 0, maxLength: 3000}
+        nextServiceAt:
+          type: [string, 'null']
+          format: date
+        serviceContact: {type: string, minLength: 0, maxLength: 300}
       required: [name]
     HomeInvitationInput:
       type: object
@@ -5234,6 +5299,13 @@ components:
           items: {type: string}
         includePhotos: {type: boolean}
         includeInfrastructure: {type: boolean}
+        includeAddress: {type: boolean}
+        documentIds:
+          type: array
+          items: {type: string}
+        purpose:
+          type: string
+          enum: [general, sale, handover]
       required: [roomIds, workIds, equipmentIds, includePhotos, includeInfrastructure]
     HomeShare:
       type: object
@@ -5343,7 +5415,32 @@ components:
         inspected: {type: boolean}
         description: {type: string}
         materials: {type: string}
-      required: [id, title, category, kind, status, startDate, endDate, roomName, performers, photos, confirmed, inspected, description, materials]
+        source: {type: string}
+        hasDocuments: {type: boolean}
+        notes:
+          type: array
+          items: {$ref: '#/components/schemas/PublicWorkNote'}
+        updatedAt: {type: string, format: date-time}
+      required: [id, title, category, kind, status, startDate, endDate, roomName, performers, photos, confirmed, inspected, description, materials, source, hasDocuments, notes, updatedAt]
+    PublicWorkNote:
+      type: object
+      properties:
+        kind: {type: string}
+        body: {type: string}
+        result:
+          type: [string, 'null']
+        authorRole: {type: string}
+        createdAt: {type: string, format: date-time}
+      required: [kind, body, result, authorRole, createdAt]
+    PublicDocument:
+      type: object
+      properties:
+        id: {type: string}
+        title: {type: string}
+        url: {type: string}
+        contentType: {type: string}
+        createdAt: {type: string, format: date-time}
+      required: [id, title, url, contentType, createdAt]
     PublicEquipment:
       type: object
       properties:
@@ -5358,7 +5455,11 @@ components:
           type: [string, 'null']
         roomName:
           type: [string, 'null']
-      required: [id, name, category, brand, model, installedAt, warrantyUntil, roomName]
+        lastServiceAt:
+          type: [string, 'null']
+        nextServiceAt:
+          type: [string, 'null']
+      required: [id, name, category, brand, model, installedAt, warrantyUntil, roomName, lastServiceAt, nextServiceAt]
     PublicInfrastructure:
       type: object
       properties:
@@ -5375,7 +5476,8 @@ components:
           items: {$ref: '#/components/schemas/MarkerPoint'}
         source: {type: string}
         verified: {type: boolean}
-      required: [id, type, label, notes, roomName, mediaUrl, points, source, verified]
+        createdAt: {type: string, format: date-time}
+      required: [id, type, label, notes, roomName, mediaUrl, points, source, verified, createdAt]
     PublicHome:
       type: object
       properties:
@@ -5408,10 +5510,18 @@ components:
         infrastructure:
           type: array
           items: {$ref: '#/components/schemas/PublicInfrastructure'}
+        documents:
+          type: array
+          items: {$ref: '#/components/schemas/PublicDocument'}
+        purpose: {type: string}
         shareLabel:
           type: [string, 'null']
         updatedAt: {type: string, format: date-time}
-      required: [publicId, name, propertyType, city, district, address, areaM2, roomCount, builtYear, stage, coverUrl, level, rooms, works, equipment, infrastructure, shareLabel, updatedAt]
+        lastChangeAt:
+          type: [string, 'null']
+          format: date-time
+      required: [publicId, name, propertyType, city, district, address, areaM2, roomCount, builtYear, stage, coverUrl, level, rooms, works, equipment, infrastructure, documents, purpose, shareLabel, updatedAt,
+        lastChangeAt]
     IdentityInput:
       type: object
       properties:
@@ -5433,7 +5543,89 @@ components:
         status: {type: string}
         mine: {type: boolean}
         updatedAt: {type: string, format: date-time}
-      required: [id, name, district, areaM2, status, mine, updatedAt]
+        estimatedTotal:
+          type: [number, 'null']
+        spentTotal:
+          type: [number, 'null']
+      required: [id, name, district, areaM2, status, mine, updatedAt, estimatedTotal, spentTotal]
+    PassportSection:
+      type: object
+      properties:
+        key: {type: string}
+        label: {type: string}
+        count: {type: integer}
+        filled: {type: boolean}
+        hint: {type: string}
+        path: {type: string}
+      required: [key, label, count, filled, hint, path]
+    HomePassport:
+      type: object
+      properties:
+        percent: {type: integer}
+        filledSections: {type: integer}
+        totalSections: {type: integer}
+        sections:
+          type: array
+          items: {$ref: '#/components/schemas/PassportSection'}
+        sources: {$ref: '#/components/schemas/PassportSources'}
+        lastChangeAt:
+          type: [string, 'null']
+          format: date-time
+      required: [percent, filledSections, totalSections, sections, sources, lastChangeAt]
+    PassportSources:
+      type: object
+      properties:
+        owner: {type: integer}
+        contractor: {type: integer}
+        documented: {type: integer}
+        specialist: {type: integer}
+      required: [owner, contractor, documented, specialist]
+    CostLine:
+      type: object
+      properties:
+        key: {type: string}
+        currency: {type: string}
+        total: {type: number}
+        count: {type: integer}
+      required: [key, currency, total, count]
+    HomeCosts:
+      type: object
+      properties:
+        byCurrency:
+          type: array
+          items: {$ref: '#/components/schemas/CostLine'}
+        byCategory:
+          type: array
+          items: {$ref: '#/components/schemas/CostLine'}
+        worksWithCost: {type: integer}
+        worksWithoutCost: {type: integer}
+        estimates:
+          type: array
+          items: {$ref: '#/components/schemas/HomeSmeta'}
+      required: [byCurrency, byCategory, worksWithCost, worksWithoutCost, estimates]
+    Reminder:
+      type: object
+      properties:
+        kind: {type: string}
+        homeId: {type: string}
+        homeName: {type: string}
+        equipmentId: {type: string}
+        title: {type: string}
+        dueDate: {type: string}
+        overdue: {type: boolean}
+      required: [kind, homeId, homeName, equipmentId, title, dueDate, overdue]
+    ServiceInterestInput:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum: [inspection, pro_account, maintenance, handover]
+        homeId:
+          type: [string, 'null']
+          format: uuid
+        contact: {type: string, minLength: 0, maxLength: 200}
+        note: {type: string, minLength: 0, maxLength: 1000}
+      required: [kind]
     HomeSmetaLinkInput:
       type: object
       properties:

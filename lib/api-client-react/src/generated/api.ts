@@ -36,6 +36,7 @@ import type {
   HandoverInput,
   HealthStatus,
   HideInput,
+  HomeCosts,
   HomeInput,
   HomeInvitationAcceptInput,
   HomeInvitationInput,
@@ -43,6 +44,7 @@ import type {
   HomeMediaAttachInput,
   HomeMember,
   HomeOverview,
+  HomePassport,
   HomePerformer,
   HomeRoom,
   HomeRoomDetail,
@@ -117,6 +119,7 @@ import type {
   RealtorProfileInput,
   RealtorWhatsappInput,
   RealtorWhatsappSettings,
+  Reminder,
   ReportInput,
   RespondInput,
   ReviewInput,
@@ -128,6 +131,7 @@ import type {
   ScopeItem,
   ScopeItemInput,
   SearchWorkersParams,
+  ServiceInterestInput,
   SharedChangeOrderDecisionInput,
   SharedEstimate,
   SharedEstimateApprovalInput,
@@ -11592,6 +11596,325 @@ export function useListMyHomeWorks<TData = Awaited<ReturnType<typeof listMyHomeW
 
 
 
+
+export const getGetHomePassportUrl = (homeId: string,) => {
+
+
+
+
+  return `/api/homes/${homeId}/passport`
+}
+
+/**
+ * @summary Passport completeness: which sections have data (not a quality score)
+ */
+export const getHomePassport = async (homeId: string, options?: Parameters<typeof customFetch>[1]): Promise<HomePassport> => {
+
+  return customFetch<HomePassport>(getGetHomePassportUrl(homeId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetHomePassportQueryKey = (homeId: string,) => {
+    return [
+    `/api/homes/${homeId}/passport`
+    ] as const;
+    }
+
+
+export const getGetHomePassportQueryOptions = <TData = Awaited<ReturnType<typeof getHomePassport>>, TError = ErrorType<unknown>>(homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHomePassport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHomePassportQueryKey(homeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHomePassport>>> = ({ signal }) => getHomePassport(homeId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: homeId !== null && homeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHomePassport>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetHomePassportQueryResult = NonNullable<Awaited<ReturnType<typeof getHomePassport>>>
+export type GetHomePassportQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Passport completeness: which sections have data (not a quality score)
+ */
+
+export function useGetHomePassport<TData = Awaited<ReturnType<typeof getHomePassport>>, TError = ErrorType<unknown>>(
+ homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHomePassport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetHomePassportQueryOptions(homeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetHomeCostsUrl = (homeId: string,) => {
+
+
+
+
+  return `/api/homes/${homeId}/costs`
+}
+
+/**
+ * @summary Actual costs entered on works plus estimates saved in the home (members)
+ */
+export const getHomeCosts = async (homeId: string, options?: Parameters<typeof customFetch>[1]): Promise<HomeCosts> => {
+
+  return customFetch<HomeCosts>(getGetHomeCostsUrl(homeId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetHomeCostsQueryKey = (homeId: string,) => {
+    return [
+    `/api/homes/${homeId}/costs`
+    ] as const;
+    }
+
+
+export const getGetHomeCostsQueryOptions = <TData = Awaited<ReturnType<typeof getHomeCosts>>, TError = ErrorType<unknown>>(homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHomeCosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHomeCostsQueryKey(homeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHomeCosts>>> = ({ signal }) => getHomeCosts(homeId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: homeId !== null && homeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHomeCosts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetHomeCostsQueryResult = NonNullable<Awaited<ReturnType<typeof getHomeCosts>>>
+export type GetHomeCostsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Actual costs entered on works plus estimates saved in the home (members)
+ */
+
+export function useGetHomeCosts<TData = Awaited<ReturnType<typeof getHomeCosts>>, TError = ErrorType<unknown>>(
+ homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHomeCosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetHomeCostsQueryOptions(homeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListMyRemindersUrl = () => {
+
+
+
+
+  return `/api/me/reminders`
+}
+
+/**
+ * @summary Upcoming service dates and warranty ends across my homes (shown in the app only)
+ */
+export const listMyReminders = async ( options?: Parameters<typeof customFetch>[1]): Promise<Reminder[]> => {
+
+  return customFetch<Reminder[]>(getListMyRemindersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMyRemindersQueryKey = () => {
+    return [
+    `/api/me/reminders`
+    ] as const;
+    }
+
+
+export const getListMyRemindersQueryOptions = <TData = Awaited<ReturnType<typeof listMyReminders>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMyReminders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMyRemindersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMyReminders>>> = ({ signal }) => listMyReminders({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMyReminders>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListMyRemindersQueryResult = NonNullable<Awaited<ReturnType<typeof listMyReminders>>>
+export type ListMyRemindersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Upcoming service dates and warranty ends across my homes (shown in the app only)
+ */
+
+export function useListMyReminders<TData = Awaited<ReturnType<typeof listMyReminders>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMyReminders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListMyRemindersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateServiceInterestUrl = () => {
+
+
+
+
+  return `/api/service-interests`
+}
+
+/**
+ * @summary Register interest in a service that is not available yet
+ */
+export const createServiceInterest = async (serviceInterestInput: ServiceInterestInput, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ActionResult>(getCreateServiceInterestUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(serviceInterestInput)
+  }
+);}
+
+
+
+
+
+export const getCreateServiceInterestMutationKey = () => ['createServiceInterest'] as const;
+
+export const getCreateServiceInterestMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createServiceInterest>>, TError,CreateServiceInterestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createServiceInterest>>, TError,CreateServiceInterestMutationVariables, TContext> => {
+
+const mutationKey = getCreateServiceInterestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createServiceInterest>>, CreateServiceInterestMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createServiceInterest(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateServiceInterestMutationResult = NonNullable<Awaited<ReturnType<typeof createServiceInterest>>>
+    export type CreateServiceInterestMutationBody = BodyType<ServiceInterestInput>
+    export type CreateServiceInterestMutationError = ErrorType<unknown>
+    export type CreateServiceInterestMutationVariables = {data: BodyType<ServiceInterestInput>}
+
+    /**
+ * @summary Register interest in a service that is not available yet
+ */
+export const useCreateServiceInterest = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createServiceInterest>>, TError,CreateServiceInterestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createServiceInterest>>,
+        TError,
+        CreateServiceInterestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateServiceInterestMutationOptions(options));
+    }
 
 export const getGetMyRolesUrl = () => {
 

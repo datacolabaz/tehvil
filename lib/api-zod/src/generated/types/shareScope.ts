@@ -5,6 +5,7 @@
  * Təhvil renovation project coordination API
  * OpenAPI spec version: 0.1.0
  */
+import type { ShareScopePurpose } from './shareScopePurpose';
 
 export interface ShareScope {
   roomIds: string[];
@@ -12,4 +13,7 @@ export interface ShareScope {
   equipmentIds: string[];
   includePhotos: boolean;
   includeInfrastructure: boolean;
+  includeAddress?: boolean;
+  documentIds?: string[];
+  purpose?: ShareScopePurpose;
 }
