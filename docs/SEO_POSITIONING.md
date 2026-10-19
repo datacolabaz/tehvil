@@ -17,8 +17,9 @@ Mövqe: **ev təhvil-təslim və AI smeta platforması**. Marketplace, ERP/CRM, 
 ## Yeni title, description, H1 (ana səhifə)
 
 - **Title:** Ev təhvil-təslim və AI smeta — Təhvil.az
-- **Description:** Evin otaqlarını, avadanlığını, qüsurlarını və dəyişikliklərini foto ilə qeydə alın. Elan linkindən təxmini bazar dəyəri, memarlıq layihəsindən ilkin tikinti smetası.
-- **H1:** Evinizi qeydə alın. Dəyərini və xərclərini əvvəlcədən hesablayın.
+- **Description:** Evin otaqlarını, avadanlığını, qüsurlarını və dəyişikliklərini foto ilə qeydə alın. Təmir smetası və memarlıq layihəsindən ilkin tikinti smetası hesablayın.
+- **H1:** Evinizi qeydə alın. Təmir və tikinti xərclərini əvvəlcədən hesablayın.
+- 20.10.2026: bazar dəyəri xidməti çıxarıldı; bələdçi `/evin-bazar-deyeri-ve-tikinti-smetasi.html` → `/ev-temiri-ve-tikinti-smetasi.html` (301).
 
 ## İndekslənmə
 

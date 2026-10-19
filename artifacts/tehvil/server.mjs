@@ -21,6 +21,8 @@ app.use((req, res, next) => {
   if (host === "www.tehvil.az" && (req.method === "GET" || req.method === "HEAD")) return res.redirect(301, `https://tehvil.az${req.originalUrl}`);
   next();
 });
+// Renamed guide (market value withdrawn 20.10.2026).
+app.get("/evin-bazar-deyeri-ve-tikinti-smetasi.html", (_req, res) => res.redirect(301, "/ev-temiri-ve-tikinti-smetasi.html"));
 // Browser traffic stays same-origin, preserving Clerk session cookies while
 // the frontend and API remain independently deployed Railway services.
 app.use("/api", createProxyMiddleware({

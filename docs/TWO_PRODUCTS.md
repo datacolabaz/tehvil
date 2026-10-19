@@ -2,6 +2,8 @@
 
 Plan istifadəçi tərəfindən təsdiqləndikdən sonra mərhələlərlə icra olundu; hər mərhələ ayrıca test edildi.
 
+> **20.10.2026:** B1 (elan üzrə bazar dəyəri) istifadəçinin qərarı ilə saytdan çıxarıldı: kart, səhifələr və “Təhvil-ə göndər” düyməsi silindi, köhnə linklər `/ai-smeta`-ya yönləndirilir, API yeni sorğulara 410 qaytarır. Bazadakı köhnə qeydlərə toxunulmayıb. AI smeta indi təmir və tikinti smetasıdır.
+
 ## Hazır / qismən hazır / xarici servis tələb edir
 
 | Funksiya | Vəziyyət | Qeyd |
