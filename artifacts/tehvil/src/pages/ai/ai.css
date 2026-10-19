@@ -97,3 +97,10 @@
   .ai-line { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .ai-line-name,.ai-amount,.ai-source { grid-column:1 / -1; }
 }
+
+.ai-assist { display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid #e8d9b8;border-radius:14px;background:#fdf8ec;font-size:14px;line-height:1.55; }
+.ai-assist p { margin:0; }
+.ai-assist-why { color:#8a7a5a;font-size:12.5px; }
+.ai-assist ol { margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px; }
+.ai-assist li .button { margin-top:2px; }
+.ai-assist-how { display:block;color:#6b6250;font-size:13px; }
