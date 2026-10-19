@@ -7,9 +7,10 @@ import {
 } from '@workspace/api-client-react';
 import { PageHeading } from '@/components/kit';
 import { Empty, Pill, Skeleton } from '@/components/home/ui';
+import { fmtNum } from '@/lib/build/estimate';
 import './ai.css';
 
-const az = (n: number) => new Intl.NumberFormat('az-AZ', { maximumFractionDigits: 0 }).format(n);
+const az = (n: number) => fmtNum(n, 0);
 const day = (s: string) => { const d = new Date(s); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`; };
 const PORTAL: Record<string, string> = { bina: 'Bina.az', tap: 'Tap.az', yeniemlak: 'Yeniemlak.az', other: 'digər portal', link: 'elan linki', text: 'yapışdırılmış mətn', manual: 'əl ilə daxil edilmiş' };
 const BUILDING: Record<string, string> = { new: 'Yeni tikili', old: 'Köhnə tikili', house: 'Həyət evi / villa', unknown: 'Məlum deyil' };

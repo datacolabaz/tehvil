@@ -68,7 +68,7 @@ export function findInText(pages: PdfPage[]): PdfFinding[] {
       const scale = line.match(/\bM\s*1\s*[:/]\s*(\d{2,4})\b/i) ?? line.match(/\b1\s*:\s*(20|25|50|75|100|200|250|500)\b/);
       if (scale) push({ kind: 'scale', label: `Miqyas 1:${scale[1]}`, value: Number(scale[1]), unit: '', page, snippet: line.trim().slice(0, 90) });
       const floors = line.match(/\b(\d{1,2})\s*-?\s*(?:mərtəbəli|mərtəbə|mertebe|этажн|этаж)/i);
-      if (floors && Number(floors[1]) > 0 && Number(floors[1]) < 60) push({ kind: 'floors', label: `${floors[1]} mərtəbə`, value: Number(floors[1]), unit: 'mərtəbə', page, snippet: line.trim().slice(0, 90) });
+      if (floors && Number(floors[1]) > 0 && Number(floors[1]) < 60) push({ kind: 'floors', label: 'Mərtəbə sayı', value: Number(floors[1]), unit: 'mərtəbə', page, snippet: line.trim().slice(0, 90) });
       const h = line.match(/(?:\bh\s*=|hündürlü[yk]\w*|высота)\s*:?\s*(\d[.,]\d{1,2})\s*m?/i);
       if (h && toNum(h[1]) > 2 && toNum(h[1]) < 8) push({ kind: 'height', label: 'Tavan / mərtəbə hündürlüyü', value: toNum(h[1]), unit: 'm', page, snippet: line.trim().slice(0, 90) });
     }

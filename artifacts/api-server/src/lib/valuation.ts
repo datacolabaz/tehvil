@@ -37,6 +37,7 @@ export const sameText = (a: string, b: string) => !!a && !!b && fold(a.trim()) =
 /** Reads the facts the valuation needs from listing text (page text or pasted text). */
 export function factsFromText(hay: string): Omit<ListingFacts, "title" | "description"> {
   const t = hay.replace(/\s+/g, " ");
+  const lo = t.toLocaleLowerCase("az"); // keyword tests: “İcarə”, “Təmirli” in any case
   const num = (s: string) => { const n = Number(s.replace(/[\s  .]/g, "").replace(",", ".")); return Number.isFinite(n) ? n : null; };
   const area = t.match(/(\d{1,5}(?:[.,]\d{1,2})?)\s*(?:m²|m2|kv\.?\s*m|кв\.?\s*м)/i);
   const rooms = t.match(/(\d{1,2})\s*-?\s*(?:otaql[ıi]|otaq\b|комнат)/i) ?? t.match(/otaq(?:\s*sayı)?\s*:?\s*(\d{1,2})/i);
@@ -44,10 +45,10 @@ export function factsFromText(hay: string): Omit<ListingFacts, "title" | "descri
   const price = t.match(/(?<![\d/.,])(\d{1,3}(?:[ \u00a0\u202f.]\d{3})+|\d{4,9})\s*(AZN|₼|manat|man\.|USD|\$)/i);
   const district = t.match(/([A-ZƏÖÜĞIŞÇ][a-zəöüğışç]+)\s+(?:r\.|ray\.|rayonu)/) ?? t.match(/\b([A-ZƏÖÜĞIŞÇ][a-zəöüğışç]+)\s+(?:qəs\.|qəsəbəsi)/) ?? t.match(/\bm\.\s*([A-ZƏÖÜĞIŞÇ][\wəöüğışç]+)/);
   const city = CITIES.find((c) => new RegExp(`\\b${c}\\b`, "i").test(t) || fold(t).includes(fold(c))) ?? null;
-  const building: Building = /yeni\s*tikili|новостройк/i.test(t) ? "new" : /köhnə\s*tikili|kohne\s*tikili|вторичк|старый фонд/i.test(t) ? "old" : /həyət\s*evi|heyet\s*evi|villa|bağ\s*evi|частный дом/i.test(t) ? "house" : "unknown";
-  const renovation: Tri = /təmirsiz|temirsiz|без ремонта|qara karkas/i.test(t) ? "no" : /təmirli|temirli|с ремонтом|euro\s*təmir|əla təmir/i.test(t) ? "yes" : "unknown";
-  const furnished: Tri = /əşyasız|esyasiz|без мебели/i.test(t) ? "no" : /əşyalı|esyali|с мебелью|mebelli/i.test(t) ? "yes" : "unknown";
-  const deal = /icar|kiray|аренд/i.test(t) ? "rent" : /sat[ıi]l|satış|satis|продаж/i.test(t) ? "sale" : null;
+  const building: Building = /yeni\s*tikili|новостройк/i.test(lo) ? "new" : /köhnə\s*tikili|kohne\s*tikili|вторичк|старый фонд/i.test(lo) ? "old" : /həyət\s*evi|heyet\s*evi|villa|bağ\s*evi|частный дом/i.test(lo) ? "house" : "unknown";
+  const renovation: Tri = /təmirsiz|temirsiz|без ремонта|qara karkas/i.test(lo) ? "no" : /təmirli|temirli|с ремонтом|euro\s*təmir|əla təmir/i.test(lo) ? "yes" : "unknown";
+  const furnished: Tri = /əşyasız|esyasiz|без мебели/i.test(lo) ? "no" : /əşyalı|esyali|с мебелью|mebelli/i.test(lo) ? "yes" : "unknown";
+  const deal = /icar|kiray|аренд/i.test(lo) ? "rent" : /sat[ıi]l|satış|satis|продаж/i.test(lo) ? "sale" : null;
   const a = area ? num(area[1]) : null;
   const p = price ? num(price[1].replace(/\./g, "")) : null;
   return {

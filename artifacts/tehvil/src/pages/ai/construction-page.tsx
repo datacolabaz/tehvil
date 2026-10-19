@@ -8,7 +8,7 @@ import {
 import { PageHeading } from '@/components/kit';
 import { Empty, Pill, Skeleton } from '@/components/home/ui';
 import {
-  LEVELS, LEVEL_LABEL, MEASURE_LABEL, SECTIONS, SEPARATE_SECTION, calcLine, emptyMeasures, linesFromTable, parseCsv, templateLines, totals,
+  LEVELS, LEVEL_LABEL, fmtNum, MEASURE_LABEL, SECTIONS, SEPARATE_SECTION, calcLine, emptyMeasures, linesFromTable, parseCsv, templateLines, totals,
   type Level, type Line, type MeasureKey, type Measures,
 } from '@/lib/build/estimate';
 import { CAD_HINT, UNSUPPORTED_CAD, readPdf, type PdfFinding } from '@/lib/files/pdf-text';
@@ -19,7 +19,7 @@ interface FileNote { name: string; kind: 'pdf' | 'image' | 'table' | 'cad' | 'ot
 interface Data { measures: Measures; sources: Partial<Record<MeasureKey, string>>; lines: Line[]; level: Level; files: FileNote[]; findings: PdfFinding[]; summary?: { total: number; unpriced: number } }
 const initial = (): Data => ({ measures: emptyMeasures(), sources: {}, lines: templateLines(), level: 'orta', files: [], findings: [] });
 const today = () => new Date().toISOString().slice(0, 10);
-const az = (n: number) => new Intl.NumberFormat('az-AZ', { maximumFractionDigits: 2 }).format(n);
+const az = (n: number) => fmtNum(n);
 const azn = (n: number) => `${az(n)} AZN`;
 
 export function ConstructionListPage() {

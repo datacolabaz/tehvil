@@ -6,6 +6,15 @@
  * uploaded price table — the app has no price base and never invents a price. A line without
  * a price stays "qiymət yoxdur" and the total says how many such lines remain.
  */
+/** Azerbaijani number format: 1 234 567,5 (space for thousands, comma for decimals). */
+export function fmtNum(n: number, maxDigits = 2): string {
+  const neg = n < 0; const v = Math.abs(n);
+  const [int, frac] = (Math.round(v * 10 ** maxDigits) / 10 ** maxDigits).toFixed(maxDigits).split('.');
+  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+  const f = (frac ?? '').replace(/0+$/, '');
+  return `${neg ? '−' : ''}${grouped}${f ? `,${f}` : ''}`;
+}
+
 export type Level = 'ekonom' | 'orta' | 'premium';
 export const LEVELS: Level[] = ['ekonom', 'orta', 'premium'];
 export const LEVEL_LABEL: Record<Level, string> = { ekonom: 'İqtisadi', orta: 'Orta', premium: 'Premium' };
@@ -155,7 +164,7 @@ const SECTION_WORDS: [RegExp, number][] = [
   [/suvaq|boya|şpaklyovka|fasad|штукат|покрас|фасад/i, 7], [/döşəmə|styajka|laminat|parket|kafel|üzlük|пол|стяжк|плитк/i, 8], [/qapı|pəncərə|двер|окн/i, 9],
   [/daşınma|nəqliyyat|iskələ|zibil|достав|вывоз|леса/i, 10], [/işçilik|usta haqqı|работ/i, 11],
 ];
-export const guessSection = (text: string) => SECTION_WORDS.find(([re]) => re.test(text))?.[1] ?? 11;
+export const guessSection = (text: string) => { const t = text.toLocaleLowerCase('az'); return SECTION_WORDS.find(([re]) => re.test(t))?.[1] ?? 11; };
 
 const H = {
   section: /bölmə|bolme|раздел|section/i, name: /ad|iş|is\b|work|наимен|name|təsvir/i, unit: /vahid|ölçü|ед|unit/i, qty: /miqdar|həcm|say|кол|qty|quantity/i,
@@ -170,7 +179,9 @@ export function linesFromTable(rows: unknown[][], fileName: string, date: string
   const headerRow = rows.findIndex(r => r.some(c => typeof c === 'string' && (H.name.test(c) || H.qty.test(c))));
   if (headerRow < 0) return { lines: [], skipped: [{ row: 1, reason: 'Başlıq sətri tapılmadı (məs. “İşin adı”, “Vahid”, “Miqdar”, “Qiymət”)' }], columns: [] };
   const header = rows[headerRow].map(c => String(c ?? '').trim());
-  const col = (re: RegExp, not?: RegExp) => header.findIndex(h => re.test(h) && !(not && not.test(h)));
+  // Azerbaijani lowercasing: “İşçilik” → “işçilik” (a plain /i flag does not fold İ).
+  const lower = header.map(h => h.toLocaleLowerCase('az'));
+  const col = (re: RegExp, not?: RegExp) => lower.findIndex(h => re.test(h) && !(not && not.test(h)));
   const ci = { section: col(H.section), name: col(H.name, /vahid|ölçü|bölmə|miqdar|qiymət/i), unit: col(H.unit), qty: col(H.qty), material: col(H.material), labor: col(H.labor), price: col(H.price, /material|işçilik|работ/i) };
   if (ci.name < 0) return { lines: [], skipped: [{ row: headerRow + 1, reason: 'İşin adı sütunu tapılmadı' }], columns: header };
   const lines: Line[] = [];
