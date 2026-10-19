@@ -15,6 +15,12 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "dist/publi
 const app = express();
 app.disable("x-powered-by");
 app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
+// One host for search engines: www.tehvil.az answers with the same pages, so it is sent to tehvil.az.
+app.use((req, res, next) => {
+  const host = (req.headers.host || "").toLowerCase().split(":")[0];
+  if (host === "www.tehvil.az" && (req.method === "GET" || req.method === "HEAD")) return res.redirect(301, `https://tehvil.az${req.originalUrl}`);
+  next();
+});
 // Browser traffic stays same-origin, preserving Clerk session cookies while
 // the frontend and API remain independently deployed Railway services.
 app.use("/api", createProxyMiddleware({
