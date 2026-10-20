@@ -43,6 +43,21 @@ const itemsFor = (kind: string): [string, string][] => [
   ...ITEM_TEMPLATES.base.filter(([, c]) => !(c === "window" && (kind === "hall" || kind === "bath"))),
   ...(ITEM_TEMPLATES[kind] ?? []),
 ];
+/** Invitation links stop working this many days after they were created (env INVITE_TTL_DAYS). */
+export const inviteTtlDays = () => Math.max(1, Math.min(365, Number(process.env.INVITE_TTL_DAYS) || 30));
+export const inviteExpired = (createdAt: Date) => createdAt.getTime() < Date.now() - inviteTtlDays() * 86400_000;
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** Where a protocol is in its life, for people: created → collecting → invited → one/both approved → PDF ready. */
+export type Stage = "created" | "collecting" | "invited" | "awaiting" | "one_approved" | "both_approved" | "pdf_ready";
+export function stageOf(p: { status: string; revision: number }, x: { invited: boolean; joined: boolean; approvedNow: number; hasMedia: boolean }): Stage {
+  if (p.status === "finalized") return "pdf_ready";
+  if (p.status === "approved") return "both_approved";
+  if (p.status === "awaiting") return x.approvedNow >= 1 ? "one_approved" : "awaiting";
+  if (x.invited || x.joined) return "invited";
+  return p.revision > 0 || x.hasMedia ? "collecting" : "created";
+}
+
 const emptyExtras = (): ProtocolExtrasJson => ({
   meters: { water: { value: "", note: "", mediaIds: [] }, gas: { value: "", note: "", mediaIds: [] }, electric: { value: "", note: "", mediaIds: [] } },
   keys: [{ kind: "Giriş qapısı açarı", count: 0 }], notes: "",
@@ -123,10 +138,10 @@ export async function snapshotOf(p: HandoverProtocolRow, rental: RentalRow | nul
   ] : [
     { role: "seller", name: p.sellerName, phone: p.sellerPhone },
     { role: "buyer", name: p.buyerName, phone: p.buyerPhone },
-    ...(p.realtorName || p.realtorPhone || p.creatorRole === "realtor" ? [{ role: "realtor", name: p.realtorName, phone: p.realtorPhone }] : []),
+    ...(p.realtorName || p.realtorPhone || p.creatorRole === "realtor" ? [{ role: "realtor", name: p.realtorName, phone: p.realtorPhone, agency: p.realtorAgency }] : []),
   ];
   return {
-    kind: p.kind, number: p.number, address: rental?.address ?? p.address, propertyType: rental?.propertyType ?? p.propertyType, handoverDate: p.handoverDate,
+    kind: p.kind, number: p.number, address: rental?.address ?? p.address, propertyType: rental?.propertyType ?? p.propertyType, handoverDate: p.handoverDate, handoverTime: p.handoverTime,
     rental: rental ? { number: rental.number, startDate: rental.startDate, endDate: rental.endDate, monthlyRent: rental.monthlyRent, deposit: rental.deposit, currency: rental.currency } : null,
     base: p.baseProtocolId ? { protocolId: p.baseProtocolId, version: p.baseVersion } : null,
     parties,
@@ -136,7 +151,7 @@ export async function snapshotOf(p: HandoverProtocolRow, rental: RentalRow | nul
       items: items.filter((it) => it.roomId === r.id).map((it) => ({ id: it.id, name: it.name, category: it.category, quantity: it.quantity, condition: it.condition, note: it.note, change: it.change, prevItemId: it.prevItemId, photos: ids((m) => m.target === "item" && m.itemId === it.id) })),
       defects: defects.filter((d) => d.roomId === r.id).map((d) => ({ id: d.id, text: d.text, photos: ids((m) => m.target === "defect" && m.defectId === d.id) })),
     })),
-    meters: (["water", "gas", "electric"] as const).map((k) => ({ kind: k, value: x.meters[k]?.value ?? "", note: x.meters[k]?.note ?? "", photos: ids((m) => m.target === "meter" && m.meterKind === k) })),
+    meters: (["water", "gas", "electric"] as const).map((k) => ({ kind: k, value: x.meters[k]?.value ?? "", note: x.meters[k]?.note ?? "", na: !!x.meters[k]?.na, photos: ids((m) => m.target === "meter" && m.meterKind === k) })),
     keys: x.keys, keyPhotos: ids((m) => m.target === "keys"), notes: x.notes, otherPhotos: ids((m) => m.target === "other"),
     revision: p.revision,
     ...(p.kind === "move_out" ? { baseline: (p.baseline as unknown as ProtocolSnapshot) ?? null } : {}),
@@ -165,7 +180,9 @@ export async function detail(p: HandoverProtocolRow, viewer: { userId: string | 
     ? (await db.select().from(rentalParticipantsTable).where(eq(rentalParticipantsTable.rentalId, rental.id))).map((x) => ({ userId: x.userId, role: x.role, joinedAt: x.joinedAt }))
     : (await db.select().from(protocolParticipantsTable).where(eq(protocolParticipantsTable.protocolId, p.id))).map((x) => ({ userId: x.userId, role: x.role, joinedAt: x.joinedAt }));
   const creatorId = rental?.createdByUserId ?? p.createdByUserId;
-  const invites = viewer.isCreator && !rental ? await db.select().from(protocolInvitesTable).where(and(eq(protocolInvitesTable.protocolId, p.id), isNull(protocolInvitesTable.revokedAt))) : [];
+  const allInvites = rental ? [] : await db.select().from(protocolInvitesTable).where(eq(protocolInvitesTable.protocolId, p.id));
+  const invites = viewer.isCreator ? allInvites.filter((i) => !i.revokedAt) : [];
+  const stage = stageOf(p, { invited: allInvites.length > 0, joined: participants.length > 1, approvedNow: approvals.filter((a) => a.version === p.currentVersion && a.decision === "approved").length, hasMedia: media.length > 0 });
   const events = viewer.userId ? await db.select().from(protocolEventsTable).where(eq(protocolEventsTable.protocolId, p.id)).orderBy(desc(protocolEventsTable.createdAt)).limit(60) : [];
   // Move-out compares with the frozen move-in content; its photos are served through this rental too.
   const baseline = p.baseline as (ProtocolSnapshot & Record<string, unknown>) | null;
@@ -180,7 +197,7 @@ export async function detail(p: HandoverProtocolRow, viewer: { userId: string | 
     protocol: {
       id: p.id, number: p.number, kind: p.kind, rentalId: p.rentalId, address: rental?.address ?? p.address, propertyType: rental?.propertyType ?? p.propertyType, handoverDate: p.handoverDate, status: p.status, creatorRole: p.creatorRole,
       sellerName: p.sellerName, sellerPhone: mask(p.sellerPhone), buyerName: p.buyerName, buyerPhone: mask(p.buyerPhone),
-      realtorName: rental?.realtorName ?? p.realtorName, realtorPhone: mask(rental?.realtorPhone ?? p.realtorPhone),
+      realtorName: rental?.realtorName ?? p.realtorName, realtorPhone: mask(rental?.realtorPhone ?? p.realtorPhone), realtorAgency: p.realtorAgency, handoverTime: p.handoverTime, stage,
       landlordName: rental?.landlordName ?? "", landlordPhone: mask(rental?.landlordPhone ?? ""), tenantName: rental?.tenantName ?? "", tenantPhone: mask(rental?.tenantPhone ?? ""),
       extras: p.extras, revision: p.revision, currentVersion: p.currentVersion, baseProtocolId: p.baseProtocolId, baseVersion: p.baseVersion,
       createdAt: p.createdAt.toISOString(), updatedAt: p.updatedAt.toISOString(),
@@ -193,7 +210,7 @@ export async function detail(p: HandoverProtocolRow, viewer: { userId: string | 
     media: media.map((m) => mediaDto(m, viewer.token, viewer.tokenParam)),
     baseline: baseline ? { ...baseline, media: baseMedia.map((m) => mediaDto(m, viewer.token, viewer.tokenParam)) } : null,
     participants: participants.map((x) => ({ role: x.role, joinedAt: x.joinedAt.toISOString(), isMe: x.userId === viewer.userId, isCreator: x.userId === creatorId })),
-    invites: invites.map((i) => ({ id: i.id, role: i.role, createdAt: i.createdAt.toISOString(), used: !!i.usedAt, lastOpenedAt: i.lastOpenedAt?.toISOString() ?? null })),
+    invites: invites.map((i) => ({ id: i.id, role: i.role, createdAt: i.createdAt.toISOString(), expiresAt: new Date(i.createdAt.getTime() + inviteTtlDays() * 86400_000).toISOString(), expired: inviteExpired(i.createdAt), used: !!i.usedAt, lastOpenedAt: i.lastOpenedAt?.toISOString() ?? null })),
     versions: versions.map((v) => ({ version: v.version, contentHash: v.contentHash, createdAt: v.createdAt.toISOString(), hasPdf: !!v.pdfObjectPath, pdfCreatedAt: v.pdfCreatedAt?.toISOString() ?? null })),
     approvals: approvals.map((a) => ({ version: a.version, role: a.role, decision: a.decision, comment: a.comment, authLevel: a.authLevel, createdAt: a.createdAt.toISOString() })),
     events: events.map((e) => ({ action: e.action, role: roleOf(e.userId), detail: e.detail, createdAt: e.createdAt.toISOString() })),
@@ -241,8 +258,17 @@ router.get("/protocols", async (req, res): Promise<void> => {
   const ids = mine.map((m) => m.p.id);
   const rooms = ids.length ? await db.select({ pid: protocolRoomsTable.protocolId }).from(protocolRoomsTable).where(inArray(protocolRoomsTable.protocolId, ids)) : [];
   const photos = ids.length ? await db.select({ pid: protocolMediaTable.protocolId }).from(protocolMediaTable).where(and(inArray(protocolMediaTable.protocolId, ids), isNull(protocolMediaTable.deletedAt))) : [];
-  res.json(mine.map(({ p, role }) => ({ id: p.id, number: p.number, address: p.address, status: p.status, myRole: role, handoverDate: p.handoverDate, updatedAt: p.updatedAt.toISOString(),
-    rooms: rooms.filter((r) => r.pid === p.id).length, photos: photos.filter((m) => m.pid === p.id).length })));
+  const invs = ids.length ? await db.select({ pid: protocolInvitesTable.protocolId }).from(protocolInvitesTable).where(inArray(protocolInvitesTable.protocolId, ids)) : [];
+  const parts = ids.length ? await db.select({ pid: protocolParticipantsTable.protocolId }).from(protocolParticipantsTable).where(inArray(protocolParticipantsTable.protocolId, ids)) : [];
+  const apprs = ids.length ? await db.select({ pid: protocolApprovalsTable.protocolId, version: protocolApprovalsTable.version, role: protocolApprovalsTable.role, decision: protocolApprovalsTable.decision }).from(protocolApprovalsTable).where(inArray(protocolApprovalsTable.protocolId, ids)) : [];
+  res.json(mine.map(({ p, role }) => {
+    const now = apprs.filter((a) => a.pid === p.id && a.version === p.currentVersion);
+    const nPhotos = photos.filter((m) => m.pid === p.id).length;
+    return { id: p.id, number: p.number, address: p.address, status: p.status, myRole: role, handoverDate: p.handoverDate, updatedAt: p.updatedAt.toISOString(),
+      rooms: rooms.filter((r) => r.pid === p.id).length, photos: nPhotos,
+      stage: stageOf(p, { invited: invs.some((i) => i.pid === p.id), joined: parts.filter((x) => x.pid === p.id).length > 1, approvedNow: now.filter((a) => a.decision === "approved").length, hasMedia: nPhotos > 0 }),
+      decisions: p.currentVersion ? decidersFor(p.kind).map((r) => ({ role: r, decision: now.find((a) => a.role === r)?.decision ?? null })) : [] };
+  }));
 });
 
 router.post("/protocols", async (req, res): Promise<void> => {
@@ -252,7 +278,7 @@ router.post("/protocols", async (req, res): Promise<void> => {
   const [p] = await db.insert(handoverProtocolsTable).values({
     number: await newNumber(), createdByUserId: userId, creatorRole: d.role, propertyType: d.propertyType, address: d.address.trim(), handoverDate: d.handoverDate ?? null,
     sellerName: d.sellerName?.trim() ?? "", sellerPhone: d.sellerPhone?.trim() ?? "", buyerName: d.buyerName?.trim() ?? "", buyerPhone: d.buyerPhone?.trim() ?? "",
-    realtorName: d.realtorName?.trim() ?? "", realtorPhone: d.realtorPhone?.trim() ?? "", extras: emptyExtras(),
+    realtorName: d.realtorName?.trim() ?? "", realtorPhone: d.realtorPhone?.trim() ?? "", realtorAgency: d.realtorAgency?.trim() ?? "", handoverTime: HHMM.test(d.handoverTime ?? "") ? d.handoverTime! : "", extras: emptyExtras(),
   }).returning();
   await db.insert(protocolParticipantsTable).values({ protocolId: p.id, userId, role: d.role, canEdit: true });
   await db.insert(protocolRoomsTable).values((ROOM_TEMPLATES[d.propertyType] ?? ROOM_TEMPLATES.other).map(([name, kind], i) => ({ protocolId: p.id, name, kind, position: i })));
@@ -273,12 +299,13 @@ router.patch("/protocols/:protocolId", async (req, res): Promise<void> => {
   if (!b.success) return bad(res, "Məlumatları yoxlayın");
   const d = b.data;
   // Rental protocols take address and parties from the rental; only their own content is edited here.
-  if (a.rental && (["propertyType", "address", "sellerName", "sellerPhone", "buyerName", "buyerPhone", "realtorName", "realtorPhone"] as const).some((k) => d[k] !== undefined)) return bad(res, "Ünvan və tərəflər kirayə səhifəsində dəyişdirilir");
+  if (d.handoverTime && !HHMM.test(d.handoverTime)) return bad(res, "Saatı SS:DD formatında yazın, məsələn 14:30");
+  if (a.rental && (["propertyType", "address", "sellerName", "sellerPhone", "buyerName", "buyerPhone", "realtorName", "realtorPhone", "realtorAgency"] as const).some((k) => d[k] !== undefined)) return bad(res, "Ünvan və tərəflər kirayə səhifəsində dəyişdirilir");
   const set: Partial<typeof handoverProtocolsTable.$inferInsert> = {};
-  for (const k of ["propertyType", "address", "handoverDate", "sellerName", "sellerPhone", "buyerName", "buyerPhone", "realtorName", "realtorPhone"] as const) if (d[k] !== undefined) (set as Record<string, unknown>)[k] = typeof d[k] === "string" ? (d[k] as string).trim() : d[k];
+  for (const k of ["propertyType", "address", "handoverDate", "handoverTime", "sellerName", "sellerPhone", "buyerName", "buyerPhone", "realtorName", "realtorPhone", "realtorAgency"] as const) if (d[k] !== undefined) (set as Record<string, unknown>)[k] = typeof d[k] === "string" ? (d[k] as string).trim() : d[k];
   if (d.extras !== undefined) {
     const x = d.extras as Partial<ProtocolExtrasJson>;
-    const meter = (m: unknown) => { const o = (m ?? {}) as { value?: unknown; note?: unknown; mediaIds?: unknown }; return { value: String(o.value ?? "").slice(0, 40), note: String(o.note ?? "").slice(0, 500), mediaIds: [] as string[] }; };
+    const meter = (m: unknown) => { const o = (m ?? {}) as { value?: unknown; note?: unknown; mediaIds?: unknown; na?: unknown }; return { value: o.na === true ? "" : String(o.value ?? "").slice(0, 40), note: String(o.note ?? "").slice(0, 500), mediaIds: [] as string[], ...(o.na === true ? { na: true } : {}) }; };
     const keys = Array.isArray(x.keys) ? x.keys.slice(0, 12).map((k) => ({ kind: String((k as { kind?: unknown }).kind ?? "").slice(0, 80), count: Math.max(0, Math.min(99, Math.round(Number((k as { count?: unknown }).count) || 0))) })) : a.p.extras.keys;
     set.extras = { meters: { water: meter(x.meters?.water), gas: meter(x.meters?.gas), electric: meter(x.meters?.electric) }, keys, notes: String(x.notes ?? "").slice(0, 4000) };
   }
@@ -465,7 +492,7 @@ protocolPublicRouter.get("/protocol-media/:mediaId", openLimit, async (req, res)
 async function liveInvite(token: string) {
   if (!/^[A-Za-z0-9_-]{20,64}$/.test(token)) return null;
   const [invite] = await db.select().from(protocolInvitesTable).where(eq(protocolInvitesTable.tokenHash, hashToken(token)));
-  if (!invite || invite.revokedAt) return null;
+  if (!invite || invite.revokedAt || inviteExpired(invite.createdAt)) return null;
   const [p] = await db.select().from(handoverProtocolsTable).where(and(eq(handoverProtocolsTable.id, invite.protocolId), isNull(handoverProtocolsTable.archivedAt)));
   return p ? { invite, p } : null;
 }
@@ -632,7 +659,7 @@ router.post("/protocols/:protocolId/versions/:version/pdf", async (req, res): Pr
   let pdf: Buffer;
   try {
     pdf = await renderProtocolPdf({
-      snapshot: snap, version: v.version, contentHash: v.contentHash, createdAt: v.createdAt, final,
+      snapshot: snap, version: v.version, contentHash: v.contentHash, createdAt: v.createdAt, protocolCreatedAt: a.p.createdAt, final,
       approvals: approvals.map((x) => ({ role: x.role, decision: x.decision, at: x.createdAt, authLevel: x.authLevel, authDetail: x.authDetail, comment: x.comment })),
       captions: new Map(media.filter((m) => m.caption).map((m) => [m.id, m.caption])),
       times: new Map(media.map((m) => [m.id, { uploaded: m.createdAt, taken: m.takenAt }])),
@@ -666,7 +693,7 @@ router.get("/protocols/:protocolId/versions/:version/pdf", async (req, res): Pro
 export async function liveRentalInvite(token: string) {
   if (!/^[A-Za-z0-9_-]{20,64}$/.test(token)) return null;
   const [invite] = await db.select().from(rentalInvitesTable).where(eq(rentalInvitesTable.tokenHash, hashToken(token)));
-  if (!invite || invite.revokedAt) return null;
+  if (!invite || invite.revokedAt || inviteExpired(invite.createdAt)) return null;
   const [rental] = await db.select().from(rentalsTable).where(and(eq(rentalsTable.id, invite.rentalId), isNull(rentalsTable.archivedAt)));
   return rental ? { invite, rental } : null;
 }

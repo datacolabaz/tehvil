@@ -5010,6 +5010,16 @@ export interface ProtocolCreateInput {
      * @maxLength 40
      */
   realtorPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  realtorAgency?: string;
+  /**
+     * @minLength 0
+     * @maxLength 5
+     */
+  handoverTime?: string;
 }
 
 export type ProtocolPatchPropertyType = typeof ProtocolPatchPropertyType[keyof typeof ProtocolPatchPropertyType];
@@ -5060,6 +5070,16 @@ export interface ProtocolPatch {
      * @maxLength 40
      */
   realtorPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  realtorAgency?: string;
+  /**
+     * @minLength 0
+     * @maxLength 5
+     */
+  handoverTime?: string;
   extras?: unknown;
 }
 
@@ -5497,6 +5517,8 @@ export interface ProtocolSummary {
   updatedAt: string;
   rooms: number;
   photos: number;
+  stage?: string;
+  decisions?: unknown;
 }
 
 export interface ProtocolInvitePreview {

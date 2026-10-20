@@ -23,3 +23,14 @@ Real iPhone Safari və Android Chrome-da yoxlanmayıb (Chromium mobil emulyasiya
 
 ## Deploy
 Yeni cədvəllər backend start zamanı avtomatik yaranır. Yeni asılılıqlar: `pdfkit`, `dejavu-fonts-ttf` (backend). İstəyə görə: `PROTOCOL_REQUIRE_PHONE=on` (Clerk-də telefonla giriş/SMS aktiv olmalıdır).
+
+## Pilot (alqı-satqı əsas məhsuldur, 21.10.2026)
+- Mesaj: “Açarı təhvil verin, mənzilin vəziyyətini qeydə alın.” CTA: “Pulsuz protokol yarat”, “Necə işləyir?”. Rollar: Satıcı / Alıcı / Rieltor (istəyə bağlı). Daxil olan istifadəçi `/protokollar`-a düşür; kirayə (`/kiraye`), ev pasportu və smeta ikinci dərəcəli alətlərdir.
+- **Pulsuz:** pilotda ödəniş divarı, abunəlik və protokol başına ödəniş yoxdur. 4,90 AZN (əlavə protokol) və 9,90 AZN (rieltor paketi) yalnız gələcək fərziyyələrdir, interfeysdə göstərilmir. Kodda ödəniş provayderi (Payriff, Epoint və s.) yoxdur, saxta ödəniş qurulmayıb. Gələcəkdə: protokolu yaradan/sifarişçi ödəyir, digər tərəflər pulsuz qoşulur; status yalnız provayderin server təsdiqi ilə.
+- **Mərhələ** (`protocol.stage`, siyahıda da): `created` → `collecting` → `invited` (və ya `awaiting`) → `one_approved` → `both_approved` → `pdf_ready`. Telefon ekranında 6 addımlı göstərici.
+- Təhvil **saatı** (`handover_time`, SS:DD) və rieltorun **agentliyi** (`realtor_agency`) — PDF-də görünür. Migration additivdir (`ADD COLUMN IF NOT EXISTS … DEFAULT ''`).
+- Sayğac “tətbiq edilmir” (`extras.meters.*.na`) — PDF-də “Tətbiq edilmir”. Təsdiqə göndərmədən əvvəl sayğac və açarlar üçün yumşaq xəbərdarlıq.
+- **Dəvət linkləri 30 gün** etibarlıdır (`INVITE_TTL_DAYS`), ləğv edilə bilir; müddəti bitmiş link açılmır və qoşmur.
+- **Statistika** `/admin/statistika`: yaradılıb, foto, dəvət olunub/açılıb/qoşulub, göndərilib, bir/iki tərəf təsdiqi, PDF, rieltorların 2-ci və 3-cü istifadəsi, təkrar yaradanlar. Yalnız saylar; ad, telefon, ünvan, foto yoxdur. Mövcud DB-dən hesablanır, ayrıca analitika sistemi qurulmayıb.
+- QR/ictimai yoxlama səhifəsi yoxdur (məxfilik); PDF-də unikal nömrə, versiya və məzmun izi (SHA-256) var.
+- Testlər: `sale-e2e` 31/31 (mərhələlər, saat, agentlik, “tətbiq edilmir”, köhnəlmiş link, ayrıca təsdiqlər, yeni versiya, pulsuz istifadə, statistika, icazələr).

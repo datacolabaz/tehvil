@@ -6815,6 +6815,8 @@ components:
         buyerPhone: {type: string, minLength: 0, maxLength: 40}
         realtorName: {type: string, minLength: 0, maxLength: 160}
         realtorPhone: {type: string, minLength: 0, maxLength: 40}
+        realtorAgency: {type: string, minLength: 0, maxLength: 160}
+        handoverTime: {type: string, minLength: 0, maxLength: 5}
       required: [role, propertyType, address]
     ProtocolPatch:
       type: object
@@ -6832,6 +6834,8 @@ components:
         buyerPhone: {type: string, minLength: 0, maxLength: 40}
         realtorName: {type: string, minLength: 0, maxLength: 160}
         realtorPhone: {type: string, minLength: 0, maxLength: 40}
+        realtorAgency: {type: string, minLength: 0, maxLength: 160}
+        handoverTime: {type: string, minLength: 0, maxLength: 5}
         extras: {}
     ProtocolRoomInput:
       type: object
@@ -7057,6 +7061,8 @@ components:
         updatedAt: {type: string, format: date-time}
         rooms: {type: integer}
         photos: {type: integer}
+        stage: {type: string}
+        decisions: {}
       required: [id, number, address, status, myRole, handoverDate, updatedAt, rooms, photos]
     ProtocolInvitePreview:
       type: object

@@ -3,7 +3,8 @@ import { boolean, date, index, integer, jsonb, pgTable, text, timestamp, uniqueI
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 const user = (name: string) => varchar(name, { length: 128 });
 
-export interface MeterJson { value: string; note: string; mediaIds: string[] }
+/** `na`: this home has no such meter (shown as “tətbiq edilmir”). */
+export interface MeterJson { value: string; note: string; mediaIds: string[]; na?: boolean }
 export interface ProtocolExtrasJson {
   meters: { water: MeterJson; gas: MeterJson; electric: MeterJson };
   keys: { kind: string; count: number }[];
@@ -34,6 +35,8 @@ export const handoverProtocolsTable = pgTable("handover_protocols", {
   propertyType: varchar("property_type", { length: 12 }).notNull().default("apartment"), // apartment | house | other
   address: varchar("address", { length: 300 }).notNull(),
   handoverDate: date("handover_date", { mode: "string" }),
+  /** Local time of the key handover, "HH:MM" (Asia/Baku), optional. */
+  handoverTime: varchar("handover_time", { length: 5 }).notNull().default(""),
   status: varchar("status", { length: 12 }).notNull().default("draft"),
   sellerName: varchar("seller_name", { length: 160 }).notNull().default(""),
   sellerPhone: varchar("seller_phone", { length: 40 }).notNull().default(""),
@@ -41,6 +44,8 @@ export const handoverProtocolsTable = pgTable("handover_protocols", {
   buyerPhone: varchar("buyer_phone", { length: 40 }).notNull().default(""),
   realtorName: varchar("realtor_name", { length: 160 }).notNull().default(""),
   realtorPhone: varchar("realtor_phone", { length: 40 }).notNull().default(""),
+  /** Realtor's agency as it should appear in the PDF, optional. */
+  realtorAgency: varchar("realtor_agency", { length: 160 }).notNull().default(""),
   extras: jsonb("extras").$type<ProtocolExtrasJson>().notNull(),
   /** Increases on every content change; a version records the revision it froze. */
   revision: integer("revision").notNull().default(0),

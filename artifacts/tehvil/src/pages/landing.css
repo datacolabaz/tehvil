@@ -246,3 +246,5 @@
 .lp-ph-sign span { flex:1;text-align:center;font-size:12px;font-weight:700;border-radius:10px;padding:6px;background:#efeadf; }
 .lp-ph-sign .ok { background:#e6f3ea;color:#22603c; }
 .lp-ph-btn { display:flex;gap:6px;justify-content:center;align-items:center;background:var(--brand,#29473f);color:#fff;border-radius:12px;padding:10px;font-weight:700;font-size:13px; }
+.lp-have-link { display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:14px; font-weight:600; color:inherit; opacity:.8; }
+.lp-benefits { padding-top: 8px; }

@@ -9,6 +9,7 @@ import {
   ClipboardCheck, Clock3, DoorOpen, FileCheck2, FilePlus2, FileText, Home, ImagePlus,
   LayoutDashboard, ListChecks, LoaderCircle, LogOut, Menu, Plus, ShieldCheck,
   WalletCards, X,
+  KeyRound,
 } from 'lucide-react';
 import {
   useListProjects, useCreateProject, useGetProjectDashboard, useListRooms, useCreateRoom,
@@ -158,7 +159,8 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
   type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number };
   // Home-first menu: the same three sections on desktop and mobile. Other modules stay reachable from Parametrlər.
   const mainNav: NavItem[] = [
-    { href: '/kiraye', icon: ClipboardCheck, key: 'rentalsNav' },
+    { href: '/protokollar', icon: ClipboardCheck, key: 'protocolsNav' },
+    { href: '/kiraye', icon: KeyRound, key: 'rentalsNav' },
     { href: '/homes', icon: House, key: 'myHomes' },
     { href: '/history', icon: History, key: 'repairHistory' },
     { href: '/ai-smeta', icon: Calculator, key: 'smeta' },
@@ -394,7 +396,7 @@ function realtorRedirect() {
   return qs.get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {};
 }
 function SignUpPage() { const c=authCopy(); const realtor=!!new URLSearchParams(window.location.search).get('realtor'); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${window.location.search}`} {...realtorRedirect()}/></div></div>; }
-function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/kiraye"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
+function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/protokollar"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
 function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   const [msg, setMsg] = useState<FeedbackMsg | null>(null);
   useEffect(() => onFeedback(m => setMsg(m)), []);

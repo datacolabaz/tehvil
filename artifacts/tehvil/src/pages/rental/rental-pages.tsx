@@ -212,11 +212,19 @@ export function RentalStatsPage() {
   const q = useGetRentalStats({ query: { queryKey: ['/api/admin/rental-stats'], retry: false } });
   if (q.isLoading) return <div className="pt-page"><Skeleton rows={3} /></div>;
   if (!q.data) return <div className="pt-page"><Empty icon={<BarChart3 size={28} />} title="Bu səhifə inzibatçılar üçündür" text="Hesabınızın inzibatçı icazəsi yoxdur." /></div>;
-  const s = q.data.stats as Record<string, number> & { weekly: { wk: string; n: number }[]; generatedAt: string };
+  type Weekly = { wk: string; n: number }[];
+  const s = q.data.stats as Record<string, number> & { weekly: Weekly; generatedAt: string; sale?: Record<string, number> & { weekly: Weekly } };
+  const z = s.sale;
+  const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : '—');
+  const saleTiles: [string, number, string][] = z ? [['Protokol yaradılıb', z.protocols, `son 30 gün: ${z.protocols30d}`], ['Foto əlavə edilib', z.withPhotos, pct(z.withPhotos, z.protocols)], ['Qarşı tərəf dəvət olunub', z.invited, pct(z.invited, z.protocols)], ['Dəvət açılıb', z.inviteOpened, pct(z.inviteOpened, z.invited)], ['Dəvət olunan qoşulub', z.inviteJoined, pct(z.inviteJoined, z.invited)], ['Təsdiqə göndərilib', z.sent, pct(z.sent, z.protocols)], ['Bir tərəf təsdiqləyib', z.oneApproved, 'cari versiya'], ['Hər iki tərəf təsdiqləyib', z.bothApproved, pct(z.bothApproved, z.protocols)], ['PDF yaradılıb (sona qədər)', z.pdf, pct(z.pdf, z.protocols)], ['Rieltor (yaradan)', z.realtors, `2+: ${z.realtors2} · 3+: ${z.realtors3}`], ['Təkrar yaradan istifadəçi', z.creatorsRepeat, '2 və daha çox protokol']] : [];
   const tiles: [string, number, string][] = [['Kirayə qeydi', s.rentals, `son 30 gün: ${s.rentals30d}`], ['Giriş təsdiqə göndərilib', s.moveInSent, ''], ['Giriş tamamlanıb', s.moveInDone, 'hər iki tərəf təsdiqləyib'], ['Çıxış başladılıb', s.moveOutStarted, ''], ['Çıxış tamamlanıb', s.moveOutDone, ''], ['PDF hesabat', s.reports, ''], ['Foto', s.photos, ''], ['İstifadəçi', s.users, `qayıdan: ${s.returning}`], ['Bir neçə mənzilli ev sahibi', s.multiRentalOwners, '']];
   const max = Math.max(1, ...s.weekly.map((w) => w.n));
   return <div className="pt-page" data-testid="stats-page">
-    <h1 className="pt-title">Kirayə statistikası</h1>
+    <h1 className="pt-title">Statistika</h1>
+    {z && <><h2 className="rt-h2">Alqı-satqı təhvili (əsas məhsul)</h2>
+      <div className="rt-tiles">{saleTiles.map(([t, v, sub]) => <div key={t} className="pt-card rt-tile" data-testid="sale-stat"><small>{t}</small><b>{v}</b>{sub && <span>{sub}</span>}</div>)}</div>
+      <div className="pt-card"><h3>Həftəlik yeni protokollar (12 həftə)</h3>{z.weekly.length ? <ul className="rt-bars">{z.weekly.map((w) => <li key={w.wk}><small>{dayAz(w.wk)}</small><span style={{ width: `${(w.n / Math.max(1, ...z.weekly.map((y) => y.n))) * 100}%` }} /><b>{w.n}</b></li>)}</ul> : <p className="rl-hint">Hələ məlumat yoxdur.</p>}</div>
+      <h2 className="rt-h2">Kirayə təhvili</h2></>}
     <p className="pt-lead">Verilənlər bazasından, {timeAz(s.generatedAt)}. Qayıdan istifadəçi: ən azı iki fərqli gündə protokolla işləyən və ya iki və daha çox kirayədə iştirak edən hesab.</p>
     <div className="rt-tiles">{tiles.map(([t, v, sub]) => <div key={t} className="pt-card rt-tile" data-testid="stat"><small>{t}</small><b>{v}</b>{sub && <span>{sub}</span>}</div>)}</div>
     <div className="pt-card"><h3>Həftəlik yeni kirayələr (12 həftə)</h3>{s.weekly.length ? <ul className="rt-bars">{s.weekly.map((w) => <li key={w.wk}><small>{dayAz(w.wk)}</small><span style={{ width: `${(w.n / max) * 100}%` }} /><b>{w.n}</b></li>)}</ul> : <p className="rl-hint">Hələ məlumat yoxdur.</p>}</div>

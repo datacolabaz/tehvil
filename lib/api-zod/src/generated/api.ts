@@ -11925,7 +11925,9 @@ export const ListProtocolsResponseItem = zod.object({
   "handoverDate": zod.string().nullable(),
   "updatedAt": zod.string().datetime({"offset":true}),
   "rooms": zod.number().int(),
-  "photos": zod.number().int()
+  "photos": zod.number().int(),
+  "stage": zod.string().optional(),
+  "decisions": zod.unknown().optional()
 })
 export const ListProtocolsResponse = zod.array(ListProtocolsResponseItem)
 
@@ -11954,6 +11956,12 @@ export const createProtocolBodyRealtorNameMax = 160;
 export const createProtocolBodyRealtorPhoneMin = 0;
 export const createProtocolBodyRealtorPhoneMax = 40;
 
+export const createProtocolBodyRealtorAgencyMin = 0;
+export const createProtocolBodyRealtorAgencyMax = 160;
+
+export const createProtocolBodyHandoverTimeMin = 0;
+export const createProtocolBodyHandoverTimeMax = 5;
+
 
 
 export const CreateProtocolBody = zod.object({
@@ -11966,7 +11974,9 @@ export const CreateProtocolBody = zod.object({
   "buyerName": zod.string().min(createProtocolBodyBuyerNameMin).max(createProtocolBodyBuyerNameMax).optional(),
   "buyerPhone": zod.string().min(createProtocolBodyBuyerPhoneMin).max(createProtocolBodyBuyerPhoneMax).optional(),
   "realtorName": zod.string().min(createProtocolBodyRealtorNameMin).max(createProtocolBodyRealtorNameMax).optional(),
-  "realtorPhone": zod.string().min(createProtocolBodyRealtorPhoneMin).max(createProtocolBodyRealtorPhoneMax).optional()
+  "realtorPhone": zod.string().min(createProtocolBodyRealtorPhoneMin).max(createProtocolBodyRealtorPhoneMax).optional(),
+  "realtorAgency": zod.string().min(createProtocolBodyRealtorAgencyMin).max(createProtocolBodyRealtorAgencyMax).optional(),
+  "handoverTime": zod.string().min(createProtocolBodyHandoverTimeMin).max(createProtocolBodyHandoverTimeMax).optional()
 })
 
 export const CreateProtocolResponse = zod.object({
@@ -12032,6 +12042,12 @@ export const updateProtocolBodyRealtorNameMax = 160;
 export const updateProtocolBodyRealtorPhoneMin = 0;
 export const updateProtocolBodyRealtorPhoneMax = 40;
 
+export const updateProtocolBodyRealtorAgencyMin = 0;
+export const updateProtocolBodyRealtorAgencyMax = 160;
+
+export const updateProtocolBodyHandoverTimeMin = 0;
+export const updateProtocolBodyHandoverTimeMax = 5;
+
 
 
 export const UpdateProtocolBody = zod.object({
@@ -12044,6 +12060,8 @@ export const UpdateProtocolBody = zod.object({
   "buyerPhone": zod.string().min(updateProtocolBodyBuyerPhoneMin).max(updateProtocolBodyBuyerPhoneMax).optional(),
   "realtorName": zod.string().min(updateProtocolBodyRealtorNameMin).max(updateProtocolBodyRealtorNameMax).optional(),
   "realtorPhone": zod.string().min(updateProtocolBodyRealtorPhoneMin).max(updateProtocolBodyRealtorPhoneMax).optional(),
+  "realtorAgency": zod.string().min(updateProtocolBodyRealtorAgencyMin).max(updateProtocolBodyRealtorAgencyMax).optional(),
+  "handoverTime": zod.string().min(updateProtocolBodyHandoverTimeMin).max(updateProtocolBodyHandoverTimeMax).optional(),
   "extras": zod.unknown().optional()
 })
 

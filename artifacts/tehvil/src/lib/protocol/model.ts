@@ -5,12 +5,13 @@ export type Kind = 'sale' | 'move_in' | 'move_out';
 export type Change = 'unchanged' | 'new_damage' | 'changed' | 'resolved' | 'missing';
 export type Status = 'draft' | 'collecting' | 'awaiting' | 'approved' | 'finalized';
 export type Condition = 'good' | 'fair' | 'defective';
-export interface Meter { value: string; note: string; mediaIds: string[] }
+export type Stage = 'created' | 'collecting' | 'invited' | 'awaiting' | 'one_approved' | 'both_approved' | 'pdf_ready';
+export interface Meter { value: string; note: string; mediaIds: string[]; na?: boolean }
 export interface Extras { meters: { water: Meter; gas: Meter; electric: Meter }; keys: { kind: string; count: number }[]; notes: string }
 export interface Protocol {
   id: string; number: string; kind: Kind; rentalId: string | null; baseProtocolId: string | null; baseVersion: number | null;
   landlordName: string; landlordPhone: string; tenantName: string; tenantPhone: string; address: string; propertyType: string; handoverDate: string | null; status: Status; creatorRole: Role;
-  sellerName: string; sellerPhone: string; buyerName: string; buyerPhone: string; realtorName: string; realtorPhone: string;
+  sellerName: string; sellerPhone: string; buyerName: string; buyerPhone: string; realtorName: string; realtorPhone: string; realtorAgency: string; handoverTime: string; stage: Stage;
   extras: Extras; revision: number; currentVersion: number; createdAt: string; updatedAt: string;
 }
 export interface Room { id: string; name: string; kind: string; condition: Condition | null; note: string; position: number; prevRoomId?: string | null }
@@ -26,7 +27,7 @@ export interface Detail {
   protocol: Protocol; rooms: Room[]; items: Item[]; defects: Defect[]; media: Media[]; deciders: Role[]; baseline: Baseline | null;
   rental: { id: string; number: string; startDate: string | null; endDate: string | null; monthlyRent: number | null; deposit: number | null; currency: string } | null;
   participants: { role: Role; joinedAt: string; isMe: boolean; isCreator: boolean }[];
-  invites: { id: string; role: Role; createdAt: string; used: boolean; lastOpenedAt: string | null }[];
+  invites: { id: string; role: Role; createdAt: string; expiresAt?: string; expired?: boolean; used: boolean; lastOpenedAt: string | null }[];
   versions: { version: number; contentHash: string; createdAt: string; hasPdf: boolean; pdfCreatedAt: string | null }[];
   approvals: { version: number; role: Role; decision: 'approved' | 'changes'; comment: string; authLevel: string; createdAt: string }[];
   events: { action: string; role: Role | null; detail: Record<string, unknown>; createdAt: string }[];
@@ -34,13 +35,17 @@ export interface Detail {
 }
 export const asDetail = (x: unknown) => x as Detail;
 
-export const ROLE_LABEL: Record<Role, string> = { realtor: 'Rieltor', seller: 'Ev sahibi (satıcı)', buyer: 'Alıcı', landlord: 'Ev sahibi', tenant: 'Kirayəçi' };
+export const ROLE_LABEL: Record<Role, string> = { realtor: 'Rieltor', seller: 'Satıcı', buyer: 'Alıcı', landlord: 'Ev sahibi', tenant: 'Kirayəçi' };
 export const KIND_LABEL: Record<Kind, string> = { sale: 'Təhvil-təslim protokolu', move_in: 'Giriş protokolu', move_out: 'Çıxış protokolu' };
 export const CHANGE_LABEL: Record<Change, string> = { unchanged: 'Dəyişməyib', new_damage: 'Yeni zədə / ləkə', changed: 'Əvvəlki zədə dəyişib', resolved: 'Təmizlənib / aradan qaldırılıb', missing: 'Çatışmır' };
 export const CATEGORY_LABEL: Record<string, string> = { wall: 'Divar', floor: 'Döşəmə', ceiling: 'Tavan', window: 'Pəncərə', door: 'Qapı', furniture: 'Mebel', appliance: 'Avadanlıq', other: 'Digər' };
 export const money = (n: number | null | undefined, c = 'AZN') => (n == null ? '—' : `${n.toLocaleString('az-AZ')} ${c}`);
 export const ROLE_SHORT: Record<Role, string> = { realtor: 'rieltor', seller: 'satıcı', buyer: 'alıcı', landlord: 'ev sahibi', tenant: 'kirayəçi' };
 export const STATUS_LABEL: Record<Status, string> = { draft: 'Qaralama', collecting: 'Məlumatlar toplanır', awaiting: 'Təsdiq gözləyir', approved: 'Təsdiqlənib', finalized: 'Yekun protokol yaradılıb' };
+/** The six steps people see; "awaiting" (sent, nobody approved yet) sits on the invitation step. */
+export const STAGES: [Stage[], string][] = [[['created'], 'Yaradılıb'], [['collecting'], 'Məlumatlar daxil edilir'], [['invited', 'awaiting'], 'Qarşı tərəf dəvət olunub'], [['one_approved'], 'Bir tərəf təsdiqləyib'], [['both_approved'], 'Hər iki tərəf təsdiqləyib'], [['pdf_ready'], 'PDF hazırdır']];
+export const STAGE_LABEL: Record<Stage, string> = { created: 'Yaradılıb', collecting: 'Məlumatlar daxil edilir', invited: 'Qarşı tərəf dəvət olunub', awaiting: 'Təsdiq gözləyir', one_approved: 'Bir tərəf təsdiqləyib', both_approved: 'Hər iki tərəf təsdiqləyib', pdf_ready: 'PDF hazırdır' };
+export const STAGE_TONE: Record<Stage, 'neutral' | 'info' | 'warn' | 'ok'> = { created: 'neutral', collecting: 'info', invited: 'info', awaiting: 'warn', one_approved: 'warn', both_approved: 'ok', pdf_ready: 'ok' };
 export const STATUS_TONE: Record<Status, 'neutral' | 'info' | 'warn' | 'ok'> = { draft: 'neutral', collecting: 'info', awaiting: 'warn', approved: 'ok', finalized: 'ok' };
 export const CONDITION_LABEL: Record<Condition, string> = { good: 'Yaxşı', fair: 'Qənaətbəxş', defective: 'Qüsurlu' };
 export const PROPERTY_LABEL: Record<string, string> = { apartment: 'Mənzil', house: 'Fərdi ev', other: 'Digər' };

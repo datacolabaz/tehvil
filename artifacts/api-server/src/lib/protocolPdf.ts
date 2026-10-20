@@ -6,12 +6,12 @@ import PDFDocument from "pdfkit";
 export interface SnapItem { id: string; name: string; category: string; quantity: number; condition: string | null; note: string; change: string | null; prevItemId: string | null; photos: string[] }
 export interface SnapRoom { id: string; name: string; kind: string; condition: string | null; note: string; prevRoomId?: string | null; photos: string[]; items?: SnapItem[]; defects: { id: string; text: string; photos: string[] }[] }
 export interface ProtocolSnapshot {
-  kind?: string; number: string; address: string; propertyType: string; handoverDate: string | null;
+  kind?: string; number: string; address: string; propertyType: string; handoverDate: string | null; handoverTime?: string;
   rental?: { number: string; startDate: string | null; endDate: string | null; monthlyRent: number | null; deposit: number | null; currency: string } | null;
   base?: { protocolId: string; version: number | null } | null;
-  parties: { role: string; name: string; phone: string }[];
+  parties: { role: string; name: string; phone: string; agency?: string }[];
   rooms: SnapRoom[];
-  meters: { kind: string; value: string; note: string; photos: string[] }[];
+  meters: { kind: string; value: string; note: string; na?: boolean; photos: string[] }[];
   keys: { kind: string; count: number }[];
   keyPhotos: string[];
   notes: string;
@@ -21,14 +21,14 @@ export interface ProtocolSnapshot {
 }
 export interface PdfApproval { role: string; decision: string; at: Date; authLevel: string; authDetail: string; comment: string }
 export interface PdfInput {
-  snapshot: ProtocolSnapshot; version: number; contentHash: string; createdAt: Date;
+  snapshot: ProtocolSnapshot; version: number; contentHash: string; createdAt: Date; protocolCreatedAt?: Date;
   approvals: PdfApproval[]; final: boolean; photo: (id: string) => Promise<Buffer | null>; captions: Map<string, string>; times?: Map<string, { uploaded: Date; taken: Date | null }>;
 }
 
 const require = createRequire(import.meta.url);
 const fontDir = () => path.join(path.dirname(require.resolve("dejavu-fonts-ttf/package.json")), "ttf");
 
-export const ROLE_LABEL: Record<string, string> = { realtor: "Rieltor", seller: "Satıcı (ev sahibi)", buyer: "Alıcı", landlord: "Ev sahibi", tenant: "Kirayəçi" };
+export const ROLE_LABEL: Record<string, string> = { realtor: "Rieltor", seller: "Satıcı", buyer: "Alıcı", landlord: "Ev sahibi", tenant: "Kirayəçi" };
 export const CHANGE_LABEL: Record<string, string> = { unchanged: "Dəyişməyib", new_damage: "Yeni zədə / ləkə", changed: "Əvvəlki zədə dəyişib", resolved: "Təmizlənib / aradan qaldırılıb", missing: "Çatışmır" };
 const TITLE: Record<string, string> = { sale: "Təhvil-təslim protokolu", move_in: "Kirayə giriş protokolu", move_out: "Kirayə çıxış protokolu və müqayisə" };
 const DECIDERS: Record<string, string[]> = { sale: ["seller", "buyer"], move_in: ["landlord", "tenant"], move_out: ["landlord", "tenant"] };
@@ -86,7 +86,8 @@ export async function renderProtocolPdf(input: PdfInput): Promise<Buffer> {
     if (s.rental.startDate || s.rental.endDate) kv("Kirayə dövrü", s.rental.endDate ? `${day(s.rental.startDate)} — ${day(s.rental.endDate)}` : `${day(s.rental.startDate)} tarixindən`);
     kv("Aylıq kirayə / depozit", `${money(s.rental.monthlyRent, s.rental.currency)} / ${money(s.rental.deposit, s.rental.currency)}`);
   }
-  kv(kind === "move_out" ? "Çıxış tarixi" : kind === "move_in" ? "Giriş tarixi" : "Təhvil tarixi", day(s.handoverDate));
+  kv(kind === "move_out" ? "Çıxış tarixi" : kind === "move_in" ? "Giriş tarixi" : "Təhvil tarixi", `${day(s.handoverDate)}${s.handoverTime ? `, saat ${s.handoverTime}` : ""}`);
+  if (input.protocolCreatedAt) kv("Protokol", `yaradılıb ${bakuTime(input.protocolCreatedAt)} · bu versiya ${bakuTime(input.createdAt)}`);
   if (kind === "move_out") kv("Müqayisə əsası", base ? `Giriş protokolu № ${base.number}${s.base?.version ? `, versiya ${s.base.version}` : " (təsdiqə göndərilməmiş məzmun)"}` : "—");
 
   h2("Tərəflər");
@@ -94,7 +95,7 @@ export async function renderProtocolPdf(input: PdfInput): Promise<Buffer> {
     const a = input.approvals.find((x) => x.role === p.role);
     const needed = (DECIDERS[kind] ?? DECIDERS.sale).includes(p.role);
     const status = a ? (a.decision === "approved" ? `Təsdiqləyib · ${bakuTime(a.at)}` : `Düzəliş istəyib · ${bakuTime(a.at)}`) : !needed ? "Təsdiq tələb olunmur" : "TƏSDİQLƏMƏYİB";
-    kv(ROLE_LABEL[p.role] ?? p.role, `${p.name || "—"}${p.phone ? ` · ${p.phone}` : ""}\n${status}`);
+    kv(ROLE_LABEL[p.role] ?? p.role, `${p.name || "—"}${p.agency ? ` · ${p.agency}` : ""}${p.phone ? ` · ${p.phone}` : ""}\n${status}`);
   }
 
   const photoGrid = async (ids: string[]) => {
@@ -187,9 +188,10 @@ export async function renderProtocolPdf(input: PdfInput): Promise<Buffer> {
   }
 
   h2("Sayğac göstəriciləri");
-  const meters = s.meters.filter((m) => m.value || m.note || m.photos.length);
+  const meters = s.meters.filter((m) => m.na || m.value || m.note || m.photos.length);
   if (!meters.length) doc.font("r").fontSize(10).fillColor(muted).text("Daxil edilməyib.");
   for (const m of meters) {
+    if (m.na) { kv(METER_LABEL[m.kind] ?? m.kind, "Tətbiq edilmir (mənzildə yoxdur)"); continue; }
     if (kind === "move_out") {
       const pm = base?.meters.find((x) => x.kind === m.kind);
       const a = num(pm?.value ?? ""), b = num(m.value);
