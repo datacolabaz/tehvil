@@ -115,6 +115,7 @@ import type {
   ProtocolPatch,
   ProtocolRoomInput,
   ProtocolSummary,
+  ProtocolVerification,
   PublicHome,
   PublicPassport,
   PublicPassportEventInput,
@@ -15928,6 +15929,83 @@ export const useCreateMoveOut = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getCreateMoveOutMutationOptions(options));
     }
+
+export const getVerifyProtocolUrl = (token: string,) => {
+
+
+
+
+  return `/api/verify/${token}`
+}
+
+/**
+ * @summary Public integrity check behind the PDF QR code (no personal data)
+ */
+export const verifyProtocol = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolVerification> => {
+
+  return customFetch<ProtocolVerification>(getVerifyProtocolUrl(token),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getVerifyProtocolQueryKey = (token: string,) => {
+    return [
+    `/api/verify/${token}`
+    ] as const;
+    }
+
+
+export const getVerifyProtocolQueryOptions = <TData = Awaited<ReturnType<typeof verifyProtocol>>, TError = ErrorType<unknown>>(token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof verifyProtocol>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getVerifyProtocolQueryKey(token);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof verifyProtocol>>> = ({ signal }) => verifyProtocol(token, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: token !== null && token !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof verifyProtocol>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type VerifyProtocolQueryResult = NonNullable<Awaited<ReturnType<typeof verifyProtocol>>>
+export type VerifyProtocolQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Public integrity check behind the PDF QR code (no personal data)
+ */
+
+export function useVerifyProtocol<TData = Awaited<ReturnType<typeof verifyProtocol>>, TError = ErrorType<unknown>>(
+ token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof verifyProtocol>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getVerifyProtocolQueryOptions(token,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetRentalInviteUrl = (token: string,) => {
 

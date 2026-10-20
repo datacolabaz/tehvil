@@ -346,7 +346,7 @@ function ApproveView({ d, put }: { d: Detail; put: (x: unknown) => void }) {
       <div className="pt-parties">{deciders.map((role) => { const a = decisions.find((x) => x.role === role); return <div key={role} className={a ? a.decision : 'wait'} data-testid={`decision-${role}`}>
         <b>{ROLE_LABEL[role]}</b><span>{a ? (a.decision === 'approved' ? `Təsdiqləyib · ${timeAz(a.createdAt)}` : `Düzəliş istəyib · ${timeAz(a.createdAt)}`) : 'Hələ təsdiqləməyib'}</span>{a?.comment && <small>“{a.comment}”</small>}
       </div>; })}</div>
-      <p className="rl-hint pt-hash">Məzmun izi: <code>{cur.contentHash.slice(0, 16)}…</code></p>
+      <p className="rl-hint pt-hash">Məzmun izi: <code>{cur.contentHash.slice(0, 16)}…</code>{(() => { const vv = d.versions.find((x) => x.version === cur.version); return vv?.manifestHash ? <> · manifest: <code>{vv.manifestHash.slice(0, 16)}…</code>{vv.verifyCode && <> · <a href={`/v/${vv.verifyCode}`} target="_blank" rel="noopener noreferrer" data-testid="verify-link">Yoxlama səhifəsi</a></>}</> : null; })()}</p>
     </div>}
 
     {d.me.canDecide && cur && <div className="pt-card pt-decide" data-testid="decide">

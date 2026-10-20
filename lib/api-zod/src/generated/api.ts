@@ -12270,7 +12270,8 @@ export const AddProtocolMediaBody = zod.object({
   "meterKind": zod.union([zod.literal('water'),zod.literal('gas'),zod.literal('electric'),zod.literal(null)]).nullish(),
   "caption": zod.string().min(addProtocolMediaBodyCaptionMin).max(addProtocolMediaBodyCaptionMax).optional(),
   "takenAt": zod.string().datetime({"offset":true}).nullish(),
-  "takenSource": zod.union([zod.literal('camera'),zod.literal('exif'),zod.literal(null)]).nullish()
+  "takenSource": zod.union([zod.literal('camera'),zod.literal('exif'),zod.literal(null)]).nullish(),
+  "clientMeta": zod.unknown().optional()
 })
 
 export const AddProtocolMediaResponse = zod.object({
@@ -12722,6 +12723,25 @@ export const CreateMoveOutResponse = zod.object({
   "invites": zod.unknown(),
   "protocols": zod.unknown(),
   "me": zod.unknown()
+})
+
+
+/**
+ * @summary Public integrity check behind the PDF QR code (no personal data)
+ */
+export const verifyProtocolPathTokenMin = 20;
+export const verifyProtocolPathTokenMax = 64;
+
+
+export const verifyProtocolPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const VerifyProtocolParams = zod.object({
+  "token": zod.coerce.string().min(verifyProtocolPathTokenMin).max(verifyProtocolPathTokenMax).regex(verifyProtocolPathTokenRegExp)
+})
+
+export const VerifyProtocolResponse = zod.object({
+  "result": zod.unknown()
 })
 
 

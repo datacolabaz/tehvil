@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import PDFDocument from "pdfkit";
+import QRCode from "qrcode";
 
 /** What a version freezes; the PDF is drawn only from this, so it can be regenerated identically. */
 export interface SnapItem { id: string; name: string; category: string; quantity: number; condition: string | null; note: string; change: string | null; prevItemId: string | null; photos: string[] }
@@ -22,7 +23,9 @@ export interface ProtocolSnapshot {
 export interface PdfApproval { role: string; decision: string; at: Date; authLevel: string; authDetail: string; comment: string }
 export interface PdfInput {
   snapshot: ProtocolSnapshot; version: number; contentHash: string; createdAt: Date; protocolCreatedAt?: Date;
-  approvals: PdfApproval[]; final: boolean; photo: (id: string) => Promise<Buffer | null>; captions: Map<string, string>; times?: Map<string, { uploaded: Date; taken: Date | null }>;
+  approvals: PdfApproval[]; final: boolean;
+  /** Public check behind the QR code; absent for versions frozen before manifests existed. */
+  verify?: { url: string; manifestHash: string; finalHash: string; photos: number } | null; photo: (id: string) => Promise<Buffer | null>; captions: Map<string, string>; times?: Map<string, { uploaded: Date; taken: Date | null }>;
 }
 
 const require = createRequire(import.meta.url);
@@ -220,6 +223,22 @@ export async function renderProtocolPdf(input: PdfInput): Promise<Buffer> {
   ensure(48);
   if (kind !== "sale") doc.font("r").fontSize(8.5).fillColor(muted).text("Bu hesabat tərəflərin qeydə aldığı faktları və müqayisəni neytral şəkildə göstərir. Zərərin kim tərəfindən yaradıldığını, təqsiri və ya depozitin taleyini müəyyən etmir; avtomatik hüquqi qərar deyil. Foto altındakı “çəkilib” vaxtı cihazın verdiyi məlumatdır, “yüklənib” vaxtını server qeyd edir.", 50, doc.y, { width: W }).moveDown(0.4);
   doc.font("r").fontSize(8.5).fillColor(muted).text(`Bu protokol tərəflərin təhvil zamanı faktiki vəziyyəti necə qeydə aldığını və Tehvil.az hesabları ilə verdikləri təsdiqləri əks etdirir. Hesab üzərindən verilən təsdiq hüquqi elektron imza deyil. Məzmun izi (SHA-256) bu versiyanın dəyişmədiyini yoxlamağa imkan verir: ${input.contentHash}`, 50, doc.y, { width: W });
+
+  if (input.verify) {
+    const v = input.verify;
+    h2("Yoxlama");
+    ensure(150);
+    const top = doc.y;
+    const qr = await QRCode.toBuffer(v.url, { margin: 1, width: 300, errorCorrectionLevel: "M" });
+    doc.image(qr, 50, top, { width: 110, height: 110 });
+    doc.font("r").fontSize(9).fillColor(ink).text("QR kod Tehvil.az-ın yoxlama səhifəsini açır. Səhifə saxlanılan protokolu, foto fayllarını və audit tarixçəsini yenidən hesablayıb bu izlərlə müqayisə edir; şəxsi məlumat göstərmir.", 172, top, { width: W - 122 });
+    doc.font("r").fontSize(8.5).fillColor(muted).text(v.url, 172, doc.y + 3, { width: W - 122 });
+    doc.font("b").fontSize(8.5).fillColor(ink).text("Manifest izi (SHA-256)", 172, doc.y + 5, { width: W - 122 });
+    doc.font("r").fontSize(8).fillColor(ink).text(v.manifestHash, 172, doc.y, { width: W - 122 });
+    if (v.finalHash) { doc.font("b").fontSize(8.5).fillColor(ink).text("Təsdiqlər qeydinin izi", 172, doc.y + 3, { width: W - 122 }); doc.font("r").fontSize(8).fillColor(ink).text(v.finalHash, 172, doc.y, { width: W - 122 }); }
+    doc.y = Math.max(doc.y, top + 116);
+    doc.font("r").fontSize(8).fillColor(muted).text(`Manifestə ${v.photos} fotonun server tərəfindən hesablanmış SHA-256 izi daxildir. İz yalnız faylın sonradan dəyişib-dəyişmədiyini göstərir; fotonun harada və nə vaxt çəkildiyini təsdiqləmir. QR kod imza və ya həqiqiliyin müstəqil sübutu deyil. SİMA elektron imzası və etibarlı zaman möhürü (RFC 3161) hazırda qoşulmayıb; vaxtlar Tehvil.az serverinin vaxtıdır.`, 50, doc.y, { width: W });
+  }
 
   // Footer on every page
   const range = doc.bufferedPageRange();

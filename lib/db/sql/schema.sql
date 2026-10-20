@@ -984,6 +984,7 @@ CREATE TABLE IF NOT EXISTS "protocol_approvals" (
 	"auth_detail" varchar(160) DEFAULT '' NOT NULL,
 	"ip" varchar(64) DEFAULT '' NOT NULL,
 	"user_agent" varchar(300) DEFAULT '' NOT NULL,
+	"manifest_hash" varchar(64) DEFAULT '' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement
@@ -1002,7 +1003,9 @@ CREATE TABLE IF NOT EXISTS "protocol_events" (
 	"user_id" varchar(128),
 	"action" varchar(40) NOT NULL,
 	"detail" jsonb DEFAULT '{}'::jsonb NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"prev_hash" varchar(64) DEFAULT '' NOT NULL,
+	"hash" varchar(64) DEFAULT '' NOT NULL
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "protocol_invites" (
@@ -1050,7 +1053,10 @@ CREATE TABLE IF NOT EXISTS "protocol_media" (
 	"caption" varchar(300) DEFAULT '' NOT NULL,
 	"uploaded_by_user_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone
+	"deleted_at" timestamp with time zone,
+	"deleted_by_user_id" varchar(128),
+	"sha256" varchar(64) DEFAULT '' NOT NULL,
+	"client_meta" jsonb
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "protocol_participants" (
@@ -1084,7 +1090,12 @@ CREATE TABLE IF NOT EXISTS "protocol_versions" (
 	"created_by_user_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"pdf_object_path" text,
-	"pdf_created_at" timestamp with time zone
+	"pdf_created_at" timestamp with time zone,
+	"manifest" jsonb,
+	"manifest_hash" varchar(64) DEFAULT '' NOT NULL,
+	"verify_code" varchar(40),
+	"final_hash" varchar(64) DEFAULT '' NOT NULL,
+	"pdf_sha256" varchar(64) DEFAULT '' NOT NULL
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "rental_invites" (
@@ -2705,6 +2716,8 @@ ALTER TABLE "protocol_approvals" ADD COLUMN IF NOT EXISTS "ip" varchar(64) DEFAU
 --> statement
 ALTER TABLE "protocol_approvals" ADD COLUMN IF NOT EXISTS "user_agent" varchar(300) DEFAULT '' NOT NULL;
 --> statement
+ALTER TABLE "protocol_approvals" ADD COLUMN IF NOT EXISTS "manifest_hash" varchar(64) DEFAULT '' NOT NULL;
+--> statement
 ALTER TABLE "protocol_approvals" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
 ALTER TABLE "protocol_defects" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
@@ -2730,6 +2743,10 @@ ALTER TABLE "protocol_events" ADD COLUMN IF NOT EXISTS "action" varchar(40) NOT 
 ALTER TABLE "protocol_events" ADD COLUMN IF NOT EXISTS "detail" jsonb DEFAULT '{}'::jsonb NOT NULL;
 --> statement
 ALTER TABLE "protocol_events" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "protocol_events" ADD COLUMN IF NOT EXISTS "prev_hash" varchar(64) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "protocol_events" ADD COLUMN IF NOT EXISTS "hash" varchar(64) DEFAULT '' NOT NULL;
 --> statement
 ALTER TABLE "protocol_invites" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
@@ -2809,6 +2826,12 @@ ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "created_at" timestamp wit
 --> statement
 ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "deleted_at" timestamp with time zone;
 --> statement
+ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "deleted_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "sha256" varchar(64) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "client_meta" jsonb;
+--> statement
 ALTER TABLE "protocol_participants" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "protocol_participants" ADD COLUMN IF NOT EXISTS "protocol_id" uuid NOT NULL;
@@ -2858,6 +2881,16 @@ ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "created_at" timestamp 
 ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "pdf_object_path" text;
 --> statement
 ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "pdf_created_at" timestamp with time zone;
+--> statement
+ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "manifest" jsonb;
+--> statement
+ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "manifest_hash" varchar(64) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "verify_code" varchar(40);
+--> statement
+ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "final_hash" varchar(64) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "pdf_sha256" varchar(64) DEFAULT '' NOT NULL;
 --> statement
 ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
@@ -3519,6 +3552,8 @@ CREATE INDEX IF NOT EXISTS "protocol_participants_user_idx" ON "protocol_partici
 CREATE INDEX IF NOT EXISTS "protocol_rooms_protocol_idx" ON "protocol_rooms" USING btree ("protocol_id","position");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "protocol_versions_idx" ON "protocol_versions" USING btree ("protocol_id","version");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "protocol_versions_verify_idx" ON "protocol_versions" USING btree ("verify_code");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "rental_invites_token_idx" ON "rental_invites" USING btree ("token_hash");
 --> statement

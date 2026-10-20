@@ -5190,6 +5190,7 @@ export interface ProtocolMediaInput {
   takenAt?: string | null;
   /** @nullable */
   takenSource?: ProtocolMediaInputTakenSource;
+  clientMeta?: unknown;
 }
 
 export type ProtocolItemInputCategory = typeof ProtocolItemInputCategory[keyof typeof ProtocolItemInputCategory];
@@ -5449,6 +5450,10 @@ export interface RentalInvitePreview {
 
 export interface AdminRentalStats {
   stats: unknown;
+}
+
+export interface ProtocolVerification {
+  result: unknown;
 }
 
 export type ProtocolInviteInputRole = typeof ProtocolInviteInputRole[keyof typeof ProtocolInviteInputRole];

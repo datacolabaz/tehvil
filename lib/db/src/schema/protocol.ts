@@ -140,8 +140,15 @@ export const protocolMediaTable = pgTable("protocol_media", {
   originalName: varchar("original_name", { length: 255 }).notNull().default(""),
   caption: varchar("caption", { length: 300 }).notNull().default(""),
   uploadedByUserId: user("uploaded_by_user_id").notNull(),
+  /** Server receive time (createdAt is set by the server). */
   createdAt: createdAt(),
+  /** Soft delete: a removed photo stays, with its hash, for the history. */
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  deletedByUserId: user("deleted_by_user_id"),
+  /** SHA-256 of the stored file, computed by the server on receipt ('' for photos stored before this existed). */
+  sha256: varchar("sha256", { length: 64 }).notNull().default(""),
+  /** What the device said (e.g. GPS from EXIF); may be missing or forged, never proof. */
+  clientMeta: jsonb("client_meta").$type<Record<string, unknown>>(),
 }, (t) => [index("protocol_media_protocol_idx").on(t.protocolId)]);
 
 /** A frozen copy of everything that is approved and printed. */
@@ -156,7 +163,15 @@ export const protocolVersionsTable = pgTable("protocol_versions", {
   createdAt: createdAt(),
   pdfObjectPath: text("pdf_object_path"),
   pdfCreatedAt: timestamp("pdf_created_at", { withTimezone: true }),
-}, (t) => [uniqueIndex("protocol_versions_idx").on(t.protocolId, t.version)]);
+  /** Integrity manifest: content + photo SHA-256s, canonical JSON; approvals point to manifestHash. Empty for older versions. */
+  manifest: jsonb("manifest").$type<Record<string, unknown>>(),
+  manifestHash: varchar("manifest_hash", { length: 64 }).notNull().default(""),
+  /** Secret code in the PDF's QR → public verification page. */
+  verifyCode: varchar("verify_code", { length: 40 }),
+  /** SHA-256 of {manifestHash, approvals}: kept apart so approvals never sit inside the hash they approve. */
+  finalHash: varchar("final_hash", { length: 64 }).notNull().default(""),
+  pdfSha256: varchar("pdf_sha256", { length: 64 }).notNull().default(""),
+}, (t) => [uniqueIndex("protocol_versions_idx").on(t.protocolId, t.version), uniqueIndex("protocol_versions_verify_idx").on(t.verifyCode)]);
 
 /** decision: approved | changes */
 export const protocolApprovalsTable = pgTable("protocol_approvals", {
@@ -173,6 +188,8 @@ export const protocolApprovalsTable = pgTable("protocol_approvals", {
   authDetail: varchar("auth_detail", { length: 160 }).notNull().default(""),
   ip: varchar("ip", { length: 64 }).notNull().default(""),
   userAgent: varchar("user_agent", { length: 300 }).notNull().default(""),
+  /** The manifest hash this decision was given for ('' for older versions). */
+  manifestHash: varchar("manifest_hash", { length: 64 }).notNull().default(""),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex("protocol_approvals_idx").on(t.protocolId, t.version, t.role)]);
 
@@ -183,6 +200,9 @@ export const protocolEventsTable = pgTable("protocol_events", {
   action: varchar("action", { length: 40 }).notNull(),
   detail: jsonb("detail").$type<Record<string, unknown>>().notNull().default({}),
   createdAt: createdAt(),
+  /** Hash chain per protocol: hash = SHA-256(canonical {prevHash, protocolId, userId, action, detail, at}). Makes edits detectable, not impossible. */
+  prevHash: varchar("prev_hash", { length: 64 }).notNull().default(""),
+  hash: varchar("hash", { length: 64 }).notNull().default(""),
 }, (t) => [index("protocol_events_protocol_idx").on(t.protocolId, t.createdAt)]);
 
 /* ------------------------------------------------------------------ rentals */

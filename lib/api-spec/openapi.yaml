@@ -3020,6 +3020,19 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/RentalDetail'}
+  /verify/{token}:
+    get:
+      operationId: verifyProtocol
+      tags: [home]
+      summary: Public integrity check behind the PDF QR code (no personal data)
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      responses:
+        '200':
+          description: Verification
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolVerification'}
   /rental-invites/{token}:
     get:
       operationId: getRentalInvite
@@ -6885,6 +6898,7 @@ components:
         takenSource:
           type: [string, 'null']
           enum: [camera, exif, null]
+        clientMeta: {}
       required: [files, target]
     ProtocolItemInput:
       type: object
@@ -7010,6 +7024,11 @@ components:
       properties:
         stats: {}
       required: [stats]
+    ProtocolVerification:
+      type: object
+      properties:
+        result: {}
+      required: [result]
     ProtocolInviteInput:
       type: object
       properties:

@@ -22,13 +22,13 @@ export interface Baseline {
   meters: { kind: 'water' | 'gas' | 'electric'; value: string; note: string; photos: string[] }[]; keys: { kind: string; count: number }[]; keyPhotos: string[]; media: Media[];
 }
 export interface Defect { id: string; roomId: string | null; text: string; createdAt: string }
-export interface Media { id: string; roomId: string | null; itemId?: string | null; defectId: string | null; target: string; meterKind: string | null; caption: string; contentType: string; url: string; createdAt: string; takenAt?: string | null; takenSource?: string | null }
+export interface Media { id: string; roomId: string | null; itemId?: string | null; defectId: string | null; target: string; meterKind: string | null; caption: string; contentType: string; url: string; createdAt: string; takenAt?: string | null; takenSource?: string | null; sha256?: string | null; hasGps?: boolean }
 export interface Detail {
   protocol: Protocol; rooms: Room[]; items: Item[]; defects: Defect[]; media: Media[]; deciders: Role[]; baseline: Baseline | null;
   rental: { id: string; number: string; startDate: string | null; endDate: string | null; monthlyRent: number | null; deposit: number | null; currency: string } | null;
   participants: { role: Role; joinedAt: string; isMe: boolean; isCreator: boolean }[];
   invites: { id: string; role: Role; createdAt: string; expiresAt?: string; expired?: boolean; used: boolean; lastOpenedAt: string | null }[];
-  versions: { version: number; contentHash: string; createdAt: string; hasPdf: boolean; pdfCreatedAt: string | null }[];
+  versions: { version: number; contentHash: string; createdAt: string; hasPdf: boolean; pdfCreatedAt: string | null; manifestHash?: string | null; finalHash?: string | null; verifyCode?: string | null }[];
   approvals: { version: number; role: Role; decision: 'approved' | 'changes'; comment: string; authLevel: string; createdAt: string }[];
   events: { action: string; role: Role | null; detail: Record<string, unknown>; createdAt: string }[];
   me: { role: Role | null; isCreator: boolean; canEdit: boolean; canDecide: boolean; current: { version: number; contentHash: string } | null };
@@ -111,10 +111,14 @@ export interface PhotoTarget { target: 'room' | 'item' | 'defect' | 'meter' | 'k
  * When the photo was taken, as the device recorded it (EXIF DateTimeOriginal of a JPEG). Read before the photo is
  * re-encoded. It is shown as “cihazın məlumatı” — the upload time recorded by the server is the reliable one.
  */
-export async function photoTakenAt(file: File): Promise<string | null> {
+export async function photoTakenAt(file: File): Promise<string | null> { return (await photoMeta(file)).takenAt; }
+
+/** What the photo file itself says (EXIF): taken time and GPS, if present. Device data — may be missing or wrong. */
+export async function photoMeta(file: File): Promise<{ takenAt: string | null; gps: { lat: number; lon: number } | null }> {
+  const none = { takenAt: null, gps: null };
   try {
     const b = new DataView(await file.slice(0, 256 * 1024).arrayBuffer());
-    if (b.getUint16(0) !== 0xffd8) return null;
+    if (b.getUint16(0) !== 0xffd8) return none;
     let o = 2;
     while (o + 4 < b.byteLength) {
       const marker = b.getUint16(o), len = b.getUint16(o + 2);
@@ -122,22 +126,36 @@ export async function photoTakenAt(file: File): Promise<string | null> {
         const t = o + 10, le = b.getUint16(t) === 0x4949;
         const u16 = (p: number) => b.getUint16(t + p, le), u32 = (p: number) => b.getUint32(t + p, le);
         const find = (ifd: number, tag: number) => { const n = u16(ifd); for (let i = 0; i < n; i++) { const e = ifd + 2 + i * 12; if (u16(e) === tag) return e; } return -1; };
-        const exifPtr = find(u32(4), 0x8769); if (exifPtr < 0) return null;
-        const ifd = u32(exifPtr + 8);
-        const read = (tag: number) => { const e = find(ifd, tag); if (e < 0) return ''; const count = u32(e + 4), at = count > 4 ? u32(e + 8) : e + 8; let s = ''; for (let i = 0; i < count - 1; i++) s += String.fromCharCode(b.getUint8(t + at + i)); return s; };
-        const dt = read(0x9003); const m = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(dt); if (!m) return null;
-        const off = /^[+-]\d{2}:\d{2}$/.test(read(0x9011)) ? read(0x9011) : '+04:00';
-        const d = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}${off}`);
-        return Number.isNaN(d.getTime()) ? null : d.toISOString();
+        const ascii = (ifd: number, tag: number) => { const e = find(ifd, tag); if (e < 0) return ''; const count = u32(e + 4), at = count > 4 ? u32(e + 8) : e + 8; let s = ''; for (let i = 0; i < count - 1; i++) s += String.fromCharCode(b.getUint8(t + at + i)); return s; };
+        let takenAt: string | null = null;
+        const exifPtr = find(u32(4), 0x8769);
+        if (exifPtr >= 0) {
+          const ifd = u32(exifPtr + 8);
+          const m = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(ascii(ifd, 0x9003));
+          if (m) {
+            const off = /^[+-]\d{2}:\d{2}$/.test(ascii(ifd, 0x9011)) ? ascii(ifd, 0x9011) : '+04:00';
+            const d = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}${off}`);
+            takenAt = Number.isNaN(d.getTime()) ? null : d.toISOString();
+          }
+        }
+        let gps: { lat: number; lon: number } | null = null;
+        const gpsPtr = find(u32(4), 0x8825);
+        if (gpsPtr >= 0) {
+          const g = u32(gpsPtr + 8);
+          const dms = (tag: number) => { const e = find(g, tag); if (e < 0) return NaN; const at = u32(e + 8); const r = (k: number) => u32(at + k * 8) / (u32(at + k * 8 + 4) || 1); return r(0) + r(1) / 60 + r(2) / 3600; };
+          const lat = dms(2) * (ascii(g, 1) === 'S' ? -1 : 1), lon = dms(4) * (ascii(g, 3) === 'W' ? -1 : 1);
+          if (Number.isFinite(lat) && Number.isFinite(lon) && (lat || lon)) gps = { lat, lon };
+        }
+        return { takenAt, gps };
       }
-      if ((marker & 0xff00) !== 0xff00) return null;
+      if ((marker & 0xff00) !== 0xff00) return none;
       o += 2 + len;
     }
-  } catch { /* unreadable: no device time */ }
-  return null;
+  } catch { /* unreadable: no device data */ }
+  return none;
 }
 
-export async function uploadPhoto(protocolId: string, file: File, t: PhotoTarget, taken?: { at: string | null; source: 'camera' | 'exif' | null }): Promise<Detail> {
+export async function uploadPhoto(protocolId: string, file: File, t: PhotoTarget, taken?: { at: string | null; source: 'camera' | 'exif' | null; gps?: { lat: number; lon: number } | null }): Promise<Detail> {
   if (file.size > 15 * 1024 * 1024) throw new PhotoError('Foto çox böyükdür (15 MB-dan çox).');
   let meta;
   try { meta = await requestUploadUrl({ name: file.name, size: file.size, contentType: file.type }); }
@@ -145,6 +163,6 @@ export async function uploadPhoto(protocolId: string, file: File, t: PhotoTarget
   const put = await fetch(meta.uploadURL, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file }).catch(() => null);
   if (!put?.ok) throw new PhotoError('Foto yüklənmədi. Yenidən cəhd edin.');
   try {
-    return asDetail(await addProtocolMedia(protocolId, { files: [{ objectPath: meta.objectPath, originalName: file.name, contentType: file.type, size: file.size }], target: t.target, roomId: t.roomId ?? null, itemId: t.itemId ?? null, defectId: t.defectId ?? null, meterKind: t.meterKind ?? null, caption: t.caption ?? '', takenAt: taken?.at ?? null, takenSource: taken?.at ? taken.source : null }));
+    return asDetail(await addProtocolMedia(protocolId, { files: [{ objectPath: meta.objectPath, originalName: file.name, contentType: file.type, size: file.size }], target: t.target, roomId: t.roomId ?? null, itemId: t.itemId ?? null, defectId: t.defectId ?? null, meterKind: t.meterKind ?? null, caption: t.caption ?? '', takenAt: taken?.at ?? null, takenSource: taken?.at ? taken.source : null, ...(taken?.gps ? { clientMeta: { gps: taken.gps } } : {}) }));
   } catch (e) { throw new PhotoError(errorText(e, 'Foto saxlanılmadı. Yenidən cəhd edin.')); }
 }
