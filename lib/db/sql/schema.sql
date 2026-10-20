@@ -946,6 +946,11 @@ CREATE TABLE IF NOT EXISTS "handover_protocols" (
 	"number" varchar(24) NOT NULL,
 	"created_by_user_id" varchar(128) NOT NULL,
 	"creator_role" varchar(10) NOT NULL,
+	"kind" varchar(10) DEFAULT 'sale' NOT NULL,
+	"rental_id" uuid,
+	"base_protocol_id" uuid,
+	"base_version" integer,
+	"baseline" jsonb,
 	"property_type" varchar(12) DEFAULT 'apartment' NOT NULL,
 	"address" varchar(300) NOT NULL,
 	"handover_date" date,
@@ -1011,12 +1016,30 @@ CREATE TABLE IF NOT EXISTS "protocol_invites" (
 	"last_opened_at" timestamp with time zone
 );
 --> statement
+CREATE TABLE IF NOT EXISTS "protocol_items" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"protocol_id" uuid NOT NULL,
+	"room_id" uuid NOT NULL,
+	"name" varchar(120) NOT NULL,
+	"category" varchar(10) DEFAULT 'other' NOT NULL,
+	"quantity" integer DEFAULT 1 NOT NULL,
+	"condition" varchar(10),
+	"note" text DEFAULT '' NOT NULL,
+	"change" varchar(12),
+	"prev_item_id" uuid,
+	"position" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
 CREATE TABLE IF NOT EXISTS "protocol_media" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"protocol_id" uuid NOT NULL,
 	"room_id" uuid,
 	"defect_id" uuid,
 	"target" varchar(10) DEFAULT 'room' NOT NULL,
+	"item_id" uuid,
+	"taken_at" timestamp with time zone,
+	"taken_source" varchar(8),
 	"meter_kind" varchar(10),
 	"object_path" text NOT NULL,
 	"content_type" varchar(100) NOT NULL,
@@ -1045,6 +1068,7 @@ CREATE TABLE IF NOT EXISTS "protocol_rooms" (
 	"position" integer DEFAULT 0 NOT NULL,
 	"condition" varchar(10),
 	"note" text DEFAULT '' NOT NULL,
+	"prev_room_id" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement
@@ -1059,6 +1083,52 @@ CREATE TABLE IF NOT EXISTS "protocol_versions" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"pdf_object_path" text,
 	"pdf_created_at" timestamp with time zone
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "rental_invites" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"rental_id" uuid NOT NULL,
+	"role" varchar(10) NOT NULL,
+	"can_edit" boolean DEFAULT true NOT NULL,
+	"token_hash" varchar(64) NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"revoked_at" timestamp with time zone,
+	"used_by_user_id" varchar(128),
+	"used_at" timestamp with time zone,
+	"last_opened_at" timestamp with time zone
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "rental_participants" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"rental_id" uuid NOT NULL,
+	"user_id" varchar(128) NOT NULL,
+	"role" varchar(10) NOT NULL,
+	"can_edit" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "rentals" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"number" varchar(24) NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"address" varchar(300) NOT NULL,
+	"property_type" varchar(12) DEFAULT 'apartment' NOT NULL,
+	"landlord_name" varchar(160) DEFAULT '' NOT NULL,
+	"landlord_phone" varchar(40) DEFAULT '' NOT NULL,
+	"tenant_name" varchar(160) DEFAULT '' NOT NULL,
+	"tenant_phone" varchar(40) DEFAULT '' NOT NULL,
+	"realtor_name" varchar(160) DEFAULT '' NOT NULL,
+	"realtor_phone" varchar(40) DEFAULT '' NOT NULL,
+	"start_date" date,
+	"end_date" date,
+	"monthly_rent" integer,
+	"deposit" integer,
+	"currency" varchar(3) DEFAULT 'AZN' NOT NULL,
+	"notes" text DEFAULT '' NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"archived_at" timestamp with time zone
 );
 --> statement
 ALTER TABLE "change_orders" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
@@ -2563,6 +2633,16 @@ ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "created_by_user_id" v
 --> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "creator_role" varchar(10) NOT NULL;
 --> statement
+ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "kind" varchar(10) DEFAULT 'sale' NOT NULL;
+--> statement
+ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "rental_id" uuid;
+--> statement
+ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "base_protocol_id" uuid;
+--> statement
+ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "base_version" integer;
+--> statement
+ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "baseline" jsonb;
+--> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "property_type" varchar(12) DEFAULT 'apartment' NOT NULL;
 --> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "address" varchar(300) NOT NULL;
@@ -2665,6 +2745,30 @@ ALTER TABLE "protocol_invites" ADD COLUMN IF NOT EXISTS "used_at" timestamp with
 --> statement
 ALTER TABLE "protocol_invites" ADD COLUMN IF NOT EXISTS "last_opened_at" timestamp with time zone;
 --> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "protocol_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "room_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "name" varchar(120) NOT NULL;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "category" varchar(10) DEFAULT 'other' NOT NULL;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "quantity" integer DEFAULT 1 NOT NULL;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "condition" varchar(10);
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "change" varchar(12);
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "prev_item_id" uuid;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "position" integer DEFAULT 0 NOT NULL;
+--> statement
+ALTER TABLE "protocol_items" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
 ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "protocol_id" uuid NOT NULL;
@@ -2674,6 +2778,12 @@ ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "room_id" uuid;
 ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "defect_id" uuid;
 --> statement
 ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "target" varchar(10) DEFAULT 'room' NOT NULL;
+--> statement
+ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "item_id" uuid;
+--> statement
+ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "taken_at" timestamp with time zone;
+--> statement
+ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "taken_source" varchar(8);
 --> statement
 ALTER TABLE "protocol_media" ADD COLUMN IF NOT EXISTS "meter_kind" varchar(10);
 --> statement
@@ -2719,6 +2829,8 @@ ALTER TABLE "protocol_rooms" ADD COLUMN IF NOT EXISTS "condition" varchar(10);
 --> statement
 ALTER TABLE "protocol_rooms" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
 --> statement
+ALTER TABLE "protocol_rooms" ADD COLUMN IF NOT EXISTS "prev_room_id" uuid;
+--> statement
 ALTER TABLE "protocol_rooms" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
 ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
@@ -2740,6 +2852,80 @@ ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "created_at" timestamp 
 ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "pdf_object_path" text;
 --> statement
 ALTER TABLE "protocol_versions" ADD COLUMN IF NOT EXISTS "pdf_created_at" timestamp with time zone;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "rental_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "role" varchar(10) NOT NULL;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "can_edit" boolean DEFAULT true NOT NULL;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "token_hash" varchar(64) NOT NULL;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "revoked_at" timestamp with time zone;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "used_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "used_at" timestamp with time zone;
+--> statement
+ALTER TABLE "rental_invites" ADD COLUMN IF NOT EXISTS "last_opened_at" timestamp with time zone;
+--> statement
+ALTER TABLE "rental_participants" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "rental_participants" ADD COLUMN IF NOT EXISTS "rental_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "rental_participants" ADD COLUMN IF NOT EXISTS "user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "rental_participants" ADD COLUMN IF NOT EXISTS "role" varchar(10) NOT NULL;
+--> statement
+ALTER TABLE "rental_participants" ADD COLUMN IF NOT EXISTS "can_edit" boolean DEFAULT true NOT NULL;
+--> statement
+ALTER TABLE "rental_participants" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "number" varchar(24) NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "address" varchar(300) NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "property_type" varchar(12) DEFAULT 'apartment' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "landlord_name" varchar(160) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "landlord_phone" varchar(40) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "tenant_name" varchar(160) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "tenant_phone" varchar(40) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "realtor_name" varchar(160) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "realtor_phone" varchar(40) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "start_date" date;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "end_date" date;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "monthly_rent" integer;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "deposit" integer;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'AZN' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "notes" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "archived_at" timestamp with time zone;
 --> statement
 DO $$ BEGIN
   ALTER TABLE "change_orders" ADD CONSTRAINT "change_orders_project_id_renovation_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."renovation_projects"("id") ON DELETE cascade ON UPDATE no action;
@@ -3107,6 +3293,16 @@ EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 --> statement
 DO $$ BEGIN
+  ALTER TABLE "protocol_items" ADD CONSTRAINT "protocol_items_protocol_id_handover_protocols_id_fk" FOREIGN KEY ("protocol_id") REFERENCES "public"."handover_protocols"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "protocol_items" ADD CONSTRAINT "protocol_items_room_id_protocol_rooms_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."protocol_rooms"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
   ALTER TABLE "protocol_media" ADD CONSTRAINT "protocol_media_protocol_id_handover_protocols_id_fk" FOREIGN KEY ("protocol_id") REFERENCES "public"."handover_protocols"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
@@ -3123,6 +3319,16 @@ END $$;
 --> statement
 DO $$ BEGIN
   ALTER TABLE "protocol_versions" ADD CONSTRAINT "protocol_versions_protocol_id_handover_protocols_id_fk" FOREIGN KEY ("protocol_id") REFERENCES "public"."handover_protocols"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "rental_invites" ADD CONSTRAINT "rental_invites_rental_id_rentals_id_fk" FOREIGN KEY ("rental_id") REFERENCES "public"."rentals"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "rental_participants" ADD CONSTRAINT "rental_participants_rental_id_rentals_id_fk" FOREIGN KEY ("rental_id") REFERENCES "public"."rentals"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 --> statement
@@ -3296,6 +3502,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS "protocol_invites_token_idx" ON "protocol_invi
 --> statement
 CREATE INDEX IF NOT EXISTS "protocol_invites_protocol_idx" ON "protocol_invites" USING btree ("protocol_id");
 --> statement
+CREATE INDEX IF NOT EXISTS "protocol_items_protocol_idx" ON "protocol_items" USING btree ("protocol_id","room_id");
+--> statement
 CREATE INDEX IF NOT EXISTS "protocol_media_protocol_idx" ON "protocol_media" USING btree ("protocol_id");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "protocol_participants_role_idx" ON "protocol_participants" USING btree ("protocol_id","role");
@@ -3305,3 +3513,15 @@ CREATE INDEX IF NOT EXISTS "protocol_participants_user_idx" ON "protocol_partici
 CREATE INDEX IF NOT EXISTS "protocol_rooms_protocol_idx" ON "protocol_rooms" USING btree ("protocol_id","position");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "protocol_versions_idx" ON "protocol_versions" USING btree ("protocol_id","version");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "rental_invites_token_idx" ON "rental_invites" USING btree ("token_hash");
+--> statement
+CREATE INDEX IF NOT EXISTS "rental_invites_rental_idx" ON "rental_invites" USING btree ("rental_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "rental_participants_role_idx" ON "rental_participants" USING btree ("rental_id","role");
+--> statement
+CREATE INDEX IF NOT EXISTS "rental_participants_user_idx" ON "rental_participants" USING btree ("user_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "rentals_number_idx" ON "rentals" USING btree ("number");
+--> statement
+CREATE INDEX IF NOT EXISTS "rentals_creator_idx" ON "rentals" USING btree ("created_by_user_id");

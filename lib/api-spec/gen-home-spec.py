@@ -165,7 +165,15 @@ S["ProtocolCreateInput"] = {"role": "enum:realtor|seller|buyer", "propertyType":
 S["ProtocolPatch"] = {"propertyType~": "enum:apartment|house|other", "address~": "str(3,300)", "handoverDate~": "date?", "sellerName~": "str(0,160)", "sellerPhone~": "str(0,40)", "buyerName~": "str(0,160)", "buyerPhone~": "str(0,40)", "realtorName~": "str(0,160)", "realtorPhone~": "str(0,40)", "extras~": "any"}
 S["ProtocolRoomInput"] = {"name~": "str(1,120)", "kind~": "enum:living|bed|kitchen|bath|hall|balcony|other", "condition~": "enum?:good|fair|defective", "note~": "str(0,4000)"}
 S["ProtocolDefectInput"] = {"roomId~": "uuid?", "text": "str(1,2000)"}
-S["ProtocolMediaInput"] = {"files": "[MediaInput(10)]", "roomId~": "uuid?", "defectId~": "uuid?", "target": "enum:room|defect|meter|keys|other", "meterKind~": "enum?:water|gas|electric", "caption~": "str(0,300)"}
+S["ProtocolMediaInput"] = {"files": "[MediaInput(10)]", "roomId~": "uuid?", "defectId~": "uuid?", "itemId~": "uuid?", "target": "enum:room|item|defect|meter|keys|other", "meterKind~": "enum?:water|gas|electric", "caption~": "str(0,300)", "takenAt~": "dt?", "takenSource~": "enum?:camera|exif"}
+S["ProtocolItemInput"] = {"roomId~": "uuid?", "name~": "str(1,120)", "category~": "enum:wall|floor|ceiling|window|door|furniture|appliance|other", "quantity~": "int", "condition~": "enum?:good|fair|defective", "note~": "str(0,2000)", "change~": "enum?:unchanged|new_damage|changed|resolved|missing"}
+S["RentalCreateInput"] = {"role": "enum:landlord|tenant|realtor", "propertyType~": "enum:apartment|house|other", "address": "str(3,300)", "landlordName~": "str(0,160)", "landlordPhone~": "str(0,40)", "tenantName~": "str(0,160)", "tenantPhone~": "str(0,40)", "realtorName~": "str(0,160)", "realtorPhone~": "str(0,40)", "startDate~": "date?", "endDate~": "date?", "monthlyRent~": "int?", "deposit~": "int?", "currency~": "enum:AZN|USD|EUR"}
+S["RentalPatch"] = {"propertyType~": "enum:apartment|house|other", "address~": "str(3,300)", "landlordName~": "str(0,160)", "landlordPhone~": "str(0,40)", "tenantName~": "str(0,160)", "tenantPhone~": "str(0,40)", "realtorName~": "str(0,160)", "realtorPhone~": "str(0,40)", "startDate~": "date?", "endDate~": "date?", "monthlyRent~": "int?", "deposit~": "int?", "currency~": "enum:AZN|USD|EUR", "notes~": "str(0,4000)"}
+S["RentalDetail"] = {"rental": "any", "participants": "any", "invites": "any", "protocols": "any", "me": "any"}
+S["RentalSummary"] = {"id": "str", "number": "str", "address": "str", "myRole": "str", "startDate": "str?", "endDate": "str?", "moveIn": "str?", "moveOut": "str?", "updatedAt": "dt"}
+S["RentalInviteInput"] = {"role": "enum:landlord|tenant|realtor", "canEdit~": "bool"}
+S["RentalInvitePreview"] = {"role": "str", "canEdit": "bool", "used": "bool", "usedByMe": "bool", "rentalId": "str", "detail": "any"}
+S["AdminRentalStats"] = {"stats": "any"}
 S["ProtocolInviteInput"] = {"role": "enum:realtor|seller|buyer"}
 S["ProtocolInviteLink"] = {"id": "str", "role": "str", "url": "str"}
 S["ProtocolDecisionInput"] = {"version": "int", "contentHash": "str(64,64)", "decision": "enum:approved|changes", "comment~": "str(0,2000)"}
@@ -281,6 +289,20 @@ op("/protocols/{protocolId}/versions/{version}/pdf", "get", "getProtocolPdf", "D
 op("/protocol-media/{mediaId}", "get", "getProtocolMedia", "Photo of a protocol (participants or a valid invitation link)", ("MediaId",), resp={"200": {"description": "File", "content": {"*/*": {"schema": {"type": "string", "format": "binary"}}}}})
 op("/protocol-invites/{token}", "get", "getProtocolInvite", "What an invitation link shows (no sign-in)", ("InviteToken",), resp=ok("Invitation", "ProtocolInvitePreview"))
 op("/protocol-invites/{token}/accept", "post", "acceptProtocolInvite", "Join the protocol in the invited role (signed in)", ("InviteToken",), resp=ok("Protocol", "ProtocolDetail"))
+op("/rentals", "get", "listRentals", "Rentals I take part in (landlord, manager, tenant, realtor)", resp=ok("Rentals", "RentalSummary", array=True))
+op("/rentals", "post", "createRental", "Create a rental with its move-in protocol", req="RentalCreateInput", resp=ok("Created", "RentalDetail", "201"))
+op("/rentals/{rentalId}", "get", "getRental", "Rental with parties, invitations and its protocols", ("RentalId",), resp=ok("Rental", "RentalDetail"))
+op("/rentals/{rentalId}", "patch", "updateRental", "Edit rental details", ("RentalId",), "RentalPatch", ok("Saved", "RentalDetail"))
+op("/rentals/{rentalId}", "delete", "archiveRental", "Archive (creator); approved protocols stay as records", ("RentalId",), resp=AR)
+op("/rentals/{rentalId}/invites", "post", "createRentalInvite", "Invitation link for the other party, with or without editing rights", ("RentalId",), "RentalInviteInput", ok("Link", "ProtocolInviteLink", "201"))
+op("/rentals/{rentalId}/invites/{inviteId}", "delete", "revokeRentalInvite", "Revoke an invitation link", ("RentalId", "InviteId"), resp=AR)
+op("/rentals/{rentalId}/move-out", "post", "createMoveOut", "Start the move-out protocol from the move-in one (rooms, items, photos for comparison)", ("RentalId",), resp=ok("Rental", "RentalDetail"))
+op("/rental-invites/{token}", "get", "getRentalInvite", "What a rental invitation shows (no sign-in)", ("InviteToken",), resp=ok("Invitation", "RentalInvitePreview"))
+op("/rental-invites/{token}/accept", "post", "acceptRentalInvite", "Join the rental in the invited role (signed in)", ("InviteToken",), resp=ok("Rental", "RentalDetail"))
+op("/protocols/{protocolId}/items", "post", "addProtocolItem", "Add an item to a room (furniture, appliance…)", ("ProtocolId",), "ProtocolItemInput", ok("Saved", "ProtocolDetail", "201"))
+op("/protocols/{protocolId}/items/{itemId}", "patch", "updateProtocolItem", "Condition, note, quantity or move-out change of an item", ("ProtocolId", "ItemId"), "ProtocolItemInput", ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/items/{itemId}", "delete", "deleteProtocolItem", "Remove an item", ("ProtocolId", "ItemId"), resp=ok("Saved", "ProtocolDetail"))
+op("/admin/rental-stats", "get", "getRentalStats", "Usage numbers for administrators (from the database)", resp=ok("Stats", "AdminRentalStats"))
 op("/me/roles", "get", "getMyRoles", "What the signed-in account is (for a menu that shows only relevant sections)", resp=ok("Roles", "MeRoles"))
 op("/me/works", "get", "listMyWorks", "Works I take part in through any of my profiles", resp=ok("Works", "MyWork", array=True))
 op("/me/workers", "get", "getMyWorkers", "My individual profile, teams/companies I manage and my memberships", resp=ok("Profiles", "MyWorkers"))
@@ -307,7 +329,7 @@ op("/staff/reviews/{reviewId}/hide", "post", "hideReview", "Tehvil.az staff hide
 op("/admin/workers/{workerId}/identity", "post", "setWorkerIdentity", "Administrator records a separate identity/business check", ("WorkerId",), "IdentityInput", ok("Saved", "Worker"))
 
 params = {}
-for n, name in [("HomeId", "homeId"), ("RoomId", "roomId"), ("MemberId", "memberId"), ("ItemId", "itemId"), ("EquipmentId", "equipmentId"), ("ShareId", "shareId"), ("WorkId", "workId"), ("ParticipantId", "participantId"), ("ReviewId", "reviewId"), ("MembershipId", "membershipId"), ("WorkerId", "workerId"), ("MediaId", "mediaId"), ("ValuationId", "valuationId"), ("EstimateId", "estimateId"), ("QuoteId", "quoteId"), ("ProtocolId", "protocolId"), ("DefectId", "defectId"), ("InviteId", "inviteId")]:
+for n, name in [("HomeId", "homeId"), ("RoomId", "roomId"), ("MemberId", "memberId"), ("ItemId", "itemId"), ("EquipmentId", "equipmentId"), ("ShareId", "shareId"), ("WorkId", "workId"), ("ParticipantId", "participantId"), ("ReviewId", "reviewId"), ("MembershipId", "membershipId"), ("WorkerId", "workerId"), ("MediaId", "mediaId"), ("ValuationId", "valuationId"), ("EstimateId", "estimateId"), ("QuoteId", "quoteId"), ("ProtocolId", "protocolId"), ("DefectId", "defectId"), ("InviteId", "inviteId"), ("RentalId", "rentalId")]:
     params[n] = {"name": name, "in": "path", "required": True, "schema": {"type": "string", "format": "uuid"}}
 params["HomePublicId"] = {"name": "publicId", "in": "path", "required": True, "schema": {"type": "string", "minLength": 6, "maxLength": 16, "pattern": "^[a-z0-9]+$"}}
 params["ShareToken"] = {"name": "token", "in": "path", "required": True, "schema": {"type": "string", "minLength": 20, "maxLength": 64, "pattern": "^[A-Za-z0-9_-]+$"}}

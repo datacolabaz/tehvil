@@ -11,6 +11,7 @@ export type ProtocolMediaInputTarget = typeof ProtocolMediaInputTarget[keyof typ
 
 export const ProtocolMediaInputTarget = {
   room: 'room',
+  item: 'item',
   defect: 'defect',
   meter: 'meter',
   keys: 'keys',
