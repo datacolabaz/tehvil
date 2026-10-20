@@ -954,6 +954,7 @@ CREATE TABLE IF NOT EXISTS "handover_protocols" (
 	"property_type" varchar(12) DEFAULT 'apartment' NOT NULL,
 	"address" varchar(300) NOT NULL,
 	"handover_date" date,
+	"handover_time" varchar(5) DEFAULT '' NOT NULL,
 	"status" varchar(12) DEFAULT 'draft' NOT NULL,
 	"seller_name" varchar(160) DEFAULT '' NOT NULL,
 	"seller_phone" varchar(40) DEFAULT '' NOT NULL,
@@ -961,6 +962,7 @@ CREATE TABLE IF NOT EXISTS "handover_protocols" (
 	"buyer_phone" varchar(40) DEFAULT '' NOT NULL,
 	"realtor_name" varchar(160) DEFAULT '' NOT NULL,
 	"realtor_phone" varchar(40) DEFAULT '' NOT NULL,
+	"realtor_agency" varchar(160) DEFAULT '' NOT NULL,
 	"extras" jsonb NOT NULL,
 	"revision" integer DEFAULT 0 NOT NULL,
 	"current_version" integer DEFAULT 0 NOT NULL,
@@ -2649,6 +2651,8 @@ ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "address" varchar(300)
 --> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "handover_date" date;
 --> statement
+ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "handover_time" varchar(5) DEFAULT '' NOT NULL;
+--> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "status" varchar(12) DEFAULT 'draft' NOT NULL;
 --> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "seller_name" varchar(160) DEFAULT '' NOT NULL;
@@ -2662,6 +2666,8 @@ ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "buyer_phone" varchar(
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "realtor_name" varchar(160) DEFAULT '' NOT NULL;
 --> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "realtor_phone" varchar(40) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "realtor_agency" varchar(160) DEFAULT '' NOT NULL;
 --> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "extras" jsonb NOT NULL;
 --> statement

@@ -48,4 +48,14 @@ export interface ProtocolCreateInput {
      * @maxLength 40
      */
   realtorPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  realtorAgency?: string;
+  /**
+     * @minLength 0
+     * @maxLength 5
+     */
+  handoverTime?: string;
 }

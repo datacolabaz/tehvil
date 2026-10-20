@@ -169,3 +169,14 @@
 .pt-preview-all { margin: 10px 0 14px; }
 .pt-preview-all > summary { cursor: pointer; font-weight: 600; color: var(--accent, #1f6f5c); padding: 6px 0; }
 .pt-preview-all[open] > summary { margin-bottom: 8px; }
+.pt-stepper-line { list-style:none; display:flex; gap:4px; padding:0; margin:12px 0 4px; overflow-x:auto; scrollbar-width:none; }
+.pt-stepper-line li { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center; color:var(--muted,#7a756b); position:relative; }
+.pt-stepper-line li span { width:24px; height:24px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:700; background:var(--line,#e5e0d5); color:inherit; }
+.pt-stepper-line li small { font-size:10px; line-height:1.2; overflow-wrap:anywhere; hyphens:auto; }
+.pt-stepper-line li.done span { background:#d8eadf; color:#1f6f4c; }
+.pt-stepper-line li.now span { background:#1f6f5c; color:#fff; box-shadow:0 0 0 3px #d8eadf; }
+.pt-stepper-line li.now small { color:var(--ink,#1d1b17); font-weight:700; }
+.pt-meter.na h3 { opacity:.65; }
+.pt-na { margin:2px 0 8px; }
+.pt-time { max-width: 200px; }
+.rt-h2 { font-size:17px; margin:18px 0 8px; }

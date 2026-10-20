@@ -17,4 +17,6 @@ export interface ProtocolSummary {
   updatedAt: string;
   rooms: number;
   photos: number;
+  stage?: string;
+  decisions?: unknown;
 }

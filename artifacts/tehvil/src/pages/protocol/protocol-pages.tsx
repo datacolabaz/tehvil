@@ -13,8 +13,8 @@ import {
 } from '@workspace/api-client-react';
 import { Empty, Pill, Skeleton } from '@/components/home/ui';
 import {
-  CONDITION_LABEL, EVENT_LABEL, KIND_LABEL, METER_LABEL, PROPERTY_LABEL, ROLE_LABEL, ROLE_SHORT, ROOM_KINDS, STATUS_LABEL, STATUS_TONE, asDetail, dayAz, errorText, roomDone, timeAz, waLink,
-  type Condition, type Detail, type Extras, type Role,
+  CONDITION_LABEL, EVENT_LABEL, KIND_LABEL, METER_LABEL, PROPERTY_LABEL, ROLE_LABEL, ROLE_SHORT, ROOM_KINDS, STAGES, STAGE_LABEL, STAGE_TONE, STATUS_LABEL, STATUS_TONE, asDetail, dayAz, errorText, roomDone, timeAz, waLink,
+  type Condition, type Detail, type Extras, type Role, type Stage,
 } from '@/lib/protocol/model';
 import { PhotoCapture, PhotoGrid } from './photo-capture';
 import { RentalReview, RentalRoomView, baselineOf } from './rental-parts';
@@ -25,6 +25,12 @@ const key = (id: string) => [`/api/protocols/${id}`];
 const here = () => window.location.pathname + window.location.search;
 
 function Err({ text }: { text: string }) { return text ? <p className="ai-error pt-err" role="alert"><AlertTriangle size={14} />{text}</p> : null; }
+/** Six steps from the brief; the current one is highlighted, earlier ones ticked. */
+function Stepper({ stage }: { stage: Stage }) {
+  const at = STAGES.findIndex(([keys]) => keys.includes(stage));
+  return <ol className="pt-stepper-line" aria-label="Protokolun mərhələsi" data-testid="stage">{STAGES.map(([, label], i) => <li key={label} className={i < at ? 'done' : i === at ? 'now' : ''} aria-current={i === at ? 'step' : undefined}><span>{i < at ? '✓' : i + 1}</span><small>{label}</small></li>)}</ol>;
+}
+
 function StatusPill({ s }: { s: Detail['protocol']['status'] }) { return <Pill tone={STATUS_TONE[s]}>{STATUS_LABEL[s]}</Pill>; }
 
 /* ================================================================== new */
@@ -34,7 +40,7 @@ export function ProtocolNewPage() {
   type SaleRole = 'realtor' | 'seller' | 'buyer';
   const initialRole = (['realtor', 'seller', 'buyer'] as SaleRole[]).find((r) => r === params.get('rol')) ?? 'realtor';
   const [role, setRole] = useState<SaleRole>(initialRole);
-  const [f, setF] = useState({ propertyType: 'apartment', address: '', handoverDate: new Date(Date.now() + 4 * 3_600_000).toISOString().slice(0, 10), sellerName: '', sellerPhone: '', buyerName: '', buyerPhone: '', realtorName: '', realtorPhone: '' });
+  const [f, setF] = useState({ propertyType: 'apartment', address: '', handoverDate: new Date(Date.now() + 4 * 3_600_000).toISOString().slice(0, 10), handoverTime: '', sellerName: '', sellerPhone: '', buyerName: '', buyerPhone: '', realtorName: '', realtorPhone: '', realtorAgency: '' });
   const [err, setErr] = useState('');
   const create = useCreateProtocol(silent);
   const [, go] = useLocation();
@@ -43,7 +49,7 @@ export function ProtocolNewPage() {
   const submit = () => {
     setErr('');
     if (f.address.trim().length < 3) return setErr('Əmlakın ünvanını yazın.');
-    create.mutate({ data: { role, propertyType: f.propertyType as never, address: f.address, handoverDate: f.handoverDate || null, sellerName: f.sellerName, sellerPhone: f.sellerPhone, buyerName: f.buyerName, buyerPhone: f.buyerPhone, realtorName: f.realtorName, realtorPhone: f.realtorPhone } }, {
+    create.mutate({ data: { role, propertyType: f.propertyType as never, address: f.address, handoverDate: f.handoverDate || null, handoverTime: f.handoverTime, sellerName: f.sellerName, sellerPhone: f.sellerPhone, buyerName: f.buyerName, buyerPhone: f.buyerPhone, realtorName: f.realtorName, realtorPhone: f.realtorPhone, realtorAgency: f.realtorAgency } }, {
       onSuccess: (d) => { void qc.invalidateQueries({ queryKey: ['/api/protocols'] }); go(`/protokol/${asDetail(d).protocol.id}`); },
       onError: (e) => setErr(errorText(e)),
     });
@@ -52,13 +58,14 @@ export function ProtocolNewPage() {
     <legend>{label}{me && <small> · siz</small>}</legend>
     <label className="field"><span>Ad, soyad</span><input value={f[n]} onChange={set(n)} autoComplete={me ? 'name' : 'off'} data-testid={`new-${n}`} /></label>
     <label className="field"><span>Telefon</span><input value={f[p]} onChange={set(p)} inputMode="tel" placeholder="+994 50 000 00 00" autoComplete={me ? 'tel' : 'off'} data-testid={`new-${p}`} /></label>
+    {n === 'realtorName' && <label className="field"><span>Agentlik (PDF-də göstərilir)</span><input value={f.realtorAgency} onChange={set('realtorAgency')} autoComplete="organization" data-testid="new-realtorAgency" /></label>}
   </fieldset>;
   return <div className="pt-page">
     <h1 className="pt-title">Yeni təhvil protokolu</h1>
-    <p className="pt-lead">Yalnız ünvan məcburidir. Qalanını sonra da əlavə edə bilərsiniz.</p>
+    <p className="pt-lead">Yalnız ünvan məcburidir. Qalanını sonra da əlavə edə bilərsiniz. Pilot mərhələsində pulsuzdur — satıcı, alıcı və rieltor heç nə ödəmir.</p>
     <section className="pt-card">
       <h2>Bu təhvildə siz kimsiniz?</h2>
-      <div className="pt-roles" role="radiogroup">{(['realtor', 'seller', 'buyer'] as SaleRole[]).map((r) => <button key={r} type="button" role="radio" aria-checked={role === r} className={role === r ? 'on' : ''} onClick={() => setRole(r)} data-testid={`new-role-${r}`}>{ROLE_LABEL[r]}</button>)}</div>
+      <div className="pt-roles" role="radiogroup">{(['seller', 'buyer', 'realtor'] as SaleRole[]).map((r) => <button key={r} type="button" role="radio" aria-checked={role === r} className={role === r ? 'on' : ''} onClick={() => setRole(r)} data-testid={`new-role-${r}`}>{ROLE_LABEL[r]}</button>)}</div>
     </section>
     <section className="pt-card">
       <h2>Əmlak</h2>
@@ -67,10 +74,11 @@ export function ProtocolNewPage() {
         <label className="field"><span>Növü</span><select value={f.propertyType} onChange={set('propertyType')} data-testid="new-type"><option value="apartment">Mənzil</option><option value="house">Fərdi ev</option><option value="other">Digər</option></select></label>
         <label className="field"><span>Təhvil tarixi</span><input type="date" value={f.handoverDate} onChange={set('handoverDate')} data-testid="new-date" /></label>
       </div>
+      <label className="field pt-time"><span>Saat (məcburi deyil)</span><input type="time" value={f.handoverTime} onChange={set('handoverTime')} data-testid="new-time" /></label>
     </section>
     <section className="pt-card">
       <h2>Tərəflər</h2>
-      {party('Ev sahibi (satıcı)', 'sellerName', 'sellerPhone', role === 'seller')}
+      {party('Satıcı', 'sellerName', 'sellerPhone', role === 'seller')}
       {party('Alıcı', 'buyerName', 'buyerPhone', role === 'buyer')}
       {party('Rieltor (varsa)', 'realtorName', 'realtorPhone', role === 'realtor')}
     </section>
@@ -89,7 +97,7 @@ export function ProtocolListPage() {
       ? <Empty icon={<ClipboardCheck size={28} />} title="Hələ protokol yoxdur" text="Mənzilin təhvilini telefonla 5–10 dəqiqəyə sənədləşdirin: otaqlar, foto, sayğaclar, açarlar və iki tərəfin təsdiqi." />
       : <ul className="pt-list">{list.data!.map((p) => <li key={p.id}><Link href={`/protokol/${p.id}`} data-testid="list-item">
         <span><b>{p.address}</b><small>№ {p.number} · {ROLE_SHORT[p.myRole as Role] ?? p.myRole} · {dayAz(p.handoverDate ?? null)} · {p.rooms} otaq · {p.photos} foto</small></span>
-        <StatusPill s={p.status as never} /><ChevronRight size={16} /></Link></li>)}</ul>}
+        {p.stage ? <Pill tone={STAGE_TONE[p.stage as Stage]}>{STAGE_LABEL[p.stage as Stage]}</Pill> : <StatusPill s={p.status as never} />}<ChevronRight size={16} /></Link></li>)}</ul>}
   </div>;
 }
 
@@ -117,7 +125,8 @@ export function ProtocolPage({ id }: { id: string }) {
       {p.rentalId ? <Link href={`/kiraye/${p.rentalId}`} className="pt-back" data-testid="back-rental"><ArrowLeft size={15} />Kirayə qeydi</Link> : <Link href="/protokollar" className="pt-back"><ArrowLeft size={15} />Protokollar</Link>}
       {p.kind !== 'sale' && <div className={`pt-kind ${p.kind}`} data-testid="protocol-kind">{KIND_LABEL[p.kind]}</div>}
       <h1 className="pt-title">{p.address}</h1>
-      <div className="pt-meta"><span>№ {p.number}</span><span>{PROPERTY_LABEL[p.propertyType]}</span><span>{dayAz(p.handoverDate)}</span><StatusPill s={p.status} /></div>
+      <div className="pt-meta"><span>№ {p.number}</span><span>{PROPERTY_LABEL[p.propertyType]}</span><span>{dayAz(p.handoverDate)}{p.handoverTime ? `, ${p.handoverTime}` : ''}</span><StatusPill s={p.status} /></div>
+      {p.kind === 'sale' && p.stage && <Stepper stage={p.stage} />}
       {!d.me.canEdit && ['awaiting', 'approved', 'finalized'].includes(p.status) && <p className="pt-lock"><Check size={14} />Versiya {p.currentVersion} {p.status === 'awaiting' ? 'təsdiq gözləyir' : 'təsdiqlənib'} — məzmun dəyişdirilmir{d.me.isCreator ? '. Dəyişiklik lazımdırsa, “Təsdiq və PDF” bölməsində redaktəni yenidən açın — yeni versiya yaranacaq.' : '.'}</p>}
     </div>
     <nav className="pt-tabs" role="tablist">{TABS.map(([t, label, icon]) => <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? 'on' : ''} onClick={() => nav(t)} data-testid={`tab-${t}`}>{icon}<span>{label}</span>{t === 'rooms' && <small>{done}/{d.rooms.length}</small>}</button>)}</nav>
@@ -200,14 +209,15 @@ function ExtrasView({ d, put }: { d: Detail; put: (x: unknown) => void }) {
   const delPhoto = can ? (m: { id: string }) => delMedia.mutate({ protocolId: pid, mediaId: m.id }, { onSuccess: put }) : undefined;
   const base = baselineOf(d);
   return <section className="pt-section" data-testid="extras-view">
-    {(['water', 'gas', 'electric'] as const).map((k) => <div key={k} className="pt-card pt-meter">
+    {(['water', 'gas', 'electric'] as const).map((k) => <div key={k} className={`pt-card pt-meter ${x.meters[k].na ? 'na' : ''}`}>
       <h3>{METER_LABEL[k]}</h3>
-      <div className="pt-two">
+      <label className="rl-check pt-na"><input type="checkbox" checked={!!x.meters[k].na} disabled={!can} onChange={(e) => setX({ ...x, meters: { ...x.meters, [k]: { ...x.meters[k], na: e.target.checked, value: e.target.checked ? '' : x.meters[k].value } } })} data-testid={`meter-${k}-na`} /><span>Bu mənzildə yoxdur (tətbiq edilmir)</span></label>
+      {!x.meters[k].na && <><div className="pt-two">
         <label className="field"><span>Göstərici{base.b && <small className="pt-was" data-testid={`meter-${k}-before`}> · girişdə: {base.b.meters.find((m) => m.kind === k)?.value || '—'}</small>}</span><input inputMode="decimal" value={x.meters[k].value} disabled={!can} onChange={(e) => setX({ ...x, meters: { ...x.meters, [k]: { ...x.meters[k], value: e.target.value } } })} data-testid={`meter-${k}`} /></label>
         <label className="field"><span>Qeyd</span><input value={x.meters[k].note} disabled={!can} onChange={(e) => setX({ ...x, meters: { ...x.meters, [k]: { ...x.meters[k], note: e.target.value } } })} placeholder="Yeri, nömrəsi" /></label>
       </div>
       <PhotoGrid media={d.media.filter((m) => m.target === 'meter' && m.meterKind === k)} onDelete={delPhoto} />
-      {can && <PhotoCapture compact protocolId={pid} target={{ target: 'meter', meterKind: k }} onSaved={put} testId={`meter-${k}-capture`} />}
+      {can && <PhotoCapture compact protocolId={pid} target={{ target: 'meter', meterKind: k }} onSaved={put} testId={`meter-${k}-capture`} />}</>}
     </div>)}
     <div className="pt-card">
       <h3><KeyRound size={16} />Açarlar və giriş vasitələri</h3>
@@ -231,23 +241,24 @@ function ExtrasView({ d, put }: { d: Detail; put: (x: unknown) => void }) {
 
 function PartiesView({ d, put }: { d: Detail; put: (x: unknown) => void }) {
   const p = d.protocol; const pid = p.id;
-  const [f, setF] = useState({ address: p.address, propertyType: p.propertyType, handoverDate: p.handoverDate ?? '', sellerName: p.sellerName, sellerPhone: p.sellerPhone, buyerName: p.buyerName, buyerPhone: p.buyerPhone, realtorName: p.realtorName, realtorPhone: p.realtorPhone });
+  const [f, setF] = useState({ address: p.address, propertyType: p.propertyType, handoverDate: p.handoverDate ?? '', handoverTime: p.handoverTime ?? '', sellerName: p.sellerName, sellerPhone: p.sellerPhone, buyerName: p.buyerName, buyerPhone: p.buyerPhone, realtorName: p.realtorName, realtorPhone: p.realtorPhone, realtorAgency: p.realtorAgency ?? '' });
   const [err, setErr] = useState(''); const [links, setLinks] = useState<Record<string, string>>({});
   const upd = useUpdateProtocol(silent); const inv = useCreateProtocolInvite(silent); const rev = useRevokeProtocolInvite(silent);
   const qc = useQueryClient();
   const can = d.me.canEdit;
-  const dirty = JSON.stringify(f) !== JSON.stringify({ address: p.address, propertyType: p.propertyType, handoverDate: p.handoverDate ?? '', sellerName: p.sellerName, sellerPhone: p.sellerPhone, buyerName: p.buyerName, buyerPhone: p.buyerPhone, realtorName: p.realtorName, realtorPhone: p.realtorPhone });
+  const dirty = JSON.stringify(f) !== JSON.stringify({ address: p.address, propertyType: p.propertyType, handoverDate: p.handoverDate ?? '', handoverTime: p.handoverTime ?? '', sellerName: p.sellerName, sellerPhone: p.sellerPhone, buyerName: p.buyerName, buyerPhone: p.buyerPhone, realtorName: p.realtorName, realtorPhone: p.realtorPhone, realtorAgency: p.realtorAgency ?? '' });
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
   const phoneOf: Record<Role, string> = { seller: p.sellerPhone, buyer: p.buyerPhone, realtor: p.realtorPhone, landlord: p.landlordPhone, tenant: p.tenantPhone };
   const nameOf: Record<Role, string> = { seller: p.sellerName, buyer: p.buyerName, realtor: p.realtorName, landlord: p.landlordName, tenant: p.tenantName };
   const invite = (role: Role) => inv.mutate({ protocolId: pid, data: { role: role as 'seller' } }, { onSuccess: (l) => { setLinks({ ...links, [role]: l.url }); void qc.invalidateQueries({ queryKey: key(pid) }); }, onError: (e) => setErr(errorText(e)) });
-  const message = (role: Role, url: string) => `Salam${nameOf[role] ? `, ${nameOf[role]}` : ''}! ${p.address} ünvanındakı əmlakın təhvil-təslim protokolu Tehvil.az-da hazırlanır. Baxmaq və təsdiqləmək üçün: ${url}`;
+  const message = (role: Role, url: string) => `Salam${nameOf[role] ? `, ${nameOf[role]}` : ''}! ${p.address} ünvanındakı mənzilin açar təhvili protokolu Tehvil.az-da hazırlanır. Baxmaq və təsdiqləmək üçün (pulsuzdur): ${url}`;
   return <section className="pt-section" data-testid="parties-view">
     <div className="pt-card">
       <h3>Əmlak</h3>
       <label className="field"><span>Ünvan</span><input value={f.address} disabled={!can} onChange={set('address')} /></label>
       <div className="pt-two"><label className="field"><span>Növü</span><select value={f.propertyType} disabled={!can} onChange={set('propertyType')}><option value="apartment">Mənzil</option><option value="house">Fərdi ev</option><option value="other">Digər</option></select></label>
         <label className="field"><span>Təhvil tarixi</span><input type="date" value={f.handoverDate} disabled={!can} onChange={set('handoverDate')} /></label></div>
+      <label className="field pt-time"><span>Saat</span><input type="time" value={f.handoverTime} disabled={!can} onChange={set('handoverTime')} data-testid="party-time" /></label>
     </div>
     {(['seller', 'buyer', 'realtor'] as Role[]).map((role) => {
       const joined = d.participants.find((x) => x.role === role);
@@ -258,6 +269,8 @@ function PartiesView({ d, put }: { d: Detail; put: (x: unknown) => void }) {
         <h3>{ROLE_LABEL[role]}{joined ? <Pill small tone="ok">{joined.isMe ? 'siz' : 'qoşulub'}</Pill> : <Pill small tone="neutral">qoşulmayıb</Pill>}</h3>
         <div className="pt-two"><label className="field"><span>Ad, soyad</span><input value={f[n]} disabled={!can} onChange={set(n)} data-testid={`party-${role}-name`} /></label>
           <label className="field"><span>Telefon</span><input value={f[ph]} disabled={!can} inputMode="tel" onChange={set(ph)} /></label></div>
+        {role === 'realtor' && <label className="field"><span>Agentlik (PDF-də göstərilir)</span><input value={f.realtorAgency} disabled={!can} onChange={set('realtorAgency')} data-testid="party-realtor-agency" /></label>}
+        {role === 'realtor' && <p className="rl-hint">Rieltor protokolu hazırlaya və tərəfləri dəvət edə bilər; onun təsdiqi satıcının və ya alıcının təsdiqini əvəz etmir.</p>}
         {d.me.isCreator && !joined && <div className="pt-invite">
           {url ? <>
             <div className="pt-link" data-testid={`invite-url-${role}`}><Link2 size={14} /><span>{url}</span></div>
@@ -266,7 +279,7 @@ function PartiesView({ d, put }: { d: Detail; put: (x: unknown) => void }) {
               <button type="button" className="button button-secondary" onClick={() => void navigator.clipboard?.writeText(url)}><Copy size={15} />Kopyala</button>
             </div>
           </> : <button type="button" className="button button-secondary" onClick={() => invite(role)} disabled={inv.isPending} data-testid={`invite-${role}`}><Send size={15} />{live ? 'Yeni dəvət linki' : 'Dəvət linki yarat'}</button>}
-          {live && <p className="rl-hint">Aktiv link {timeAz(live.createdAt)} yaradılıb{live.lastOpenedAt ? ` · son açılış ${timeAz(live.lastOpenedAt)}` : ' · hələ açılmayıb'}. <button type="button" className="sm-link-btn" onClick={() => rev.mutate({ protocolId: pid, inviteId: live.id }, { onSuccess: () => { setLinks({ ...links, [role]: '' }); void qc.invalidateQueries({ queryKey: key(pid) }); } })} data-testid={`invite-revoke-${role}`}>Linki ləğv et</button></p>}
+          {live && <p className="rl-hint">{live.expired ? 'Linkin müddəti bitib — yeni link yaradın. ' : `Aktiv link ${timeAz(live.createdAt)} yaradılıb${live.expiresAt ? `, ${dayAz(live.expiresAt.slice(0, 10))} tarixinədək etibarlıdır` : ''}`}{live.lastOpenedAt ? ` · son açılış ${timeAz(live.lastOpenedAt)}` : ' · hələ açılmayıb'}. <button type="button" className="sm-link-btn" onClick={() => rev.mutate({ protocolId: pid, inviteId: live.id }, { onSuccess: () => { setLinks({ ...links, [role]: '' }); void qc.invalidateQueries({ queryKey: key(pid) }); } })} data-testid={`invite-revoke-${role}`}>Linki ləğv et</button></p>}
           <p className="rl-hint">Link yalnız protokola baxmağa imkan verir. Təsdiq üçün tərəf telefonundan daxil olur; yeni link köhnəsini ləğv edir.</p>
         </div>}
       </div>;
@@ -280,7 +293,7 @@ function PartiesView({ d, put }: { d: Detail; put: (x: unknown) => void }) {
 export function Review({ d }: { d: Detail }) {
   if (d.protocol.kind !== 'sale') return <RentalReview d={d} />;
   const x = d.protocol.extras;
-  const meters = (['water', 'gas', 'electric'] as const).filter((k) => x.meters[k].value || d.media.some((m) => m.meterKind === k));
+  const meters = (['water', 'gas', 'electric'] as const).filter((k) => x.meters[k].na || x.meters[k].value || d.media.some((m) => m.meterKind === k));
   const keys = x.keys.filter((k) => k.kind.trim() && k.count > 0);
   return <div className="pt-review" data-testid="review">
     {d.rooms.map((r) => { const defects = d.defects.filter((y) => y.roomId === r.id); return <div key={r.id} className="pt-rv-room">
@@ -289,7 +302,7 @@ export function Review({ d }: { d: Detail }) {
       {defects.length > 0 && <ul className="pt-rv-defects">{defects.map((y) => <li key={y.id}>{y.text}<PhotoGrid media={d.media.filter((m) => m.defectId === y.id)} /></li>)}</ul>}
       <PhotoGrid media={d.media.filter((m) => m.target === 'room' && m.roomId === r.id)} />
     </div>; })}
-    <div className="pt-rv-room"><div className="pt-rv-head"><b>Sayğaclar</b></div>{meters.length ? <ul>{meters.map((k) => <li key={k}>{METER_LABEL[k]}: <b>{x.meters[k].value || '—'}</b>{x.meters[k].note ? ` · ${x.meters[k].note}` : ''}<PhotoGrid media={d.media.filter((m) => m.meterKind === k)} /></li>)}</ul> : <p className="rl-hint">Daxil edilməyib</p>}</div>
+    <div className="pt-rv-room"><div className="pt-rv-head"><b>Sayğaclar</b></div>{meters.length ? <ul>{meters.map((k) => <li key={k}>{METER_LABEL[k]}: <b>{x.meters[k].na ? 'tətbiq edilmir' : x.meters[k].value || '—'}</b>{x.meters[k].note ? ` · ${x.meters[k].note}` : ''}<PhotoGrid media={d.media.filter((m) => m.meterKind === k)} /></li>)}</ul> : <p className="rl-hint">Daxil edilməyib</p>}</div>
     <div className="pt-rv-room"><div className="pt-rv-head"><b>Açarlar</b></div>{keys.length ? <ul>{keys.map((k, i) => <li key={i}>{k.kind}: <b>{k.count}</b></li>)}</ul> : <p className="rl-hint">Daxil edilməyib</p>}<PhotoGrid media={d.media.filter((m) => m.target === 'keys')} /></div>
     {x.notes && <div className="pt-rv-room"><div className="pt-rv-head"><b>Digər qeydlər</b></div><p>{x.notes}</p></div>}
   </div>;
@@ -309,6 +322,11 @@ function ApproveView({ d, put }: { d: Detail; put: (x: unknown) => void }) {
     { ok: d.rooms.length > 0 && done === d.rooms.length, text: rental ? `Bütün otaqlarda elementlərin vəziyyəti qeyd olunub (${done}/${d.rooms.length})` : `Otaqlar yoxlanılıb (${done}/${d.rooms.length})`, soft: true },
     { ok: rental ? !!p.landlordName.trim() && !!p.tenantName.trim() : !!p.sellerName.trim() && !!p.buyerName.trim(), text: rental ? 'Ev sahibinin və kirayəçinin adı yazılıb (kirayə səhifəsində)' : 'Satıcının və alıcının adı yazılıb', soft: false },
     { ok: deciders.every((r) => d.participants.some((x) => x.role === r)), text: rental ? 'Ev sahibi və kirayəçi qoşulub (təsdiq üçün lazımdır)' : 'Satıcı və alıcı protokola qoşulub (təsdiq üçün lazımdır)', soft: true },
+
+    ...(rental ? [] : [
+      { ok: (['water', 'gas', 'electric'] as const).every((k) => p.extras.meters[k].na || !!p.extras.meters[k].value.trim()), text: 'Sayğaclar: göstərici yazılıb və ya “tətbiq edilmir” seçilib', soft: true },
+      { ok: p.extras.keys.some((k) => k.kind.trim() && k.count > 0), text: 'Təhvil verilən açarların sayı qeyd olunub', soft: true },
+    ]),
   ];
   const latest = d.versions[0];
   const asked = ['draft', 'collecting'].includes(p.status) ? d.approvals.filter((x) => x.version === p.currentVersion && x.decision === 'changes') : [];
@@ -399,7 +417,7 @@ export function ProtocolInvitePage({ token }: { token: string }) {
     <div className="pt-brand"><img src="/favicon.svg" alt="" width={26} height={26} />Tehvil.az</div>
     <div className="pt-invite-banner"><ClipboardCheck size={20} /><div><b>Sizi {ROLE_SHORT[role]} kimi dəvət ediblər</b><span>{p.address} · № {p.number} · {dayAz(p.handoverDate)}</span></div></div>
     <div className="pt-meta"><StatusPill s={p.status} />{p.currentVersion > 0 && <span>Versiya {p.currentVersion}</span>}</div>
-    <div className="pt-card"><h3>Tərəflər</h3><ul className="pt-plain"><li>Ev sahibi (satıcı): <b>{p.sellerName || '—'}</b> {p.sellerPhone}</li><li>Alıcı: <b>{p.buyerName || '—'}</b> {p.buyerPhone}</li>{p.realtorName && <li>Rieltor: <b>{p.realtorName}</b> {p.realtorPhone}</li>}</ul></div>
+    <div className="pt-card"><h3>Tərəflər</h3><ul className="pt-plain"><li>Satıcı: <b>{p.sellerName || '—'}</b> {p.sellerPhone}</li><li>Alıcı: <b>{p.buyerName || '—'}</b> {p.buyerPhone}</li>{p.realtorName && <li>Rieltor: <b>{p.realtorName}</b>{p.realtorAgency ? ` · ${p.realtorAgency}` : ''} {p.realtorPhone}</li>}</ul></div>
     <Review d={d} />
     <Err text={err} />
     <div className="pt-bar">

@@ -236,6 +236,24 @@ router.get("/admin/rental-stats", async (req, res): Promise<void> => {
     returning: await n(sql`select count(*)::int n from (select user_id from protocol_events e join handover_protocols p on p.id = e.protocol_id where p.kind in ('move_in','move_out') and e.user_id is not null group by user_id having count(distinct date(e.created_at at time zone 'Asia/Baku')) >= 2 union select user_id from rental_participants group by user_id having count(*) >= 2) t`),
     multiRentalOwners: await n(sql`select count(*)::int n from (select user_id from rental_participants where role = 'landlord' group by user_id having count(*) >= 2) t`),
     weekly: (await db.execute(sql`select to_char(date_trunc('week', created_at at time zone 'Asia/Baku'), 'YYYY-MM-DD') wk, count(*)::int n from rentals where created_at > now() - interval '12 weeks' group by 1 order by 1`)).rows,
+    // Sale handover (main product): funnel per protocol, no personal data.
+    sale: {
+      protocols: await n(sql`select count(*)::int n from handover_protocols where kind = 'sale' and archived_at is null`),
+      protocols30d: await n(sql`select count(*)::int n from handover_protocols where kind = 'sale' and archived_at is null and created_at > now() - interval '30 days'`),
+      withPhotos: await n(sql`select count(distinct m.protocol_id)::int n from protocol_media m join handover_protocols p on p.id = m.protocol_id where p.kind = 'sale' and p.archived_at is null and m.deleted_at is null`),
+      invited: await n(sql`select count(distinct i.protocol_id)::int n from protocol_invites i join handover_protocols p on p.id = i.protocol_id where p.kind = 'sale' and p.archived_at is null`),
+      inviteOpened: await n(sql`select count(distinct i.protocol_id)::int n from protocol_invites i join handover_protocols p on p.id = i.protocol_id where p.kind = 'sale' and p.archived_at is null and i.last_opened_at is not null`),
+      inviteJoined: await n(sql`select count(distinct i.protocol_id)::int n from protocol_invites i join handover_protocols p on p.id = i.protocol_id where p.kind = 'sale' and p.archived_at is null and i.used_at is not null`),
+      sent: await n(sql`select count(distinct v.protocol_id)::int n from protocol_versions v join handover_protocols p on p.id = v.protocol_id where p.kind = 'sale' and p.archived_at is null`),
+      oneApproved: await n(sql`select count(*)::int n from (select a.protocol_id from protocol_approvals a join handover_protocols p on p.id = a.protocol_id and a.version = p.current_version where p.kind = 'sale' and p.archived_at is null and a.decision = 'approved' group by a.protocol_id having count(*) = 1) t`),
+      bothApproved: await n(sql`select count(*)::int n from handover_protocols where kind = 'sale' and status in ('approved','finalized') and archived_at is null`),
+      pdf: await n(sql`select count(distinct v.protocol_id)::int n from protocol_versions v join handover_protocols p on p.id = v.protocol_id where p.kind = 'sale' and v.pdf_object_path is not null`),
+      realtors: await n(sql`select count(distinct created_by_user_id)::int n from handover_protocols where kind = 'sale' and creator_role = 'realtor'`),
+      realtors2: await n(sql`select count(*)::int n from (select created_by_user_id from handover_protocols where kind = 'sale' and creator_role = 'realtor' group by 1 having count(*) >= 2) t`),
+      realtors3: await n(sql`select count(*)::int n from (select created_by_user_id from handover_protocols where kind = 'sale' and creator_role = 'realtor' group by 1 having count(*) >= 3) t`),
+      creatorsRepeat: await n(sql`select count(*)::int n from (select created_by_user_id from handover_protocols where kind = 'sale' group by 1 having count(*) >= 2) t`),
+      weekly: (await db.execute(sql`select to_char(date_trunc('week', created_at at time zone 'Asia/Baku'), 'YYYY-MM-DD') wk, count(*)::int n from handover_protocols where kind = 'sale' and created_at > now() - interval '12 weeks' group by 1 order by 1`)).rows,
+    },
     generatedAt: new Date().toISOString(),
   };
   res.json({ stats });
