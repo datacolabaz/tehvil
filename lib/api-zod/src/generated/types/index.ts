@@ -197,6 +197,7 @@ export * from './protocolRoomInput';
 export * from './protocolRoomInputCondition';
 export * from './protocolRoomInputKind';
 export * from './protocolSummary';
+export * from './protocolVerification';
 export * from './publicDocument';
 export * from './publicEquipment';
 export * from './publicHome';

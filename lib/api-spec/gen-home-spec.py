@@ -165,7 +165,7 @@ S["ProtocolCreateInput"] = {"role": "enum:realtor|seller|buyer", "propertyType":
 S["ProtocolPatch"] = {"propertyType~": "enum:apartment|house|other", "address~": "str(3,300)", "handoverDate~": "date?", "sellerName~": "str(0,160)", "sellerPhone~": "str(0,40)", "buyerName~": "str(0,160)", "buyerPhone~": "str(0,40)", "realtorName~": "str(0,160)", "realtorPhone~": "str(0,40)", "realtorAgency~": "str(0,160)", "handoverTime~": "str(0,5)", "extras~": "any"}
 S["ProtocolRoomInput"] = {"name~": "str(1,120)", "kind~": "enum:living|bed|kitchen|bath|hall|balcony|other", "condition~": "enum?:good|fair|defective", "note~": "str(0,4000)"}
 S["ProtocolDefectInput"] = {"roomId~": "uuid?", "text": "str(1,2000)"}
-S["ProtocolMediaInput"] = {"files": "[MediaInput(10)]", "roomId~": "uuid?", "defectId~": "uuid?", "itemId~": "uuid?", "target": "enum:room|item|defect|meter|keys|other", "meterKind~": "enum?:water|gas|electric", "caption~": "str(0,300)", "takenAt~": "dt?", "takenSource~": "enum?:camera|exif"}
+S["ProtocolMediaInput"] = {"files": "[MediaInput(10)]", "roomId~": "uuid?", "defectId~": "uuid?", "itemId~": "uuid?", "target": "enum:room|item|defect|meter|keys|other", "meterKind~": "enum?:water|gas|electric", "caption~": "str(0,300)", "takenAt~": "dt?", "takenSource~": "enum?:camera|exif", "clientMeta~": "any"}
 S["ProtocolItemInput"] = {"roomId~": "uuid?", "name~": "str(1,120)", "category~": "enum:wall|floor|ceiling|window|door|furniture|appliance|other", "quantity~": "int", "condition~": "enum?:good|fair|defective", "note~": "str(0,2000)", "change~": "enum?:unchanged|new_damage|changed|resolved|missing"}
 S["RentalCreateInput"] = {"role": "enum:landlord|tenant|realtor", "propertyType~": "enum:apartment|house|other", "address": "str(3,300)", "landlordName~": "str(0,160)", "landlordPhone~": "str(0,40)", "tenantName~": "str(0,160)", "tenantPhone~": "str(0,40)", "realtorName~": "str(0,160)", "realtorPhone~": "str(0,40)", "startDate~": "date?", "endDate~": "date?", "monthlyRent~": "int?", "deposit~": "int?", "currency~": "enum:AZN|USD|EUR"}
 S["RentalPatch"] = {"propertyType~": "enum:apartment|house|other", "address~": "str(3,300)", "landlordName~": "str(0,160)", "landlordPhone~": "str(0,40)", "tenantName~": "str(0,160)", "tenantPhone~": "str(0,40)", "realtorName~": "str(0,160)", "realtorPhone~": "str(0,40)", "startDate~": "date?", "endDate~": "date?", "monthlyRent~": "int?", "deposit~": "int?", "currency~": "enum:AZN|USD|EUR", "notes~": "str(0,4000)"}
@@ -174,6 +174,7 @@ S["RentalSummary"] = {"id": "str", "number": "str", "address": "str", "myRole": 
 S["RentalInviteInput"] = {"role": "enum:landlord|tenant|realtor", "canEdit~": "bool"}
 S["RentalInvitePreview"] = {"role": "str", "canEdit": "bool", "used": "bool", "usedByMe": "bool", "rentalId": "str", "detail": "any"}
 S["AdminRentalStats"] = {"stats": "any"}
+S["ProtocolVerification"] = {"result": "any"}
 S["ProtocolInviteInput"] = {"role": "enum:realtor|seller|buyer"}
 S["ProtocolInviteLink"] = {"id": "str", "role": "str", "url": "str"}
 S["ProtocolDecisionInput"] = {"version": "int", "contentHash": "str(64,64)", "decision": "enum:approved|changes", "comment~": "str(0,2000)"}
@@ -297,6 +298,7 @@ op("/rentals/{rentalId}", "delete", "archiveRental", "Archive (creator); approve
 op("/rentals/{rentalId}/invites", "post", "createRentalInvite", "Invitation link for the other party, with or without editing rights", ("RentalId",), "RentalInviteInput", ok("Link", "ProtocolInviteLink", "201"))
 op("/rentals/{rentalId}/invites/{inviteId}", "delete", "revokeRentalInvite", "Revoke an invitation link", ("RentalId", "InviteId"), resp=AR)
 op("/rentals/{rentalId}/move-out", "post", "createMoveOut", "Start the move-out protocol from the move-in one (rooms, items, photos for comparison)", ("RentalId",), resp=ok("Rental", "RentalDetail"))
+op("/verify/{token}", "get", "verifyProtocol", "Public integrity check behind the PDF QR code (no personal data)", ("InviteToken",), resp=ok("Verification", "ProtocolVerification"))
 op("/rental-invites/{token}", "get", "getRentalInvite", "What a rental invitation shows (no sign-in)", ("InviteToken",), resp=ok("Invitation", "RentalInvitePreview"))
 op("/rental-invites/{token}/accept", "post", "acceptRentalInvite", "Join the rental in the invited role (signed in)", ("InviteToken",), resp=ok("Rental", "RentalDetail"))
 op("/protocols/{protocolId}/items", "post", "addProtocolItem", "Add an item to a room (furniture, appliance…)", ("ProtocolId",), "ProtocolItemInput", ok("Saved", "ProtocolDetail", "201"))

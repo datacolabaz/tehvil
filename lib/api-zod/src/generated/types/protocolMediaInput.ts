@@ -31,4 +31,5 @@ export interface ProtocolMediaInput {
   takenAt?: string | null;
   /** @nullable */
   takenSource?: ProtocolMediaInputTakenSource;
+  clientMeta?: unknown;
 }

@@ -101,6 +101,7 @@ const RentalListPage = lazy(() => import('@/pages/rental/rental-pages').then(m =
 const RentalNewPage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalNewPage })));
 const RentalPage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalPage })));
 const RentalInvitePage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalInvitePage })));
+const VerifyPage = lazy(() => import('@/pages/protocol/verify-page').then(m => ({ default: m.VerifyPage })));
 const RentalStatsPage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalStatsPage })));
 
 /** Sections of one home in the digital home passport (Azerbaijani, like the brief). */
@@ -432,6 +433,7 @@ function ClerkRoutes() {
       <Route path="/kiraye/yeni">{() => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Yeni' }]} lang={lang} change={changeLang} t={t}><RentalNewPage/></ProtocolShell>}</Route>
       <Route path="/kiraye/:id">{params => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Kirayə' }]} lang={lang} change={changeLang} t={t}><RentalPage id={params.id}/></ProtocolShell>}</Route>
       <Route path="/k/:token">{params => <PublicSuspense t={t}><RentalInvitePage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/v/:code">{params => <PublicSuspense t={t}><VerifyPage code={params.code}/></PublicSuspense>}</Route>
       <Route path="/admin/statistika">{() => <ProtocolShell active="settingsNav" crumbs={[{ label: 'Statistika' }]} lang={lang} change={changeLang} t={t}><RentalStatsPage/></ProtocolShell>}</Route>
       <Route path="/protokollar">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları' }]} lang={lang} change={changeLang} t={t}><ProtocolListPage/></ProtocolShell>}</Route>
       <Route path="/protokol/yeni">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları', href: '/protokollar' }, { label: 'Yeni' }]} lang={lang} change={changeLang} t={t}><ProtocolNewPage/></ProtocolShell>}</Route>

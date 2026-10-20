@@ -14,5 +14,6 @@ Disallow: /protokollar
 Disallow: /k/
 Disallow: /kiraye
 Disallow: /admin/
+Disallow: /v/
 
 Sitemap: https://tehvil.az/sitemap.xml

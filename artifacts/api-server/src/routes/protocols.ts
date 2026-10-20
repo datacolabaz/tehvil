@@ -1,7 +1,7 @@
 import { createHash, randomInt } from "node:crypto";
 import { Readable } from "node:stream";
 import { clerkClient, getAuth } from "@clerk/express";
-import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { Router, type IRouter, type Request, type Response } from "express";
 import {
   AddProtocolDefectBody, AddProtocolItemBody, AddProtocolMediaBody, AddProtocolRoomBody, CreateProtocolBody, CreateProtocolInviteBody, DecideProtocolBody,
@@ -16,6 +16,7 @@ import { ObjectNotFoundError, ObjectStorageService } from "../lib/objectStorage"
 import { renderProtocolPdf, type ProtocolSnapshot } from "../lib/protocolPdf";
 import { rateLimit } from "../lib/rateLimit";
 import { hashToken, newToken, publicOrigin } from "../lib/realtorCore";
+import { buildManifest, canonicalHash, eventHash, finalRecord, sha256, trustServices, verifyChain, type ManifestPhoto } from "../lib/integrity";
 
 /** Invitation pages and photos opened through an invitation link work without sign-in. */
 export const protocolPublicRouter: IRouter = Router();
@@ -67,8 +68,18 @@ const uid = (req: Request) => getAuth(req).userId!;
 export const bad = (res: Response, error: string, status = 400) => { res.status(status).json({ error }); };
 export const isUuid = (s: unknown): s is string => typeof s === "string" && /^[0-9a-f-]{36}$/i.test(s);
 
+/** Audit event, chained per protocol (each hash covers the previous one); a per-protocol lock keeps the chain linear. */
 export async function event(protocolId: string, userId: string | null, action: string, detail: Record<string, unknown> = {}) {
-  await db.insert(protocolEventsTable).values({ protocolId, userId, action, detail });
+  const clean = JSON.parse(JSON.stringify(detail)) as Record<string, unknown>;
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${protocolId}))`);
+    const [last] = await tx.select({ hash: protocolEventsTable.hash, createdAt: protocolEventsTable.createdAt }).from(protocolEventsTable)
+      .where(and(eq(protocolEventsTable.protocolId, protocolId), ne(protocolEventsTable.hash, ""))).orderBy(desc(protocolEventsTable.createdAt)).limit(1);
+    let at = new Date(Math.floor(Date.now()));
+    if (last && at.getTime() <= last.createdAt.getTime()) at = new Date(last.createdAt.getTime() + 1);
+    const prevHash = last?.hash ?? "";
+    await tx.insert(protocolEventsTable).values({ protocolId, userId, action, detail: clean, createdAt: at, prevHash, hash: eventHash({ prevHash, protocolId, userId, action, detail: clean, at }) });
+  });
 }
 
 export interface Me { role: string; canEdit: boolean }
@@ -164,7 +175,8 @@ export const hashOf = (s: ProtocolSnapshot) => createHash("sha256").update(JSON.
 export const mediaDto = (m: typeof protocolMediaTable.$inferSelect, token?: string, tokenParam = "t") => ({
   id: m.id, roomId: m.roomId, itemId: m.itemId, defectId: m.defectId, target: m.target, meterKind: m.meterKind, caption: m.caption, contentType: m.contentType,
   url: `/api/protocol-media/${m.id}${token ? `?${tokenParam}=${encodeURIComponent(token)}` : ""}`,
-  createdAt: m.createdAt.toISOString(), takenAt: m.takenAt?.toISOString() ?? null, takenSource: m.takenSource,
+  createdAt: m.createdAt.toISOString(), takenAt: m.takenAt?.toISOString() ?? null, takenSource: m.takenSource, sha256: m.sha256 || null,
+  hasGps: !!(m.clientMeta as { gps?: unknown } | null)?.gps,
 });
 
 export async function detail(p: HandoverProtocolRow, viewer: { userId: string | null; isCreator: boolean; role: string | null; canEdit: boolean; token?: string; tokenParam?: string }, rental: RentalRow | null = null) {
@@ -211,8 +223,8 @@ export async function detail(p: HandoverProtocolRow, viewer: { userId: string | 
     baseline: baseline ? { ...baseline, media: baseMedia.map((m) => mediaDto(m, viewer.token, viewer.tokenParam)) } : null,
     participants: participants.map((x) => ({ role: x.role, joinedAt: x.joinedAt.toISOString(), isMe: x.userId === viewer.userId, isCreator: x.userId === creatorId })),
     invites: invites.map((i) => ({ id: i.id, role: i.role, createdAt: i.createdAt.toISOString(), expiresAt: new Date(i.createdAt.getTime() + inviteTtlDays() * 86400_000).toISOString(), expired: inviteExpired(i.createdAt), used: !!i.usedAt, lastOpenedAt: i.lastOpenedAt?.toISOString() ?? null })),
-    versions: versions.map((v) => ({ version: v.version, contentHash: v.contentHash, createdAt: v.createdAt.toISOString(), hasPdf: !!v.pdfObjectPath, pdfCreatedAt: v.pdfCreatedAt?.toISOString() ?? null })),
-    approvals: approvals.map((a) => ({ version: a.version, role: a.role, decision: a.decision, comment: a.comment, authLevel: a.authLevel, createdAt: a.createdAt.toISOString() })),
+    versions: versions.map((v) => ({ version: v.version, contentHash: v.contentHash, createdAt: v.createdAt.toISOString(), hasPdf: !!v.pdfObjectPath, pdfCreatedAt: v.pdfCreatedAt?.toISOString() ?? null, manifestHash: v.manifestHash || null, finalHash: v.finalHash || null, verifyCode: viewer.userId ? v.verifyCode : null })),
+    approvals: approvals.map((a) => ({ version: a.version, role: a.role, decision: a.decision, comment: a.comment, authLevel: a.authLevel, createdAt: a.createdAt.toISOString(), manifestHash: a.manifestHash || null })),
     events: events.map((e) => ({ action: e.action, role: roleOf(e.userId), detail: e.detail, createdAt: e.createdAt.toISOString() })),
     me: {
       role: viewer.role, isCreator: viewer.isCreator, canEdit: viewer.canEdit && EDITABLE.includes(p.status),
@@ -406,6 +418,9 @@ router.post("/protocols/:protocolId/media", async (req, res): Promise<void> => {
   }
   // The device's “taken at” is kept only if plausible (not in the future, not older than 20 years); it is never proof.
   const taken = d.takenAt ? new Date(d.takenAt) : null;
+  const cm = (d as { clientMeta?: { gps?: { lat?: unknown; lon?: unknown } } }).clientMeta;
+  const lat = Number(cm?.gps?.lat), lon = Number(cm?.gps?.lon);
+  const clientMeta = Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && (lat !== 0 || lon !== 0) ? { gps: { lat: Math.round(lat * 1e5) / 1e5, lon: Math.round(lon * 1e5) / 1e5 }, source: "exif" } : null;
   const takenAt = taken && !Number.isNaN(taken.getTime()) && taken.getTime() <= Date.now() + 5 * 60_000 && taken.getTime() > Date.now() - 20 * 365 * 86_400_000 ? taken : null;
   for (const f of d.files) {
     if (!f.objectPath.startsWith("/objects/uploads/") || !PHOTO_TYPES.includes(f.contentType) || f.size < 1 || f.size > MAX_PHOTO) return bad(res, "Yalnız 15 MB-a qədər JPG və ya PNG foto əlavə etmək olar");
@@ -414,6 +429,7 @@ router.post("/protocols/:protocolId/media", async (req, res): Promise<void> => {
   const already = await db.select({ objectPath: protocolMediaTable.objectPath }).from(protocolMediaTable).where(and(eq(protocolMediaTable.protocolId, a.p.id), inArray(protocolMediaTable.objectPath, d.files.map((f) => f.objectPath))));
   const fresh = d.files.filter((f) => !already.some((x) => x.objectPath === f.objectPath));
   if (!fresh.length) return void res.status(201).json(await reload(a));
+  const hashes = new Map<string, string>();
   try {
     for (const f of fresh) {
       const [up] = await db.select().from(evidenceUploadsTable).where(and(eq(evidenceUploadsTable.objectPath, f.objectPath), eq(evidenceUploadsTable.userId, a.userId), isNull(evidenceUploadsTable.attachedAt)));
@@ -421,6 +437,10 @@ router.post("/protocols/:protocolId/media", async (req, res): Promise<void> => {
       const file = await storage.getObjectEntityFile(f.objectPath);
       const [meta] = await file.getMetadata();
       if (Number(meta.size) !== f.size) return bad(res, "Foto tam yüklənməyib. Yenidən cəhd edin");
+      // The server's own fingerprint of exactly the bytes it stored.
+      const buf = await readObject(f.objectPath);
+      if (!buf || buf.length !== f.size) return bad(res, "Foto tam yüklənməyib. Yenidən cəhd edin");
+      hashes.set(f.objectPath, sha256(buf));
     }
   } catch (err) {
     if (err instanceof ObjectNotFoundError) return bad(res, "Foto tam yüklənməyib. Yenidən cəhd edin");
@@ -435,9 +455,11 @@ router.post("/protocols/:protocolId/media", async (req, res): Promise<void> => {
       protocolId: a.p.id, roomId: d.target === "room" ? d.roomId ?? null : null, defectId: d.target === "defect" ? d.defectId ?? null : null, itemId: d.target === "item" ? d.itemId ?? null : null, target: d.target,
       takenAt, takenSource: takenAt ? d.takenSource ?? null : null,
       meterKind: d.target === "meter" ? d.meterKind ?? null : null, objectPath: f.objectPath, contentType: f.contentType, size: f.size, originalName: f.originalName.slice(0, 255),
-      caption: d.caption ?? "", uploadedByUserId: a.userId,
+      caption: d.caption ?? "", uploadedByUserId: a.userId, sha256: hashes.get(f.objectPath) ?? "", clientMeta,
     })));
   });
+  const added = await db.select({ id: protocolMediaTable.id, sha256: protocolMediaTable.sha256, target: protocolMediaTable.target }).from(protocolMediaTable).where(and(eq(protocolMediaTable.protocolId, a.p.id), inArray(protocolMediaTable.objectPath, fresh.map((f) => f.objectPath))));
+  for (const m of added) await event(a.p.id, a.userId, "photo_added", { mediaId: m.id, sha256: m.sha256, target: m.target });
   await touch(a.p);
   res.status(201).json(await reload(a));
 });
@@ -445,8 +467,9 @@ router.post("/protocols/:protocolId/media", async (req, res): Promise<void> => {
 router.delete("/protocols/:protocolId/media/:mediaId", async (req, res): Promise<void> => {
   const a = await load(req, res); if (!a || !mustEdit(a, res)) return;
   if (!isUuid(req.params.mediaId)) return bad(res, "Foto tapılmadı", 404);
-  const del = await db.update(protocolMediaTable).set({ deletedAt: new Date() }).where(and(eq(protocolMediaTable.id, req.params.mediaId), eq(protocolMediaTable.protocolId, a.p.id), isNull(protocolMediaTable.deletedAt))).returning();
-  if (del.length) await touch(a.p);
+  const del = await db.update(protocolMediaTable).set({ deletedAt: new Date(), deletedByUserId: a.userId }).where(and(eq(protocolMediaTable.id, req.params.mediaId), eq(protocolMediaTable.protocolId, a.p.id), isNull(protocolMediaTable.deletedAt))).returning();
+  // The file and its hash stay; only the protocol stops showing it.
+  if (del.length) { await event(a.p.id, a.userId, "photo_removed", { mediaId: del[0].id, sha256: del[0].sha256 }); await touch(a.p); }
   res.json(await reload(a));
 });
 
@@ -568,11 +591,16 @@ router.post("/protocols/:protocolId/submit", async (req, res): Promise<void> => 
   else if (!a.p.sellerName.trim() || !a.p.buyerName.trim()) return bad(res, "Satıcının və alıcının adını yazın");
   const version = (last?.version ?? 0) + 1;
   const contentHash = hashOf(snap);
+  const photos = await photoHashes(snap);
+  if (!photos) return bad(res, "Bəzi fotolar yaddaşda tapılmadı. Səhifəni yeniləyib yenidən cəhd edin", 409);
+  const frozenAt = new Date();
+  const { manifest, hash: manifestHash } = buildManifest({ protocolId: a.p.id, number: a.p.number, kind: a.p.kind, version, frozenAt: frozenAt.toISOString(), contentHash, content: snap as unknown as Record<string, unknown>, photos });
+  const verifyCode = newToken().slice(0, 22);
   const moved = await db.update(handoverProtocolsTable).set({ status: "awaiting", currentVersion: version, updatedAt: new Date() })
     .where(and(eq(handoverProtocolsTable.id, a.p.id), eq(handoverProtocolsTable.revision, a.p.revision), inArray(handoverProtocolsTable.status, EDITABLE))).returning();
   if (!moved.length) return bad(res, "Protokol bu anda dəyişdi. Səhifəni yeniləyib təkrar göndərin", 409);
-  await db.insert(protocolVersionsTable).values({ protocolId: a.p.id, version, revision: a.p.revision, snapshot: snap as unknown as Record<string, unknown>, contentHash, createdByUserId: a.userId });
-  await event(a.p.id, a.userId, "submitted", { version, contentHash });
+  await db.insert(protocolVersionsTable).values({ protocolId: a.p.id, version, revision: a.p.revision, snapshot: snap as unknown as Record<string, unknown>, contentHash, createdByUserId: a.userId, createdAt: frozenAt, manifest: manifest as unknown as Record<string, unknown>, manifestHash, verifyCode });
+  await event(a.p.id, a.userId, "submitted", { version, contentHash, manifestHash });
   res.json(await dto({ ...a, p: moved[0] }));
 });
 
@@ -615,10 +643,10 @@ router.post("/protocols/:protocolId/decisions", async (req, res): Promise<void> 
   if (process.env.PROTOCOL_REQUIRE_PHONE === "on" && who.level !== "phone") return bad(res, "Təsdiq üçün hesabınızda telefon nömrəsini təsdiqləyin", 403);
   const inserted = await db.insert(protocolApprovalsTable).values({
     protocolId: a.p.id, version: v.version, contentHash: v.contentHash, role: a.me.role, userId: a.userId, decision: b.data.decision, comment: (b.data.comment ?? "").trim(),
-    authLevel: who.level, authDetail: who.detail, ip: (req.ip ?? "").slice(0, 64), userAgent: (req.get("user-agent") ?? "").slice(0, 300),
+    authLevel: who.level, authDetail: who.detail, ip: (req.ip ?? "").slice(0, 64), userAgent: (req.get("user-agent") ?? "").slice(0, 300), manifestHash: v.manifestHash,
   }).onConflictDoNothing().returning();
   if (!inserted.length) return void res.json(await dto(a));
-  await event(a.p.id, a.userId, b.data.decision === "approved" ? "approved" : "changes_requested", { version: v.version, comment: (b.data.comment ?? "").slice(0, 300) });
+  await event(a.p.id, a.userId, b.data.decision === "approved" ? "approved" : "changes_requested", { version: v.version, role: a.me.role, method: who.level, manifestHash: v.manifestHash, comment: (b.data.comment ?? "").slice(0, 300) });
   let status = a.p.status;
   if (b.data.decision === "changes") status = "collecting";
   else {
@@ -639,6 +667,31 @@ async function versionFor(a: Access, raw: unknown) {
   return v ?? null;
 }
 
+/** Every photo a snapshot points to (incl. a move-out's move-in photos) with its server SHA-256; older photos are hashed now. Missing file → null. */
+async function photoHashes(snap: ProtocolSnapshot): Promise<ManifestPhoto[] | null> {
+  const ids = new Set<string>();
+  const walk = (s: ProtocolSnapshot | null | undefined) => {
+    if (!s) return;
+    for (const r of s.rooms) { r.photos.forEach((i) => ids.add(i)); (r.items ?? []).forEach((it) => it.photos.forEach((i) => ids.add(i))); r.defects.forEach((d) => d.photos.forEach((i) => ids.add(i))); }
+    s.meters.forEach((m) => m.photos.forEach((i) => ids.add(i))); s.keyPhotos.forEach((i) => ids.add(i)); (s.otherPhotos ?? []).forEach((i) => ids.add(i));
+    walk(s.baseline ?? null);
+  };
+  walk(snap);
+  if (!ids.size) return [];
+  const rows = await db.select().from(protocolMediaTable).where(inArray(protocolMediaTable.id, [...ids]));
+  const out: ManifestPhoto[] = [];
+  for (const m of rows) {
+    let h = m.sha256;
+    if (!h) {
+      const buf = await readObject(m.objectPath); if (!buf) return null;
+      h = sha256(buf);
+      await db.update(protocolMediaTable).set({ sha256: h }).where(and(eq(protocolMediaTable.id, m.id), eq(protocolMediaTable.sha256, "")));
+    }
+    out.push({ id: m.id, sha256: h, size: m.size, contentType: m.contentType, target: m.target, receivedAt: m.createdAt.toISOString() });
+  }
+  return rows.length === ids.size ? out : null;
+}
+
 async function readObject(objectPath: string): Promise<Buffer | null> {
   try {
     const file = await storage.getObjectEntityFile(objectPath);
@@ -656,10 +709,12 @@ router.post("/protocols/:protocolId/versions/:version/pdf", async (req, res): Pr
   const snap = v.snapshot as unknown as ProtocolSnapshot;
   const media = await db.select().from(protocolMediaTable).where(inArray(protocolMediaTable.protocolId, [a.p.id, ...(a.p.baseProtocolId ? [a.p.baseProtocolId] : [])]));
   const byId = new Map(media.map((m) => [m.id, m]));
+  const fin = v.manifestHash && final ? finalRecord(v.manifestHash, approvals.map((x) => ({ role: x.role, decision: x.decision, at: x.createdAt, method: x.authLevel, manifestHash: x.manifestHash }))) : null;
+  const verify = v.manifestHash && v.verifyCode ? { url: `${publicOrigin(req)}/v/${v.verifyCode}`, manifestHash: v.manifestHash, finalHash: fin?.hash ?? "", photos: ((v.manifest as { photos?: unknown[] } | null)?.photos ?? []).length } : null;
   let pdf: Buffer;
   try {
     pdf = await renderProtocolPdf({
-      snapshot: snap, version: v.version, contentHash: v.contentHash, createdAt: v.createdAt, protocolCreatedAt: a.p.createdAt, final,
+      snapshot: snap, version: v.version, contentHash: v.contentHash, createdAt: v.createdAt, protocolCreatedAt: a.p.createdAt, final, verify,
       approvals: approvals.map((x) => ({ role: x.role, decision: x.decision, at: x.createdAt, authLevel: x.authLevel, authDetail: x.authDetail, comment: x.comment })),
       captions: new Map(media.filter((m) => m.caption).map((m) => [m.id, m.caption])),
       times: new Map(media.map((m) => [m.id, { uploaded: m.createdAt, taken: m.takenAt }])),
@@ -670,10 +725,11 @@ router.post("/protocols/:protocolId/versions/:version/pdf", async (req, res): Pr
   const objectPath = storage.normalizeObjectEntityPath(uploadURL);
   const put = await fetch(uploadURL, { method: "PUT", body: new Uint8Array(pdf), headers: { "Content-Type": "application/pdf" } });
   if (!put.ok) { req.log.error({ status: put.status }, "protocol pdf upload failed"); return bad(res, "PDF saxlanılmadı. Yenidən cəhd edin", 502); }
-  await db.update(protocolVersionsTable).set({ pdfObjectPath: objectPath, pdfCreatedAt: new Date() }).where(eq(protocolVersionsTable.id, v.id));
+  const pdfSha256 = sha256(pdf);
+  await db.update(protocolVersionsTable).set({ pdfObjectPath: objectPath, pdfCreatedAt: new Date(), pdfSha256, ...(fin ? { finalHash: fin.hash } : {}) }).where(eq(protocolVersionsTable.id, v.id));
   let p = a.p;
   if (final && v.version === a.p.currentVersion && a.p.status === "approved") [p] = await db.update(handoverProtocolsTable).set({ status: "finalized", updatedAt: new Date() }).where(eq(handoverProtocolsTable.id, a.p.id)).returning();
-  await event(a.p.id, a.userId, "pdf_created", { version: v.version, final });
+  await event(a.p.id, a.userId, "pdf_created", { version: v.version, final, pdfSha256, finalHash: fin?.hash ?? "" });
   res.json(await dto({ ...a, p }));
 });
 
@@ -748,3 +804,59 @@ router.delete("/protocols/:protocolId/items/:itemId", async (req, res): Promise<
 });
 
 export default router;
+
+/* ------------------------------------------------------------------ public verification (QR in the PDF) */
+
+const verifyLimit = rateLimit({ windowMs: 60_000, max: 20, key: (req) => `pv:${req.ip}` });
+
+/**
+ * Recomputes what can be recomputed and compares it with what was stored: the manifest hash, every photo's
+ * SHA-256 against the stored file, the PDF file, the approvals record and the audit chain. Shows no names,
+ * phones, address or photos. A match means "unchanged since frozen in Tehvil.az", nothing more.
+ */
+protocolPublicRouter.get("/verify/:token", verifyLimit, async (req, res): Promise<void> => {
+  res.setHeader("Cache-Control", "private, no-store");
+  res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  const code = String(req.params.token);
+  if (!/^[A-Za-z0-9_-]{16,40}$/.test(code)) return bad(res, "Yoxlama kodu tapılmadı", 404);
+  const [v] = await db.select().from(protocolVersionsTable).where(eq(protocolVersionsTable.verifyCode, code));
+  if (!v) return bad(res, "Yoxlama kodu tapılmadı", 404);
+  const [p] = await db.select().from(handoverProtocolsTable).where(eq(handoverProtocolsTable.id, v.protocolId));
+  if (!p) return bad(res, "Yoxlama kodu tapılmadı", 404);
+  const manifest = v.manifest as { contentHash?: string; photos?: ManifestPhoto[] } | null;
+  const manifestOk = !!manifest && canonicalHash(manifest) === v.manifestHash && manifest.contentHash === v.contentHash;
+  // Photos: the stored file is hashed again and compared with the manifest.
+  const mp = manifest?.photos ?? [];
+  const rows = mp.length ? await db.select().from(protocolMediaTable).where(inArray(protocolMediaTable.id, mp.map((x) => x.id))) : [];
+  let okN = 0, changed = 0, missing = 0;
+  for (const ph of mp) {
+    const m = rows.find((r) => r.id === ph.id);
+    const buf = m ? await readObject(m.objectPath) : null;
+    if (!buf) missing++; else if (sha256(buf) === ph.sha256) okN++; else changed++;
+  }
+  const approvals = await db.select().from(protocolApprovalsTable).where(and(eq(protocolApprovalsTable.protocolId, p.id), eq(protocolApprovalsTable.version, v.version))).orderBy(asc(protocolApprovalsTable.createdAt));
+  const deciders = decidersFor(p.kind);
+  const allApproved = deciders.every((r) => approvals.some((x) => x.role === r && x.decision === "approved"));
+  const fin = v.finalHash ? finalRecord(v.manifestHash, approvals.map((x) => ({ role: x.role, decision: x.decision, at: x.createdAt, method: x.authLevel, manifestHash: x.manifestHash }))) : null;
+  let pdf: { exists: boolean; ok: boolean | null } = { exists: !!v.pdfObjectPath, ok: null };
+  if (v.pdfObjectPath && v.pdfSha256) { const b = await readObject(v.pdfObjectPath); pdf = { exists: !!b, ok: b ? sha256(b) === v.pdfSha256 : false }; }
+  const versions = await db.select({ version: protocolVersionsTable.version, createdAt: protocolVersionsTable.createdAt, manifestHash: protocolVersionsTable.manifestHash }).from(protocolVersionsTable).where(eq(protocolVersionsTable.protocolId, p.id)).orderBy(asc(protocolVersionsTable.version));
+  const allApprovals = await db.select({ version: protocolApprovalsTable.version, role: protocolApprovalsTable.role, decision: protocolApprovalsTable.decision }).from(protocolApprovalsTable).where(eq(protocolApprovalsTable.protocolId, p.id));
+  const events = await db.select().from(protocolEventsTable).where(eq(protocolEventsTable.protocolId, p.id)).orderBy(asc(protocolEventsTable.createdAt));
+  const chain = verifyChain(p.id, events);
+  const result = {
+    protocol: { number: p.number, kind: p.kind, status: p.status, currentVersion: p.currentVersion },
+    version: {
+      version: v.version, frozenAt: v.createdAt.toISOString(), current: v.version === p.currentVersion,
+      manifestHash: v.manifestHash, manifestOk, finalHash: v.finalHash || null, finalOk: fin ? fin.hash === v.finalHash : null, pdf,
+    },
+    photos: { total: mp.length, ok: okN, changed, missing },
+    approvals: deciders.map((role) => { const a = approvals.find((x) => x.role === role); return { role, decision: a?.decision ?? null, at: a?.createdAt.toISOString() ?? null, method: a?.authLevel ?? null, sameManifest: a ? a.manifestHash === v.manifestHash : null }; }),
+    allApproved,
+    history: versions.map((x) => ({ version: x.version, frozenAt: x.createdAt.toISOString(), hasManifest: !!x.manifestHash, approvedBy: allApprovals.filter((y) => y.version === x.version && y.decision === "approved").map((y) => y.role) })),
+    audit: { events: events.length, checked: chain.checked, legacy: chain.legacy, ok: chain.ok, lastAt: events.at(-1)?.createdAt.toISOString() ?? null },
+    trust: trustServices(),
+    checkedAt: new Date().toISOString(),
+  };
+  res.json({ result });
+});

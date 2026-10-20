@@ -225,6 +225,9 @@ importers:
       pino-http:
         specifier: ^10.5.0
         version: 10.5.0
+      qrcode:
+        specifier: 1.5.4
+        version: 1.5.4
     devDependencies:
       '@types/cookie-parser':
         specifier: ^1.4.10
@@ -241,6 +244,9 @@ importers:
       '@types/pdfkit':
         specifier: ^0.17.6
         version: 0.17.6
+      '@types/qrcode':
+        specifier: 1.5.5
+        version: 1.5.5
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
