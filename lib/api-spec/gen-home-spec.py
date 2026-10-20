@@ -161,6 +161,17 @@ S["PriceImportResult"] = {"added": "int", "errors": "[str]"}
 S["RepairEstimateInput"] = {"name": "str(1,200)", "data": "any"}
 S["RepairEstimate"] = {"id": "str", "name": "str", "data": "any", "createdAt": "dt", "updatedAt": "dt"}
 S["RepairEstimateSummary"] = {"id": "str", "name": "str", "updatedAt": "dt", "totalLow": "num?", "total": "num?", "totalHigh": "num?", "area": "num?"}
+S["ProtocolCreateInput"] = {"role": "enum:realtor|seller|buyer", "propertyType": "enum:apartment|house|other", "address": "str(3,300)", "handoverDate~": "date?", "sellerName~": "str(0,160)", "sellerPhone~": "str(0,40)", "buyerName~": "str(0,160)", "buyerPhone~": "str(0,40)", "realtorName~": "str(0,160)", "realtorPhone~": "str(0,40)"}
+S["ProtocolPatch"] = {"propertyType~": "enum:apartment|house|other", "address~": "str(3,300)", "handoverDate~": "date?", "sellerName~": "str(0,160)", "sellerPhone~": "str(0,40)", "buyerName~": "str(0,160)", "buyerPhone~": "str(0,40)", "realtorName~": "str(0,160)", "realtorPhone~": "str(0,40)", "extras~": "any"}
+S["ProtocolRoomInput"] = {"name~": "str(1,120)", "kind~": "enum:living|bed|kitchen|bath|hall|balcony|other", "condition~": "enum?:good|fair|defective", "note~": "str(0,4000)"}
+S["ProtocolDefectInput"] = {"roomId~": "uuid?", "text": "str(1,2000)"}
+S["ProtocolMediaInput"] = {"files": "[MediaInput(10)]", "roomId~": "uuid?", "defectId~": "uuid?", "target": "enum:room|defect|meter|keys|other", "meterKind~": "enum?:water|gas|electric", "caption~": "str(0,300)"}
+S["ProtocolInviteInput"] = {"role": "enum:realtor|seller|buyer"}
+S["ProtocolInviteLink"] = {"id": "str", "role": "str", "url": "str"}
+S["ProtocolDecisionInput"] = {"version": "int", "contentHash": "str(64,64)", "decision": "enum:approved|changes", "comment~": "str(0,2000)"}
+S["ProtocolDetail"] = {"protocol": "any", "rooms": "any", "defects": "any", "media": "any", "participants": "any", "invites": "any", "versions": "any", "approvals": "any", "events": "any", "me": "any"}
+S["ProtocolSummary"] = {"id": "str", "number": "str", "address": "str", "status": "str", "myRole": "str", "handoverDate": "str?", "updatedAt": "dt", "rooms": "int", "photos": "int"}
+S["ProtocolInvitePreview"] = {"role": "str", "used": "bool", "usedByMe": "bool", "protocolId": "str", "detail": "any"}
 S["HomeWorkItem"] = {"work": "WorkSummary", "homeName": "str", "myRole": "str"}
 S["MeRoles"] = {"staff": "bool", "hasHomes": "bool", "managesHomes": "bool", "isPerformer": "bool", "hasProjects": "bool"}
 
@@ -248,6 +259,28 @@ op("/repair-estimates", "post", "createRepairEstimate", "Save a repair estimate"
 op("/repair-estimates/{estimateId}", "get", "getRepairEstimate", "One repair estimate (owner only)", ("EstimateId",), resp=ok("Estimate", "RepairEstimate"))
 op("/repair-estimates/{estimateId}", "put", "updateRepairEstimate", "Save changes", ("EstimateId",), "RepairEstimateInput", ok("Saved", "RepairEstimate"))
 op("/repair-estimates/{estimateId}", "delete", "deleteRepairEstimate", "Delete (owner only)", ("EstimateId",), resp=AR)
+op("/protocols", "get", "listProtocols", "Handover protocols I take part in", resp=ok("Protocols", "ProtocolSummary", array=True))
+op("/protocols", "post", "createProtocol", "Create a handover protocol (the creator manages it)", req="ProtocolCreateInput", resp=ok("Created", "ProtocolDetail", "201"))
+op("/protocols/{protocolId}", "get", "getProtocol", "Protocol with rooms, photos, parties, versions and approvals (participants)", ("ProtocolId",), resp=ok("Protocol", "ProtocolDetail"))
+op("/protocols/{protocolId}", "patch", "updateProtocol", "Edit details, meters, keys, notes (only while collecting)", ("ProtocolId",), "ProtocolPatch", ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}", "delete", "archiveProtocol", "Archive (creator; not after approval)", ("ProtocolId",), resp=AR)
+op("/protocols/{protocolId}/rooms", "post", "addProtocolRoom", "Add a room", ("ProtocolId",), "ProtocolRoomInput", ok("Saved", "ProtocolDetail", "201"))
+op("/protocols/{protocolId}/rooms/{roomId}", "patch", "updateProtocolRoom", "Edit a room: condition, note, name", ("ProtocolId", "RoomId"), "ProtocolRoomInput", ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/rooms/{roomId}", "delete", "deleteProtocolRoom", "Remove a room", ("ProtocolId", "RoomId"), resp=ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/defects", "post", "addProtocolDefect", "Record a defect", ("ProtocolId",), "ProtocolDefectInput", ok("Saved", "ProtocolDetail", "201"))
+op("/protocols/{protocolId}/defects/{defectId}", "delete", "deleteProtocolDefect", "Remove a defect", ("ProtocolId", "DefectId"), resp=ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/media", "post", "addProtocolMedia", "Attach uploaded photos to a room, defect, meter or keys", ("ProtocolId",), "ProtocolMediaInput", ok("Saved", "ProtocolDetail", "201"))
+op("/protocols/{protocolId}/media/{mediaId}", "delete", "deleteProtocolMedia", "Remove a photo", ("ProtocolId", "MediaId"), resp=ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/invites", "post", "createProtocolInvite", "Invitation link for a party (creator); replaces the previous link for that role", ("ProtocolId",), "ProtocolInviteInput", ok("Link", "ProtocolInviteLink", "201"))
+op("/protocols/{protocolId}/invites/{inviteId}", "delete", "revokeProtocolInvite", "Revoke an invitation link (creator)", ("ProtocolId", "InviteId"), resp=AR)
+op("/protocols/{protocolId}/submit", "post", "submitProtocol", "Freeze the content as a new version and ask the parties to approve (creator)", ("ProtocolId",), resp=ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/reopen", "post", "reopenProtocol", "Allow edits again; the next submission becomes a new version (creator)", ("ProtocolId",), resp=ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/decisions", "post", "decideProtocol", "Seller or buyer approves the version or asks for changes", ("ProtocolId",), "ProtocolDecisionInput", ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/versions/{version}/pdf", "post", "createProtocolPdf", "Generate the PDF of a version", ("ProtocolId", "VersionNo"), resp=ok("Saved", "ProtocolDetail"))
+op("/protocols/{protocolId}/versions/{version}/pdf", "get", "getProtocolPdf", "Download the PDF of a version (participants)", ("ProtocolId", "VersionNo"), resp={"200": {"description": "PDF", "content": {"application/pdf": {"schema": {"type": "string", "format": "binary"}}}}})
+op("/protocol-media/{mediaId}", "get", "getProtocolMedia", "Photo of a protocol (participants or a valid invitation link)", ("MediaId",), resp={"200": {"description": "File", "content": {"*/*": {"schema": {"type": "string", "format": "binary"}}}}})
+op("/protocol-invites/{token}", "get", "getProtocolInvite", "What an invitation link shows (no sign-in)", ("InviteToken",), resp=ok("Invitation", "ProtocolInvitePreview"))
+op("/protocol-invites/{token}/accept", "post", "acceptProtocolInvite", "Join the protocol in the invited role (signed in)", ("InviteToken",), resp=ok("Protocol", "ProtocolDetail"))
 op("/me/roles", "get", "getMyRoles", "What the signed-in account is (for a menu that shows only relevant sections)", resp=ok("Roles", "MeRoles"))
 op("/me/works", "get", "listMyWorks", "Works I take part in through any of my profiles", resp=ok("Works", "MyWork", array=True))
 op("/me/workers", "get", "getMyWorkers", "My individual profile, teams/companies I manage and my memberships", resp=ok("Profiles", "MyWorkers"))
@@ -274,11 +307,12 @@ op("/staff/reviews/{reviewId}/hide", "post", "hideReview", "Tehvil.az staff hide
 op("/admin/workers/{workerId}/identity", "post", "setWorkerIdentity", "Administrator records a separate identity/business check", ("WorkerId",), "IdentityInput", ok("Saved", "Worker"))
 
 params = {}
-for n, name in [("HomeId", "homeId"), ("RoomId", "roomId"), ("MemberId", "memberId"), ("ItemId", "itemId"), ("EquipmentId", "equipmentId"), ("ShareId", "shareId"), ("WorkId", "workId"), ("ParticipantId", "participantId"), ("ReviewId", "reviewId"), ("MembershipId", "membershipId"), ("WorkerId", "workerId"), ("MediaId", "mediaId"), ("ValuationId", "valuationId"), ("EstimateId", "estimateId"), ("QuoteId", "quoteId")]:
+for n, name in [("HomeId", "homeId"), ("RoomId", "roomId"), ("MemberId", "memberId"), ("ItemId", "itemId"), ("EquipmentId", "equipmentId"), ("ShareId", "shareId"), ("WorkId", "workId"), ("ParticipantId", "participantId"), ("ReviewId", "reviewId"), ("MembershipId", "membershipId"), ("WorkerId", "workerId"), ("MediaId", "mediaId"), ("ValuationId", "valuationId"), ("EstimateId", "estimateId"), ("QuoteId", "quoteId"), ("ProtocolId", "protocolId"), ("DefectId", "defectId"), ("InviteId", "inviteId")]:
     params[n] = {"name": name, "in": "path", "required": True, "schema": {"type": "string", "format": "uuid"}}
 params["HomePublicId"] = {"name": "publicId", "in": "path", "required": True, "schema": {"type": "string", "minLength": 6, "maxLength": 16, "pattern": "^[a-z0-9]+$"}}
 params["ShareToken"] = {"name": "token", "in": "path", "required": True, "schema": {"type": "string", "minLength": 20, "maxLength": 64, "pattern": "^[A-Za-z0-9_-]+$"}}
 params["InviteToken"] = dict(params["ShareToken"])
+params["VersionNo"] = {"name": "version", "in": "path", "required": True, "schema": {"type": "integer", "minimum": 1}}
 
 class D(yaml.SafeDumper): pass
 D.ignore_aliases = lambda *a: True

@@ -203,3 +203,46 @@
 .lp-hero2 h1 { margin:0 0 14px;font-size:clamp(34px,4.6vw,58px);line-height:1.05;letter-spacing:-.055em;color:#1e3d35; }
 .lp-hero2 p { margin:0;max-width:760px;color:#4f665a;font-size:17px;line-height:1.7; }
 @media (max-width:760px) { .lp-hero2 { padding-top:26px; } .lp-hero2 h1 { font-size:34px; } .lp-hero2 p { font-size:16px; } }
+
+/* Handover protocol landing */
+.lp-hero-pt { display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;text-align:left; }
+.lp-hero-pt h1 { margin:8px 0 12px; }
+.lp-hero-pt .lp-hero-copy > p { font-size:18px;color:#44574f;max-width:560px; }
+@media (max-width:900px) { .lp-hero-pt { grid-template-columns:1fr; gap:24px; } }
+.lp-roles { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:520px;margin:18px 0 8px; }
+.lp-roles button { min-height:52px;border-radius:14px;border:1.5px solid var(--line,#e5e0d5);background:#fff;font-weight:700;font-size:15px;color:inherit;cursor:pointer; }
+.lp-roles button.on { border-color:var(--brand,#29473f);background:#eaf1ee;color:var(--brand,#29473f); }
+.lp-role-text { font-size:14.5px !important;color:#5f6f68 !important;min-height:44px;margin:0 0 14px; }
+.lp-steps4 { list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px; }
+@media (max-width:900px) { .lp-steps4 { grid-template-columns:1fr 1fr; } }
+@media (max-width:560px) { .lp-steps4 { grid-template-columns:1fr; } }
+.lp-steps4 li { display:flex;gap:12px;padding:16px;border:1px solid var(--line,#e5e0d5);border-radius:16px;background:#fff; }
+.lp-steps4 li > span { width:30px;height:30px;border-radius:50%;background:var(--brand,#29473f);color:#fff;display:grid;place-items:center;font-weight:800;flex-shrink:0; }
+.lp-steps4 p { margin:4px 0 0;font-size:14px;color:#5f6f68; }
+.lp-points-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px 24px; }
+@media (max-width:700px) { .lp-points-grid { grid-template-columns:1fr; } }
+.lp-link-card { display:flex;gap:14px;align-items:flex-start;padding:22px;border-radius:20px;background:#eaf1ee; }
+.lp-link-card h2 { margin:0 0 6px;font-size:22px; }
+.lp-link-card p { margin:0 0 6px;color:#344b43; }
+.lp-small { font-size:13.5px;color:#5f6f68 !important; }
+.lp-tools { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+@media (max-width:640px) { .lp-tools { grid-template-columns:1fr; } }
+.lp-tool { display:flex;gap:12px;align-items:center;padding:16px;border:1px solid var(--line,#e5e0d5);border-radius:16px;background:#fff;color:inherit;text-decoration:none; }
+.lp-tool span { flex:1;display:flex;flex-direction:column; }
+.lp-tool small { color:#5f6f68; }
+.lp-phone { position:relative;max-width:320px;margin:0 auto;width:100%; }
+.lp-phone .lp-mock-tag { position:absolute;top:-12px;left:16px;z-index:2; }
+.lp-phone-screen { border:10px solid #1f2b27;border-radius:34px;background:#f7f5ef;padding:18px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 20px 50px rgba(20,40,32,.18); }
+.lp-phone-screen > small { color:#5f6f68;font-size:11.5px; }
+.lp-ph-progress { height:6px;border-radius:6px;background:#e4e0d6;overflow:hidden; }
+.lp-ph-progress span { display:block;height:100%;background:#2e7d4f; }
+.lp-ph-room { display:flex;gap:8px;align-items:center;background:#fff;border-radius:12px;padding:8px 10px;border:1px solid #e8e3d8; }
+.lp-ph-room i { width:20px;height:20px;border-radius:50%;border:2px solid #cfd6d2;display:grid;place-items:center;color:#fff;flex-shrink:0; }
+.lp-ph-room.ok i { background:#2e7d4f;border-color:#2e7d4f; } .lp-ph-room.bad i { background:#b3412a;border-color:#b3412a; } .lp-ph-room.mid i { background:#b07a1e;border-color:#b07a1e; }
+.lp-ph-room span { display:flex;flex-direction:column;font-size:12.5px; }
+.lp-ph-room small { color:#5f6f68;font-size:11px; }
+.lp-ph-row { display:flex;gap:6px;align-items:center;font-size:12px;color:#344b43; }
+.lp-ph-sign { display:flex;gap:6px; }
+.lp-ph-sign span { flex:1;text-align:center;font-size:12px;font-weight:700;border-radius:10px;padding:6px;background:#efeadf; }
+.lp-ph-sign .ok { background:#e6f3ea;color:#22603c; }
+.lp-ph-btn { display:flex;gap:6px;justify-content:center;align-items:center;background:var(--brand,#29473f);color:#fff;border-radius:12px;padding:10px;font-weight:700;font-size:13px; }

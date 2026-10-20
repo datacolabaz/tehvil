@@ -11914,6 +11914,591 @@ export const DeleteRepairEstimateResponse = zod.object({
 
 
 /**
+ * @summary Handover protocols I take part in
+ */
+export const ListProtocolsResponseItem = zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "address": zod.string(),
+  "status": zod.string(),
+  "myRole": zod.string(),
+  "handoverDate": zod.string().nullable(),
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "rooms": zod.number().int(),
+  "photos": zod.number().int()
+})
+export const ListProtocolsResponse = zod.array(ListProtocolsResponseItem)
+
+
+/**
+ * @summary Create a handover protocol (the creator manages it)
+ */
+export const createProtocolBodyAddressMin = 3;
+export const createProtocolBodyAddressMax = 300;
+
+export const createProtocolBodySellerNameMin = 0;
+export const createProtocolBodySellerNameMax = 160;
+
+export const createProtocolBodySellerPhoneMin = 0;
+export const createProtocolBodySellerPhoneMax = 40;
+
+export const createProtocolBodyBuyerNameMin = 0;
+export const createProtocolBodyBuyerNameMax = 160;
+
+export const createProtocolBodyBuyerPhoneMin = 0;
+export const createProtocolBodyBuyerPhoneMax = 40;
+
+export const createProtocolBodyRealtorNameMin = 0;
+export const createProtocolBodyRealtorNameMax = 160;
+
+export const createProtocolBodyRealtorPhoneMin = 0;
+export const createProtocolBodyRealtorPhoneMax = 40;
+
+
+
+export const CreateProtocolBody = zod.object({
+  "role": zod.enum(['realtor', 'seller', 'buyer']),
+  "propertyType": zod.enum(['apartment', 'house', 'other']),
+  "address": zod.string().min(createProtocolBodyAddressMin).max(createProtocolBodyAddressMax),
+  "handoverDate": zod.string().date().nullish(),
+  "sellerName": zod.string().min(createProtocolBodySellerNameMin).max(createProtocolBodySellerNameMax).optional(),
+  "sellerPhone": zod.string().min(createProtocolBodySellerPhoneMin).max(createProtocolBodySellerPhoneMax).optional(),
+  "buyerName": zod.string().min(createProtocolBodyBuyerNameMin).max(createProtocolBodyBuyerNameMax).optional(),
+  "buyerPhone": zod.string().min(createProtocolBodyBuyerPhoneMin).max(createProtocolBodyBuyerPhoneMax).optional(),
+  "realtorName": zod.string().min(createProtocolBodyRealtorNameMin).max(createProtocolBodyRealtorNameMax).optional(),
+  "realtorPhone": zod.string().min(createProtocolBodyRealtorPhoneMin).max(createProtocolBodyRealtorPhoneMax).optional()
+})
+
+export const CreateProtocolResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Protocol with rooms, photos, parties, versions and approvals (participants)
+ */
+export const GetProtocolParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const GetProtocolResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Edit details, meters, keys, notes (only while collecting)
+ */
+export const UpdateProtocolParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const updateProtocolBodyAddressMin = 3;
+export const updateProtocolBodyAddressMax = 300;
+
+export const updateProtocolBodySellerNameMin = 0;
+export const updateProtocolBodySellerNameMax = 160;
+
+export const updateProtocolBodySellerPhoneMin = 0;
+export const updateProtocolBodySellerPhoneMax = 40;
+
+export const updateProtocolBodyBuyerNameMin = 0;
+export const updateProtocolBodyBuyerNameMax = 160;
+
+export const updateProtocolBodyBuyerPhoneMin = 0;
+export const updateProtocolBodyBuyerPhoneMax = 40;
+
+export const updateProtocolBodyRealtorNameMin = 0;
+export const updateProtocolBodyRealtorNameMax = 160;
+
+export const updateProtocolBodyRealtorPhoneMin = 0;
+export const updateProtocolBodyRealtorPhoneMax = 40;
+
+
+
+export const UpdateProtocolBody = zod.object({
+  "propertyType": zod.enum(['apartment', 'house', 'other']).optional(),
+  "address": zod.string().min(updateProtocolBodyAddressMin).max(updateProtocolBodyAddressMax).optional(),
+  "handoverDate": zod.string().date().nullish(),
+  "sellerName": zod.string().min(updateProtocolBodySellerNameMin).max(updateProtocolBodySellerNameMax).optional(),
+  "sellerPhone": zod.string().min(updateProtocolBodySellerPhoneMin).max(updateProtocolBodySellerPhoneMax).optional(),
+  "buyerName": zod.string().min(updateProtocolBodyBuyerNameMin).max(updateProtocolBodyBuyerNameMax).optional(),
+  "buyerPhone": zod.string().min(updateProtocolBodyBuyerPhoneMin).max(updateProtocolBodyBuyerPhoneMax).optional(),
+  "realtorName": zod.string().min(updateProtocolBodyRealtorNameMin).max(updateProtocolBodyRealtorNameMax).optional(),
+  "realtorPhone": zod.string().min(updateProtocolBodyRealtorPhoneMin).max(updateProtocolBodyRealtorPhoneMax).optional(),
+  "extras": zod.unknown().optional()
+})
+
+export const UpdateProtocolResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Archive (creator; not after approval)
+ */
+export const ArchiveProtocolParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const ArchiveProtocolResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Add a room
+ */
+export const AddProtocolRoomParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const addProtocolRoomBodyNameMax = 120;
+
+export const addProtocolRoomBodyNoteMin = 0;
+export const addProtocolRoomBodyNoteMax = 4000;
+
+
+
+export const AddProtocolRoomBody = zod.object({
+  "name": zod.string().min(1).max(addProtocolRoomBodyNameMax).optional(),
+  "kind": zod.enum(['living', 'bed', 'kitchen', 'bath', 'hall', 'balcony', 'other']).optional(),
+  "condition": zod.union([zod.literal('good'),zod.literal('fair'),zod.literal('defective'),zod.literal(null)]).nullish(),
+  "note": zod.string().min(addProtocolRoomBodyNoteMin).max(addProtocolRoomBodyNoteMax).optional()
+})
+
+export const AddProtocolRoomResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Edit a room: condition, note, name
+ */
+export const UpdateProtocolRoomParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "roomId": zod.coerce.string().uuid()
+})
+
+export const updateProtocolRoomBodyNameMax = 120;
+
+export const updateProtocolRoomBodyNoteMin = 0;
+export const updateProtocolRoomBodyNoteMax = 4000;
+
+
+
+export const UpdateProtocolRoomBody = zod.object({
+  "name": zod.string().min(1).max(updateProtocolRoomBodyNameMax).optional(),
+  "kind": zod.enum(['living', 'bed', 'kitchen', 'bath', 'hall', 'balcony', 'other']).optional(),
+  "condition": zod.union([zod.literal('good'),zod.literal('fair'),zod.literal('defective'),zod.literal(null)]).nullish(),
+  "note": zod.string().min(updateProtocolRoomBodyNoteMin).max(updateProtocolRoomBodyNoteMax).optional()
+})
+
+export const UpdateProtocolRoomResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Remove a room
+ */
+export const DeleteProtocolRoomParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "roomId": zod.coerce.string().uuid()
+})
+
+export const DeleteProtocolRoomResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Record a defect
+ */
+export const AddProtocolDefectParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const addProtocolDefectBodyTextMax = 2000;
+
+
+
+export const AddProtocolDefectBody = zod.object({
+  "roomId": zod.string().uuid().nullish(),
+  "text": zod.string().min(1).max(addProtocolDefectBodyTextMax)
+})
+
+export const AddProtocolDefectResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Remove a defect
+ */
+export const DeleteProtocolDefectParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "defectId": zod.coerce.string().uuid()
+})
+
+export const DeleteProtocolDefectResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Attach uploaded photos to a room, defect, meter or keys
+ */
+export const AddProtocolMediaParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+
+export const addProtocolMediaBodyFilesItemOriginalNameMax = 255;
+
+export const addProtocolMediaBodyFilesItemSizeMax = 52428800;
+
+export const addProtocolMediaBodyFilesMax = 10;
+
+export const addProtocolMediaBodyCaptionMin = 0;
+export const addProtocolMediaBodyCaptionMax = 300;
+
+
+
+export const AddProtocolMediaBody = zod.object({
+  "files": zod.array(zod.object({
+  "objectPath": zod.string().min(1),
+  "originalName": zod.string().min(1).max(addProtocolMediaBodyFilesItemOriginalNameMax),
+  "contentType": zod.string(),
+  "size": zod.number().int().min(1).max(addProtocolMediaBodyFilesItemSizeMax)
+})).max(addProtocolMediaBodyFilesMax),
+  "roomId": zod.string().uuid().nullish(),
+  "defectId": zod.string().uuid().nullish(),
+  "target": zod.enum(['room', 'defect', 'meter', 'keys', 'other']),
+  "meterKind": zod.union([zod.literal('water'),zod.literal('gas'),zod.literal('electric'),zod.literal(null)]).nullish(),
+  "caption": zod.string().min(addProtocolMediaBodyCaptionMin).max(addProtocolMediaBodyCaptionMax).optional()
+})
+
+export const AddProtocolMediaResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Remove a photo
+ */
+export const DeleteProtocolMediaParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "mediaId": zod.coerce.string().uuid()
+})
+
+export const DeleteProtocolMediaResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Invitation link for a party (creator); replaces the previous link for that role
+ */
+export const CreateProtocolInviteParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const CreateProtocolInviteBody = zod.object({
+  "role": zod.enum(['realtor', 'seller', 'buyer'])
+})
+
+export const CreateProtocolInviteResponse = zod.object({
+  "id": zod.string(),
+  "role": zod.string(),
+  "url": zod.string()
+})
+
+
+/**
+ * @summary Revoke an invitation link (creator)
+ */
+export const RevokeProtocolInviteParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "inviteId": zod.coerce.string().uuid()
+})
+
+export const RevokeProtocolInviteResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Freeze the content as a new version and ask the parties to approve (creator)
+ */
+export const SubmitProtocolParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const SubmitProtocolResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Allow edits again; the next submission becomes a new version (creator)
+ */
+export const ReopenProtocolParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const ReopenProtocolResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Seller or buyer approves the version or asks for changes
+ */
+export const DecideProtocolParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const decideProtocolBodyContentHashMin = 64;
+export const decideProtocolBodyContentHashMax = 64;
+
+export const decideProtocolBodyCommentMin = 0;
+export const decideProtocolBodyCommentMax = 2000;
+
+
+
+export const DecideProtocolBody = zod.object({
+  "version": zod.number().int(),
+  "contentHash": zod.string().min(decideProtocolBodyContentHashMin).max(decideProtocolBodyContentHashMax),
+  "decision": zod.enum(['approved', 'changes']),
+  "comment": zod.string().min(decideProtocolBodyCommentMin).max(decideProtocolBodyCommentMax).optional()
+})
+
+export const DecideProtocolResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Generate the PDF of a version
+ */
+
+
+
+export const CreateProtocolPdfParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "version": zod.coerce.number().int().min(1)
+})
+
+export const CreateProtocolPdfResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Download the PDF of a version (participants)
+ */
+
+
+
+export const GetProtocolPdfParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "version": zod.coerce.number().int().min(1)
+})
+
+export const GetProtocolPdfResponse = zod.unknown()
+
+
+/**
+ * @summary Photo of a protocol (participants or a valid invitation link)
+ */
+export const GetProtocolMediaParams = zod.object({
+  "mediaId": zod.coerce.string().uuid()
+})
+
+export const GetProtocolMediaResponse = zod.unknown()
+
+
+/**
+ * @summary What an invitation link shows (no sign-in)
+ */
+export const getProtocolInvitePathTokenMin = 20;
+export const getProtocolInvitePathTokenMax = 64;
+
+
+export const getProtocolInvitePathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const GetProtocolInviteParams = zod.object({
+  "token": zod.coerce.string().min(getProtocolInvitePathTokenMin).max(getProtocolInvitePathTokenMax).regex(getProtocolInvitePathTokenRegExp)
+})
+
+export const GetProtocolInviteResponse = zod.object({
+  "role": zod.string(),
+  "used": zod.boolean(),
+  "usedByMe": zod.boolean(),
+  "protocolId": zod.string(),
+  "detail": zod.unknown()
+})
+
+
+/**
+ * @summary Join the protocol in the invited role (signed in)
+ */
+export const acceptProtocolInvitePathTokenMin = 20;
+export const acceptProtocolInvitePathTokenMax = 64;
+
+
+export const acceptProtocolInvitePathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const AcceptProtocolInviteParams = zod.object({
+  "token": zod.coerce.string().min(acceptProtocolInvitePathTokenMin).max(acceptProtocolInvitePathTokenMax).regex(acceptProtocolInvitePathTokenRegExp)
+})
+
+export const AcceptProtocolInviteResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
  * @summary What the signed-in account is (for a menu that shows only relevant sections)
  */
 export const GetMyRolesResponse = zod.object({

@@ -4952,6 +4952,284 @@ export interface RepairEstimateSummary {
   area: number | null;
 }
 
+export type ProtocolCreateInputRole = typeof ProtocolCreateInputRole[keyof typeof ProtocolCreateInputRole];
+
+
+export const ProtocolCreateInputRole = {
+  realtor: 'realtor',
+  seller: 'seller',
+  buyer: 'buyer',
+} as const;
+
+export type ProtocolCreateInputPropertyType = typeof ProtocolCreateInputPropertyType[keyof typeof ProtocolCreateInputPropertyType];
+
+
+export const ProtocolCreateInputPropertyType = {
+  apartment: 'apartment',
+  house: 'house',
+  other: 'other',
+} as const;
+
+export interface ProtocolCreateInput {
+  role: ProtocolCreateInputRole;
+  propertyType: ProtocolCreateInputPropertyType;
+  /**
+     * @minLength 3
+     * @maxLength 300
+     */
+  address: string;
+  /** @nullable */
+  handoverDate?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  sellerName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  sellerPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  buyerName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  buyerPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  realtorName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  realtorPhone?: string;
+}
+
+export type ProtocolPatchPropertyType = typeof ProtocolPatchPropertyType[keyof typeof ProtocolPatchPropertyType];
+
+
+export const ProtocolPatchPropertyType = {
+  apartment: 'apartment',
+  house: 'house',
+  other: 'other',
+} as const;
+
+export interface ProtocolPatch {
+  propertyType?: ProtocolPatchPropertyType;
+  /**
+     * @minLength 3
+     * @maxLength 300
+     */
+  address?: string;
+  /** @nullable */
+  handoverDate?: string | null;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  sellerName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  sellerPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  buyerName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  buyerPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  realtorName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  realtorPhone?: string;
+  extras?: unknown;
+}
+
+export type ProtocolRoomInputKind = typeof ProtocolRoomInputKind[keyof typeof ProtocolRoomInputKind];
+
+
+export const ProtocolRoomInputKind = {
+  living: 'living',
+  bed: 'bed',
+  kitchen: 'kitchen',
+  bath: 'bath',
+  hall: 'hall',
+  balcony: 'balcony',
+  other: 'other',
+} as const;
+
+/**
+ * @nullable
+ */
+export type ProtocolRoomInputCondition = typeof ProtocolRoomInputCondition[keyof typeof ProtocolRoomInputCondition] | null;
+
+
+export const ProtocolRoomInputCondition = {
+  good: 'good',
+  fair: 'fair',
+  defective: 'defective',
+} as const;
+
+export interface ProtocolRoomInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name?: string;
+  kind?: ProtocolRoomInputKind;
+  /** @nullable */
+  condition?: ProtocolRoomInputCondition;
+  /**
+     * @minLength 0
+     * @maxLength 4000
+     */
+  note?: string;
+}
+
+export interface ProtocolDefectInput {
+  /** @nullable */
+  roomId?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  text: string;
+}
+
+export type ProtocolMediaInputTarget = typeof ProtocolMediaInputTarget[keyof typeof ProtocolMediaInputTarget];
+
+
+export const ProtocolMediaInputTarget = {
+  room: 'room',
+  defect: 'defect',
+  meter: 'meter',
+  keys: 'keys',
+  other: 'other',
+} as const;
+
+/**
+ * @nullable
+ */
+export type ProtocolMediaInputMeterKind = typeof ProtocolMediaInputMeterKind[keyof typeof ProtocolMediaInputMeterKind] | null;
+
+
+export const ProtocolMediaInputMeterKind = {
+  water: 'water',
+  gas: 'gas',
+  electric: 'electric',
+} as const;
+
+export interface ProtocolMediaInput {
+  /** @maxItems 10 */
+  files: MediaInput[];
+  /** @nullable */
+  roomId?: string | null;
+  /** @nullable */
+  defectId?: string | null;
+  target: ProtocolMediaInputTarget;
+  /** @nullable */
+  meterKind?: ProtocolMediaInputMeterKind;
+  /**
+     * @minLength 0
+     * @maxLength 300
+     */
+  caption?: string;
+}
+
+export type ProtocolInviteInputRole = typeof ProtocolInviteInputRole[keyof typeof ProtocolInviteInputRole];
+
+
+export const ProtocolInviteInputRole = {
+  realtor: 'realtor',
+  seller: 'seller',
+  buyer: 'buyer',
+} as const;
+
+export interface ProtocolInviteInput {
+  role: ProtocolInviteInputRole;
+}
+
+export interface ProtocolInviteLink {
+  id: string;
+  role: string;
+  url: string;
+}
+
+export type ProtocolDecisionInputDecision = typeof ProtocolDecisionInputDecision[keyof typeof ProtocolDecisionInputDecision];
+
+
+export const ProtocolDecisionInputDecision = {
+  approved: 'approved',
+  changes: 'changes',
+} as const;
+
+export interface ProtocolDecisionInput {
+  version: number;
+  /**
+     * @minLength 64
+     * @maxLength 64
+     */
+  contentHash: string;
+  decision: ProtocolDecisionInputDecision;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  comment?: string;
+}
+
+export interface ProtocolDetail {
+  protocol: unknown;
+  rooms: unknown;
+  defects: unknown;
+  media: unknown;
+  participants: unknown;
+  invites: unknown;
+  versions: unknown;
+  approvals: unknown;
+  events: unknown;
+  me: unknown;
+}
+
+export interface ProtocolSummary {
+  id: string;
+  number: string;
+  address: string;
+  status: string;
+  myRole: string;
+  /** @nullable */
+  handoverDate: string | null;
+  updatedAt: string;
+  rooms: number;
+  photos: number;
+}
+
+export interface ProtocolInvitePreview {
+  role: string;
+  used: boolean;
+  usedByMe: boolean;
+  protocolId: string;
+  detail: unknown;
+}
+
 export interface HomeWorkItem {
   work: WorkSummary;
   homeName: string;

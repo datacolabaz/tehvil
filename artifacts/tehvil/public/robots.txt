@@ -8,5 +8,8 @@ Disallow: /invites/
 Disallow: /p/confirm/
 Disallow: /share/
 Disallow: /estimate/
+Disallow: /d/
+Disallow: /protokol/
+Disallow: /protokollar
 
 Sitemap: https://tehvil.az/sitemap.xml

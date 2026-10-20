@@ -102,6 +102,17 @@ import type {
   ProjectInput,
   PropertyPassport,
   PropertyPassportInput,
+  ProtocolCreateInput,
+  ProtocolDecisionInput,
+  ProtocolDefectInput,
+  ProtocolDetail,
+  ProtocolInviteInput,
+  ProtocolInviteLink,
+  ProtocolInvitePreview,
+  ProtocolMediaInput,
+  ProtocolPatch,
+  ProtocolRoomInput,
+  ProtocolSummary,
   PublicHome,
   PublicPassport,
   PublicPassportEventInput,
@@ -13485,6 +13496,1785 @@ export const useDeleteRepairEstimate = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteRepairEstimateMutationOptions(options));
+    }
+
+export const getListProtocolsUrl = () => {
+
+
+
+
+  return `/api/protocols`
+}
+
+/**
+ * @summary Handover protocols I take part in
+ */
+export const listProtocols = async ( options?: Parameters<typeof customFetch>[1]): Promise<ProtocolSummary[]> => {
+
+  return customFetch<ProtocolSummary[]>(getListProtocolsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListProtocolsQueryKey = () => {
+    return [
+    `/api/protocols`
+    ] as const;
+    }
+
+
+export const getListProtocolsQueryOptions = <TData = Awaited<ReturnType<typeof listProtocols>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listProtocols>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListProtocolsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listProtocols>>> = ({ signal }) => listProtocols({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listProtocols>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListProtocolsQueryResult = NonNullable<Awaited<ReturnType<typeof listProtocols>>>
+export type ListProtocolsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Handover protocols I take part in
+ */
+
+export function useListProtocols<TData = Awaited<ReturnType<typeof listProtocols>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listProtocols>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListProtocolsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateProtocolUrl = () => {
+
+
+
+
+  return `/api/protocols`
+}
+
+/**
+ * @summary Create a handover protocol (the creator manages it)
+ */
+export const createProtocol = async (protocolCreateInput: ProtocolCreateInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getCreateProtocolUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolCreateInput)
+  }
+);}
+
+
+
+
+
+export const getCreateProtocolMutationKey = () => ['createProtocol'] as const;
+
+export const getCreateProtocolMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProtocol>>, TError,CreateProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createProtocol>>, TError,CreateProtocolMutationVariables, TContext> => {
+
+const mutationKey = getCreateProtocolMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProtocol>>, CreateProtocolMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createProtocol(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateProtocolMutationResult = NonNullable<Awaited<ReturnType<typeof createProtocol>>>
+    export type CreateProtocolMutationBody = BodyType<ProtocolCreateInput>
+    export type CreateProtocolMutationError = ErrorType<unknown>
+    export type CreateProtocolMutationVariables = {data: BodyType<ProtocolCreateInput>}
+
+    /**
+ * @summary Create a handover protocol (the creator manages it)
+ */
+export const useCreateProtocol = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProtocol>>, TError,CreateProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createProtocol>>,
+        TError,
+        CreateProtocolMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateProtocolMutationOptions(options));
+    }
+
+export const getGetProtocolUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}`
+}
+
+/**
+ * @summary Protocol with rooms, photos, parties, versions and approvals (participants)
+ */
+export const getProtocol = async (protocolId: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getGetProtocolUrl(protocolId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProtocolQueryKey = (protocolId: string,) => {
+    return [
+    `/api/protocols/${protocolId}`
+    ] as const;
+    }
+
+
+export const getGetProtocolQueryOptions = <TData = Awaited<ReturnType<typeof getProtocol>>, TError = ErrorType<unknown>>(protocolId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProtocol>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProtocolQueryKey(protocolId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProtocol>>> = ({ signal }) => getProtocol(protocolId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: protocolId !== null && protocolId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProtocol>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProtocolQueryResult = NonNullable<Awaited<ReturnType<typeof getProtocol>>>
+export type GetProtocolQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Protocol with rooms, photos, parties, versions and approvals (participants)
+ */
+
+export function useGetProtocol<TData = Awaited<ReturnType<typeof getProtocol>>, TError = ErrorType<unknown>>(
+ protocolId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProtocol>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProtocolQueryOptions(protocolId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateProtocolUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}`
+}
+
+/**
+ * @summary Edit details, meters, keys, notes (only while collecting)
+ */
+export const updateProtocol = async (protocolId: string,
+    protocolPatch: ProtocolPatch, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getUpdateProtocolUrl(protocolId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolPatch)
+  }
+);}
+
+
+
+
+
+export const getUpdateProtocolMutationKey = () => ['updateProtocol'] as const;
+
+export const getUpdateProtocolMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProtocol>>, TError,UpdateProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateProtocol>>, TError,UpdateProtocolMutationVariables, TContext> => {
+
+const mutationKey = getUpdateProtocolMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProtocol>>, UpdateProtocolMutationVariables> = (props) => {
+          const {protocolId,data} = props ?? {};
+
+          return  updateProtocol(protocolId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateProtocolMutationResult = NonNullable<Awaited<ReturnType<typeof updateProtocol>>>
+    export type UpdateProtocolMutationBody = BodyType<ProtocolPatch>
+    export type UpdateProtocolMutationError = ErrorType<unknown>
+    export type UpdateProtocolMutationVariables = {protocolId: string;data: BodyType<ProtocolPatch>}
+
+    /**
+ * @summary Edit details, meters, keys, notes (only while collecting)
+ */
+export const useUpdateProtocol = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProtocol>>, TError,UpdateProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateProtocol>>,
+        TError,
+        UpdateProtocolMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateProtocolMutationOptions(options));
+    }
+
+export const getArchiveProtocolUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}`
+}
+
+/**
+ * @summary Archive (creator; not after approval)
+ */
+export const archiveProtocol = async (protocolId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getArchiveProtocolUrl(protocolId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getArchiveProtocolMutationKey = () => ['archiveProtocol'] as const;
+
+export const getArchiveProtocolMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof archiveProtocol>>, TError,ArchiveProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof archiveProtocol>>, TError,ArchiveProtocolMutationVariables, TContext> => {
+
+const mutationKey = getArchiveProtocolMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof archiveProtocol>>, ArchiveProtocolMutationVariables> = (props) => {
+          const {protocolId} = props ?? {};
+
+          return  archiveProtocol(protocolId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ArchiveProtocolMutationResult = NonNullable<Awaited<ReturnType<typeof archiveProtocol>>>
+
+    export type ArchiveProtocolMutationError = ErrorType<unknown>
+    export type ArchiveProtocolMutationVariables = {protocolId: string}
+
+    /**
+ * @summary Archive (creator; not after approval)
+ */
+export const useArchiveProtocol = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof archiveProtocol>>, TError,ArchiveProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof archiveProtocol>>,
+        TError,
+        ArchiveProtocolMutationVariables,
+        TContext
+      > => {
+      return useMutation(getArchiveProtocolMutationOptions(options));
+    }
+
+export const getAddProtocolRoomUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/rooms`
+}
+
+/**
+ * @summary Add a room
+ */
+export const addProtocolRoom = async (protocolId: string,
+    protocolRoomInput: ProtocolRoomInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getAddProtocolRoomUrl(protocolId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolRoomInput)
+  }
+);}
+
+
+
+
+
+export const getAddProtocolRoomMutationKey = () => ['addProtocolRoom'] as const;
+
+export const getAddProtocolRoomMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addProtocolRoom>>, TError,AddProtocolRoomMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addProtocolRoom>>, TError,AddProtocolRoomMutationVariables, TContext> => {
+
+const mutationKey = getAddProtocolRoomMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addProtocolRoom>>, AddProtocolRoomMutationVariables> = (props) => {
+          const {protocolId,data} = props ?? {};
+
+          return  addProtocolRoom(protocolId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddProtocolRoomMutationResult = NonNullable<Awaited<ReturnType<typeof addProtocolRoom>>>
+    export type AddProtocolRoomMutationBody = BodyType<ProtocolRoomInput>
+    export type AddProtocolRoomMutationError = ErrorType<unknown>
+    export type AddProtocolRoomMutationVariables = {protocolId: string;data: BodyType<ProtocolRoomInput>}
+
+    /**
+ * @summary Add a room
+ */
+export const useAddProtocolRoom = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addProtocolRoom>>, TError,AddProtocolRoomMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addProtocolRoom>>,
+        TError,
+        AddProtocolRoomMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddProtocolRoomMutationOptions(options));
+    }
+
+export const getUpdateProtocolRoomUrl = (protocolId: string,
+    roomId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/rooms/${roomId}`
+}
+
+/**
+ * @summary Edit a room: condition, note, name
+ */
+export const updateProtocolRoom = async (protocolId: string,
+    roomId: string,
+    protocolRoomInput: ProtocolRoomInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getUpdateProtocolRoomUrl(protocolId,roomId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolRoomInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateProtocolRoomMutationKey = () => ['updateProtocolRoom'] as const;
+
+export const getUpdateProtocolRoomMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProtocolRoom>>, TError,UpdateProtocolRoomMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateProtocolRoom>>, TError,UpdateProtocolRoomMutationVariables, TContext> => {
+
+const mutationKey = getUpdateProtocolRoomMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProtocolRoom>>, UpdateProtocolRoomMutationVariables> = (props) => {
+          const {protocolId,roomId,data} = props ?? {};
+
+          return  updateProtocolRoom(protocolId,roomId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateProtocolRoomMutationResult = NonNullable<Awaited<ReturnType<typeof updateProtocolRoom>>>
+    export type UpdateProtocolRoomMutationBody = BodyType<ProtocolRoomInput>
+    export type UpdateProtocolRoomMutationError = ErrorType<unknown>
+    export type UpdateProtocolRoomMutationVariables = {protocolId: string;roomId: string;data: BodyType<ProtocolRoomInput>}
+
+    /**
+ * @summary Edit a room: condition, note, name
+ */
+export const useUpdateProtocolRoom = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProtocolRoom>>, TError,UpdateProtocolRoomMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateProtocolRoom>>,
+        TError,
+        UpdateProtocolRoomMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateProtocolRoomMutationOptions(options));
+    }
+
+export const getDeleteProtocolRoomUrl = (protocolId: string,
+    roomId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/rooms/${roomId}`
+}
+
+/**
+ * @summary Remove a room
+ */
+export const deleteProtocolRoom = async (protocolId: string,
+    roomId: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getDeleteProtocolRoomUrl(protocolId,roomId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteProtocolRoomMutationKey = () => ['deleteProtocolRoom'] as const;
+
+export const getDeleteProtocolRoomMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolRoom>>, TError,DeleteProtocolRoomMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolRoom>>, TError,DeleteProtocolRoomMutationVariables, TContext> => {
+
+const mutationKey = getDeleteProtocolRoomMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProtocolRoom>>, DeleteProtocolRoomMutationVariables> = (props) => {
+          const {protocolId,roomId} = props ?? {};
+
+          return  deleteProtocolRoom(protocolId,roomId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteProtocolRoomMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProtocolRoom>>>
+
+    export type DeleteProtocolRoomMutationError = ErrorType<unknown>
+    export type DeleteProtocolRoomMutationVariables = {protocolId: string;roomId: string}
+
+    /**
+ * @summary Remove a room
+ */
+export const useDeleteProtocolRoom = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolRoom>>, TError,DeleteProtocolRoomMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteProtocolRoom>>,
+        TError,
+        DeleteProtocolRoomMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteProtocolRoomMutationOptions(options));
+    }
+
+export const getAddProtocolDefectUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/defects`
+}
+
+/**
+ * @summary Record a defect
+ */
+export const addProtocolDefect = async (protocolId: string,
+    protocolDefectInput: ProtocolDefectInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getAddProtocolDefectUrl(protocolId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolDefectInput)
+  }
+);}
+
+
+
+
+
+export const getAddProtocolDefectMutationKey = () => ['addProtocolDefect'] as const;
+
+export const getAddProtocolDefectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addProtocolDefect>>, TError,AddProtocolDefectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addProtocolDefect>>, TError,AddProtocolDefectMutationVariables, TContext> => {
+
+const mutationKey = getAddProtocolDefectMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addProtocolDefect>>, AddProtocolDefectMutationVariables> = (props) => {
+          const {protocolId,data} = props ?? {};
+
+          return  addProtocolDefect(protocolId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddProtocolDefectMutationResult = NonNullable<Awaited<ReturnType<typeof addProtocolDefect>>>
+    export type AddProtocolDefectMutationBody = BodyType<ProtocolDefectInput>
+    export type AddProtocolDefectMutationError = ErrorType<unknown>
+    export type AddProtocolDefectMutationVariables = {protocolId: string;data: BodyType<ProtocolDefectInput>}
+
+    /**
+ * @summary Record a defect
+ */
+export const useAddProtocolDefect = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addProtocolDefect>>, TError,AddProtocolDefectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addProtocolDefect>>,
+        TError,
+        AddProtocolDefectMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddProtocolDefectMutationOptions(options));
+    }
+
+export const getDeleteProtocolDefectUrl = (protocolId: string,
+    defectId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/defects/${defectId}`
+}
+
+/**
+ * @summary Remove a defect
+ */
+export const deleteProtocolDefect = async (protocolId: string,
+    defectId: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getDeleteProtocolDefectUrl(protocolId,defectId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteProtocolDefectMutationKey = () => ['deleteProtocolDefect'] as const;
+
+export const getDeleteProtocolDefectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolDefect>>, TError,DeleteProtocolDefectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolDefect>>, TError,DeleteProtocolDefectMutationVariables, TContext> => {
+
+const mutationKey = getDeleteProtocolDefectMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProtocolDefect>>, DeleteProtocolDefectMutationVariables> = (props) => {
+          const {protocolId,defectId} = props ?? {};
+
+          return  deleteProtocolDefect(protocolId,defectId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteProtocolDefectMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProtocolDefect>>>
+
+    export type DeleteProtocolDefectMutationError = ErrorType<unknown>
+    export type DeleteProtocolDefectMutationVariables = {protocolId: string;defectId: string}
+
+    /**
+ * @summary Remove a defect
+ */
+export const useDeleteProtocolDefect = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolDefect>>, TError,DeleteProtocolDefectMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteProtocolDefect>>,
+        TError,
+        DeleteProtocolDefectMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteProtocolDefectMutationOptions(options));
+    }
+
+export const getAddProtocolMediaUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/media`
+}
+
+/**
+ * @summary Attach uploaded photos to a room, defect, meter or keys
+ */
+export const addProtocolMedia = async (protocolId: string,
+    protocolMediaInput: ProtocolMediaInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getAddProtocolMediaUrl(protocolId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolMediaInput)
+  }
+);}
+
+
+
+
+
+export const getAddProtocolMediaMutationKey = () => ['addProtocolMedia'] as const;
+
+export const getAddProtocolMediaMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addProtocolMedia>>, TError,AddProtocolMediaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addProtocolMedia>>, TError,AddProtocolMediaMutationVariables, TContext> => {
+
+const mutationKey = getAddProtocolMediaMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addProtocolMedia>>, AddProtocolMediaMutationVariables> = (props) => {
+          const {protocolId,data} = props ?? {};
+
+          return  addProtocolMedia(protocolId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddProtocolMediaMutationResult = NonNullable<Awaited<ReturnType<typeof addProtocolMedia>>>
+    export type AddProtocolMediaMutationBody = BodyType<ProtocolMediaInput>
+    export type AddProtocolMediaMutationError = ErrorType<unknown>
+    export type AddProtocolMediaMutationVariables = {protocolId: string;data: BodyType<ProtocolMediaInput>}
+
+    /**
+ * @summary Attach uploaded photos to a room, defect, meter or keys
+ */
+export const useAddProtocolMedia = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addProtocolMedia>>, TError,AddProtocolMediaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addProtocolMedia>>,
+        TError,
+        AddProtocolMediaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddProtocolMediaMutationOptions(options));
+    }
+
+export const getDeleteProtocolMediaUrl = (protocolId: string,
+    mediaId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/media/${mediaId}`
+}
+
+/**
+ * @summary Remove a photo
+ */
+export const deleteProtocolMedia = async (protocolId: string,
+    mediaId: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getDeleteProtocolMediaUrl(protocolId,mediaId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteProtocolMediaMutationKey = () => ['deleteProtocolMedia'] as const;
+
+export const getDeleteProtocolMediaMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolMedia>>, TError,DeleteProtocolMediaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolMedia>>, TError,DeleteProtocolMediaMutationVariables, TContext> => {
+
+const mutationKey = getDeleteProtocolMediaMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProtocolMedia>>, DeleteProtocolMediaMutationVariables> = (props) => {
+          const {protocolId,mediaId} = props ?? {};
+
+          return  deleteProtocolMedia(protocolId,mediaId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteProtocolMediaMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProtocolMedia>>>
+
+    export type DeleteProtocolMediaMutationError = ErrorType<unknown>
+    export type DeleteProtocolMediaMutationVariables = {protocolId: string;mediaId: string}
+
+    /**
+ * @summary Remove a photo
+ */
+export const useDeleteProtocolMedia = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolMedia>>, TError,DeleteProtocolMediaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteProtocolMedia>>,
+        TError,
+        DeleteProtocolMediaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteProtocolMediaMutationOptions(options));
+    }
+
+export const getCreateProtocolInviteUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/invites`
+}
+
+/**
+ * @summary Invitation link for a party (creator); replaces the previous link for that role
+ */
+export const createProtocolInvite = async (protocolId: string,
+    protocolInviteInput: ProtocolInviteInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolInviteLink> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolInviteLink>(getCreateProtocolInviteUrl(protocolId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolInviteInput)
+  }
+);}
+
+
+
+
+
+export const getCreateProtocolInviteMutationKey = () => ['createProtocolInvite'] as const;
+
+export const getCreateProtocolInviteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProtocolInvite>>, TError,CreateProtocolInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createProtocolInvite>>, TError,CreateProtocolInviteMutationVariables, TContext> => {
+
+const mutationKey = getCreateProtocolInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProtocolInvite>>, CreateProtocolInviteMutationVariables> = (props) => {
+          const {protocolId,data} = props ?? {};
+
+          return  createProtocolInvite(protocolId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateProtocolInviteMutationResult = NonNullable<Awaited<ReturnType<typeof createProtocolInvite>>>
+    export type CreateProtocolInviteMutationBody = BodyType<ProtocolInviteInput>
+    export type CreateProtocolInviteMutationError = ErrorType<unknown>
+    export type CreateProtocolInviteMutationVariables = {protocolId: string;data: BodyType<ProtocolInviteInput>}
+
+    /**
+ * @summary Invitation link for a party (creator); replaces the previous link for that role
+ */
+export const useCreateProtocolInvite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProtocolInvite>>, TError,CreateProtocolInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createProtocolInvite>>,
+        TError,
+        CreateProtocolInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateProtocolInviteMutationOptions(options));
+    }
+
+export const getRevokeProtocolInviteUrl = (protocolId: string,
+    inviteId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/invites/${inviteId}`
+}
+
+/**
+ * @summary Revoke an invitation link (creator)
+ */
+export const revokeProtocolInvite = async (protocolId: string,
+    inviteId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getRevokeProtocolInviteUrl(protocolId,inviteId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokeProtocolInviteMutationKey = () => ['revokeProtocolInvite'] as const;
+
+export const getRevokeProtocolInviteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeProtocolInvite>>, TError,RevokeProtocolInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeProtocolInvite>>, TError,RevokeProtocolInviteMutationVariables, TContext> => {
+
+const mutationKey = getRevokeProtocolInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeProtocolInvite>>, RevokeProtocolInviteMutationVariables> = (props) => {
+          const {protocolId,inviteId} = props ?? {};
+
+          return  revokeProtocolInvite(protocolId,inviteId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeProtocolInviteMutationResult = NonNullable<Awaited<ReturnType<typeof revokeProtocolInvite>>>
+
+    export type RevokeProtocolInviteMutationError = ErrorType<unknown>
+    export type RevokeProtocolInviteMutationVariables = {protocolId: string;inviteId: string}
+
+    /**
+ * @summary Revoke an invitation link (creator)
+ */
+export const useRevokeProtocolInvite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeProtocolInvite>>, TError,RevokeProtocolInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof revokeProtocolInvite>>,
+        TError,
+        RevokeProtocolInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevokeProtocolInviteMutationOptions(options));
+    }
+
+export const getSubmitProtocolUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/submit`
+}
+
+/**
+ * @summary Freeze the content as a new version and ask the parties to approve (creator)
+ */
+export const submitProtocol = async (protocolId: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getSubmitProtocolUrl(protocolId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSubmitProtocolMutationKey = () => ['submitProtocol'] as const;
+
+export const getSubmitProtocolMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitProtocol>>, TError,SubmitProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitProtocol>>, TError,SubmitProtocolMutationVariables, TContext> => {
+
+const mutationKey = getSubmitProtocolMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitProtocol>>, SubmitProtocolMutationVariables> = (props) => {
+          const {protocolId} = props ?? {};
+
+          return  submitProtocol(protocolId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitProtocolMutationResult = NonNullable<Awaited<ReturnType<typeof submitProtocol>>>
+
+    export type SubmitProtocolMutationError = ErrorType<unknown>
+    export type SubmitProtocolMutationVariables = {protocolId: string}
+
+    /**
+ * @summary Freeze the content as a new version and ask the parties to approve (creator)
+ */
+export const useSubmitProtocol = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitProtocol>>, TError,SubmitProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitProtocol>>,
+        TError,
+        SubmitProtocolMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubmitProtocolMutationOptions(options));
+    }
+
+export const getReopenProtocolUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/reopen`
+}
+
+/**
+ * @summary Allow edits again; the next submission becomes a new version (creator)
+ */
+export const reopenProtocol = async (protocolId: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getReopenProtocolUrl(protocolId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getReopenProtocolMutationKey = () => ['reopenProtocol'] as const;
+
+export const getReopenProtocolMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reopenProtocol>>, TError,ReopenProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reopenProtocol>>, TError,ReopenProtocolMutationVariables, TContext> => {
+
+const mutationKey = getReopenProtocolMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reopenProtocol>>, ReopenProtocolMutationVariables> = (props) => {
+          const {protocolId} = props ?? {};
+
+          return  reopenProtocol(protocolId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReopenProtocolMutationResult = NonNullable<Awaited<ReturnType<typeof reopenProtocol>>>
+
+    export type ReopenProtocolMutationError = ErrorType<unknown>
+    export type ReopenProtocolMutationVariables = {protocolId: string}
+
+    /**
+ * @summary Allow edits again; the next submission becomes a new version (creator)
+ */
+export const useReopenProtocol = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reopenProtocol>>, TError,ReopenProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reopenProtocol>>,
+        TError,
+        ReopenProtocolMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReopenProtocolMutationOptions(options));
+    }
+
+export const getDecideProtocolUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/decisions`
+}
+
+/**
+ * @summary Seller or buyer approves the version or asks for changes
+ */
+export const decideProtocol = async (protocolId: string,
+    protocolDecisionInput: ProtocolDecisionInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getDecideProtocolUrl(protocolId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolDecisionInput)
+  }
+);}
+
+
+
+
+
+export const getDecideProtocolMutationKey = () => ['decideProtocol'] as const;
+
+export const getDecideProtocolMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideProtocol>>, TError,DecideProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideProtocol>>, TError,DecideProtocolMutationVariables, TContext> => {
+
+const mutationKey = getDecideProtocolMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideProtocol>>, DecideProtocolMutationVariables> = (props) => {
+          const {protocolId,data} = props ?? {};
+
+          return  decideProtocol(protocolId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideProtocolMutationResult = NonNullable<Awaited<ReturnType<typeof decideProtocol>>>
+    export type DecideProtocolMutationBody = BodyType<ProtocolDecisionInput>
+    export type DecideProtocolMutationError = ErrorType<unknown>
+    export type DecideProtocolMutationVariables = {protocolId: string;data: BodyType<ProtocolDecisionInput>}
+
+    /**
+ * @summary Seller or buyer approves the version or asks for changes
+ */
+export const useDecideProtocol = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideProtocol>>, TError,DecideProtocolMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideProtocol>>,
+        TError,
+        DecideProtocolMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideProtocolMutationOptions(options));
+    }
+
+export const getCreateProtocolPdfUrl = (protocolId: string,
+    version: number,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/versions/${version}/pdf`
+}
+
+/**
+ * @summary Generate the PDF of a version
+ */
+export const createProtocolPdf = async (protocolId: string,
+    version: number, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getCreateProtocolPdfUrl(protocolId,version),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCreateProtocolPdfMutationKey = () => ['createProtocolPdf'] as const;
+
+export const getCreateProtocolPdfMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProtocolPdf>>, TError,CreateProtocolPdfMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createProtocolPdf>>, TError,CreateProtocolPdfMutationVariables, TContext> => {
+
+const mutationKey = getCreateProtocolPdfMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProtocolPdf>>, CreateProtocolPdfMutationVariables> = (props) => {
+          const {protocolId,version} = props ?? {};
+
+          return  createProtocolPdf(protocolId,version,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateProtocolPdfMutationResult = NonNullable<Awaited<ReturnType<typeof createProtocolPdf>>>
+
+    export type CreateProtocolPdfMutationError = ErrorType<unknown>
+    export type CreateProtocolPdfMutationVariables = {protocolId: string;version: number}
+
+    /**
+ * @summary Generate the PDF of a version
+ */
+export const useCreateProtocolPdf = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProtocolPdf>>, TError,CreateProtocolPdfMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createProtocolPdf>>,
+        TError,
+        CreateProtocolPdfMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateProtocolPdfMutationOptions(options));
+    }
+
+export const getGetProtocolPdfUrl = (protocolId: string,
+    version: number,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/versions/${version}/pdf`
+}
+
+/**
+ * @summary Download the PDF of a version (participants)
+ */
+export const getProtocolPdf = async (protocolId: string,
+    version: number, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetProtocolPdfUrl(protocolId,version),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProtocolPdfQueryKey = (protocolId: string,
+    version: number,) => {
+    return [
+    `/api/protocols/${protocolId}/versions/${version}/pdf`
+    ] as const;
+    }
+
+
+export const getGetProtocolPdfQueryOptions = <TData = Awaited<ReturnType<typeof getProtocolPdf>>, TError = ErrorType<unknown>>(protocolId: string,
+    version: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProtocolPdf>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProtocolPdfQueryKey(protocolId,version);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProtocolPdf>>> = ({ signal }) => getProtocolPdf(protocolId,version, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: protocolId !== null && protocolId !== undefined && version !== null && version !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProtocolPdf>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProtocolPdfQueryResult = NonNullable<Awaited<ReturnType<typeof getProtocolPdf>>>
+export type GetProtocolPdfQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Download the PDF of a version (participants)
+ */
+
+export function useGetProtocolPdf<TData = Awaited<ReturnType<typeof getProtocolPdf>>, TError = ErrorType<unknown>>(
+ protocolId: string,
+    version: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProtocolPdf>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProtocolPdfQueryOptions(protocolId,version,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProtocolMediaUrl = (mediaId: string,) => {
+
+
+
+
+  return `/api/protocol-media/${mediaId}`
+}
+
+/**
+ * @summary Photo of a protocol (participants or a valid invitation link)
+ */
+export const getProtocolMedia = async (mediaId: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetProtocolMediaUrl(mediaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProtocolMediaQueryKey = (mediaId: string,) => {
+    return [
+    `/api/protocol-media/${mediaId}`
+    ] as const;
+    }
+
+
+export const getGetProtocolMediaQueryOptions = <TData = Awaited<ReturnType<typeof getProtocolMedia>>, TError = ErrorType<unknown>>(mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProtocolMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProtocolMediaQueryKey(mediaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProtocolMedia>>> = ({ signal }) => getProtocolMedia(mediaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: mediaId !== null && mediaId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProtocolMedia>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProtocolMediaQueryResult = NonNullable<Awaited<ReturnType<typeof getProtocolMedia>>>
+export type GetProtocolMediaQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Photo of a protocol (participants or a valid invitation link)
+ */
+
+export function useGetProtocolMedia<TData = Awaited<ReturnType<typeof getProtocolMedia>>, TError = ErrorType<unknown>>(
+ mediaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProtocolMedia>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProtocolMediaQueryOptions(mediaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProtocolInviteUrl = (token: string,) => {
+
+
+
+
+  return `/api/protocol-invites/${token}`
+}
+
+/**
+ * @summary What an invitation link shows (no sign-in)
+ */
+export const getProtocolInvite = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolInvitePreview> => {
+
+  return customFetch<ProtocolInvitePreview>(getGetProtocolInviteUrl(token),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProtocolInviteQueryKey = (token: string,) => {
+    return [
+    `/api/protocol-invites/${token}`
+    ] as const;
+    }
+
+
+export const getGetProtocolInviteQueryOptions = <TData = Awaited<ReturnType<typeof getProtocolInvite>>, TError = ErrorType<unknown>>(token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProtocolInvite>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProtocolInviteQueryKey(token);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProtocolInvite>>> = ({ signal }) => getProtocolInvite(token, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: token !== null && token !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProtocolInvite>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProtocolInviteQueryResult = NonNullable<Awaited<ReturnType<typeof getProtocolInvite>>>
+export type GetProtocolInviteQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary What an invitation link shows (no sign-in)
+ */
+
+export function useGetProtocolInvite<TData = Awaited<ReturnType<typeof getProtocolInvite>>, TError = ErrorType<unknown>>(
+ token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProtocolInvite>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProtocolInviteQueryOptions(token,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAcceptProtocolInviteUrl = (token: string,) => {
+
+
+
+
+  return `/api/protocol-invites/${token}/accept`
+}
+
+/**
+ * @summary Join the protocol in the invited role (signed in)
+ */
+export const acceptProtocolInvite = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getAcceptProtocolInviteUrl(token),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAcceptProtocolInviteMutationKey = () => ['acceptProtocolInvite'] as const;
+
+export const getAcceptProtocolInviteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptProtocolInvite>>, TError,AcceptProtocolInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof acceptProtocolInvite>>, TError,AcceptProtocolInviteMutationVariables, TContext> => {
+
+const mutationKey = getAcceptProtocolInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptProtocolInvite>>, AcceptProtocolInviteMutationVariables> = (props) => {
+          const {token} = props ?? {};
+
+          return  acceptProtocolInvite(token,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptProtocolInviteMutationResult = NonNullable<Awaited<ReturnType<typeof acceptProtocolInvite>>>
+
+    export type AcceptProtocolInviteMutationError = ErrorType<unknown>
+    export type AcceptProtocolInviteMutationVariables = {token: string}
+
+    /**
+ * @summary Join the protocol in the invited role (signed in)
+ */
+export const useAcceptProtocolInvite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptProtocolInvite>>, TError,AcceptProtocolInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof acceptProtocolInvite>>,
+        TError,
+        AcceptProtocolInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAcceptProtocolInviteMutationOptions(options));
     }
 
 export const getGetMyRolesUrl = () => {

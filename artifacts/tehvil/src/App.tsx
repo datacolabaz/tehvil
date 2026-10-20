@@ -92,6 +92,10 @@ const InboxPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ def
 const InviteAcceptPage = lazy(() => import('@/pages/home/inbox-pages').then(m => ({ default: m.InviteAcceptPage })));
 const PublicHomePage = lazy(() => import('@/pages/home/public-home-page').then(m => ({ default: m.PublicHomePage })));
 const SharedHomePage = lazy(() => import('@/pages/home/public-home-page').then(m => ({ default: m.SharedHomePage })));
+const ProtocolNewPage = lazy(() => import('@/pages/protocol/protocol-pages').then(m => ({ default: m.ProtocolNewPage })));
+const ProtocolListPage = lazy(() => import('@/pages/protocol/protocol-pages').then(m => ({ default: m.ProtocolListPage })));
+const ProtocolPage = lazy(() => import('@/pages/protocol/protocol-pages').then(m => ({ default: m.ProtocolPage })));
+const ProtocolInvitePage = lazy(() => import('@/pages/protocol/protocol-pages').then(m => ({ default: m.ProtocolInvitePage })));
 
 /** Sections of one home in the digital home passport (Azerbaijani, like the brief). */
 const HOME_NAV = [
@@ -149,6 +153,7 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
   type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number };
   // Home-first menu: the same three sections on desktop and mobile. Other modules stay reachable from Parametrlər.
   const mainNav: NavItem[] = [
+    { href: '/protokollar', icon: ClipboardCheck, key: 'protocolsNav' },
     { href: '/homes', icon: House, key: 'myHomes' },
     { href: '/history', icon: History, key: 'repairHistory' },
     { href: '/ai-smeta', icon: Calculator, key: 'smeta' },
@@ -353,6 +358,12 @@ function WorkShellInner({ workId, ...shell }: ShellProps & { workId: string }) {
 function PlainShell({ active, crumbs, children, ...shell }: ShellProps & { active: string; crumbs: Crumb[]; children: ReactNode }) {
   return <Protected t={shell.t}><AppShell {...shell} active={active} crumbs={crumbs}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Protected>;
 }
+/** Protocol pages: signed-out visitors are sent to sign-in and brought back to the same page. */
+function ProtocolShell({ active = 'protocolsNav', crumbs, children, ...shell }: ShellProps & { active?: string; crumbs: Crumb[]; children: ReactNode }) {
+  const back = encodeURIComponent(window.location.pathname + window.location.search);
+  return <><Show when="signed-in"><AppShell {...shell} active={active} crumbs={crumbs}><Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell></Show>
+    <Show when="signed-out"><div className="auth-wall"><div className="auth-panel"><Brand/><div className="eyebrow">Təhvil-təslim protokolu</div><h1 className="font-display">Protokol yaratmaq üçün daxil olun</h1><p>Protokolun sahibi və idarəetmə hüququ hesabla müəyyən edilir. Qeydiyyat bir dəqiqə çəkir.</p><Link className="button button-primary" href={`/sign-in?redirect=${back}`} data-testid="protocol-signin">Daxil ol<ArrowRight size={16}/></Link><Link className="text-link" href={`/sign-up?redirect=${back}`}>Qeydiyyatdan keç</Link></div></div></Show></>;
+}
 function PublicSuspense({ children, t }: { children: ReactNode; t: (k: TKey) => string }) { return <Suspense fallback={<Loading t={t}/>}>{children}</Suspense>; }
 function InvitationPage({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) {
   const accept=useAcceptInvitation();const [,setLocation]=useLocation();const token=new URLSearchParams(window.location.search).get('token')||'';const [typed,setTyped]=useState(token);
@@ -374,7 +385,7 @@ function realtorRedirect() {
   const qs = new URLSearchParams(window.location.search);
   // Only same-site paths (e.g. an invitation link) are accepted as a redirect target.
   const next = qs.get('redirect');
-  if (next && /^\/(invite|works|homes|workers)\/[A-Za-z0-9_/-]{1,80}$/.test(next)) return { forceRedirectUrl: `${basePath}${next}` };
+  if (next && /^\/(invite|works|homes|workers|d|protokol)\/[A-Za-z0-9_/?=-]{1,80}$/.test(next)) return { forceRedirectUrl: `${basePath}${next}` };
   return qs.get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {};
 }
 function SignUpPage() { const c=authCopy(); const realtor=!!new URLSearchParams(window.location.search).get('realtor'); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${window.location.search}`} {...realtorRedirect()}/></div></div>; }
@@ -410,6 +421,10 @@ function ClerkRoutes() {
       <Route path="/h/:publicId">{params => <PublicSuspense t={t}><PublicHomePage publicId={params.publicId}/></PublicSuspense>}</Route>
       <Route path="/w/:workerId">{params => <PublicSuspense t={t}><PublicWorkerPage workerId={params.workerId}/></PublicSuspense>}</Route>
       <Route path="/invite/:token">{params => <PublicSuspense t={t}><InviteAcceptPage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/protokollar">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları' }]} lang={lang} change={changeLang} t={t}><ProtocolListPage/></ProtocolShell>}</Route>
+      <Route path="/protokol/yeni">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları', href: '/protokollar' }, { label: 'Yeni' }]} lang={lang} change={changeLang} t={t}><ProtocolNewPage/></ProtocolShell>}</Route>
+      <Route path="/protokol/:id">{params => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları', href: '/protokollar' }, { label: 'Protokol' }]} lang={lang} change={changeLang} t={t}><ProtocolPage id={params.id}/></ProtocolShell>}</Route>
+      <Route path="/d/:token">{params => <PublicSuspense t={t}><ProtocolInvitePage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/homes">{() => <PlainShell active="myHomes" crumbs={[{ label: t('myHomes') }]} lang={lang} change={changeLang} t={t}><HomesPage/></PlainShell>}</Route>
       <Route path="/homes/:homeId/history">{params => <HomeShell homeId={params.homeId} section="history" lang={lang} change={changeLang} t={t}><HomeHistoryPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/rooms/:roomId">{params => <HomeShell homeId={params.homeId} section="rooms" lang={lang} change={changeLang} t={t}><RoomPage homeId={params.homeId} roomId={params.roomId}/></HomeShell>}</Route>
