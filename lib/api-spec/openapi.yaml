@@ -2579,6 +2579,332 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ActionResult'}
+  /protocols:
+    get:
+      operationId: listProtocols
+      tags: [home]
+      summary: Handover protocols I take part in
+      responses:
+        '200':
+          description: Protocols
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/ProtocolSummary'}
+    post:
+      operationId: createProtocol
+      tags: [home]
+      summary: Create a handover protocol (the creator manages it)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolCreateInput'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}:
+    get:
+      operationId: getProtocol
+      tags: [home]
+      summary: Protocol with rooms, photos, parties, versions and approvals (participants)
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      responses:
+        '200':
+          description: Protocol
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+    patch:
+      operationId: updateProtocol
+      tags: [home]
+      summary: Edit details, meters, keys, notes (only while collecting)
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolPatch'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+    delete:
+      operationId: archiveProtocol
+      tags: [home]
+      summary: Archive (creator; not after approval)
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /protocols/{protocolId}/rooms:
+    post:
+      operationId: addProtocolRoom
+      tags: [home]
+      summary: Add a room
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolRoomInput'}
+      responses:
+        '201':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/rooms/{roomId}:
+    patch:
+      operationId: updateProtocolRoom
+      tags: [home]
+      summary: 'Edit a room: condition, note, name'
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/RoomId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolRoomInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+    delete:
+      operationId: deleteProtocolRoom
+      tags: [home]
+      summary: Remove a room
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/RoomId'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/defects:
+    post:
+      operationId: addProtocolDefect
+      tags: [home]
+      summary: Record a defect
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolDefectInput'}
+      responses:
+        '201':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/defects/{defectId}:
+    delete:
+      operationId: deleteProtocolDefect
+      tags: [home]
+      summary: Remove a defect
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/DefectId'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/media:
+    post:
+      operationId: addProtocolMedia
+      tags: [home]
+      summary: Attach uploaded photos to a room, defect, meter or keys
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolMediaInput'}
+      responses:
+        '201':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/media/{mediaId}:
+    delete:
+      operationId: deleteProtocolMedia
+      tags: [home]
+      summary: Remove a photo
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/MediaId'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/invites:
+    post:
+      operationId: createProtocolInvite
+      tags: [home]
+      summary: Invitation link for a party (creator); replaces the previous link for that role
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolInviteInput'}
+      responses:
+        '201':
+          description: Link
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolInviteLink'}
+  /protocols/{protocolId}/invites/{inviteId}:
+    delete:
+      operationId: revokeProtocolInvite
+      tags: [home]
+      summary: Revoke an invitation link (creator)
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/InviteId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /protocols/{protocolId}/submit:
+    post:
+      operationId: submitProtocol
+      tags: [home]
+      summary: Freeze the content as a new version and ask the parties to approve (creator)
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/reopen:
+    post:
+      operationId: reopenProtocol
+      tags: [home]
+      summary: Allow edits again; the next submission becomes a new version (creator)
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/decisions:
+    post:
+      operationId: decideProtocol
+      tags: [home]
+      summary: Seller or buyer approves the version or asks for changes
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolDecisionInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/versions/{version}/pdf:
+    post:
+      operationId: createProtocolPdf
+      tags: [home]
+      summary: Generate the PDF of a version
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/VersionNo'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+    get:
+      operationId: getProtocolPdf
+      tags: [home]
+      summary: Download the PDF of a version (participants)
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/VersionNo'}
+      responses:
+        '200':
+          description: PDF
+          content:
+            application/pdf:
+              schema: {type: string, format: binary}
+  /protocol-media/{mediaId}:
+    get:
+      operationId: getProtocolMedia
+      tags: [home]
+      summary: Photo of a protocol (participants or a valid invitation link)
+      parameters:
+      - {$ref: '#/components/parameters/MediaId'}
+      responses:
+        '200':
+          description: File
+          content:
+            '*/*':
+              schema: {type: string, format: binary}
+  /protocol-invites/{token}:
+    get:
+      operationId: getProtocolInvite
+      tags: [home]
+      summary: What an invitation link shows (no sign-in)
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      responses:
+        '200':
+          description: Invitation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolInvitePreview'}
+  /protocol-invites/{token}/accept:
+    post:
+      operationId: acceptProtocolInvite
+      tags: [home]
+      summary: Join the protocol in the invited role (signed in)
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      responses:
+        '200':
+          description: Protocol
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
   /me/roles:
     get:
       operationId: getMyRoles
@@ -3016,6 +3342,21 @@ components:
       in: path
       required: true
       schema: {type: string, format: uuid}
+    ProtocolId:
+      name: protocolId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    DefectId:
+      name: defectId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    InviteId:
+      name: inviteId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
     HomePublicId:
       name: publicId
       in: path
@@ -3031,6 +3372,11 @@ components:
       in: path
       required: true
       schema: {type: string, minLength: 20, maxLength: 64, pattern: '^[A-Za-z0-9_-]+$'}
+    VersionNo:
+      name: version
+      in: path
+      required: true
+      schema: {type: integer, minimum: 1}
   # <<< HOME-PASSPORT parameters
   schemas:
     HealthStatus:
@@ -6243,6 +6589,144 @@ components:
         area:
           type: [number, 'null']
       required: [id, name, updatedAt, totalLow, total, totalHigh, area]
+    ProtocolCreateInput:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [realtor, seller, buyer]
+        propertyType:
+          type: string
+          enum: [apartment, house, other]
+        address: {type: string, minLength: 3, maxLength: 300}
+        handoverDate:
+          type: [string, 'null']
+          format: date
+        sellerName: {type: string, minLength: 0, maxLength: 160}
+        sellerPhone: {type: string, minLength: 0, maxLength: 40}
+        buyerName: {type: string, minLength: 0, maxLength: 160}
+        buyerPhone: {type: string, minLength: 0, maxLength: 40}
+        realtorName: {type: string, minLength: 0, maxLength: 160}
+        realtorPhone: {type: string, minLength: 0, maxLength: 40}
+      required: [role, propertyType, address]
+    ProtocolPatch:
+      type: object
+      properties:
+        propertyType:
+          type: string
+          enum: [apartment, house, other]
+        address: {type: string, minLength: 3, maxLength: 300}
+        handoverDate:
+          type: [string, 'null']
+          format: date
+        sellerName: {type: string, minLength: 0, maxLength: 160}
+        sellerPhone: {type: string, minLength: 0, maxLength: 40}
+        buyerName: {type: string, minLength: 0, maxLength: 160}
+        buyerPhone: {type: string, minLength: 0, maxLength: 40}
+        realtorName: {type: string, minLength: 0, maxLength: 160}
+        realtorPhone: {type: string, minLength: 0, maxLength: 40}
+        extras: {}
+    ProtocolRoomInput:
+      type: object
+      properties:
+        name: {type: string, minLength: 1, maxLength: 120}
+        kind:
+          type: string
+          enum: [living, bed, kitchen, bath, hall, balcony, other]
+        condition:
+          type: [string, 'null']
+          enum: [good, fair, defective, null]
+        note: {type: string, minLength: 0, maxLength: 4000}
+    ProtocolDefectInput:
+      type: object
+      properties:
+        roomId:
+          type: [string, 'null']
+          format: uuid
+        text: {type: string, minLength: 1, maxLength: 2000}
+      required: [text]
+    ProtocolMediaInput:
+      type: object
+      properties:
+        files:
+          type: array
+          items: {$ref: '#/components/schemas/MediaInput'}
+          maxItems: 10
+        roomId:
+          type: [string, 'null']
+          format: uuid
+        defectId:
+          type: [string, 'null']
+          format: uuid
+        target:
+          type: string
+          enum: [room, defect, meter, keys, other]
+        meterKind:
+          type: [string, 'null']
+          enum: [water, gas, electric, null]
+        caption: {type: string, minLength: 0, maxLength: 300}
+      required: [files, target]
+    ProtocolInviteInput:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [realtor, seller, buyer]
+      required: [role]
+    ProtocolInviteLink:
+      type: object
+      properties:
+        id: {type: string}
+        role: {type: string}
+        url: {type: string}
+      required: [id, role, url]
+    ProtocolDecisionInput:
+      type: object
+      properties:
+        version: {type: integer}
+        contentHash: {type: string, minLength: 64, maxLength: 64}
+        decision:
+          type: string
+          enum: [approved, changes]
+        comment: {type: string, minLength: 0, maxLength: 2000}
+      required: [version, contentHash, decision]
+    ProtocolDetail:
+      type: object
+      properties:
+        protocol: {}
+        rooms: {}
+        defects: {}
+        media: {}
+        participants: {}
+        invites: {}
+        versions: {}
+        approvals: {}
+        events: {}
+        me: {}
+      required: [protocol, rooms, defects, media, participants, invites, versions, approvals, events, me]
+    ProtocolSummary:
+      type: object
+      properties:
+        id: {type: string}
+        number: {type: string}
+        address: {type: string}
+        status: {type: string}
+        myRole: {type: string}
+        handoverDate:
+          type: [string, 'null']
+        updatedAt: {type: string, format: date-time}
+        rooms: {type: integer}
+        photos: {type: integer}
+      required: [id, number, address, status, myRole, handoverDate, updatedAt, rooms, photos]
+    ProtocolInvitePreview:
+      type: object
+      properties:
+        role: {type: string}
+        used: {type: boolean}
+        usedByMe: {type: boolean}
+        protocolId: {type: string}
+        detail: {}
+      required: [role, used, usedByMe, protocolId, detail]
     HomeWorkItem:
       type: object
       properties:

@@ -20,6 +20,7 @@ import workersRouter from "./workers";
 import passportRouter from "./passport";
 import valuationRouter from "./valuation";
 import pricesRouter, { pricesPublicRouter } from "./prices";
+import protocolsRouter, { protocolPublicRouter } from "./protocols";
 
 const router: IRouter = Router();
 
@@ -28,6 +29,7 @@ router.use(sharedEstimatesRouter);
 router.use(realtorPublicRouter);
 router.use(homePublicRouter);
 router.use(pricesPublicRouter);
+router.use(protocolPublicRouter);
 router.use(storageRouter);
 router.use(lifecycleRouter);
 router.use(requireAuth);
@@ -45,5 +47,6 @@ router.use(workersRouter);
 router.use(passportRouter);
 router.use(valuationRouter);
 router.use(pricesRouter);
+router.use(protocolsRouter);
 
 export default router;
