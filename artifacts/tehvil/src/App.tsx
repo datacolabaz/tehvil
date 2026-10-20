@@ -96,6 +96,11 @@ const ProtocolNewPage = lazy(() => import('@/pages/protocol/protocol-pages').the
 const ProtocolListPage = lazy(() => import('@/pages/protocol/protocol-pages').then(m => ({ default: m.ProtocolListPage })));
 const ProtocolPage = lazy(() => import('@/pages/protocol/protocol-pages').then(m => ({ default: m.ProtocolPage })));
 const ProtocolInvitePage = lazy(() => import('@/pages/protocol/protocol-pages').then(m => ({ default: m.ProtocolInvitePage })));
+const RentalListPage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalListPage })));
+const RentalNewPage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalNewPage })));
+const RentalPage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalPage })));
+const RentalInvitePage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalInvitePage })));
+const RentalStatsPage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalStatsPage })));
 
 /** Sections of one home in the digital home passport (Azerbaijani, like the brief). */
 const HOME_NAV = [
@@ -153,7 +158,7 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
   type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number };
   // Home-first menu: the same three sections on desktop and mobile. Other modules stay reachable from Parametrlər.
   const mainNav: NavItem[] = [
-    { href: '/protokollar', icon: ClipboardCheck, key: 'protocolsNav' },
+    { href: '/kiraye', icon: ClipboardCheck, key: 'rentalsNav' },
     { href: '/homes', icon: House, key: 'myHomes' },
     { href: '/history', icon: History, key: 'repairHistory' },
     { href: '/ai-smeta', icon: Calculator, key: 'smeta' },
@@ -385,11 +390,11 @@ function realtorRedirect() {
   const qs = new URLSearchParams(window.location.search);
   // Only same-site paths (e.g. an invitation link) are accepted as a redirect target.
   const next = qs.get('redirect');
-  if (next && /^\/(invite|works|homes|workers|d|protokol)\/[A-Za-z0-9_/?=-]{1,80}$/.test(next)) return { forceRedirectUrl: `${basePath}${next}` };
+  if (next && /^\/(invite|works|homes|workers|d|k|protokol|kiraye)\/[A-Za-z0-9_/?=&-]{1,80}$/.test(next)) return { forceRedirectUrl: `${basePath}${next}` };
   return qs.get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {};
 }
 function SignUpPage() { const c=authCopy(); const realtor=!!new URLSearchParams(window.location.search).get('realtor'); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${window.location.search}`} {...realtorRedirect()}/></div></div>; }
-function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/homes"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
+function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/kiraye"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
 function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   const [msg, setMsg] = useState<FeedbackMsg | null>(null);
   useEffect(() => onFeedback(m => setMsg(m)), []);
@@ -421,6 +426,11 @@ function ClerkRoutes() {
       <Route path="/h/:publicId">{params => <PublicSuspense t={t}><PublicHomePage publicId={params.publicId}/></PublicSuspense>}</Route>
       <Route path="/w/:workerId">{params => <PublicSuspense t={t}><PublicWorkerPage workerId={params.workerId}/></PublicSuspense>}</Route>
       <Route path="/invite/:token">{params => <PublicSuspense t={t}><InviteAcceptPage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/kiraye">{() => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr' }]} lang={lang} change={changeLang} t={t}><RentalListPage/></ProtocolShell>}</Route>
+      <Route path="/kiraye/yeni">{() => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Yeni' }]} lang={lang} change={changeLang} t={t}><RentalNewPage/></ProtocolShell>}</Route>
+      <Route path="/kiraye/:id">{params => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Kirayə' }]} lang={lang} change={changeLang} t={t}><RentalPage id={params.id}/></ProtocolShell>}</Route>
+      <Route path="/k/:token">{params => <PublicSuspense t={t}><RentalInvitePage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/admin/statistika">{() => <ProtocolShell active="settingsNav" crumbs={[{ label: 'Statistika' }]} lang={lang} change={changeLang} t={t}><RentalStatsPage/></ProtocolShell>}</Route>
       <Route path="/protokollar">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları' }]} lang={lang} change={changeLang} t={t}><ProtocolListPage/></ProtocolShell>}</Route>
       <Route path="/protokol/yeni">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları', href: '/protokollar' }, { label: 'Yeni' }]} lang={lang} change={changeLang} t={t}><ProtocolNewPage/></ProtocolShell>}</Route>
       <Route path="/protokol/:id">{params => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları', href: '/protokollar' }, { label: 'Protokol' }]} lang={lang} change={changeLang} t={t}><ProtocolPage id={params.id}/></ProtocolShell>}</Route>

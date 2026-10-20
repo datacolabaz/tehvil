@@ -12247,9 +12247,12 @@ export const AddProtocolMediaBody = zod.object({
 })).max(addProtocolMediaBodyFilesMax),
   "roomId": zod.string().uuid().nullish(),
   "defectId": zod.string().uuid().nullish(),
-  "target": zod.enum(['room', 'defect', 'meter', 'keys', 'other']),
+  "itemId": zod.string().uuid().nullish(),
+  "target": zod.enum(['room', 'item', 'defect', 'meter', 'keys', 'other']),
   "meterKind": zod.union([zod.literal('water'),zod.literal('gas'),zod.literal('electric'),zod.literal(null)]).nullish(),
-  "caption": zod.string().min(addProtocolMediaBodyCaptionMin).max(addProtocolMediaBodyCaptionMax).optional()
+  "caption": zod.string().min(addProtocolMediaBodyCaptionMin).max(addProtocolMediaBodyCaptionMax).optional(),
+  "takenAt": zod.string().datetime({"offset":true}).nullish(),
+  "takenSource": zod.union([zod.literal('camera'),zod.literal('exif'),zod.literal(null)]).nullish()
 })
 
 export const AddProtocolMediaResponse = zod.object({
@@ -12495,6 +12498,366 @@ export const AcceptProtocolInviteResponse = zod.object({
   "approvals": zod.unknown(),
   "events": zod.unknown(),
   "me": zod.unknown()
+})
+
+
+/**
+ * @summary Rentals I take part in (landlord, manager, tenant, realtor)
+ */
+export const ListRentalsResponseItem = zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "address": zod.string(),
+  "myRole": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "moveIn": zod.string().nullable(),
+  "moveOut": zod.string().nullable(),
+  "updatedAt": zod.string().datetime({"offset":true})
+})
+export const ListRentalsResponse = zod.array(ListRentalsResponseItem)
+
+
+/**
+ * @summary Create a rental with its move-in protocol
+ */
+export const createRentalBodyAddressMin = 3;
+export const createRentalBodyAddressMax = 300;
+
+export const createRentalBodyLandlordNameMin = 0;
+export const createRentalBodyLandlordNameMax = 160;
+
+export const createRentalBodyLandlordPhoneMin = 0;
+export const createRentalBodyLandlordPhoneMax = 40;
+
+export const createRentalBodyTenantNameMin = 0;
+export const createRentalBodyTenantNameMax = 160;
+
+export const createRentalBodyTenantPhoneMin = 0;
+export const createRentalBodyTenantPhoneMax = 40;
+
+export const createRentalBodyRealtorNameMin = 0;
+export const createRentalBodyRealtorNameMax = 160;
+
+export const createRentalBodyRealtorPhoneMin = 0;
+export const createRentalBodyRealtorPhoneMax = 40;
+
+
+
+export const CreateRentalBody = zod.object({
+  "role": zod.enum(['landlord', 'tenant', 'realtor']),
+  "propertyType": zod.enum(['apartment', 'house', 'other']).optional(),
+  "address": zod.string().min(createRentalBodyAddressMin).max(createRentalBodyAddressMax),
+  "landlordName": zod.string().min(createRentalBodyLandlordNameMin).max(createRentalBodyLandlordNameMax).optional(),
+  "landlordPhone": zod.string().min(createRentalBodyLandlordPhoneMin).max(createRentalBodyLandlordPhoneMax).optional(),
+  "tenantName": zod.string().min(createRentalBodyTenantNameMin).max(createRentalBodyTenantNameMax).optional(),
+  "tenantPhone": zod.string().min(createRentalBodyTenantPhoneMin).max(createRentalBodyTenantPhoneMax).optional(),
+  "realtorName": zod.string().min(createRentalBodyRealtorNameMin).max(createRentalBodyRealtorNameMax).optional(),
+  "realtorPhone": zod.string().min(createRentalBodyRealtorPhoneMin).max(createRentalBodyRealtorPhoneMax).optional(),
+  "startDate": zod.string().date().nullish(),
+  "endDate": zod.string().date().nullish(),
+  "monthlyRent": zod.number().int().nullish(),
+  "deposit": zod.number().int().nullish(),
+  "currency": zod.enum(['AZN', 'USD', 'EUR']).optional()
+})
+
+export const CreateRentalResponse = zod.object({
+  "rental": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "protocols": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Rental with parties, invitations and its protocols
+ */
+export const GetRentalParams = zod.object({
+  "rentalId": zod.coerce.string().uuid()
+})
+
+export const GetRentalResponse = zod.object({
+  "rental": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "protocols": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Edit rental details
+ */
+export const UpdateRentalParams = zod.object({
+  "rentalId": zod.coerce.string().uuid()
+})
+
+export const updateRentalBodyAddressMin = 3;
+export const updateRentalBodyAddressMax = 300;
+
+export const updateRentalBodyLandlordNameMin = 0;
+export const updateRentalBodyLandlordNameMax = 160;
+
+export const updateRentalBodyLandlordPhoneMin = 0;
+export const updateRentalBodyLandlordPhoneMax = 40;
+
+export const updateRentalBodyTenantNameMin = 0;
+export const updateRentalBodyTenantNameMax = 160;
+
+export const updateRentalBodyTenantPhoneMin = 0;
+export const updateRentalBodyTenantPhoneMax = 40;
+
+export const updateRentalBodyRealtorNameMin = 0;
+export const updateRentalBodyRealtorNameMax = 160;
+
+export const updateRentalBodyRealtorPhoneMin = 0;
+export const updateRentalBodyRealtorPhoneMax = 40;
+
+export const updateRentalBodyNotesMin = 0;
+export const updateRentalBodyNotesMax = 4000;
+
+
+
+export const UpdateRentalBody = zod.object({
+  "propertyType": zod.enum(['apartment', 'house', 'other']).optional(),
+  "address": zod.string().min(updateRentalBodyAddressMin).max(updateRentalBodyAddressMax).optional(),
+  "landlordName": zod.string().min(updateRentalBodyLandlordNameMin).max(updateRentalBodyLandlordNameMax).optional(),
+  "landlordPhone": zod.string().min(updateRentalBodyLandlordPhoneMin).max(updateRentalBodyLandlordPhoneMax).optional(),
+  "tenantName": zod.string().min(updateRentalBodyTenantNameMin).max(updateRentalBodyTenantNameMax).optional(),
+  "tenantPhone": zod.string().min(updateRentalBodyTenantPhoneMin).max(updateRentalBodyTenantPhoneMax).optional(),
+  "realtorName": zod.string().min(updateRentalBodyRealtorNameMin).max(updateRentalBodyRealtorNameMax).optional(),
+  "realtorPhone": zod.string().min(updateRentalBodyRealtorPhoneMin).max(updateRentalBodyRealtorPhoneMax).optional(),
+  "startDate": zod.string().date().nullish(),
+  "endDate": zod.string().date().nullish(),
+  "monthlyRent": zod.number().int().nullish(),
+  "deposit": zod.number().int().nullish(),
+  "currency": zod.enum(['AZN', 'USD', 'EUR']).optional(),
+  "notes": zod.string().min(updateRentalBodyNotesMin).max(updateRentalBodyNotesMax).optional()
+})
+
+export const UpdateRentalResponse = zod.object({
+  "rental": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "protocols": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Archive (creator); approved protocols stay as records
+ */
+export const ArchiveRentalParams = zod.object({
+  "rentalId": zod.coerce.string().uuid()
+})
+
+export const ArchiveRentalResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Invitation link for the other party, with or without editing rights
+ */
+export const CreateRentalInviteParams = zod.object({
+  "rentalId": zod.coerce.string().uuid()
+})
+
+export const CreateRentalInviteBody = zod.object({
+  "role": zod.enum(['landlord', 'tenant', 'realtor']),
+  "canEdit": zod.boolean().optional()
+})
+
+export const CreateRentalInviteResponse = zod.object({
+  "id": zod.string(),
+  "role": zod.string(),
+  "url": zod.string()
+})
+
+
+/**
+ * @summary Revoke an invitation link
+ */
+export const RevokeRentalInviteParams = zod.object({
+  "rentalId": zod.coerce.string().uuid(),
+  "inviteId": zod.coerce.string().uuid()
+})
+
+export const RevokeRentalInviteResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Start the move-out protocol from the move-in one (rooms, items, photos for comparison)
+ */
+export const CreateMoveOutParams = zod.object({
+  "rentalId": zod.coerce.string().uuid()
+})
+
+export const CreateMoveOutResponse = zod.object({
+  "rental": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "protocols": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary What a rental invitation shows (no sign-in)
+ */
+export const getRentalInvitePathTokenMin = 20;
+export const getRentalInvitePathTokenMax = 64;
+
+
+export const getRentalInvitePathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const GetRentalInviteParams = zod.object({
+  "token": zod.coerce.string().min(getRentalInvitePathTokenMin).max(getRentalInvitePathTokenMax).regex(getRentalInvitePathTokenRegExp)
+})
+
+export const GetRentalInviteResponse = zod.object({
+  "role": zod.string(),
+  "canEdit": zod.boolean(),
+  "used": zod.boolean(),
+  "usedByMe": zod.boolean(),
+  "rentalId": zod.string(),
+  "detail": zod.unknown()
+})
+
+
+/**
+ * @summary Join the rental in the invited role (signed in)
+ */
+export const acceptRentalInvitePathTokenMin = 20;
+export const acceptRentalInvitePathTokenMax = 64;
+
+
+export const acceptRentalInvitePathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const AcceptRentalInviteParams = zod.object({
+  "token": zod.coerce.string().min(acceptRentalInvitePathTokenMin).max(acceptRentalInvitePathTokenMax).regex(acceptRentalInvitePathTokenRegExp)
+})
+
+export const AcceptRentalInviteResponse = zod.object({
+  "rental": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "protocols": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Add an item to a room (furniture, appliance…)
+ */
+export const AddProtocolItemParams = zod.object({
+  "protocolId": zod.coerce.string().uuid()
+})
+
+export const addProtocolItemBodyNameMax = 120;
+
+export const addProtocolItemBodyNoteMin = 0;
+export const addProtocolItemBodyNoteMax = 2000;
+
+
+
+export const AddProtocolItemBody = zod.object({
+  "roomId": zod.string().uuid().nullish(),
+  "name": zod.string().min(1).max(addProtocolItemBodyNameMax).optional(),
+  "category": zod.enum(['wall', 'floor', 'ceiling', 'window', 'door', 'furniture', 'appliance', 'other']).optional(),
+  "quantity": zod.number().int().optional(),
+  "condition": zod.union([zod.literal('good'),zod.literal('fair'),zod.literal('defective'),zod.literal(null)]).nullish(),
+  "note": zod.string().min(addProtocolItemBodyNoteMin).max(addProtocolItemBodyNoteMax).optional(),
+  "change": zod.union([zod.literal('unchanged'),zod.literal('new_damage'),zod.literal('changed'),zod.literal('resolved'),zod.literal('missing'),zod.literal(null)]).nullish()
+})
+
+export const AddProtocolItemResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Condition, note, quantity or move-out change of an item
+ */
+export const UpdateProtocolItemParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "itemId": zod.coerce.string().uuid()
+})
+
+export const updateProtocolItemBodyNameMax = 120;
+
+export const updateProtocolItemBodyNoteMin = 0;
+export const updateProtocolItemBodyNoteMax = 2000;
+
+
+
+export const UpdateProtocolItemBody = zod.object({
+  "roomId": zod.string().uuid().nullish(),
+  "name": zod.string().min(1).max(updateProtocolItemBodyNameMax).optional(),
+  "category": zod.enum(['wall', 'floor', 'ceiling', 'window', 'door', 'furniture', 'appliance', 'other']).optional(),
+  "quantity": zod.number().int().optional(),
+  "condition": zod.union([zod.literal('good'),zod.literal('fair'),zod.literal('defective'),zod.literal(null)]).nullish(),
+  "note": zod.string().min(updateProtocolItemBodyNoteMin).max(updateProtocolItemBodyNoteMax).optional(),
+  "change": zod.union([zod.literal('unchanged'),zod.literal('new_damage'),zod.literal('changed'),zod.literal('resolved'),zod.literal('missing'),zod.literal(null)]).nullish()
+})
+
+export const UpdateProtocolItemResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Remove an item
+ */
+export const DeleteProtocolItemParams = zod.object({
+  "protocolId": zod.coerce.string().uuid(),
+  "itemId": zod.coerce.string().uuid()
+})
+
+export const DeleteProtocolItemResponse = zod.object({
+  "protocol": zod.unknown(),
+  "rooms": zod.unknown(),
+  "defects": zod.unknown(),
+  "media": zod.unknown(),
+  "participants": zod.unknown(),
+  "invites": zod.unknown(),
+  "versions": zod.unknown(),
+  "approvals": zod.unknown(),
+  "events": zod.unknown(),
+  "me": zod.unknown()
+})
+
+
+/**
+ * @summary Usage numbers for administrators (from the database)
+ */
+export const GetRentalStatsResponse = zod.object({
+  "stats": zod.unknown()
 })
 
 

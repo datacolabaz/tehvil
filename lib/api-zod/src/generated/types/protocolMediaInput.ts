@@ -7,6 +7,7 @@
  */
 import type { MediaInput } from './mediaInput';
 import type { ProtocolMediaInputMeterKind } from './protocolMediaInputMeterKind';
+import type { ProtocolMediaInputTakenSource } from './protocolMediaInputTakenSource';
 import type { ProtocolMediaInputTarget } from './protocolMediaInputTarget';
 
 export interface ProtocolMediaInput {
@@ -16,6 +17,8 @@ export interface ProtocolMediaInput {
   roomId?: string | null;
   /** @nullable */
   defectId?: string | null;
+  /** @nullable */
+  itemId?: string | null;
   target: ProtocolMediaInputTarget;
   /** @nullable */
   meterKind?: ProtocolMediaInputMeterKind;
@@ -24,4 +27,8 @@ export interface ProtocolMediaInput {
      * @maxLength 300
      */
   caption?: string;
+  /** @nullable */
+  takenAt?: string | null;
+  /** @nullable */
+  takenSource?: ProtocolMediaInputTakenSource;
 }

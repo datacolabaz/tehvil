@@ -5119,6 +5119,7 @@ export type ProtocolMediaInputTarget = typeof ProtocolMediaInputTarget[keyof typ
 
 export const ProtocolMediaInputTarget = {
   room: 'room',
+  item: 'item',
   defect: 'defect',
   meter: 'meter',
   keys: 'keys',
@@ -5137,6 +5138,17 @@ export const ProtocolMediaInputMeterKind = {
   electric: 'electric',
 } as const;
 
+/**
+ * @nullable
+ */
+export type ProtocolMediaInputTakenSource = typeof ProtocolMediaInputTakenSource[keyof typeof ProtocolMediaInputTakenSource] | null;
+
+
+export const ProtocolMediaInputTakenSource = {
+  camera: 'camera',
+  exif: 'exif',
+} as const;
+
 export interface ProtocolMediaInput {
   /** @maxItems 10 */
   files: MediaInput[];
@@ -5144,6 +5156,8 @@ export interface ProtocolMediaInput {
   roomId?: string | null;
   /** @nullable */
   defectId?: string | null;
+  /** @nullable */
+  itemId?: string | null;
   target: ProtocolMediaInputTarget;
   /** @nullable */
   meterKind?: ProtocolMediaInputMeterKind;
@@ -5152,6 +5166,269 @@ export interface ProtocolMediaInput {
      * @maxLength 300
      */
   caption?: string;
+  /** @nullable */
+  takenAt?: string | null;
+  /** @nullable */
+  takenSource?: ProtocolMediaInputTakenSource;
+}
+
+export type ProtocolItemInputCategory = typeof ProtocolItemInputCategory[keyof typeof ProtocolItemInputCategory];
+
+
+export const ProtocolItemInputCategory = {
+  wall: 'wall',
+  floor: 'floor',
+  ceiling: 'ceiling',
+  window: 'window',
+  door: 'door',
+  furniture: 'furniture',
+  appliance: 'appliance',
+  other: 'other',
+} as const;
+
+/**
+ * @nullable
+ */
+export type ProtocolItemInputCondition = typeof ProtocolItemInputCondition[keyof typeof ProtocolItemInputCondition] | null;
+
+
+export const ProtocolItemInputCondition = {
+  good: 'good',
+  fair: 'fair',
+  defective: 'defective',
+} as const;
+
+/**
+ * @nullable
+ */
+export type ProtocolItemInputChange = typeof ProtocolItemInputChange[keyof typeof ProtocolItemInputChange] | null;
+
+
+export const ProtocolItemInputChange = {
+  unchanged: 'unchanged',
+  new_damage: 'new_damage',
+  changed: 'changed',
+  resolved: 'resolved',
+  missing: 'missing',
+} as const;
+
+export interface ProtocolItemInput {
+  /** @nullable */
+  roomId?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name?: string;
+  category?: ProtocolItemInputCategory;
+  quantity?: number;
+  /** @nullable */
+  condition?: ProtocolItemInputCondition;
+  /**
+     * @minLength 0
+     * @maxLength 2000
+     */
+  note?: string;
+  /** @nullable */
+  change?: ProtocolItemInputChange;
+}
+
+export type RentalCreateInputRole = typeof RentalCreateInputRole[keyof typeof RentalCreateInputRole];
+
+
+export const RentalCreateInputRole = {
+  landlord: 'landlord',
+  tenant: 'tenant',
+  realtor: 'realtor',
+} as const;
+
+export type RentalCreateInputPropertyType = typeof RentalCreateInputPropertyType[keyof typeof RentalCreateInputPropertyType];
+
+
+export const RentalCreateInputPropertyType = {
+  apartment: 'apartment',
+  house: 'house',
+  other: 'other',
+} as const;
+
+export type RentalCreateInputCurrency = typeof RentalCreateInputCurrency[keyof typeof RentalCreateInputCurrency];
+
+
+export const RentalCreateInputCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+  EUR: 'EUR',
+} as const;
+
+export interface RentalCreateInput {
+  role: RentalCreateInputRole;
+  propertyType?: RentalCreateInputPropertyType;
+  /**
+     * @minLength 3
+     * @maxLength 300
+     */
+  address: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  landlordName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  landlordPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  tenantName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  tenantPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  realtorName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  realtorPhone?: string;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
+  /** @nullable */
+  monthlyRent?: number | null;
+  /** @nullable */
+  deposit?: number | null;
+  currency?: RentalCreateInputCurrency;
+}
+
+export type RentalPatchPropertyType = typeof RentalPatchPropertyType[keyof typeof RentalPatchPropertyType];
+
+
+export const RentalPatchPropertyType = {
+  apartment: 'apartment',
+  house: 'house',
+  other: 'other',
+} as const;
+
+export type RentalPatchCurrency = typeof RentalPatchCurrency[keyof typeof RentalPatchCurrency];
+
+
+export const RentalPatchCurrency = {
+  AZN: 'AZN',
+  USD: 'USD',
+  EUR: 'EUR',
+} as const;
+
+export interface RentalPatch {
+  propertyType?: RentalPatchPropertyType;
+  /**
+     * @minLength 3
+     * @maxLength 300
+     */
+  address?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  landlordName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  landlordPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  tenantName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  tenantPhone?: string;
+  /**
+     * @minLength 0
+     * @maxLength 160
+     */
+  realtorName?: string;
+  /**
+     * @minLength 0
+     * @maxLength 40
+     */
+  realtorPhone?: string;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  endDate?: string | null;
+  /** @nullable */
+  monthlyRent?: number | null;
+  /** @nullable */
+  deposit?: number | null;
+  currency?: RentalPatchCurrency;
+  /**
+     * @minLength 0
+     * @maxLength 4000
+     */
+  notes?: string;
+}
+
+export interface RentalDetail {
+  rental: unknown;
+  participants: unknown;
+  invites: unknown;
+  protocols: unknown;
+  me: unknown;
+}
+
+export interface RentalSummary {
+  id: string;
+  number: string;
+  address: string;
+  myRole: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  /** @nullable */
+  moveIn: string | null;
+  /** @nullable */
+  moveOut: string | null;
+  updatedAt: string;
+}
+
+export type RentalInviteInputRole = typeof RentalInviteInputRole[keyof typeof RentalInviteInputRole];
+
+
+export const RentalInviteInputRole = {
+  landlord: 'landlord',
+  tenant: 'tenant',
+  realtor: 'realtor',
+} as const;
+
+export interface RentalInviteInput {
+  role: RentalInviteInputRole;
+  canEdit?: boolean;
+}
+
+export interface RentalInvitePreview {
+  role: string;
+  canEdit: boolean;
+  used: boolean;
+  usedByMe: boolean;
+  rentalId: string;
+  detail: unknown;
+}
+
+export interface AdminRentalStats {
+  stats: unknown;
 }
 
 export type ProtocolInviteInputRole = typeof ProtocolInviteInputRole[keyof typeof ProtocolInviteInputRole];

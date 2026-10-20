@@ -21,6 +21,7 @@ import passportRouter from "./passport";
 import valuationRouter from "./valuation";
 import pricesRouter, { pricesPublicRouter } from "./prices";
 import protocolsRouter, { protocolPublicRouter } from "./protocols";
+import rentalsRouter, { rentalPublicRouter } from "./rentals";
 
 const router: IRouter = Router();
 
@@ -30,6 +31,7 @@ router.use(realtorPublicRouter);
 router.use(homePublicRouter);
 router.use(pricesPublicRouter);
 router.use(protocolPublicRouter);
+router.use(rentalPublicRouter);
 router.use(storageRouter);
 router.use(lifecycleRouter);
 router.use(requireAuth);
@@ -48,5 +50,6 @@ router.use(passportRouter);
 router.use(valuationRouter);
 router.use(pricesRouter);
 router.use(protocolsRouter);
+router.use(rentalsRouter);
 
 export default router;

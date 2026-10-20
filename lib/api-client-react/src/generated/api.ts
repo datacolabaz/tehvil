@@ -21,6 +21,7 @@ import type {
 
 import type {
   ActionResult,
+  AdminRentalStats,
   ApprovalInput,
   AuditEntry,
   ChangeOrder,
@@ -109,6 +110,7 @@ import type {
   ProtocolInviteInput,
   ProtocolInviteLink,
   ProtocolInvitePreview,
+  ProtocolItemInput,
   ProtocolMediaInput,
   ProtocolPatch,
   ProtocolRoomInput,
@@ -141,6 +143,12 @@ import type {
   RealtorWhatsappInput,
   RealtorWhatsappSettings,
   Reminder,
+  RentalCreateInput,
+  RentalDetail,
+  RentalInviteInput,
+  RentalInvitePreview,
+  RentalPatch,
+  RentalSummary,
   RepairEstimate,
   RepairEstimateInput,
   RepairEstimateSummary,
@@ -15276,6 +15284,1134 @@ export const useAcceptProtocolInvite = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getAcceptProtocolInviteMutationOptions(options));
     }
+
+export const getListRentalsUrl = () => {
+
+
+
+
+  return `/api/rentals`
+}
+
+/**
+ * @summary Rentals I take part in (landlord, manager, tenant, realtor)
+ */
+export const listRentals = async ( options?: Parameters<typeof customFetch>[1]): Promise<RentalSummary[]> => {
+
+  return customFetch<RentalSummary[]>(getListRentalsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRentalsQueryKey = () => {
+    return [
+    `/api/rentals`
+    ] as const;
+    }
+
+
+export const getListRentalsQueryOptions = <TData = Awaited<ReturnType<typeof listRentals>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRentals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRentalsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRentals>>> = ({ signal }) => listRentals({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRentals>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListRentalsQueryResult = NonNullable<Awaited<ReturnType<typeof listRentals>>>
+export type ListRentalsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Rentals I take part in (landlord, manager, tenant, realtor)
+ */
+
+export function useListRentals<TData = Awaited<ReturnType<typeof listRentals>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRentals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListRentalsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateRentalUrl = () => {
+
+
+
+
+  return `/api/rentals`
+}
+
+/**
+ * @summary Create a rental with its move-in protocol
+ */
+export const createRental = async (rentalCreateInput: RentalCreateInput, options?: Parameters<typeof customFetch>[1]): Promise<RentalDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RentalDetail>(getCreateRentalUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(rentalCreateInput)
+  }
+);}
+
+
+
+
+
+export const getCreateRentalMutationKey = () => ['createRental'] as const;
+
+export const getCreateRentalMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRental>>, TError,CreateRentalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRental>>, TError,CreateRentalMutationVariables, TContext> => {
+
+const mutationKey = getCreateRentalMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRental>>, CreateRentalMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createRental(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRentalMutationResult = NonNullable<Awaited<ReturnType<typeof createRental>>>
+    export type CreateRentalMutationBody = BodyType<RentalCreateInput>
+    export type CreateRentalMutationError = ErrorType<unknown>
+    export type CreateRentalMutationVariables = {data: BodyType<RentalCreateInput>}
+
+    /**
+ * @summary Create a rental with its move-in protocol
+ */
+export const useCreateRental = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRental>>, TError,CreateRentalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createRental>>,
+        TError,
+        CreateRentalMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateRentalMutationOptions(options));
+    }
+
+export const getGetRentalUrl = (rentalId: string,) => {
+
+
+
+
+  return `/api/rentals/${rentalId}`
+}
+
+/**
+ * @summary Rental with parties, invitations and its protocols
+ */
+export const getRental = async (rentalId: string, options?: Parameters<typeof customFetch>[1]): Promise<RentalDetail> => {
+
+  return customFetch<RentalDetail>(getGetRentalUrl(rentalId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRentalQueryKey = (rentalId: string,) => {
+    return [
+    `/api/rentals/${rentalId}`
+    ] as const;
+    }
+
+
+export const getGetRentalQueryOptions = <TData = Awaited<ReturnType<typeof getRental>>, TError = ErrorType<unknown>>(rentalId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRental>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRentalQueryKey(rentalId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRental>>> = ({ signal }) => getRental(rentalId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: rentalId !== null && rentalId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRental>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRentalQueryResult = NonNullable<Awaited<ReturnType<typeof getRental>>>
+export type GetRentalQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Rental with parties, invitations and its protocols
+ */
+
+export function useGetRental<TData = Awaited<ReturnType<typeof getRental>>, TError = ErrorType<unknown>>(
+ rentalId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRental>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRentalQueryOptions(rentalId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateRentalUrl = (rentalId: string,) => {
+
+
+
+
+  return `/api/rentals/${rentalId}`
+}
+
+/**
+ * @summary Edit rental details
+ */
+export const updateRental = async (rentalId: string,
+    rentalPatch: RentalPatch, options?: Parameters<typeof customFetch>[1]): Promise<RentalDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RentalDetail>(getUpdateRentalUrl(rentalId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(rentalPatch)
+  }
+);}
+
+
+
+
+
+export const getUpdateRentalMutationKey = () => ['updateRental'] as const;
+
+export const getUpdateRentalMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRental>>, TError,UpdateRentalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRental>>, TError,UpdateRentalMutationVariables, TContext> => {
+
+const mutationKey = getUpdateRentalMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRental>>, UpdateRentalMutationVariables> = (props) => {
+          const {rentalId,data} = props ?? {};
+
+          return  updateRental(rentalId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRentalMutationResult = NonNullable<Awaited<ReturnType<typeof updateRental>>>
+    export type UpdateRentalMutationBody = BodyType<RentalPatch>
+    export type UpdateRentalMutationError = ErrorType<unknown>
+    export type UpdateRentalMutationVariables = {rentalId: string;data: BodyType<RentalPatch>}
+
+    /**
+ * @summary Edit rental details
+ */
+export const useUpdateRental = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRental>>, TError,UpdateRentalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRental>>,
+        TError,
+        UpdateRentalMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateRentalMutationOptions(options));
+    }
+
+export const getArchiveRentalUrl = (rentalId: string,) => {
+
+
+
+
+  return `/api/rentals/${rentalId}`
+}
+
+/**
+ * @summary Archive (creator); approved protocols stay as records
+ */
+export const archiveRental = async (rentalId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getArchiveRentalUrl(rentalId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getArchiveRentalMutationKey = () => ['archiveRental'] as const;
+
+export const getArchiveRentalMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof archiveRental>>, TError,ArchiveRentalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof archiveRental>>, TError,ArchiveRentalMutationVariables, TContext> => {
+
+const mutationKey = getArchiveRentalMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof archiveRental>>, ArchiveRentalMutationVariables> = (props) => {
+          const {rentalId} = props ?? {};
+
+          return  archiveRental(rentalId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ArchiveRentalMutationResult = NonNullable<Awaited<ReturnType<typeof archiveRental>>>
+
+    export type ArchiveRentalMutationError = ErrorType<unknown>
+    export type ArchiveRentalMutationVariables = {rentalId: string}
+
+    /**
+ * @summary Archive (creator); approved protocols stay as records
+ */
+export const useArchiveRental = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof archiveRental>>, TError,ArchiveRentalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof archiveRental>>,
+        TError,
+        ArchiveRentalMutationVariables,
+        TContext
+      > => {
+      return useMutation(getArchiveRentalMutationOptions(options));
+    }
+
+export const getCreateRentalInviteUrl = (rentalId: string,) => {
+
+
+
+
+  return `/api/rentals/${rentalId}/invites`
+}
+
+/**
+ * @summary Invitation link for the other party, with or without editing rights
+ */
+export const createRentalInvite = async (rentalId: string,
+    rentalInviteInput: RentalInviteInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolInviteLink> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolInviteLink>(getCreateRentalInviteUrl(rentalId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(rentalInviteInput)
+  }
+);}
+
+
+
+
+
+export const getCreateRentalInviteMutationKey = () => ['createRentalInvite'] as const;
+
+export const getCreateRentalInviteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRentalInvite>>, TError,CreateRentalInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRentalInvite>>, TError,CreateRentalInviteMutationVariables, TContext> => {
+
+const mutationKey = getCreateRentalInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRentalInvite>>, CreateRentalInviteMutationVariables> = (props) => {
+          const {rentalId,data} = props ?? {};
+
+          return  createRentalInvite(rentalId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateRentalInviteMutationResult = NonNullable<Awaited<ReturnType<typeof createRentalInvite>>>
+    export type CreateRentalInviteMutationBody = BodyType<RentalInviteInput>
+    export type CreateRentalInviteMutationError = ErrorType<unknown>
+    export type CreateRentalInviteMutationVariables = {rentalId: string;data: BodyType<RentalInviteInput>}
+
+    /**
+ * @summary Invitation link for the other party, with or without editing rights
+ */
+export const useCreateRentalInvite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRentalInvite>>, TError,CreateRentalInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createRentalInvite>>,
+        TError,
+        CreateRentalInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateRentalInviteMutationOptions(options));
+    }
+
+export const getRevokeRentalInviteUrl = (rentalId: string,
+    inviteId: string,) => {
+
+
+
+
+  return `/api/rentals/${rentalId}/invites/${inviteId}`
+}
+
+/**
+ * @summary Revoke an invitation link
+ */
+export const revokeRentalInvite = async (rentalId: string,
+    inviteId: string, options?: Parameters<typeof customFetch>[1]): Promise<ActionResult> => {
+
+  return customFetch<ActionResult>(getRevokeRentalInviteUrl(rentalId,inviteId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokeRentalInviteMutationKey = () => ['revokeRentalInvite'] as const;
+
+export const getRevokeRentalInviteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeRentalInvite>>, TError,RevokeRentalInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeRentalInvite>>, TError,RevokeRentalInviteMutationVariables, TContext> => {
+
+const mutationKey = getRevokeRentalInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeRentalInvite>>, RevokeRentalInviteMutationVariables> = (props) => {
+          const {rentalId,inviteId} = props ?? {};
+
+          return  revokeRentalInvite(rentalId,inviteId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeRentalInviteMutationResult = NonNullable<Awaited<ReturnType<typeof revokeRentalInvite>>>
+
+    export type RevokeRentalInviteMutationError = ErrorType<unknown>
+    export type RevokeRentalInviteMutationVariables = {rentalId: string;inviteId: string}
+
+    /**
+ * @summary Revoke an invitation link
+ */
+export const useRevokeRentalInvite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeRentalInvite>>, TError,RevokeRentalInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof revokeRentalInvite>>,
+        TError,
+        RevokeRentalInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevokeRentalInviteMutationOptions(options));
+    }
+
+export const getCreateMoveOutUrl = (rentalId: string,) => {
+
+
+
+
+  return `/api/rentals/${rentalId}/move-out`
+}
+
+/**
+ * @summary Start the move-out protocol from the move-in one (rooms, items, photos for comparison)
+ */
+export const createMoveOut = async (rentalId: string, options?: Parameters<typeof customFetch>[1]): Promise<RentalDetail> => {
+
+  return customFetch<RentalDetail>(getCreateMoveOutUrl(rentalId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCreateMoveOutMutationKey = () => ['createMoveOut'] as const;
+
+export const getCreateMoveOutMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMoveOut>>, TError,CreateMoveOutMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createMoveOut>>, TError,CreateMoveOutMutationVariables, TContext> => {
+
+const mutationKey = getCreateMoveOutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createMoveOut>>, CreateMoveOutMutationVariables> = (props) => {
+          const {rentalId} = props ?? {};
+
+          return  createMoveOut(rentalId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateMoveOutMutationResult = NonNullable<Awaited<ReturnType<typeof createMoveOut>>>
+
+    export type CreateMoveOutMutationError = ErrorType<unknown>
+    export type CreateMoveOutMutationVariables = {rentalId: string}
+
+    /**
+ * @summary Start the move-out protocol from the move-in one (rooms, items, photos for comparison)
+ */
+export const useCreateMoveOut = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMoveOut>>, TError,CreateMoveOutMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createMoveOut>>,
+        TError,
+        CreateMoveOutMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateMoveOutMutationOptions(options));
+    }
+
+export const getGetRentalInviteUrl = (token: string,) => {
+
+
+
+
+  return `/api/rental-invites/${token}`
+}
+
+/**
+ * @summary What a rental invitation shows (no sign-in)
+ */
+export const getRentalInvite = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<RentalInvitePreview> => {
+
+  return customFetch<RentalInvitePreview>(getGetRentalInviteUrl(token),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRentalInviteQueryKey = (token: string,) => {
+    return [
+    `/api/rental-invites/${token}`
+    ] as const;
+    }
+
+
+export const getGetRentalInviteQueryOptions = <TData = Awaited<ReturnType<typeof getRentalInvite>>, TError = ErrorType<unknown>>(token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRentalInvite>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRentalInviteQueryKey(token);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRentalInvite>>> = ({ signal }) => getRentalInvite(token, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: token !== null && token !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRentalInvite>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRentalInviteQueryResult = NonNullable<Awaited<ReturnType<typeof getRentalInvite>>>
+export type GetRentalInviteQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary What a rental invitation shows (no sign-in)
+ */
+
+export function useGetRentalInvite<TData = Awaited<ReturnType<typeof getRentalInvite>>, TError = ErrorType<unknown>>(
+ token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRentalInvite>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRentalInviteQueryOptions(token,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAcceptRentalInviteUrl = (token: string,) => {
+
+
+
+
+  return `/api/rental-invites/${token}/accept`
+}
+
+/**
+ * @summary Join the rental in the invited role (signed in)
+ */
+export const acceptRentalInvite = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<RentalDetail> => {
+
+  return customFetch<RentalDetail>(getAcceptRentalInviteUrl(token),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAcceptRentalInviteMutationKey = () => ['acceptRentalInvite'] as const;
+
+export const getAcceptRentalInviteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptRentalInvite>>, TError,AcceptRentalInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof acceptRentalInvite>>, TError,AcceptRentalInviteMutationVariables, TContext> => {
+
+const mutationKey = getAcceptRentalInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptRentalInvite>>, AcceptRentalInviteMutationVariables> = (props) => {
+          const {token} = props ?? {};
+
+          return  acceptRentalInvite(token,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptRentalInviteMutationResult = NonNullable<Awaited<ReturnType<typeof acceptRentalInvite>>>
+
+    export type AcceptRentalInviteMutationError = ErrorType<unknown>
+    export type AcceptRentalInviteMutationVariables = {token: string}
+
+    /**
+ * @summary Join the rental in the invited role (signed in)
+ */
+export const useAcceptRentalInvite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptRentalInvite>>, TError,AcceptRentalInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof acceptRentalInvite>>,
+        TError,
+        AcceptRentalInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAcceptRentalInviteMutationOptions(options));
+    }
+
+export const getAddProtocolItemUrl = (protocolId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/items`
+}
+
+/**
+ * @summary Add an item to a room (furniture, appliance…)
+ */
+export const addProtocolItem = async (protocolId: string,
+    protocolItemInput: ProtocolItemInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getAddProtocolItemUrl(protocolId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolItemInput)
+  }
+);}
+
+
+
+
+
+export const getAddProtocolItemMutationKey = () => ['addProtocolItem'] as const;
+
+export const getAddProtocolItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addProtocolItem>>, TError,AddProtocolItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addProtocolItem>>, TError,AddProtocolItemMutationVariables, TContext> => {
+
+const mutationKey = getAddProtocolItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addProtocolItem>>, AddProtocolItemMutationVariables> = (props) => {
+          const {protocolId,data} = props ?? {};
+
+          return  addProtocolItem(protocolId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddProtocolItemMutationResult = NonNullable<Awaited<ReturnType<typeof addProtocolItem>>>
+    export type AddProtocolItemMutationBody = BodyType<ProtocolItemInput>
+    export type AddProtocolItemMutationError = ErrorType<unknown>
+    export type AddProtocolItemMutationVariables = {protocolId: string;data: BodyType<ProtocolItemInput>}
+
+    /**
+ * @summary Add an item to a room (furniture, appliance…)
+ */
+export const useAddProtocolItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addProtocolItem>>, TError,AddProtocolItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addProtocolItem>>,
+        TError,
+        AddProtocolItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddProtocolItemMutationOptions(options));
+    }
+
+export const getUpdateProtocolItemUrl = (protocolId: string,
+    itemId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/items/${itemId}`
+}
+
+/**
+ * @summary Condition, note, quantity or move-out change of an item
+ */
+export const updateProtocolItem = async (protocolId: string,
+    itemId: string,
+    protocolItemInput: ProtocolItemInput, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProtocolDetail>(getUpdateProtocolItemUrl(protocolId,itemId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(protocolItemInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateProtocolItemMutationKey = () => ['updateProtocolItem'] as const;
+
+export const getUpdateProtocolItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProtocolItem>>, TError,UpdateProtocolItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateProtocolItem>>, TError,UpdateProtocolItemMutationVariables, TContext> => {
+
+const mutationKey = getUpdateProtocolItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProtocolItem>>, UpdateProtocolItemMutationVariables> = (props) => {
+          const {protocolId,itemId,data} = props ?? {};
+
+          return  updateProtocolItem(protocolId,itemId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateProtocolItemMutationResult = NonNullable<Awaited<ReturnType<typeof updateProtocolItem>>>
+    export type UpdateProtocolItemMutationBody = BodyType<ProtocolItemInput>
+    export type UpdateProtocolItemMutationError = ErrorType<unknown>
+    export type UpdateProtocolItemMutationVariables = {protocolId: string;itemId: string;data: BodyType<ProtocolItemInput>}
+
+    /**
+ * @summary Condition, note, quantity or move-out change of an item
+ */
+export const useUpdateProtocolItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProtocolItem>>, TError,UpdateProtocolItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateProtocolItem>>,
+        TError,
+        UpdateProtocolItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateProtocolItemMutationOptions(options));
+    }
+
+export const getDeleteProtocolItemUrl = (protocolId: string,
+    itemId: string,) => {
+
+
+
+
+  return `/api/protocols/${protocolId}/items/${itemId}`
+}
+
+/**
+ * @summary Remove an item
+ */
+export const deleteProtocolItem = async (protocolId: string,
+    itemId: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolDetail> => {
+
+  return customFetch<ProtocolDetail>(getDeleteProtocolItemUrl(protocolId,itemId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteProtocolItemMutationKey = () => ['deleteProtocolItem'] as const;
+
+export const getDeleteProtocolItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolItem>>, TError,DeleteProtocolItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolItem>>, TError,DeleteProtocolItemMutationVariables, TContext> => {
+
+const mutationKey = getDeleteProtocolItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProtocolItem>>, DeleteProtocolItemMutationVariables> = (props) => {
+          const {protocolId,itemId} = props ?? {};
+
+          return  deleteProtocolItem(protocolId,itemId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteProtocolItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProtocolItem>>>
+
+    export type DeleteProtocolItemMutationError = ErrorType<unknown>
+    export type DeleteProtocolItemMutationVariables = {protocolId: string;itemId: string}
+
+    /**
+ * @summary Remove an item
+ */
+export const useDeleteProtocolItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProtocolItem>>, TError,DeleteProtocolItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteProtocolItem>>,
+        TError,
+        DeleteProtocolItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteProtocolItemMutationOptions(options));
+    }
+
+export const getGetRentalStatsUrl = () => {
+
+
+
+
+  return `/api/admin/rental-stats`
+}
+
+/**
+ * @summary Usage numbers for administrators (from the database)
+ */
+export const getRentalStats = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminRentalStats> => {
+
+  return customFetch<AdminRentalStats>(getGetRentalStatsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRentalStatsQueryKey = () => {
+    return [
+    `/api/admin/rental-stats`
+    ] as const;
+    }
+
+
+export const getGetRentalStatsQueryOptions = <TData = Awaited<ReturnType<typeof getRentalStats>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRentalStats>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRentalStatsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRentalStats>>> = ({ signal }) => getRentalStats({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRentalStats>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRentalStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getRentalStats>>>
+export type GetRentalStatsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Usage numbers for administrators (from the database)
+ */
+
+export function useGetRentalStats<TData = Awaited<ReturnType<typeof getRentalStats>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRentalStats>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRentalStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetMyRolesUrl = () => {
 

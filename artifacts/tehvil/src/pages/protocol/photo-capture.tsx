@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera, Check, ImagePlus, LoaderCircle, RotateCcw, Trash2, X } from 'lucide-react';
-import { PhotoError, preparePhoto, uploadPhoto, type Detail, type Media, type PhotoTarget } from '@/lib/protocol/model';
+import { PhotoError, photoTakenAt, preparePhoto, timeAz, uploadPhoto, type Detail, type Media, type PhotoTarget } from '@/lib/protocol/model';
 
-interface Item { id: string; file: File; url: string; state: 'uploading' | 'error'; error: string }
+interface Item { id: string; file: File; url: string; state: 'uploading' | 'error'; error: string; camera: boolean }
 let seq = 0;
 
 /**
@@ -24,8 +24,11 @@ export function PhotoCapture({ protocolId, target, onSaved, compact = false, tes
   const send = async (item: Item) => {
     setQueue((q) => q.map((x) => (x.id === item.id ? { ...x, state: 'uploading', error: '' } : x)));
     try {
+      // Device time first (re-encoding drops it); a camera shot without it was taken just now.
+      const exif = await photoTakenAt(item.file);
+      const taken = exif ? { at: exif, source: 'exif' as const } : item.camera ? { at: new Date().toISOString(), source: 'camera' as const } : { at: null, source: null };
       const prepared = await preparePhoto(item.file);
-      const d = await uploadPhoto(protocolId, prepared, target);
+      const d = await uploadPhoto(protocolId, prepared, target, taken);
       onSaved(d);
       setQueue((q) => q.filter((x) => x.id !== item.id));
       URL.revokeObjectURL(item.url);
@@ -35,7 +38,7 @@ export function PhotoCapture({ protocolId, target, onSaved, compact = false, tes
   };
   const accept = () => {
     if (!preview) return;
-    const items = preview.files.map(({ file, url }) => ({ id: `q${++seq}`, file, url, state: 'uploading' as const, error: '' }));
+    const items = preview.files.map(({ file, url }) => ({ id: `q${++seq}`, file, url, state: 'uploading' as const, error: '', camera: preview.fromCamera }));
     setQueue((q) => [...q, ...items]);
     setPreview(null);
     items.forEach((i) => void send(i));
@@ -70,10 +73,11 @@ export function PhotoCapture({ protocolId, target, onSaved, compact = false, tes
   </div>;
 }
 
-export function PhotoGrid({ media, onDelete, testId }: { media: Media[]; onDelete?: (m: Media) => void; testId?: string }) {
+export function PhotoGrid({ media, onDelete, testId, times = false }: { media: Media[]; onDelete?: (m: Media) => void; testId?: string; times?: boolean }) {
   if (!media.length) return null;
   return <ul className="pt-photos" data-testid={testId}>{media.map((m) => <li key={m.id}>
-    <a href={m.url} target="_blank" rel="noopener noreferrer"><img src={m.url} alt={m.caption || 'Foto'} loading="lazy" /></a>
+    <a href={m.url} target="_blank" rel="noopener noreferrer" title={`Yüklənib: ${timeAz(m.createdAt)} (server)${m.takenAt ? ` · çəkilib: ${timeAz(m.takenAt)} (cihazın məlumatı)` : ''}`}><img src={m.url} alt={m.caption || 'Foto'} loading="lazy" /></a>
+    {times && <small className="pt-photo-time">{m.takenAt ? `📷 ${timeAz(m.takenAt).slice(0, 10)} · ` : ''}⬆ {timeAz(m.createdAt).slice(0, 16)}</small>}
     {onDelete && <button type="button" className="icon-button pt-photo-del" aria-label="Fotonu sil" onClick={() => onDelete(m)}><Trash2 size={13} /></button>}
   </li>)}</ul>;
 }

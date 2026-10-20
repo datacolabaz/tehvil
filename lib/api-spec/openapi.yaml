@@ -2905,6 +2905,208 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /rentals:
+    get:
+      operationId: listRentals
+      tags: [home]
+      summary: Rentals I take part in (landlord, manager, tenant, realtor)
+      responses:
+        '200':
+          description: Rentals
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/RentalSummary'}
+    post:
+      operationId: createRental
+      tags: [home]
+      summary: Create a rental with its move-in protocol
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RentalCreateInput'}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RentalDetail'}
+  /rentals/{rentalId}:
+    get:
+      operationId: getRental
+      tags: [home]
+      summary: Rental with parties, invitations and its protocols
+      parameters:
+      - {$ref: '#/components/parameters/RentalId'}
+      responses:
+        '200':
+          description: Rental
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RentalDetail'}
+    patch:
+      operationId: updateRental
+      tags: [home]
+      summary: Edit rental details
+      parameters:
+      - {$ref: '#/components/parameters/RentalId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RentalPatch'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RentalDetail'}
+    delete:
+      operationId: archiveRental
+      tags: [home]
+      summary: Archive (creator); approved protocols stay as records
+      parameters:
+      - {$ref: '#/components/parameters/RentalId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /rentals/{rentalId}/invites:
+    post:
+      operationId: createRentalInvite
+      tags: [home]
+      summary: Invitation link for the other party, with or without editing rights
+      parameters:
+      - {$ref: '#/components/parameters/RentalId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RentalInviteInput'}
+      responses:
+        '201':
+          description: Link
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolInviteLink'}
+  /rentals/{rentalId}/invites/{inviteId}:
+    delete:
+      operationId: revokeRentalInvite
+      tags: [home]
+      summary: Revoke an invitation link
+      parameters:
+      - {$ref: '#/components/parameters/RentalId'}
+      - {$ref: '#/components/parameters/InviteId'}
+      responses:
+        '200':
+          description: Done
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ActionResult'}
+  /rentals/{rentalId}/move-out:
+    post:
+      operationId: createMoveOut
+      tags: [home]
+      summary: Start the move-out protocol from the move-in one (rooms, items, photos for comparison)
+      parameters:
+      - {$ref: '#/components/parameters/RentalId'}
+      responses:
+        '200':
+          description: Rental
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RentalDetail'}
+  /rental-invites/{token}:
+    get:
+      operationId: getRentalInvite
+      tags: [home]
+      summary: What a rental invitation shows (no sign-in)
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      responses:
+        '200':
+          description: Invitation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RentalInvitePreview'}
+  /rental-invites/{token}/accept:
+    post:
+      operationId: acceptRentalInvite
+      tags: [home]
+      summary: Join the rental in the invited role (signed in)
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      responses:
+        '200':
+          description: Rental
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RentalDetail'}
+  /protocols/{protocolId}/items:
+    post:
+      operationId: addProtocolItem
+      tags: [home]
+      summary: Add an item to a room (furniture, appliance…)
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolItemInput'}
+      responses:
+        '201':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /protocols/{protocolId}/items/{itemId}:
+    patch:
+      operationId: updateProtocolItem
+      tags: [home]
+      summary: Condition, note, quantity or move-out change of an item
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/ItemId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProtocolItemInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+    delete:
+      operationId: deleteProtocolItem
+      tags: [home]
+      summary: Remove an item
+      parameters:
+      - {$ref: '#/components/parameters/ProtocolId'}
+      - {$ref: '#/components/parameters/ItemId'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProtocolDetail'}
+  /admin/rental-stats:
+    get:
+      operationId: getRentalStats
+      tags: [home]
+      summary: Usage numbers for administrators (from the database)
+      responses:
+        '200':
+          description: Stats
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AdminRentalStats'}
   /me/roles:
     get:
       operationId: getMyRoles
@@ -3354,6 +3556,11 @@ components:
       schema: {type: string, format: uuid}
     InviteId:
       name: inviteId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    RentalId:
+      name: rentalId
       in: path
       required: true
       schema: {type: string, format: uuid}
@@ -6658,14 +6865,147 @@ components:
         defectId:
           type: [string, 'null']
           format: uuid
+        itemId:
+          type: [string, 'null']
+          format: uuid
         target:
           type: string
-          enum: [room, defect, meter, keys, other]
+          enum: [room, item, defect, meter, keys, other]
         meterKind:
           type: [string, 'null']
           enum: [water, gas, electric, null]
         caption: {type: string, minLength: 0, maxLength: 300}
+        takenAt:
+          type: [string, 'null']
+          format: date-time
+        takenSource:
+          type: [string, 'null']
+          enum: [camera, exif, null]
       required: [files, target]
+    ProtocolItemInput:
+      type: object
+      properties:
+        roomId:
+          type: [string, 'null']
+          format: uuid
+        name: {type: string, minLength: 1, maxLength: 120}
+        category:
+          type: string
+          enum: [wall, floor, ceiling, window, door, furniture, appliance, other]
+        quantity: {type: integer}
+        condition:
+          type: [string, 'null']
+          enum: [good, fair, defective, null]
+        note: {type: string, minLength: 0, maxLength: 2000}
+        change:
+          type: [string, 'null']
+          enum: [unchanged, new_damage, changed, resolved, missing, null]
+    RentalCreateInput:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [landlord, tenant, realtor]
+        propertyType:
+          type: string
+          enum: [apartment, house, other]
+        address: {type: string, minLength: 3, maxLength: 300}
+        landlordName: {type: string, minLength: 0, maxLength: 160}
+        landlordPhone: {type: string, minLength: 0, maxLength: 40}
+        tenantName: {type: string, minLength: 0, maxLength: 160}
+        tenantPhone: {type: string, minLength: 0, maxLength: 40}
+        realtorName: {type: string, minLength: 0, maxLength: 160}
+        realtorPhone: {type: string, minLength: 0, maxLength: 40}
+        startDate:
+          type: [string, 'null']
+          format: date
+        endDate:
+          type: [string, 'null']
+          format: date
+        monthlyRent:
+          type: [integer, 'null']
+        deposit:
+          type: [integer, 'null']
+        currency:
+          type: string
+          enum: [AZN, USD, EUR]
+      required: [role, address]
+    RentalPatch:
+      type: object
+      properties:
+        propertyType:
+          type: string
+          enum: [apartment, house, other]
+        address: {type: string, minLength: 3, maxLength: 300}
+        landlordName: {type: string, minLength: 0, maxLength: 160}
+        landlordPhone: {type: string, minLength: 0, maxLength: 40}
+        tenantName: {type: string, minLength: 0, maxLength: 160}
+        tenantPhone: {type: string, minLength: 0, maxLength: 40}
+        realtorName: {type: string, minLength: 0, maxLength: 160}
+        realtorPhone: {type: string, minLength: 0, maxLength: 40}
+        startDate:
+          type: [string, 'null']
+          format: date
+        endDate:
+          type: [string, 'null']
+          format: date
+        monthlyRent:
+          type: [integer, 'null']
+        deposit:
+          type: [integer, 'null']
+        currency:
+          type: string
+          enum: [AZN, USD, EUR]
+        notes: {type: string, minLength: 0, maxLength: 4000}
+    RentalDetail:
+      type: object
+      properties:
+        rental: {}
+        participants: {}
+        invites: {}
+        protocols: {}
+        me: {}
+      required: [rental, participants, invites, protocols, me]
+    RentalSummary:
+      type: object
+      properties:
+        id: {type: string}
+        number: {type: string}
+        address: {type: string}
+        myRole: {type: string}
+        startDate:
+          type: [string, 'null']
+        endDate:
+          type: [string, 'null']
+        moveIn:
+          type: [string, 'null']
+        moveOut:
+          type: [string, 'null']
+        updatedAt: {type: string, format: date-time}
+      required: [id, number, address, myRole, startDate, endDate, moveIn, moveOut, updatedAt]
+    RentalInviteInput:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [landlord, tenant, realtor]
+        canEdit: {type: boolean}
+      required: [role]
+    RentalInvitePreview:
+      type: object
+      properties:
+        role: {type: string}
+        canEdit: {type: boolean}
+        used: {type: boolean}
+        usedByMe: {type: boolean}
+        rentalId: {type: string}
+        detail: {}
+      required: [role, canEdit, used, usedByMe, rentalId, detail]
+    AdminRentalStats:
+      type: object
+      properties:
+        stats: {}
+      required: [stats]
     ProtocolInviteInput:
       type: object
       properties:
