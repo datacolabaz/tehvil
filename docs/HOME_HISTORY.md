@@ -64,3 +64,50 @@ Pilotda hər şey pulsuzdur; ödəniş sistemi yoxdur. Qiymət fərziyyələrini
 - Brauzerdə video sıxılması.
 - Offline növbə (zəif internetdə xəta + “Yenidən cəhd et” var, offline saxlama yoxdur).
 - Paylaşım linkində GPS koordinatları (qəsdən göstərilmir).
+
+## 7. Bir kliklə foto — dəvət linki (21.10.2026, ikinci mərhələ)
+
+**Ssenari:**
+1. Ev sahibi mərhələdə “Foto çəkən şəxsi dəvət et” → “Link yarat” düyməsinə basır. Susmaya görə: yalnız foto, 30 gün.
+2. Linki WhatsApp, SMS və ya kopyala ilə göndərir.
+3. Qonşu və ya usta `/f/<token>` linkini açır. Hesab, ev seçimi və mərhələ seçimi yoxdur.
+4. “Foto çək” (arxa kamera) və ya “Şəkil yüklə” → önbaxış → “Yenidən çək” / “Yüklə”. Qeyd istəyə bağlıdır.
+5. Server cavab verəndən sonra “Foto uğurla əlavə edildi.” göstərilir.
+6. Foto avtomatik həmin evin həmin mərhələsinə düşür. Ev sahibi onu istənilən cihazdan görür: “Dəvət linki vasitəsilə yüklənib”, qeyd, server vaxtı, GPS (varsa).
+
+**Model:**
+- `stage_photo_invites`: `home_id`, `work_id` (mərhələ), `token_hash` (SHA-256), `permission` (`photos` | `photos_status`), `label`, `expires_at`, `max_uploads`, `upload_count`, `revoked_at`, `last_used_at`, `created_by_user_id`.
+- `home_media.invite_id`; `uploaded_by_user_id = "invite:<id>"`. Real ad uydurulmur.
+
+**API:**
+- Sahib: `POST /works/:id/photo-invites`, `GET /homes/:id/photo-invites`, `DELETE /homes/:id/photo-invites/:inviteId`.
+- Linklə, hesabsız: `GET /photo-invites/:token`, `POST …/upload-url`, `POST …/photos`, `POST …/status`.
+
+**Təhlükəsizlik:**
+- Token hər sorğuda serverdə yoxlanılır və heç bir hesabla eyniləşdirilmir.
+- Link yalnız öz mərhələsinə yazır. Ünvan və sahibin məlumatı göstərilmir; evin, fotoların və başqa mərhələlərin API-si açılmır.
+- Fayl tipi: JPG / PNG / WebP, ≤15 MB.
+- Upload yalnız həmin link üçün yaradılmış ola bilər; başqasının upload-unu bağlamaq olmur.
+- Limit atomik yoxlanılır. Təkrar klik eyni fotonu qaytarır, dublikat yaratmır.
+- Ləğv edilmiş və ya müddəti bitmiş link heç nə yükləmir.
+- Tokenlər loglarda `[redacted]` kimi yazılır. Səhifə `noindex`, `no-referrer`; `/f/` robots-da bağlıdır.
+- GPS yalnız şəxs “Məkanı əlavə et”i seçəndə göndərilir — fotonun öz GPS-i də.
+
+**Status:**
+- `photos_status` linki yalnız “Başladı” və “Tamamlandı” edə bilər; “Tamamlandı” = “Yoxlanış gözləyir”.
+- Qəbul (“Qəbul et”) və “Düzəliş tələb et” yalnız ev sahibindədir. Tamamlanma və qəbul `work_approvals`-da ayrıca hadisələrdir.
+- Statuslar: Başlanmayıb / Davam edir / Yoxlanış gözləyir / Düzəliş tələb olunur / Qəbul edilib.
+
+**Panel (tarixçə səhifəsi):**
+- Qəbul edilmiş mərhələlər, yoxlanış gözləyənlər, foto sayı.
+- Son əlavə edilən fotolar.
+- Dəvətlər: aktiv, ləğv edilib, müddəti bitib, limit dolub; ləğv etmək.
+
+**Bildiriş:**
+- Push, SMS və e-poçt yoxdur. Yeni foto paneldə görünür və audit jurnalına yazılır.
+
+**Mərhələlər:** 14 standart mərhələ var (Torpaq və hazırlıq işləri … Təhvil); öz mərhələnizi də əlavə edə bilərsiniz.
+
+**Testlər:**
+- `invite-e2e` 35/35.
+- `fi-flow` (telefon): link → qeydiyyatsız foto → xəta və yenidən cəhd → başqa cihazda görünür → yoxlanış və qəbul → ləğv.

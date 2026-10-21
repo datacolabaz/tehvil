@@ -17,14 +17,14 @@ import './landing.css';
  */
 type Role = 'realtor' | 'seller' | 'buyer';
 const ROLES: { id: Role; label: string; text: string }[] = [
-  { id: 'seller', label: 'Satıcı', text: 'Təməldən son təmirə qədər mərhələləri foto ilə toplayın, alıcıya linklə göstərin. Açar təhvil günü otaqları və sayğacları protokolda təsdiqləyin.' },
-  { id: 'buyer', label: 'Alıcı', text: 'Sizə göndərilən linklə evin mərhələ-mərhələ foto tarixçəsinə və təhvil protokoluna hesabsız baxın.' },
-  { id: 'realtor', label: 'Rieltor', text: 'Müştərinin evi üçün tarixçə qurun, alıcıya paylaşın, təhvil protokolunu hazırlayın. Təsdiqi satıcı və alıcı özləri verir.' },
+  { id: 'seller', label: 'Evimin arxivi', text: 'Ev sahibi və ya satıcı: öz eviniz üçün mərhələ-mərhələ foto arxivi yaradın. Usta və ya qonşu linklə, hesabsız foto göndərə bilər.' },
+  { id: 'buyer', label: 'Evlə maraqlanıram', text: 'Alıcı: sizə göndərilən linklə evin tikinti və təmir tarixçəsinə hesabsız baxın.' },
+  { id: 'realtor', label: 'Rieltor', text: 'Müştəri evlərinin arxivlərini idarə edin və alıcıya paylaşın.' },
 ];
 const BENEFITS = [
-  [<Camera size={20} key="c" />, 'Tikinti və təmir mərhələlərini foto ilə qeydə alın', 'Təməl, armatur, suvaq, elektrik, santexnika — divar bağlanmazdan əvvəl görünənlər itmir.'],
-  [<Link2 size={20} key="l" />, 'Tarixçəni alıcıya linklə göstərin', 'Yalnız baxış üçün link; ünvan susmaya görə gizli, istənilən vaxt deaktiv edilir.'],
-  [<ClipboardCheck size={20} key="a" />, 'Təhvil günü protokolu iki tərəf təsdiqləsin', 'Otaqlar, qüsurlar, sayğaclar, açarlar və PDF — eyni evə bağlı, ayrıca modul.'],
+  [<Camera size={20} key="c" />, 'Hər mərhələni foto ilə saxlayın', 'Bünövrə, armatur, suvaq, elektrik, santexnika — divar bağlanmazdan əvvəl görünənlər itmir.'],
+  [<Smartphone size={20} key="l" />, 'Usta və ya qonşu linklə foto göndərsin', 'Mərhələyə link göndərirsiniz; o, hesab yaratmadan foto çəkir, foto düz həmin mərhələyə düşür.'],
+  [<Link2 size={20} key="a" />, 'Alıcı və rieltorla paylaşın', 'Yalnız baxış üçün link; ünvan susmaya görə gizli, istənilən vaxt deaktiv edilir. Açar günü üçün ayrıca təhvil protokolu.'],
 ] as const;
 
 const IN_PROTOCOL = [
@@ -65,18 +65,18 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
     <section className="lp-hero2 lp-hero-pt wrap">
       <div className="lp-hero-copy">
         <div className="eyebrow"><span className="eyebrow-dot" />Tehvil.az</div>
-        <h1 className="font-display">Evin tikintidən təhvilə qədər rəqəmsal tarixçəsi.</h1>
-        <p>Elanda yalnız hazır ev görünür. Təməl, armatur, suvaq, elektrik və santexnika mərhələlərini foto ilə qeydə alın, alıcıya linklə göstərin. Açar təhvil günü otaqları, sayğacları və açarları ayrıca protokolda təsdiqləyin.</p>
-        <div className="lp-roles" role="radiogroup" aria-label="Bu təhvildə siz kimsiniz?" data-testid="landing-roles">
+        <h1 className="font-display">Evinizin bütün mərhələlərini bir yerdə saxlayın</h1>
+        <p>Təməldən son təmirə qədər fotolar. Tarix və yer qeydə alınır. İstəsəniz alıcı və rieltorla paylaşırsınız.</p>
+        <div className="lp-roles" role="radiogroup" aria-label="Siz kimsiniz?" data-testid="landing-roles">
           {ROLES.map((r) => <button key={r.id} type="button" role="radio" aria-checked={role === r.id} className={role === r.id ? 'on' : ''} onClick={() => setRole(r.id)} data-testid={`landing-role-${r.id}`}>{r.label}</button>)}
         </div>
         <p className="lp-role-text" data-testid="landing-role-text">{current.text}</p>
         <div className="lp-svc-ctas">
-          <Link href="/homes?new=1" className="button button-primary lp-big" data-testid="cta-history"><Camera size={17} />Tarixçəni başlat<ArrowRight size={16} /></Link>
-          <Link href={`/protokol/yeni?rol=${role}`} className="button button-secondary lp-big" data-testid="cta-protocol"><ClipboardCheck size={17} />Təhvil protokolu yarat</Link>
+          <Link href="/homes?new=1" className="button button-primary lp-big" data-testid="cta-history"><Camera size={17} />Pulsuz arxiv yarat<ArrowRight size={16} /></Link>
+          <a href="#how" className="lp-have-link lp-how" data-testid="cta-how">Necə işləyir?</a>
         </div>
-        <a href="#how" className="lp-have-link" data-testid="cta-how">Necə işləyir?</a>
-        {role !== 'realtor' && <a href="#link" className="lp-have-link" data-testid="cta-have-link"><Link2 size={15} />Mənə link göndərilib</a>}
+        <p className="lp-small lp-auto" data-testid="hero-note">Şəkillər yüklənəndə tarix avtomatik, yer isə icazənizlə yazılır. Video Pro-dur (pilotda ev başına 5 qısa video pulsuz sınaqdadır).</p>
+        {role === 'buyer' && <a href="#link" className="lp-have-link" data-testid="cta-have-link"><Link2 size={15} />Mənə link göndərilib</a>}
         <p className="lp-honest"><ShieldCheck size={16} />Təsdiq hesabınız, tarix-saat və versiya ilə qeydə alınır; ixtisaslı elektron imza deyil. Protokol hüquqi zəmanət vermir — anlaşılmazlıq riskini azaltmağa kömək edir.</p>
       </div>
       <ProtocolArt />
@@ -172,35 +172,20 @@ export function HomePassportLanding({ lang, change }: { lang: Lang; change: (v: 
 }
 
 /** A phone showing a protocol in progress. Labelled as an example. */
+const SAMPLE: [string, number, string, 'done' | 'now'][] = [
+  ['Təməl', 12, '14.03.2026', 'done'], ['Armatur', 8, '02.04.2026', 'done'], ['Divar işləri', 15, '28.05.2026', 'done'],
+  ['Suvaq', 9, '10.07.2026', 'done'], ['Son təmir', 11, '05.10.2026', 'now'], ['Təhvil günü', 6, '21.10.2026', 'now'],
+];
+/** Sample archive card: stages, not rooms — the same language as the product. Clearly marked as an example. */
 function ProtocolArt() {
-  const [tab, setTab] = useState<'history' | 'protocol'>('history');
-  const tabs = <div className="lp-ph-tabs" role="tablist" aria-label="Nümunə">
-    <button type="button" role="tab" aria-selected={tab === 'history'} className={tab === 'history' ? 'on' : ''} onClick={() => setTab('history')} data-testid="mock-tab-history">Tarixçə</button>
-    <button type="button" role="tab" aria-selected={tab === 'protocol'} className={tab === 'protocol' ? 'on' : ''} onClick={() => setTab('protocol')} data-testid="mock-tab-protocol">Təhvil protokolu</button>
-  </div>;
   return <div className="lp-phone" data-testid="landing-mock">
-    <div className="lp-mock-tag">Nümunə · real ev deyil</div>
-    {tab === 'history' ? <div className="lp-phone-screen" data-testid="mock-history">
-      {tabs}
-      <small>Xətai, yeni tikili · Blok A, m. 42</small>
-      <div className="lp-ph-stages" aria-label="Mərhələlər: 7/12">{Array.from({ length: 12 }, (_, i) => <i key={i} className={i < 6 ? 'done' : i === 6 ? 'now' : ''} />)}</div>
-      <div className="lp-ph-stage-now"><b>Suvaq</b><small>7-ci mərhələ · tarixçə aparılır</small></div>
-      <div className="lp-ph-photo"><span>Son foto</span></div>
-      <div className="lp-ph-row"><Camera size={13} />8 foto · 14 okt 2026, 10:35</div>
-      <div className="lp-ph-row"><MapPin size={13} />GPS məlumatı qeydə alınıb</div>
-      <div className="lp-ph-btn"><Camera size={14} />Foto çək</div>
-      <div className="lp-ph-btn alt"><ImagePlus size={14} />Şəkil yüklə</div>
-      <div className="lp-ph-links"><span>Tarixçəyə bax</span><button type="button" onClick={() => setTab('protocol')}>Təhvil protokolu →</button></div>
-    </div> : <div className="lp-phone-screen" data-testid="mock-protocol">
-      {tabs}
-      <small>Yasamal, Şərifzadə 12 · № TP-2026-…</small>
-      <div className="lp-ph-progress"><span style={{ width: '66%' }} /></div>
-      {[['Qonaq otağı', 'Yaxşı · 4 foto', 'ok'], ['Mətbəx', 'Qüsurlu · kran damcılayır', 'bad'], ['Hamam və tualet', 'Qənaətbəxş · 3 foto', 'mid'], ['Dəhliz', 'yoxlanmayıb', '']].map(([n, s, c]) =>
-        <div key={n} className={`lp-ph-room ${c}`}><i>{c ? <Check size={11} /> : null}</i><span><b>{n}</b><small>{s}</small></span></div>)}
-      <div className="lp-ph-row"><Gauge size={13} />Su: 00342,6 · Qaz: 1290</div>
-      <div className="lp-ph-row"><KeyRound size={13} />Açar: 3 · Domofon çipi: 2</div>
-      <div className="lp-ph-sign"><span className="ok">Satıcı ✓</span><span>Alıcı …</span></div>
-      <div className="lp-ph-btn"><Camera size={14} />Foto çək</div>
-    </div>}
+    <div className="lp-mock-tag">Nümunə arxiv · real ev deyil</div>
+    <div className="lp-phone-screen" data-testid="mock-history">
+      <small>Yasamal, Şərifzadə 12</small>
+      <div className="lp-ph-progress"><span style={{ width: '70%' }} /></div>
+      {SAMPLE.map(([n, c, d, st]) => <div key={n} className={`lp-ph-room ${st === 'done' ? 'ok' : 'mid'}`} data-testid="mock-stage"><i><Check size={11} /></i><span><b>{n}</b><small>{c} foto · {d}{st === 'now' ? ' · davam edir' : ' · tamamlanıb'}</small></span></div>)}
+      <div className="lp-ph-btn"><ImagePlus size={14} />Şəkil yüklə</div>
+      <div className="lp-ph-note"><MapPin size={11} />Tarix avtomatik, GPS icazə ilə qeyd olunur</div>
+    </div>
   </div>;
 }

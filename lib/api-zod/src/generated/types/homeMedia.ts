@@ -26,4 +26,7 @@ export interface HomeMedia {
   hasGps?: boolean;
   gps?: unknown;
   size?: number;
+  uploadedVia?: string;
+  /** @nullable */
+  inviteId?: string | null;
 }

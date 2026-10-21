@@ -1795,6 +1795,120 @@ paths:
               schema:
                 type: array
                 items: {$ref: '#/components/schemas/WorkSummary'}
+  /works/{workId}/photo-invites:
+    post:
+      operationId: createPhotoInvite
+      tags: [home]
+      summary: Link for someone without an account to add photos to this stage
+      parameters:
+      - {$ref: '#/components/parameters/WorkId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PhotoInviteInput'}
+      responses:
+        '200':
+          description: Invite
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PhotoInvite'}
+  /homes/{homeId}/photo-invites:
+    get:
+      operationId: listPhotoInvites
+      tags: [home]
+      summary: Photo invitation links of this home (active, revoked, expired)
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Invites
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/PhotoInvite'}
+  /homes/{homeId}/photo-invites/{inviteId}:
+    delete:
+      operationId: revokePhotoInvite
+      tags: [home]
+      summary: Revoke a photo invitation link
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      - {$ref: '#/components/parameters/InviteId'}
+      responses:
+        '200':
+          description: Invite
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PhotoInvite'}
+  /photo-invites/{token}:
+    get:
+      operationId: getPhotoInvite
+      tags: [home]
+      summary: What a photo invitation link shows (no sign-in)
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      responses:
+        '200':
+          description: Invite
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PhotoInvitePreview'}
+  /photo-invites/{token}/upload-url:
+    post:
+      operationId: requestInviteUploadUrl
+      tags: [home]
+      summary: Presigned upload for a photo through an invitation link
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/InviteUploadRequest'}
+      responses:
+        '200':
+          description: Upload
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InviteUploadUrl'}
+  /photo-invites/{token}/photos:
+    post:
+      operationId: addInvitePhoto
+      tags: [home]
+      summary: Attach an uploaded photo to the invited stage
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/InvitePhotoInput'}
+      responses:
+        '200':
+          description: Saved
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/InvitePhotoResult'}
+  /photo-invites/{token}/status:
+    post:
+      operationId: setInviteStageStatus
+      tags: [home]
+      summary: Mark the stage started or finished (sends it for the owner's review; never accepts it)
+      parameters:
+      - {$ref: '#/components/parameters/InviteToken'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/InviteStatusInput'}
+      responses:
+        '200':
+          description: Invite
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PhotoInvitePreview'}
   /homes/{homeId}/protocols:
     get:
       operationId: listHomeProtocols
@@ -5193,6 +5307,9 @@ components:
         hasGps: {type: boolean}
         gps: {}
         size: {type: integer}
+        uploadedVia: {type: string}
+        inviteId:
+          type: [string, 'null']
       required: [id, url, contentType, originalName, caption, phase, workId, roomId, uploadedByMe, createdAt]
     HomeMediaAttachInput:
       type: object
@@ -7093,6 +7210,92 @@ components:
           type: array
           items: {type: string}
       required: [ids]
+    PhotoInviteInput:
+      type: object
+      properties:
+        permission:
+          type: string
+          enum: [photos, photos_status]
+        label: {type: string, minLength: 0, maxLength: 120}
+        expiresInDays:
+          type: [integer, 'null']
+        maxUploads:
+          type: [integer, 'null']
+    PhotoInvite:
+      type: object
+      properties:
+        id: {type: string}
+        workId: {type: string}
+        workTitle: {type: string}
+        permission: {type: string}
+        label: {type: string}
+        createdAt: {type: string, format: date-time}
+        expiresAt:
+          type: [string, 'null']
+        maxUploads:
+          type: [integer, 'null']
+        uploadCount: {type: integer}
+        revokedAt:
+          type: [string, 'null']
+        lastUsedAt:
+          type: [string, 'null']
+        state: {type: string}
+        url: {type: string}
+      required: [id, workId, workTitle, permission, label, createdAt, expiresAt, maxUploads, uploadCount, revokedAt, lastUsedAt, state]
+    PhotoInvitePreview:
+      type: object
+      properties:
+        homeName: {type: string}
+        stageTitle: {type: string}
+        stageStatus: {type: string}
+        permission: {type: string}
+        expiresAt:
+          type: [string, 'null']
+        remaining:
+          type: [integer, 'null']
+        uploadCount: {type: integer}
+      required: [homeName, stageTitle, stageStatus, permission, expiresAt, remaining, uploadCount]
+    InviteUploadRequest:
+      type: object
+      properties:
+        name: {type: string, minLength: 1, maxLength: 255}
+        size: {type: integer}
+        contentType: {type: string, minLength: 1, maxLength: 120}
+      required: [name, size, contentType]
+    InviteUploadUrl:
+      type: object
+      properties:
+        uploadURL: {type: string}
+        objectPath: {type: string}
+      required: [uploadURL, objectPath]
+    InvitePhotoInput:
+      type: object
+      properties:
+        file: {$ref: '#/components/schemas/MediaInput'}
+        note: {type: string, minLength: 0, maxLength: 300}
+        takenAt:
+          type: [string, 'null']
+          format: date-time
+        takenSource:
+          type: [string, 'null']
+          enum: [camera, exif, null]
+        clientMeta: {}
+      required: [file]
+    InvitePhotoResult:
+      type: object
+      properties:
+        id: {type: string}
+        createdAt: {type: string, format: date-time}
+        uploadCount: {type: integer}
+        duplicate: {type: boolean}
+      required: [id, createdAt, uploadCount, duplicate]
+    InviteStatusInput:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [start, complete]
+      required: [action]
     ProtocolInviteInput:
       type: object
       properties:

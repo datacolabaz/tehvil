@@ -9124,7 +9124,9 @@ export const GetHomeRoomResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 }))
 })
 
@@ -9399,7 +9401,9 @@ export const CreateWorkResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -9492,6 +9496,223 @@ export const ReorderHomeWorksResponse = zod.array(ReorderHomeWorksResponseItem)
 
 
 /**
+ * @summary Link for someone without an account to add photos to this stage
+ */
+export const CreatePhotoInviteParams = zod.object({
+  "workId": zod.coerce.string().uuid()
+})
+
+export const createPhotoInviteBodyLabelMin = 0;
+export const createPhotoInviteBodyLabelMax = 120;
+
+
+
+export const CreatePhotoInviteBody = zod.object({
+  "permission": zod.enum(['photos', 'photos_status']).optional(),
+  "label": zod.string().min(createPhotoInviteBodyLabelMin).max(createPhotoInviteBodyLabelMax).optional(),
+  "expiresInDays": zod.number().int().nullish(),
+  "maxUploads": zod.number().int().nullish()
+})
+
+export const CreatePhotoInviteResponse = zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "permission": zod.string(),
+  "label": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().nullable(),
+  "maxUploads": zod.number().int().nullable(),
+  "uploadCount": zod.number().int(),
+  "revokedAt": zod.string().nullable(),
+  "lastUsedAt": zod.string().nullable(),
+  "state": zod.string(),
+  "url": zod.string().optional()
+})
+
+
+/**
+ * @summary Photo invitation links of this home (active, revoked, expired)
+ */
+export const ListPhotoInvitesParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListPhotoInvitesResponseItem = zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "permission": zod.string(),
+  "label": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().nullable(),
+  "maxUploads": zod.number().int().nullable(),
+  "uploadCount": zod.number().int(),
+  "revokedAt": zod.string().nullable(),
+  "lastUsedAt": zod.string().nullable(),
+  "state": zod.string(),
+  "url": zod.string().optional()
+})
+export const ListPhotoInvitesResponse = zod.array(ListPhotoInvitesResponseItem)
+
+
+/**
+ * @summary Revoke a photo invitation link
+ */
+export const RevokePhotoInviteParams = zod.object({
+  "homeId": zod.coerce.string().uuid(),
+  "inviteId": zod.coerce.string().uuid()
+})
+
+export const RevokePhotoInviteResponse = zod.object({
+  "id": zod.string(),
+  "workId": zod.string(),
+  "workTitle": zod.string(),
+  "permission": zod.string(),
+  "label": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "expiresAt": zod.string().nullable(),
+  "maxUploads": zod.number().int().nullable(),
+  "uploadCount": zod.number().int(),
+  "revokedAt": zod.string().nullable(),
+  "lastUsedAt": zod.string().nullable(),
+  "state": zod.string(),
+  "url": zod.string().optional()
+})
+
+
+/**
+ * @summary What a photo invitation link shows (no sign-in)
+ */
+export const getPhotoInvitePathTokenMin = 20;
+export const getPhotoInvitePathTokenMax = 64;
+
+
+export const getPhotoInvitePathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const GetPhotoInviteParams = zod.object({
+  "token": zod.coerce.string().min(getPhotoInvitePathTokenMin).max(getPhotoInvitePathTokenMax).regex(getPhotoInvitePathTokenRegExp)
+})
+
+export const GetPhotoInviteResponse = zod.object({
+  "homeName": zod.string(),
+  "stageTitle": zod.string(),
+  "stageStatus": zod.string(),
+  "permission": zod.string(),
+  "expiresAt": zod.string().nullable(),
+  "remaining": zod.number().int().nullable(),
+  "uploadCount": zod.number().int()
+})
+
+
+/**
+ * @summary Presigned upload for a photo through an invitation link
+ */
+export const requestInviteUploadUrlPathTokenMin = 20;
+export const requestInviteUploadUrlPathTokenMax = 64;
+
+
+export const requestInviteUploadUrlPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const RequestInviteUploadUrlParams = zod.object({
+  "token": zod.coerce.string().min(requestInviteUploadUrlPathTokenMin).max(requestInviteUploadUrlPathTokenMax).regex(requestInviteUploadUrlPathTokenRegExp)
+})
+
+export const requestInviteUploadUrlBodyNameMax = 255;
+
+export const requestInviteUploadUrlBodyContentTypeMax = 120;
+
+
+
+export const RequestInviteUploadUrlBody = zod.object({
+  "name": zod.string().min(1).max(requestInviteUploadUrlBodyNameMax),
+  "size": zod.number().int(),
+  "contentType": zod.string().min(1).max(requestInviteUploadUrlBodyContentTypeMax)
+})
+
+export const RequestInviteUploadUrlResponse = zod.object({
+  "uploadURL": zod.string(),
+  "objectPath": zod.string()
+})
+
+
+/**
+ * @summary Attach an uploaded photo to the invited stage
+ */
+export const addInvitePhotoPathTokenMin = 20;
+export const addInvitePhotoPathTokenMax = 64;
+
+
+export const addInvitePhotoPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const AddInvitePhotoParams = zod.object({
+  "token": zod.coerce.string().min(addInvitePhotoPathTokenMin).max(addInvitePhotoPathTokenMax).regex(addInvitePhotoPathTokenRegExp)
+})
+
+
+export const addInvitePhotoBodyFileOriginalNameMax = 255;
+
+export const addInvitePhotoBodyFileSizeMax = 52428800;
+
+export const addInvitePhotoBodyNoteMin = 0;
+export const addInvitePhotoBodyNoteMax = 300;
+
+
+
+export const AddInvitePhotoBody = zod.object({
+  "file": zod.object({
+  "objectPath": zod.string().min(1),
+  "originalName": zod.string().min(1).max(addInvitePhotoBodyFileOriginalNameMax),
+  "contentType": zod.string(),
+  "size": zod.number().int().min(1).max(addInvitePhotoBodyFileSizeMax)
+}),
+  "note": zod.string().min(addInvitePhotoBodyNoteMin).max(addInvitePhotoBodyNoteMax).optional(),
+  "takenAt": zod.string().datetime({"offset":true}).nullish(),
+  "takenSource": zod.union([zod.literal('camera'),zod.literal('exif'),zod.literal(null)]).nullish(),
+  "clientMeta": zod.unknown().optional()
+})
+
+export const AddInvitePhotoResponse = zod.object({
+  "id": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "uploadCount": zod.number().int(),
+  "duplicate": zod.boolean()
+})
+
+
+/**
+ * @summary Mark the stage started or finished (sends it for the owner's review; never accepts it)
+ */
+export const setInviteStageStatusPathTokenMin = 20;
+export const setInviteStageStatusPathTokenMax = 64;
+
+
+export const setInviteStageStatusPathTokenRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const SetInviteStageStatusParams = zod.object({
+  "token": zod.coerce.string().min(setInviteStageStatusPathTokenMin).max(setInviteStageStatusPathTokenMax).regex(setInviteStageStatusPathTokenRegExp)
+})
+
+export const SetInviteStageStatusBody = zod.object({
+  "action": zod.enum(['start', 'complete'])
+})
+
+export const SetInviteStageStatusResponse = zod.object({
+  "homeName": zod.string(),
+  "stageTitle": zod.string(),
+  "stageStatus": zod.string(),
+  "permission": zod.string(),
+  "expiresAt": zod.string().nullable(),
+  "remaining": zod.number().int().nullable(),
+  "uploadCount": zod.number().int()
+})
+
+
+/**
  * @summary Handover protocols linked to this home that the caller takes part in
  */
 export const ListHomeProtocolsParams = zod.object({
@@ -9536,7 +9757,9 @@ export const ListHomeMediaResponseItem = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })
 export const ListHomeMediaResponse = zod.array(ListHomeMediaResponseItem)
 
@@ -10267,7 +10490,9 @@ export const GetWorkResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10429,7 +10654,9 @@ export const UpdateWorkResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10564,7 +10791,9 @@ export const ChangeWorkStatusResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10699,7 +10928,9 @@ export const AddWorkNoteResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10851,7 +11082,9 @@ export const AddWorkParticipantResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10991,7 +11224,9 @@ export const UpdateWorkParticipantResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -11129,7 +11364,9 @@ export const CreateReviewResponse = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -14136,7 +14373,9 @@ export const AttachHomeMediaResponseItem = zod.object({
   "takenSource": zod.string().nullish(),
   "hasGps": zod.boolean().optional(),
   "gps": zod.unknown().optional(),
-  "size": zod.number().int().optional()
+  "size": zod.number().int().optional(),
+  "uploadedVia": zod.string().optional(),
+  "inviteId": zod.string().nullish()
 })
 export const AttachHomeMediaResponse = zod.array(AttachHomeMediaResponseItem)
 

@@ -53,7 +53,7 @@ def schema(fields):
     return out
 
 S = {}
-S["HomeMedia"] = {"id": "str", "url": "str", "contentType": "str", "originalName": "str", "caption": "str", "phase": "str", "workId": "str?", "roomId": "str?", "uploadedByMe": "bool", "createdAt": "dt", "takenAt~": "str?", "takenSource~": "str?", "hasGps~": "bool", "gps~": "any", "size~": "int"}
+S["HomeMedia"] = {"id": "str", "url": "str", "contentType": "str", "originalName": "str", "caption": "str", "phase": "str", "workId": "str?", "roomId": "str?", "uploadedByMe": "bool", "createdAt": "dt", "takenAt~": "str?", "takenSource~": "str?", "hasGps~": "bool", "gps~": "any", "size~": "int", "uploadedVia~": "str", "inviteId~": "str?"}
 S["HomeMediaAttachInput"] = {"files": "[MediaInput(20)]", "homeId~": "uuid?", "workId~": "uuid?", "roomId~": "uuid?", "workerId~": "uuid?", "caption~": "str(0,300)", "phase~": "enum:before|during|after|hidden|other|document", "takenAt~": "dt?", "takenSource~": "enum?:camera|exif", "clientMeta~": "any"}
 S["HomePermissions"] = {"edit": "bool", "manageMembers": "bool", "manageSharing": "bool", "addWorks": "bool", "confirmWorks": "bool", "inspect": "bool", "viewAudit": "bool"}
 S["Home"] = {"id": "str", "publicId": "str", "name": "str", "propertyType": "str", "city": "str", "district": "str", "address": "str", "areaM2": "int?", "roomCount": "int?", "floor": "str", "builtYear": "int?", "stage": "str", "coverMediaId": "str?", "coverUrl": "str?", "notes": "str", "publicLevel": "str", "publicShowAddress": "bool", "publicShowPhotos": "bool", "publicShowEquipment": "bool", "showOnWorkerProfiles": "bool", "myRole": "str", "permissions": "HomePermissions", "archived": "bool", "createdAt": "dt", "updatedAt": "dt"}
@@ -176,6 +176,14 @@ S["RentalInvitePreview"] = {"role": "str", "canEdit": "bool", "used": "bool", "u
 S["AdminRentalStats"] = {"stats": "any"}
 S["ProtocolVerification"] = {"result": "any"}
 S["WorkOrderInput"] = {"ids": "[str]"}
+S["PhotoInviteInput"] = {"permission~": "enum:photos|photos_status", "label~": "str(0,120)", "expiresInDays~": "int?", "maxUploads~": "int?"}
+S["PhotoInvite"] = {"id": "str", "workId": "str", "workTitle": "str", "permission": "str", "label": "str", "createdAt": "dt", "expiresAt": "str?", "maxUploads": "int?", "uploadCount": "int", "revokedAt": "str?", "lastUsedAt": "str?", "state": "str", "url~": "str"}
+S["PhotoInvitePreview"] = {"homeName": "str", "stageTitle": "str", "stageStatus": "str", "permission": "str", "expiresAt": "str?", "remaining": "int?", "uploadCount": "int"}
+S["InviteUploadRequest"] = {"name": "str(1,255)", "size": "int", "contentType": "str(1,120)"}
+S["InviteUploadUrl"] = {"uploadURL": "str", "objectPath": "str"}
+S["InvitePhotoInput"] = {"file": "MediaInput", "note~": "str(0,300)", "takenAt~": "dt?", "takenSource~": "enum?:camera|exif", "clientMeta~": "any"}
+S["InvitePhotoResult"] = {"id": "str", "createdAt": "dt", "uploadCount": "int", "duplicate": "bool"}
+S["InviteStatusInput"] = {"action": "enum:start|complete"}
 S["ProtocolInviteInput"] = {"role": "enum:realtor|seller|buyer"}
 S["ProtocolInviteLink"] = {"id": "str", "role": "str", "url": "str"}
 S["ProtocolDecisionInput"] = {"version": "int", "contentHash": "str(64,64)", "decision": "enum:approved|changes", "comment~": "str(0,2000)"}
@@ -217,6 +225,13 @@ op("/homes/{homeId}/performers", "get", "listHomePerformers", "Individuals, team
 op("/homes/{homeId}/works", "get", "listWorks", "Construction and repair history, newest first", ("HomeId",), resp=ok("Works", "WorkSummary", array=True))
 op("/homes/{homeId}/works", "post", "createWork", "Create a work record", ("HomeId",), "WorkInput", ok("Created", "WorkDetail", "201"))
 op("/homes/{homeId}/works/order", "post", "reorderHomeWorks", "Set the order of works (stages) on the history timeline", ("HomeId",), "WorkOrderInput", ok("Works", "WorkSummary", array=True))
+op("/works/{workId}/photo-invites", "post", "createPhotoInvite", "Link for someone without an account to add photos to this stage", ("WorkId",), "PhotoInviteInput", ok("Invite", "PhotoInvite"))
+op("/homes/{homeId}/photo-invites", "get", "listPhotoInvites", "Photo invitation links of this home (active, revoked, expired)", ("HomeId",), resp=ok("Invites", "PhotoInvite", array=True))
+op("/homes/{homeId}/photo-invites/{inviteId}", "delete", "revokePhotoInvite", "Revoke a photo invitation link", ("HomeId", "InviteId"), resp=ok("Invite", "PhotoInvite"))
+op("/photo-invites/{token}", "get", "getPhotoInvite", "What a photo invitation link shows (no sign-in)", ("InviteToken",), resp=ok("Invite", "PhotoInvitePreview"))
+op("/photo-invites/{token}/upload-url", "post", "requestInviteUploadUrl", "Presigned upload for a photo through an invitation link", ("InviteToken",), "InviteUploadRequest", ok("Upload", "InviteUploadUrl"))
+op("/photo-invites/{token}/photos", "post", "addInvitePhoto", "Attach an uploaded photo to the invited stage", ("InviteToken",), "InvitePhotoInput", ok("Saved", "InvitePhotoResult"))
+op("/photo-invites/{token}/status", "post", "setInviteStageStatus", "Mark the stage started or finished (sends it for the owner's review; never accepts it)", ("InviteToken",), "InviteStatusInput", ok("Invite", "PhotoInvitePreview"))
 op("/homes/{homeId}/protocols", "get", "listHomeProtocols", "Handover protocols linked to this home that the caller takes part in", ("HomeId",), resp=ok("Protocols", "ProtocolSummary", array=True))
 op("/homes/{homeId}/media", "get", "listHomeMedia", "Photos and videos of the home visible to the caller", ("HomeId",), resp=ok("Media", "HomeMedia", array=True))
 op("/homes/{homeId}/infrastructure", "get", "listInfrastructure", "Hidden utility lines marked on photos", ("HomeId",), resp=ok("Items", "InfrastructureItem", array=True))

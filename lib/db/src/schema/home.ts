@@ -180,6 +180,8 @@ export const homeMediaTable = pgTable("home_media", {
   clientMeta: jsonb("client_meta").$type<Record<string, unknown>>(),
   /** SHA-256 of the stored file, computed by the server ('' for older files). */
   sha256: varchar("sha256", { length: 64 }).notNull().default(""),
+  /** Uploaded through a photo invitation link (no account); uploaded_by_user_id is then "invite:<id>". */
+  inviteId: uuid("invite_id"),
 }, (t) => [
   uniqueIndex("home_media_object_idx").on(t.objectPath),
   index("home_media_home_idx").on(t.homeId, t.createdAt),
@@ -365,6 +367,27 @@ export const homeSharesTable = pgTable("home_shares", {
   openCount: integer("open_count").notNull().default(0),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex("home_shares_token_idx").on(t.tokenHash), index("home_shares_home_idx").on(t.homeId)]);
+
+/**
+ * Link that lets anyone holding it add photos to one stage (work record) of one home — no account.
+ * permission: photos | photos_status (may also mark the stage started / finished → awaiting the owner's review).
+ * Never accepts a stage and never opens anything else of the home. Only the token's SHA-256 is stored.
+ */
+export const stagePhotoInvitesTable = pgTable("stage_photo_invites", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  homeId: uuid("home_id").notNull().references(() => homesTable.id, { onDelete: "cascade" }),
+  workId: uuid("work_id").notNull().references(() => workRecordsTable.id, { onDelete: "cascade" }),
+  tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+  permission: varchar("permission", { length: 16 }).notNull().default("photos"),
+  label: varchar("label", { length: 120 }).notNull().default(""),
+  createdByUserId: user("created_by_user_id").notNull(),
+  createdAt: createdAt(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  maxUploads: integer("max_uploads"),
+  uploadCount: integer("upload_count").notNull().default(0),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+}, (t) => [uniqueIndex("stage_photo_invites_token_idx").on(t.tokenHash), index("stage_photo_invites_home_idx").on(t.homeId)]);
 
 /** Audit trail of every change in the home passport and performer profiles. */
 export const homeAuditTable = pgTable("home_audit", {

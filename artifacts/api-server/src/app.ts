@@ -22,7 +22,8 @@ app.use(
         return {
           id: req.id,
           method: req.method,
-          url: req.url?.split("?")[0]?.replace(/(\/shared-(?:passports|estimates)\/|\/passport-confirm\/(?:contractor|owner)\/|\/public\/home-shares\/|\/invitations\/)[^/]+/, "$1[redacted]"),
+          // Secret tokens in paths (share, invitation, verification links) never reach the logs.
+          url: req.url?.split("?")[0]?.replace(/(\/shared-(?:passports|estimates)\/|\/passport-confirm\/(?:contractor|owner)\/|\/public\/home-shares\/|\/invitations\/|\/photo-invites\/|\/protocol-invites\/|\/rental-invites\/|\/verify\/)[^/]+/, "$1[redacted]"),
         };
       },
       res(res) {

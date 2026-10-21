@@ -2968,6 +2968,9 @@ export interface HomeMedia {
   hasGps?: boolean;
   gps?: unknown;
   size?: number;
+  uploadedVia?: string;
+  /** @nullable */
+  inviteId?: string | null;
 }
 
 export type HomeMediaAttachInputPhase = typeof HomeMediaAttachInputPhase[keyof typeof HomeMediaAttachInputPhase];
@@ -5488,6 +5491,122 @@ export interface ProtocolVerification {
 
 export interface WorkOrderInput {
   ids: string[];
+}
+
+export type PhotoInviteInputPermission = typeof PhotoInviteInputPermission[keyof typeof PhotoInviteInputPermission];
+
+
+export const PhotoInviteInputPermission = {
+  photos: 'photos',
+  photos_status: 'photos_status',
+} as const;
+
+export interface PhotoInviteInput {
+  permission?: PhotoInviteInputPermission;
+  /**
+     * @minLength 0
+     * @maxLength 120
+     */
+  label?: string;
+  /** @nullable */
+  expiresInDays?: number | null;
+  /** @nullable */
+  maxUploads?: number | null;
+}
+
+export interface PhotoInvite {
+  id: string;
+  workId: string;
+  workTitle: string;
+  permission: string;
+  label: string;
+  createdAt: string;
+  /** @nullable */
+  expiresAt: string | null;
+  /** @nullable */
+  maxUploads: number | null;
+  uploadCount: number;
+  /** @nullable */
+  revokedAt: string | null;
+  /** @nullable */
+  lastUsedAt: string | null;
+  state: string;
+  url?: string;
+}
+
+export interface PhotoInvitePreview {
+  homeName: string;
+  stageTitle: string;
+  stageStatus: string;
+  permission: string;
+  /** @nullable */
+  expiresAt: string | null;
+  /** @nullable */
+  remaining: number | null;
+  uploadCount: number;
+}
+
+export interface InviteUploadRequest {
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  name: string;
+  size: number;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  contentType: string;
+}
+
+export interface InviteUploadUrl {
+  uploadURL: string;
+  objectPath: string;
+}
+
+/**
+ * @nullable
+ */
+export type InvitePhotoInputTakenSource = typeof InvitePhotoInputTakenSource[keyof typeof InvitePhotoInputTakenSource] | null;
+
+
+export const InvitePhotoInputTakenSource = {
+  camera: 'camera',
+  exif: 'exif',
+} as const;
+
+export interface InvitePhotoInput {
+  file: MediaInput;
+  /**
+     * @minLength 0
+     * @maxLength 300
+     */
+  note?: string;
+  /** @nullable */
+  takenAt?: string | null;
+  /** @nullable */
+  takenSource?: InvitePhotoInputTakenSource;
+  clientMeta?: unknown;
+}
+
+export interface InvitePhotoResult {
+  id: string;
+  createdAt: string;
+  uploadCount: number;
+  duplicate: boolean;
+}
+
+export type InviteStatusInputAction = typeof InviteStatusInputAction[keyof typeof InviteStatusInputAction];
+
+
+export const InviteStatusInputAction = {
+  start: 'start',
+  complete: 'complete',
+} as const;
+
+export interface InviteStatusInput {
+  action: InviteStatusInputAction;
 }
 
 export type ProtocolInviteInputRole = typeof ProtocolInviteInputRole[keyof typeof ProtocolInviteInputRole];

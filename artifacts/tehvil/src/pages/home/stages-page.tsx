@@ -1,10 +1,10 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, Camera, ChevronDown, ClipboardCheck, Film, ImagePlus, LoaderCircle, MapPin, MapPinOff, Plus, Share2, RotateCcw, Check } from 'lucide-react';
+import { ArrowDown, ArrowUp, Camera, ChevronDown, ClipboardCheck, Copy, Film, ImagePlus, LoaderCircle, MapPin, MapPinOff, MessageCircle, Plus, Share2, RotateCcw, Check, UserPlus, X } from 'lucide-react';
 import {
-  createProtocol, reorderHomeWorks, useCreateWork, useListHomeMedia, useListHomeProtocols, useListWorks,
-  type HomeMedia, type WorkSummary,
+  changeWorkStatus, createPhotoInvite, createProtocol, reorderHomeWorks, revokePhotoInvite, useCreateWork, useListHomeMedia, useListHomeProtocols, useListPhotoInvites, useListWorks,
+  type HomeMedia, type PhotoInvite, type WorkSummary,
 } from '@workspace/api-client-react';
 import { PageHeading } from '@/components/kit';
 import { Empty, Modal, Pill, Skeleton } from '@/components/home/ui';
@@ -66,9 +66,15 @@ export function orderStages(works: WorkSummary[]) {
   });
 }
 
-export function MediaFacts({ m }: { m: HomeMedia }) {
+/** Stage status in the owner's words; "completed" means it waits for the owner's review. */
+export const STAGE_STATUS: Record<string, string> = { planned: 'Başlanmayıb', in_progress: 'Davam edir', completed: 'Yoxlanış gözləyir', revision: 'Düzəliş tələb olunur', confirmed: 'Qəbul edilib' };
+
+export function MediaFacts({ m, invites = [] }: { m: HomeMedia; invites?: PhotoInvite[] }) {
   const g = m.gps as { lat: number; lon: number } | null | undefined;
+  const via = m.uploadedVia === 'invite' ? invites.find((i) => i.id === m.inviteId) : null;
   return <dl className="st-facts" data-testid="media-facts">
+    {m.uploadedVia === 'invite' && <div className="st-via" data-testid="via-invite"><dd>Dəvət linki vasitəsilə yüklənib{via?.label ? ` (${via.label})` : ''}</dd></div>}
+    {m.caption ? <div><dt>Qeyd</dt><dd data-testid="media-note">{m.caption}</dd></div> : null}
     {m.takenAt ? <div><dt>{tr('hTaken')}</dt><dd>{fmt(m.takenAt)} <small>({tr('hDeviceData')})</small></dd></div> : null}
     <div><dt>{tr('hUploaded')}</dt><dd>{fmt(m.createdAt)}</dd></div>
     <div><dt>{tr('hLocation')}</dt><dd>{m.hasGps ? <span className="st-gps on" data-testid="gps-yes"><MapPin size={12} />{tr('hGpsRecorded')}{g ? <a href={`https://www.openstreetmap.org/?mlat=${g.lat}&mlon=${g.lon}#map=18/${g.lat}/${g.lon}`} target="_blank" rel="noopener noreferrer"> · {g.lat.toFixed(5)}, {g.lon.toFixed(5)}</a> : null}</span> : <span className="st-gps" data-testid="gps-no"><MapPinOff size={12} />{tr('hNoLocation')}</span>}</dd></div>
@@ -78,8 +84,63 @@ export function MediaFacts({ m }: { m: HomeMedia }) {
 type Item = { id: string; name: string; state: 'uploading' | 'done' | 'error'; error?: string; file: File; kind: 'camera' | 'gallery' | 'video' };
 let seq = 0;
 
-function StageCard({ w, media, homeId, canEdit, open, toggle, first, last, move, gps }: { w: WorkSummary; media: HomeMedia[]; homeId: string; canEdit: boolean; open: boolean; toggle: () => void; first: boolean; last: boolean; move: (d: -1 | 1) => void; gps: boolean }) {
+function InviteModal({ w, onClose, onCreated }: { w: WorkSummary; onClose: () => void; onCreated: () => void }) {
+  const [permission, setPermission] = useState<'photos' | 'photos_status'>('photos');
+  const [days, setDays] = useState<'7' | '30' | 'none'>('30'); const [max, setMax] = useState(''); const [label, setLabel] = useState('');
+  const [link, setLink] = useState(''); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
+  const create = async () => {
+    setBusy(true); setErr('');
+    try {
+      const r = await createPhotoInvite(w.id, { permission, label: label.trim(), expiresInDays: days === 'none' ? null : Number(days), maxUploads: max.trim() ? Number(max) : null });
+      setLink(r.url ?? ''); onCreated();
+    } catch (e) { setErr((e as { data?: { error?: string } })?.data?.error ?? 'Link yaradılmadı.'); } finally { setBusy(false); }
+  };
+  const msg = `Salam! “${w.title}” mərhələsinin fotolarını bu linkdən çəkib göndərin (hesab lazım deyil): ${link}`;
+  return <Modal open onClose={onClose} eyebrow={w.title} title="Foto çəkən şəxsi dəvət et" footer={link ? <button type="button" className="button button-primary st-big" onClick={onClose}>Hazırdır</button> : <button type="button" className="button button-primary st-big" disabled={busy} onClick={() => void create()} data-testid="invite-create">{busy && <LoaderCircle size={15} className="spin" />}Link yarat</button>}>
+    {link ? <div className="st-invite-made" data-testid="invite-made">
+      <p>Linki qonşuya, ustaya və ya etibar etdiyiniz şəxsə göndərin. O, hesab yaratmadan foto çəkəcək və foto avtomatik bu mərhələyə düşəcək.</p>
+      <div className="st-link" data-testid="invite-url">{link}</div>
+      <div className="st-actions">
+        <button type="button" className="button button-secondary" onClick={() => void navigator.clipboard?.writeText(link)} data-testid="invite-copy"><Copy size={15} />Kopyala</button>
+        <a className="button button-secondary" href={`https://wa.me/?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer"><MessageCircle size={15} />WhatsApp</a>
+        <a className="button button-secondary" href={`sms:?&body=${encodeURIComponent(msg)}`}>SMS</a>
+      </div>
+    </div> : <>
+      <div className="st-presets" role="radiogroup" aria-label="İcazə">
+        <button type="button" role="radio" aria-checked={permission === 'photos'} className={permission === 'photos' ? 'on' : ''} onClick={() => setPermission('photos')} data-testid="invite-perm-photos">Yalnız foto yükləmək</button>
+        <button type="button" role="radio" aria-checked={permission === 'photos_status'} className={permission === 'photos_status' ? 'on' : ''} onClick={() => setPermission('photos_status')} data-testid="invite-perm-status">Foto + “başladı / tamamlandı”</button>
+      </div>
+      <p className="rl-hint">Heç bir link mərhələni qəbul edə, evin başqa məlumatlarını görə və ya dəyişə bilməz. Qəbul qərarı yalnız sizdədir.</p>
+      <label className="field"><span>Kimə (istəyə bağlı, yalnız sizə görünür)</span><input value={label} maxLength={120} onChange={(e) => setLabel(e.target.value)} placeholder="məs. Usta Rauf, qonşu" data-testid="invite-label" /></label>
+      <div className="st-actions">
+        <label className="field"><span>Müddət</span><select value={days} onChange={(e) => setDays(e.target.value as never)} data-testid="invite-days"><option value="7">7 gün</option><option value="30">30 gün</option><option value="none">Müddətsiz</option></select></label>
+        <label className="field"><span>Foto limiti</span><input inputMode="numeric" value={max} onChange={(e) => setMax(e.target.value.replace(/\D/g, ''))} placeholder="limitsiz" data-testid="invite-max" /></label>
+      </div>
+      {err && <p className="ai-error">{err}</p>}
+    </>}
+  </Modal>;
+}
+
+function Review({ w, onDone }: { w: WorkSummary; onDone: () => void }) {
+  const [asking, setAsking] = useState(false); const [note, setNote] = useState(''); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
+  const act = async (action: 'confirm' | 'request_revision') => {
+    setBusy(true); setErr('');
+    try { await changeWorkStatus(w.id, { action, note: note.trim() }); onDone(); } catch (e) { setErr((e as { data?: { error?: string } })?.data?.error ?? 'Alınmadı.'); } finally { setBusy(false); }
+  };
+  return <div className="st-review" data-testid="stage-review">
+    <b>Mərhələ yoxlanışınızı gözləyir.</b>
+    {asking ? <><textarea className="hp-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Nə düzəldilməlidir?" data-testid="review-note" />
+      <button type="button" className="button button-secondary" onClick={() => setAsking(false)}>Geri</button>
+      <button type="button" className="button button-primary" disabled={busy || !note.trim()} onClick={() => void act('request_revision')} data-testid="review-revision-send">Düzəliş tələb et</button></>
+      : <><button type="button" className="button button-secondary" disabled={busy} onClick={() => setAsking(true)} data-testid="review-revision">Düzəliş tələb et</button>
+        <button type="button" className="button button-primary" disabled={busy} onClick={() => void act('confirm')} data-testid="review-confirm"><Check size={15} />Qəbul et</button></>}
+    {err && <p className="ai-error">{err}</p>}
+  </div>;
+}
+
+function StageCard({ w, media, homeId, canEdit, canManage, invites, open, toggle, first, last, move, gps }: { w: WorkSummary; media: HomeMedia[]; homeId: string; canEdit: boolean; canManage: boolean; invites: PhotoInvite[]; open: boolean; toggle: () => void; first: boolean; last: boolean; move: (d: -1 | 1) => void; gps: boolean }) {
   const qc = useQueryClient();
+  const [inviting, setInviting] = useState(false);
   const cam = useRef<HTMLInputElement>(null); const gal = useRef<HTMLInputElement>(null); const vid = useRef<HTMLInputElement>(null);
   const [queue, setQueue] = useState<Item[]>([]);
   const photos = media.filter(isImage); const videos = media.filter(isVideo);
@@ -119,6 +180,7 @@ function StageCard({ w, media, homeId, canEdit, open, toggle, first, last, move,
         <span className="st-thumb">{cover ? <img src={cover.url} alt="" loading="lazy" /> : <Camera size={20} />}</span>
         <span className="st-main">
           <b data-testid="stage-title">{w.title}</b>
+          <span className={`st-status ${w.status}`} data-testid="stage-status">{STAGE_STATUS[w.status] ?? w.status}</span>
           <small>{w.startDate ? dayOnly(w.startDate) : ''}{w.endDate && w.endDate !== w.startDate ? ` — ${dayOnly(w.endDate)}` : ''}</small>
           <span className="st-badges"><span data-testid="stage-count">{photos.length} {tr('hPhotos')}</span>{videos.length > 0 && <span><Film size={12} />{videos.length}</span>}{media.some((m) => m.hasGps) && <span className="st-gps on"><MapPin size={12} />GPS</span>}</span>
         </span>
@@ -139,14 +201,17 @@ function StageCard({ w, media, homeId, canEdit, open, toggle, first, last, move,
         {!media.length ? <p className="st-empty">{tr('hNoPhotos')}</p>
           : <ul className="st-media">{media.map((m) => <li key={m.id}>
             {isVideo(m) ? <video src={m.url} controls preload="metadata" /> : <a href={m.url} target="_blank" rel="noopener noreferrer"><img src={m.url} alt={m.caption || w.title} loading="lazy" /></a>}
-            <MediaFacts m={m} />
+            <MediaFacts m={m} invites={invites} />
           </li>)}</ul>}
         <div className="st-more">
+          {canManage && <button type="button" className="sm-link-btn" onClick={() => setInviting(true)} data-testid="stage-invite"><UserPlus size={13} />Foto çəkən şəxsi dəvət et</button>}
           {canEdit && <button type="button" className="sm-link-btn" onClick={() => vid.current?.click()} data-testid="stage-video"><Film size={13} />{tr('hAddVideo')} <small>(≤60 s, ≤50 MB)</small></button>}
           <Link href={`/works/${w.id}`} className="sm-link-btn">{tr('hEditStage')}</Link>
           {canEdit && <span className="st-move"><button type="button" className="icon-button" disabled={first} onClick={() => move(-1)} aria-label={tr('hMoveUp')} data-testid="stage-up"><ArrowUp size={14} /></button><button type="button" className="icon-button" disabled={last} onClick={() => move(1)} aria-label={tr('hMoveDown')} data-testid="stage-down"><ArrowDown size={14} /></button></span>}
         </div>
       </div>}
+      {canManage && w.status === 'completed' && <Review w={w} onDone={() => { void qc.invalidateQueries({ queryKey: [`/api/homes/${homeId}/works`] }); void refreshHomeData(qc); }} />}
+      {inviting && <InviteModal w={w} onClose={() => setInviting(false)} onCreated={() => void qc.invalidateQueries({ queryKey: [`/api/homes/${homeId}/photo-invites`] })} />}
     </div>
   </li>;
 }
@@ -161,7 +226,7 @@ function AddStage({ homeId, used, onClose, onAdded }: { homeId: string; used: st
     if (title.length < 2) return setErr(tr('hStageName'));
     setErr('');
     try {
-      const w = await create.mutateAsync({ homeId, data: { title, category: (p?.category ?? 'general') as never, kind: (p?.kind ?? 'construction') as never, startDate: date || null, status: date && date > today() ? 'planned' : 'completed', description: '' } });
+      const w = await create.mutateAsync({ homeId, data: { title, category: (p?.category ?? 'general') as never, kind: (p?.kind ?? 'construction') as never, startDate: date || null, status: date && date > today() ? 'planned' : 'in_progress', description: '' } });
       onAdded(w.id);
     } catch (e) { setErr((e as { data?: { error?: string } })?.data?.error ?? tr('hUploadFailed')); }
   };
@@ -179,6 +244,7 @@ export function HomeStagesPage({ homeId }: { homeId: string }) {
   const works = useListWorks(homeId);
   const media = useListHomeMedia(homeId);
   const protocols = useListHomeProtocols(homeId, { query: { queryKey: [`/api/homes/${homeId}/protocols`], retry: false } });
+  const invites = useListPhotoInvites(homeId, { query: { queryKey: [`/api/homes/${homeId}/photo-invites`], retry: false, enabled: !!home.data?.home.permissions.edit } });
   const qc = useQueryClient(); const [, go] = useLocation();
   const [openId, setOpenId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -190,6 +256,10 @@ export function HomeStagesPage({ homeId }: { homeId: string }) {
   const h = home.data.home; const p = h.permissions;
   const canEdit = p.addWorks;
   const byWork = (id: string) => (media.data ?? []).filter((m) => m.workId === id);
+  const allMedia = (media.data ?? []).filter((m) => m.workId && isImage(m));
+  const recent = [...allMedia].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
+  const awaiting = stages.filter((s) => s.status === 'completed');
+  const accepted = stages.filter((s) => s.status === 'confirmed').length;
   const setGpsPref = async (on: boolean) => {
     setGps(on); try { localStorage.setItem(GPS_KEY, on ? 'on' : 'off'); } catch { /* per-device preference only */ }
     if (on) { const pos = await devicePosition(); if (!pos) setErr(`${tr('hNoLocation')}: GPS icazəsi verilməyib və ya əlçatan deyil. Fotolar yenə yüklənəcək.`); else setErr(''); }
@@ -216,10 +286,21 @@ export function HomeStagesPage({ homeId }: { homeId: string }) {
       {p.edit && <button type="button" className="button button-secondary" disabled={busy === 'protocol'} onClick={() => void newProtocol()} data-testid="stage-protocol"><ClipboardCheck size={15} />{tr('hCreateProtocol')}</button>}
     </div>
     {err && <p className="ai-warn" data-testid="stages-warn">{err}</p>}
+    {stages.length > 0 && <div className="st-summary" data-testid="stage-summary">
+      <div className="st-tile"><b>{accepted}/{stages.length}</b><small>mərhələ qəbul edilib</small></div>
+      <div className="st-tile"><b data-testid="awaiting-count">{awaiting.length}</b><small>yoxlanış gözləyir{awaiting.length ? `: ${awaiting.map((a) => a.title).join(', ')}` : ''}</small></div>
+      <div className="st-tile"><b>{allMedia.length}</b><small>foto</small></div>
+    </div>}
+    {recent.length > 0 && <><h3 className="st-h3">Son əlavə edilən fotolar</h3><div className="st-recent" data-testid="recent-photos">{recent.map((m) => <figure key={m.id}><img src={m.url} alt="" loading="lazy" /><figcaption>{stages.find((s) => s.id === m.workId)?.title} · {fmt(m.createdAt)}{m.uploadedVia === 'invite' ? ' · dəvətlə' : ''}</figcaption></figure>)}</div></>}
     {(protocols.data ?? []).length > 0 && <div className="st-protocols" data-testid="home-protocols">{protocols.data!.map((x) => <Link key={x.id} href={`/protokol/${x.id}`} className="st-proto"><ClipboardCheck size={15} /><span>{tr('hViewProtocol')} · № {x.number}</span><Pill small tone={x.status === 'finalized' || x.status === 'approved' ? 'ok' : 'info'}>{x.status === 'finalized' ? 'PDF' : x.status === 'approved' ? '✓' : '…'}</Pill></Link>)}</div>}
     {!stages.length ? <Empty icon={<Camera size={28} />} title={tr('hNoHistory')} text="Mərhələni seçin və ilk fotonu çəkin — qalan məlumatı sonra da yaza bilərsiniz."
       action={canEdit ? <div className="st-presets inline">{STAGE_PRESETS.slice(0, 6).map((ps) => <button key={ps.key} type="button" onClick={() => setAdding(true)}>{ps[lang()]}</button>)}<button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="stage-add-empty"><Plus size={15} />{tr('hFirstPhoto')}</button></div> : undefined} />
-      : <ol className="st-timeline" data-testid="timeline">{stages.map((w, i) => <StageCard key={w.id} w={w} media={byWork(w.id)} homeId={homeId} canEdit={canEdit} open={openId === w.id} toggle={() => setOpenId(openId === w.id ? null : w.id)} first={i === 0} last={i === stages.length - 1} move={(d) => void move(i, d)} gps={gps} />)}</ol>}
+      : <ol className="st-timeline" data-testid="timeline">{stages.map((w, i) => <StageCard key={w.id} w={w} media={byWork(w.id)} homeId={homeId} canEdit={canEdit} canManage={p.edit} invites={invites.data ?? []} open={openId === w.id} toggle={() => setOpenId(openId === w.id ? null : w.id)} first={i === 0} last={i === stages.length - 1} move={(d) => void move(i, d)} gps={gps} />)}</ol>}
+    {p.edit && (invites.data ?? []).length > 0 && <section className="st-invites" data-testid="invites-panel"><h3>Foto dəvətləri</h3><ul>{invites.data!.map((iv) => <li key={iv.id} data-testid="invite-row">
+      <span className="grow"><b>{iv.workTitle}</b>{iv.label ? ` · ${iv.label}` : ''} · {iv.permission === 'photos' ? 'yalnız foto' : 'foto + status'} · {iv.uploadCount} foto{iv.maxUploads ? `/${iv.maxUploads}` : ''}{iv.expiresAt ? ` · ${fmt(iv.expiresAt, false)}-dək` : ' · müddətsiz'}</span>
+      <Pill small tone={iv.state === 'active' ? 'ok' : 'neutral'}>{iv.state === 'active' ? 'aktiv' : iv.state === 'revoked' ? 'ləğv edilib' : iv.state === 'expired' ? 'müddəti bitib' : 'limit dolub'}</Pill>
+      {iv.state === 'active' && <button type="button" className="sm-link-btn" onClick={() => void revokePhotoInvite(homeId, iv.id).then(() => qc.invalidateQueries({ queryKey: [`/api/homes/${homeId}/photo-invites`] }))} data-testid="invite-revoke"><X size={12} />Ləğv et</button>}
+    </li>)}</ul></section>}
     <p className="st-note">{tr('hEvidenceNote')} Video: hər ev üçün 5-ə qədər, hər biri ≤60 saniyə və ≤50 MB. Pro plan {tr('hComingSoon')} — hazırda bütün imkanlar pulsuzdur.</p>
     {adding && <AddStage homeId={homeId} used={stages.map((s) => s.title)} onClose={() => setAdding(false)} onAdded={(id) => { setAdding(false); setOpenId(id); void refreshHomeData(qc); void qc.invalidateQueries({ queryKey: [`/api/homes/${homeId}/works`] }); }} />}
   </div>;
