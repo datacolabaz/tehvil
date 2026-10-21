@@ -10,7 +10,7 @@ DAYS = [
        "body": ["Elanlarda hazır evin şəkilləri olur: parket, işıq, mebel.", "Təməl, armatur, borular, naqillər — bunları heç kim göstərmir. Çünki o şəkillər ya çəkilməyib, ya da kiminsə telefonunda itib.", "Soruşanda cavab çox vaxt eynidir: “Yaxşı tikilib, narahat olmayın.”"]},
       {"t": "cta", "eyebrow": "Ona görə", "title": "Evin hər mərhələsi tarixi ilə bir yerdə qalsın.", "body": "Tehvil.az-ı bunun üçün qururuq: təməldən açar gününə qədər fotolar bir arxivdə. İstəsəniz alıcı ilə paylaşırsınız, istəməsəniz — yalnız sizə qalır."},
     ],
-    "caption": """Bir neçə ay əvvəl tanışımız mənzil alırdı. Elanda hər şey qəşəng idi. Sonra divarı deşəndə məlum oldu ki, boru tamam başqa yerdən keçir.
+    "caption": """Çoxumuza tanışdır: elanda mənzil qəşəng görünür, sonra divarı deşəndə məlum olur ki, boru tamam başqa yerdən keçir.
 
 Fikirləşdik: tikinti zamanı hər şeyi görən insanlar var — usta, ev sahibi, qonşu. Sadəcə o fotolar bir yerdə qalmır. WhatsApp qrupunda, köhnə telefonda, “sonra taparam” qovluğunda itir.
 
@@ -27,7 +27,7 @@ Növbəti günlərdə necə işlədiyini bir-bir göstərəcəyik. Sualınız ol
        "rows": [["zap", "Elektrik xətləri", "hansı divardan, hansı hündürlükdən keçir"], ["droplets", "Su boruları", "harada birləşir, kran haradadır"], ["waves", "Kanalizasiya", "boru hansı tərəfə gedir"], ["thermometer", "İstilik sistemi", "kombi, radiator xətləri"]]},
       {"t": "cta", "eyebrow": "Bəs nə qədər?", "title": "Hər divara 2–3 foto bəs edir.", "body": "Yüklədiyiniz anda tarixi yazılır. Beş il sonra rəfə dübel vuranda bu fotolara görə özünüzə təşəkkür edəcəksiniz."},
     ],
-    "caption": """Bunu ustalardan da çox eşitmişik: “Kaş ki o vaxt şəkil çəkəydik.”
+    "caption": """Tanış cümlədir: “Kaş ki o vaxt şəkil çəkəydik.”
 
 Suvaq vurulandan sonra naqilin, borunun harada olduğunu təxmin etmək qalır. Səhv təxmin isə bəzən bahalı olur.
 
@@ -55,11 +55,11 @@ Siyahı sadəcə başlanğıcdır. Sizin evinizdə başqa iş varsa, adını yaz
   {
     "topic": "Usta linklə foto göndərir",
     "slides": [
-      {"t": "hook", "eyebrow": "Ən çox sevdiyimiz hissə", "title": "Usta foto çəkir. Foto itmir.", "sub": "Hesab açmadan, proqram yükləmədən."},
+      {"t": "hook", "eyebrow": "Yeni imkan", "title": "Usta foto çəkir. Foto itmir.", "sub": "Hesab açmadan, proqram yükləmədən."},
       {"t": "phone", "eyebrow": "Necə işləyir", "title": "Mərhələyə link yaradıb ustaya atırsınız.", "screen": "invite"},
       {"t": "phone", "eyebrow": "Sonra", "title": "Foto özü düz həmin mərhələyə düşür.", "screen": "success"},
     ],
-    "caption": """Ən çox eşitdiyimiz problem buydu: “Usta şəkil atır, sonra o şəkilləri tapa bilmirəm.”
+    "caption": """Tanış vəziyyətdir: usta şəkil atır, bir ay sonra o şəkilləri çatın içində tapa bilmirsiniz.
 
 İndi belə edirsiniz:
 1. Evin mərhələsini açırsınız (məsələn, “Bünövrə”).
