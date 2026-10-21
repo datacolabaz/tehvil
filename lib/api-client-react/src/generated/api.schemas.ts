@@ -2961,6 +2961,13 @@ export interface HomeMedia {
   roomId: string | null;
   uploadedByMe: boolean;
   createdAt: string;
+  /** @nullable */
+  takenAt?: string | null;
+  /** @nullable */
+  takenSource?: string | null;
+  hasGps?: boolean;
+  gps?: unknown;
+  size?: number;
 }
 
 export type HomeMediaAttachInputPhase = typeof HomeMediaAttachInputPhase[keyof typeof HomeMediaAttachInputPhase];
@@ -2973,6 +2980,17 @@ export const HomeMediaAttachInputPhase = {
   hidden: 'hidden',
   other: 'other',
   document: 'document',
+} as const;
+
+/**
+ * @nullable
+ */
+export type HomeMediaAttachInputTakenSource = typeof HomeMediaAttachInputTakenSource[keyof typeof HomeMediaAttachInputTakenSource] | null;
+
+
+export const HomeMediaAttachInputTakenSource = {
+  camera: 'camera',
+  exif: 'exif',
 } as const;
 
 export interface HomeMediaAttachInput {
@@ -2992,6 +3010,11 @@ export interface HomeMediaAttachInput {
      */
   caption?: string;
   phase?: HomeMediaAttachInputPhase;
+  /** @nullable */
+  takenAt?: string | null;
+  /** @nullable */
+  takenSource?: HomeMediaAttachInputTakenSource;
+  clientMeta?: unknown;
 }
 
 export interface HomePermissions {
@@ -3255,6 +3278,8 @@ export interface WorkSummary {
   description: string;
   createdAt: string;
   updatedAt: string;
+  /** @nullable */
+  sortOrder?: number | null;
 }
 
 export interface WorkNote {
@@ -3506,6 +3531,8 @@ export interface WorkInput {
   status?: WorkInputStatus;
   /** @nullable */
   smetaProjectId?: string | null;
+  /** @nullable */
+  sortOrder?: number | null;
   /** @nullable */
   cost?: number | null;
   currency?: WorkInputCurrency;
@@ -4391,6 +4418,7 @@ export interface PublicWork {
   hasDocuments: boolean;
   notes: PublicWorkNote[];
   updatedAt: string;
+  photoFacts?: unknown;
 }
 
 export interface PublicDocument {
@@ -5020,6 +5048,8 @@ export interface ProtocolCreateInput {
      * @maxLength 5
      */
   handoverTime?: string;
+  /** @nullable */
+  homeId?: string | null;
 }
 
 export type ProtocolPatchPropertyType = typeof ProtocolPatchPropertyType[keyof typeof ProtocolPatchPropertyType];
@@ -5454,6 +5484,10 @@ export interface AdminRentalStats {
 
 export interface ProtocolVerification {
   result: unknown;
+}
+
+export interface WorkOrderInput {
+  ids: string[];
 }
 
 export type ProtocolInviteInputRole = typeof ProtocolInviteInputRole[keyof typeof ProtocolInviteInputRole];

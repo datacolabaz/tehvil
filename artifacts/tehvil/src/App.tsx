@@ -68,6 +68,7 @@ const OwnerConfirmPage = lazy(() => import('@/pages/realtor/confirm-pages').then
 const HomesPage = lazy(() => import('@/pages/home/homes-page').then(m => ({ default: m.HomesPage })));
 const HomeProfilePage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeProfilePage })));
 const HomeHistoryPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeHistoryPage })));
+const HomeStagesPage = lazy(() => import('@/pages/home/stages-page').then(m => ({ default: m.HomeStagesPage })));
 const HomeRoomsPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeRoomsPage })));
 const RoomPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.RoomPage })));
 const HomePerformersPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomePerformersPage })));
@@ -107,6 +108,7 @@ const RentalStatsPage = lazy(() => import('@/pages/rental/rental-pages').then(m 
 /** Sections of one home in the digital home passport (Azerbaijani, like the brief). */
 const HOME_NAV = [
   { path: '', key: 'profile', label: 'Ümumi məlumat', icon: House },
+  { path: '/tarixce', key: 'stages', label: 'Tikinti tarixçəsi', icon: ImagePlus },
   { path: '/rooms', key: 'rooms', label: 'Otaqlar', icon: DoorOpen },
   { path: '/history', key: 'history', label: 'İşlər və tarixçə', icon: History },
   { path: '/map', key: 'map', label: 'Texniki məlumatlar', icon: Cable },
@@ -160,9 +162,9 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
   type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number };
   // Home-first menu: the same three sections on desktop and mobile. Other modules stay reachable from Parametrlər.
   const mainNav: NavItem[] = [
+    { href: '/homes', icon: House, key: 'myHomes' },
     { href: '/protokollar', icon: ClipboardCheck, key: 'protocolsNav' },
     { href: '/kiraye', icon: KeyRound, key: 'rentalsNav' },
-    { href: '/homes', icon: House, key: 'myHomes' },
     { href: '/history', icon: History, key: 'repairHistory' },
     { href: '/ai-smeta', icon: Calculator, key: 'smeta' },
   ];
@@ -214,7 +216,7 @@ function LegacyLanding({ lang, change, t }: { lang: Lang; change: (v: Lang)=>voi
   </div>;
 }
 function Protected({ children, t }: { children: ReactNode; t: (k:TKey)=>string }) {
-  return <><Show when="signed-in">{children}</Show><Show when="signed-out"><div className="auth-wall"><div className="auth-panel"><Brand/><div className="eyebrow">{t('trust')}</div><h1 className="font-display">{t('signinPrompt')}</h1><Link className="button button-primary" href="/sign-in">{t('signIn')}<ArrowRight size={16}/></Link></div></div></Show></>;
+  return <><Show when="signed-in">{children}</Show><Show when="signed-out"><div className="auth-wall"><div className="auth-panel"><Brand/><div className="eyebrow">{t('trust')}</div><h1 className="font-display">{t('signinPrompt')}</h1><Link className="button button-primary" href={`/sign-in?redirect=${encodeURIComponent(window.location.pathname.replace(basePath, '') + window.location.search)}`}>{t('signIn')}<ArrowRight size={16}/></Link></div></div></Show></>;
 }
 function useProjectData(id: string) {
   const projects = useListProjects();
@@ -393,11 +395,11 @@ function realtorRedirect() {
   const qs = new URLSearchParams(window.location.search);
   // Only same-site paths (e.g. an invitation link) are accepted as a redirect target.
   const next = qs.get('redirect');
-  if (next && /^\/(invite|works|homes|workers|d|k|protokol|kiraye)\/[A-Za-z0-9_/?=&-]{1,80}$/.test(next)) return { forceRedirectUrl: `${basePath}${next}` };
+  if (next && (/^\/(invite|works|homes|workers|d|k|protokol|kiraye)\/[A-Za-z0-9_/?=&-]{1,80}$/.test(next) || /^\/(homes|protokollar|kiraye)(\?new=1)?$/.test(next))) return { forceRedirectUrl: `${basePath}${next}` };
   return qs.get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {};
 }
 function SignUpPage() { const c=authCopy(); const realtor=!!new URLSearchParams(window.location.search).get('realtor'); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${window.location.search}`} {...realtorRedirect()}/></div></div>; }
-function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/protokollar"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
+function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/homes"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
 function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   const [msg, setMsg] = useState<FeedbackMsg | null>(null);
   useEffect(() => onFeedback(m => setMsg(m)), []);
@@ -440,6 +442,7 @@ function ClerkRoutes() {
       <Route path="/protokol/:id">{params => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları', href: '/protokollar' }, { label: 'Protokol' }]} lang={lang} change={changeLang} t={t}><ProtocolPage id={params.id}/></ProtocolShell>}</Route>
       <Route path="/d/:token">{params => <PublicSuspense t={t}><ProtocolInvitePage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/homes">{() => <PlainShell active="myHomes" crumbs={[{ label: t('myHomes') }]} lang={lang} change={changeLang} t={t}><HomesPage/></PlainShell>}</Route>
+      <Route path="/homes/:homeId/tarixce">{params => <HomeShell homeId={params.homeId} section="stages" lang={lang} change={changeLang} t={t}><HomeStagesPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/history">{params => <HomeShell homeId={params.homeId} section="history" lang={lang} change={changeLang} t={t}><HomeHistoryPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/rooms/:roomId">{params => <HomeShell homeId={params.homeId} section="rooms" lang={lang} change={changeLang} t={t}><RoomPage homeId={params.homeId} roomId={params.roomId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/rooms">{params => <HomeShell homeId={params.homeId} section="rooms" lang={lang} change={changeLang} t={t}><HomeRoomsPage homeId={params.homeId}/></HomeShell>}</Route>

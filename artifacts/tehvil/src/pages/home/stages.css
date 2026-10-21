@@ -1,0 +1,49 @@
+.st-page { max-width: 760px; }
+.st-tools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:4px 0 14px; }
+.st-gps-toggle { display:inline-flex; align-items:center; gap:6px; font-size:14px; padding:8px 12px; border:1px solid var(--line,#e5e0d5); border-radius:999px; background:#fff; cursor:pointer; }
+.st-protocols { display:grid; gap:8px; margin-bottom:14px; }
+.st-proto { display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; background:#fff; border:1px solid var(--line,#e5e0d5); color:inherit; text-decoration:none; font-weight:600; font-size:14px; }
+.st-proto span { flex:1; }
+.st-timeline { list-style:none; margin:0; padding:0 0 0 18px; position:relative; }
+.st-timeline::before { content:""; position:absolute; left:6px; top:8px; bottom:8px; width:2px; background:#d8e2da; }
+.st-stage { position:relative; margin-bottom:12px; }
+.st-dot { position:absolute; left:-17px; top:22px; width:12px; height:12px; border-radius:50%; background:#1f5c47; box-shadow:0 0 0 3px #f6f1e7; }
+.st-card { background:#fff; border:1px solid var(--line,#e5e0d5); border-radius:16px; padding:10px 12px; }
+.st-head { display:flex; gap:12px; align-items:center; width:100%; background:none; border:0; padding:0; text-align:left; cursor:pointer; color:inherit; font:inherit; }
+.st-thumb { width:64px; height:64px; flex:0 0 64px; border-radius:12px; overflow:hidden; background:#f1ece2; display:grid; place-items:center; color:#8a8478; }
+.st-thumb img { width:100%; height:100%; object-fit:cover; }
+.st-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.st-main b { font-size:16px; }
+.st-main small { color:var(--muted,#7a756b); font-size:13px; }
+.st-badges { display:flex; gap:8px; flex-wrap:wrap; font-size:12.5px; color:var(--muted,#6f6a60); }
+.st-badges span { display:inline-flex; align-items:center; gap:3px; }
+.st-chev { transition: transform .15s; color:#8a8478; }
+.st-stage.open .st-chev { transform: rotate(180deg); }
+.st-desc { margin:8px 0 0; font-size:14px; color:#4a463f; }
+.st-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.st-big { min-height:48px; font-size:15px; justify-content:center; }
+.st-queue { list-style:none; padding:0; margin:8px 0 0; display:grid; gap:4px; font-size:13px; }
+.st-queue li { display:flex; gap:6px; align-items:center; padding:6px 8px; border-radius:8px; background:#f4f1ea; }
+.st-queue li.done { background:#e3f1e8; color:#174d36; }
+.st-queue li.error { background:#fbe6e1; color:#7d2614; flex-wrap:wrap; }
+.st-body { margin-top:10px; }
+.st-empty { color:var(--muted,#7a756b); font-size:14px; }
+.st-media { list-style:none; padding:0; margin:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+.st-media img, .st-media video { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:10px; display:block; background:#eee; }
+.st-facts { margin:6px 0 0; display:grid; gap:2px; font-size:12px; }
+.st-facts div { display:flex; gap:4px; flex-wrap:wrap; }
+.st-facts dt { color:var(--muted,#7a756b); }
+.st-facts dt::after { content:":"; }
+.st-facts dd { margin:0; }
+.st-facts small { color:var(--muted,#8a8478); }
+.st-gps { display:inline-flex; align-items:center; gap:3px; color:#8a8478; }
+.st-gps.on { color:#1f6f4c; }
+.st-more { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:10px; font-size:13px; }
+.st-move { margin-left:auto; display:inline-flex; gap:4px; }
+.st-presets { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+.st-presets.inline { justify-content:center; margin-top:8px; }
+.st-presets button { border:1px solid var(--line,#e5e0d5); background:#fff; border-radius:999px; padding:8px 12px; font:inherit; font-size:14px; cursor:pointer; }
+.st-presets button.on { background:#1f5c47; color:#fff; border-color:#1f5c47; }
+.st-presets button.used:not(.on) { opacity:.6; }
+.st-note { margin-top:16px; font-size:12.5px; color:var(--muted,#7a756b); }
+@media (max-width: 520px) { .st-media { grid-template-columns:1fr 1fr; } .st-timeline { padding-left:14px; } .st-dot { left:-13px; } .st-timeline::before { left:4px; } }

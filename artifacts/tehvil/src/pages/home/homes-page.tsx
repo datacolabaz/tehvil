@@ -47,7 +47,7 @@ export function HomesPage() {
         {h.pendingApproval > 0 && <span className="hp-pending"><ClipboardCheck size={13} />{h.pendingApproval} iş təsdiqinizi gözləyir</span>}
       </div>
     </Link>)}</div>}
-    {creating && <AddHomeModal onClose={close} onSaved={id => { setCreating(false); setLocation(`/homes/${id}?welcome=1`); }} />}
+    {creating && <AddHomeModal onClose={close} onSaved={id => { setCreating(false); setLocation(`/homes/${id}/tarixce`); }} />}
     <HomeToaster />
   </>;
 }

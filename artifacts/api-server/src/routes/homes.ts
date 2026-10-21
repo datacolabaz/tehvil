@@ -24,6 +24,7 @@ import {
   GetHomeSharingParams,
   ListEquipmentParams,
   LinkHomeSmetaBody,
+  ReorderHomeWorksBody,
   LinkHomeSmetaParams,
   ListHomeAuditParams,
   ListHomeSmetasParams,
@@ -398,6 +399,20 @@ router.get("/homes/:homeId/performers", async (req, res): Promise<void> => {
 
 /* ---------------------------------------------------------------------- works */
 
+/** Owner-chosen order of stages on the history timeline. Only people who manage the home; ids must belong to it. */
+router.post("/homes/:homeId/works/order", async (req, res): Promise<void> => {
+  const a = await access(req, res, String(req.params.homeId));
+  if (!a) return;
+  if (!homePermissions(a).edit) return forbidden(res);
+  const b = ReorderHomeWorksBody.safeParse(req.body);
+  if (!b.success || b.data.ids.length > 500 || new Set(b.data.ids).size !== b.data.ids.length) return bad(res, "Sıranı yoxlayın");
+  const own = await db.select({ id: workRecordsTable.id }).from(workRecordsTable).where(and(eq(workRecordsTable.homeId, a.home.id), inArray(workRecordsTable.id, b.data.ids.length ? b.data.ids : ["00000000-0000-0000-0000-000000000000"])));
+  if (own.length !== b.data.ids.length) return bad(res, "Mərhələ bu evə aid deyil");
+  await db.transaction(async (tx) => { for (const [i, id] of b.data.ids.entries()) await tx.update(workRecordsTable).set({ sortOrder: i }).where(eq(workRecordsTable.id, id)); });
+  await audit({ homeId: a.home.id, actorUserId: uid(req), actorRole: a.role, action: "works.reordered", entityType: "home", entityId: a.home.id, summary: `${b.data.ids.length} mərhələ` });
+  res.json(await workSummaries(await visibleWorks(a)));
+});
+
 router.get("/homes/:homeId/works", async (req, res): Promise<void> => {
   noStore(res);
   const p = ListWorksParams.safeParse(req.params);
@@ -420,6 +435,7 @@ export async function workValues(homeId: string, userId: string, isOwner: boolea
     ...(d.cost !== undefined ? { cost: d.cost == null ? null : Math.max(0, Math.round(d.cost * 100) / 100) } : {}),
     ...(d.currency ? { currency: d.currency } : {}),
     ...(d.warrantyNote !== undefined ? { warrantyNote: d.warrantyNote.trim() } : {}),
+    ...(d.sortOrder !== undefined ? { sortOrder: d.sortOrder == null ? null : Math.max(0, Math.min(10000, Math.round(d.sortOrder))) } : {}),
   };
   if (d.smetaProjectId !== undefined) {
     if (!isOwner) return { error: "Smeta layihəsini yalnız ev sahibi bağlaya bilər" };

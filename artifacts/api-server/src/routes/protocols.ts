@@ -16,6 +16,7 @@ import { ObjectNotFoundError, ObjectStorageService } from "../lib/objectStorage"
 import { renderProtocolPdf, type ProtocolSnapshot } from "../lib/protocolPdf";
 import { rateLimit } from "../lib/rateLimit";
 import { hashToken, newToken, publicOrigin } from "../lib/realtorCore";
+import { getHomeAccess, homePermissions } from "../lib/homeAccess";
 import { buildManifest, canonicalHash, eventHash, finalRecord, sha256, trustServices, verifyChain, type ManifestPhoto } from "../lib/integrity";
 
 /** Invitation pages and photos opened through an invitation link work without sign-in. */
@@ -210,6 +211,7 @@ export async function detail(p: HandoverProtocolRow, viewer: { userId: string | 
       id: p.id, number: p.number, kind: p.kind, rentalId: p.rentalId, address: rental?.address ?? p.address, propertyType: rental?.propertyType ?? p.propertyType, handoverDate: p.handoverDate, status: p.status, creatorRole: p.creatorRole,
       sellerName: p.sellerName, sellerPhone: mask(p.sellerPhone), buyerName: p.buyerName, buyerPhone: mask(p.buyerPhone),
       realtorName: rental?.realtorName ?? p.realtorName, realtorPhone: mask(rental?.realtorPhone ?? p.realtorPhone), realtorAgency: p.realtorAgency, handoverTime: p.handoverTime, stage,
+      homeId: viewer.userId ? p.homeId : null,
       landlordName: rental?.landlordName ?? "", landlordPhone: mask(rental?.landlordPhone ?? ""), tenantName: rental?.tenantName ?? "", tenantPhone: mask(rental?.tenantPhone ?? ""),
       extras: p.extras, revision: p.revision, currentVersion: p.currentVersion, baseProtocolId: p.baseProtocolId, baseVersion: p.baseVersion,
       createdAt: p.createdAt.toISOString(), updatedAt: p.updatedAt.toISOString(),
@@ -287,7 +289,14 @@ router.post("/protocols", async (req, res): Promise<void> => {
   const b = CreateProtocolBody.safeParse(req.body);
   if (!b.success) return bad(res, "Ünvanı və rolunuzu yoxlayın");
   const d = b.data, userId = uid(req);
-  const [p] = await db.insert(handoverProtocolsTable).values({
+  // Linking to a home history needs edit rights on that home.
+  let homeId: string | null = null;
+  if (d.homeId) {
+    const ha = await getHomeAccess(userId, d.homeId);
+    if (!ha || !homePermissions(ha).edit) return bad(res, "Bu ev tarixçəsinə protokol bağlamaq icazəniz yoxdur", 403);
+    homeId = ha.home.id;
+  }
+  const [p] = await db.insert(handoverProtocolsTable).values({ homeId,
     number: await newNumber(), createdByUserId: userId, creatorRole: d.role, propertyType: d.propertyType, address: d.address.trim(), handoverDate: d.handoverDate ?? null,
     sellerName: d.sellerName?.trim() ?? "", sellerPhone: d.sellerPhone?.trim() ?? "", buyerName: d.buyerName?.trim() ?? "", buyerPhone: d.buyerPhone?.trim() ?? "",
     realtorName: d.realtorName?.trim() ?? "", realtorPhone: d.realtorPhone?.trim() ?? "", realtorAgency: d.realtorAgency?.trim() ?? "", handoverTime: HHMM.test(d.handoverTime ?? "") ? d.handoverTime! : "", extras: emptyExtras(),
@@ -859,4 +868,16 @@ protocolPublicRouter.get("/verify/:token", verifyLimit, async (req, res): Promis
     checkedAt: new Date().toISOString(),
   };
   res.json({ result });
+});
+
+/** Protocols of a home history, for people who can see the home and take part in the protocol. */
+router.get("/homes/:homeId/protocols", async (req, res): Promise<void> => {
+  const userId = uid(req);
+  const ha = await getHomeAccess(userId, String(req.params.homeId));
+  if (!ha) return bad(res, "Ev tapılmadı", 404);
+  const rows = await db.select({ p: handoverProtocolsTable, role: protocolParticipantsTable.role }).from(protocolParticipantsTable)
+    .innerJoin(handoverProtocolsTable, eq(handoverProtocolsTable.id, protocolParticipantsTable.protocolId))
+    .where(and(eq(protocolParticipantsTable.userId, userId), eq(handoverProtocolsTable.homeId, ha.home.id), isNull(handoverProtocolsTable.archivedAt))).orderBy(desc(handoverProtocolsTable.updatedAt));
+  res.json(rows.map(({ p, role }) => ({ id: p.id, number: p.number, address: p.address, status: p.status, myRole: role, handoverDate: p.handoverDate, updatedAt: p.updatedAt.toISOString(), rooms: 0, photos: 0,
+    stage: stageOf(p, { invited: false, joined: false, approvedNow: 0, hasMedia: false }), decisions: [] })));
 });

@@ -656,7 +656,11 @@ CREATE TABLE IF NOT EXISTS "home_media" (
 	"phase" varchar(12) DEFAULT 'other' NOT NULL,
 	"uploaded_by_user_id" varchar(128) NOT NULL,
 	"deleted_at" timestamp with time zone,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"taken_at" timestamp with time zone,
+	"taken_source" varchar(8),
+	"client_meta" jsonb,
+	"sha256" varchar(64) DEFAULT '' NOT NULL
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "home_members" (
@@ -813,6 +817,7 @@ CREATE TABLE IF NOT EXISTS "work_records" (
 	"currency" varchar(3) DEFAULT 'AZN' NOT NULL,
 	"warranty_note" text DEFAULT '' NOT NULL,
 	"smeta_project_id" uuid,
+	"sort_order" integer,
 	"created_by_user_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -948,6 +953,7 @@ CREATE TABLE IF NOT EXISTS "handover_protocols" (
 	"creator_role" varchar(10) NOT NULL,
 	"kind" varchar(10) DEFAULT 'sale' NOT NULL,
 	"rental_id" uuid,
+	"home_id" uuid,
 	"base_protocol_id" uuid,
 	"base_version" integer,
 	"baseline" jsonb,
@@ -2182,6 +2188,14 @@ ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "deleted_at" timestamp with ti
 --> statement
 ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "taken_at" timestamp with time zone;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "taken_source" varchar(8);
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "client_meta" jsonb;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "sha256" varchar(64) DEFAULT '' NOT NULL;
+--> statement
 ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
@@ -2434,6 +2448,8 @@ ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "warranty_note" text DEFAULT
 --> statement
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "smeta_project_id" uuid;
 --> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "sort_order" integer;
+--> statement
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
 --> statement
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
@@ -2649,6 +2665,8 @@ ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "creator_role" varchar
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "kind" varchar(10) DEFAULT 'sale' NOT NULL;
 --> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "rental_id" uuid;
+--> statement
+ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "home_id" uuid;
 --> statement
 ALTER TABLE "handover_protocols" ADD COLUMN IF NOT EXISTS "base_protocol_id" uuid;
 --> statement

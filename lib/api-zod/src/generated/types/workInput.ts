@@ -47,6 +47,8 @@ export interface WorkInput {
   /** @nullable */
   smetaProjectId?: string | null;
   /** @nullable */
+  sortOrder?: number | null;
+  /** @nullable */
   cost?: number | null;
   currency?: WorkInputCurrency;
   /**

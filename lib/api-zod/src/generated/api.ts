@@ -8643,7 +8643,8 @@ export const CreateHomeResponse = zod.object({
   "materials": zod.string(),
   "description": zod.string(),
   "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
 })),
   "performers": zod.array(zod.object({
   "worker": zod.object({
@@ -8762,7 +8763,8 @@ export const GetHomeOverviewResponse = zod.object({
   "materials": zod.string(),
   "description": zod.string(),
   "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
 })),
   "performers": zod.array(zod.object({
   "worker": zod.object({
@@ -8916,7 +8918,8 @@ export const UpdateHomeResponse = zod.object({
   "materials": zod.string(),
   "description": zod.string(),
   "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
 })),
   "performers": zod.array(zod.object({
   "worker": zod.object({
@@ -9046,7 +9049,8 @@ export const GetHomeRoomResponse = zod.object({
   "materials": zod.string(),
   "description": zod.string(),
   "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
 })),
   "equipment": zod.array(zod.object({
   "id": zod.string(),
@@ -9115,7 +9119,12 @@ export const GetHomeRoomResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 }))
 })
 
@@ -9272,7 +9281,8 @@ export const ListWorksResponseItem = zod.object({
   "materials": zod.string(),
   "description": zod.string(),
   "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
 })
 export const ListWorksResponse = zod.array(ListWorksResponseItem)
 
@@ -9315,6 +9325,7 @@ export const CreateWorkBody = zod.object({
   "visibility": zod.enum(['public', 'private']).optional(),
   "status": zod.enum(['planned', 'in_progress', 'completed']).optional(),
   "smetaProjectId": zod.string().uuid().nullish(),
+  "sortOrder": zod.number().int().nullish(),
   "cost": zod.number().nullish(),
   "currency": zod.enum(['AZN', 'USD', 'EUR']).optional(),
   "warrantyNote": zod.string().min(createWorkBodyWarrantyNoteMin).max(createWorkBodyWarrantyNoteMax).optional()
@@ -9383,7 +9394,12 @@ export const CreateWorkResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -9434,6 +9450,71 @@ export const CreateWorkResponse = zod.object({
 
 
 /**
+ * @summary Set the order of works (stages) on the history timeline
+ */
+export const ReorderHomeWorksParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ReorderHomeWorksBody = zod.object({
+  "ids": zod.array(zod.string())
+})
+
+export const ReorderHomeWorksResponseItem = zod.object({
+  "id": zod.string(),
+  "homeId": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "kind": zod.string(),
+  "status": zod.string(),
+  "startDate": zod.string().nullable(),
+  "endDate": zod.string().nullable(),
+  "roomId": zod.string().nullable(),
+  "roomName": zod.string().nullable(),
+  "participants": zod.array(zod.object({
+  "workerId": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "role": zod.string(),
+  "status": zod.string()
+})),
+  "mediaCount": zod.number().int(),
+  "openDefects": zod.number().int(),
+  "inspected": zod.boolean(),
+  "visibility": zod.string(),
+  "materials": zod.string(),
+  "description": zod.string(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
+})
+export const ReorderHomeWorksResponse = zod.array(ReorderHomeWorksResponseItem)
+
+
+/**
+ * @summary Handover protocols linked to this home that the caller takes part in
+ */
+export const ListHomeProtocolsParams = zod.object({
+  "homeId": zod.coerce.string().uuid()
+})
+
+export const ListHomeProtocolsResponseItem = zod.object({
+  "id": zod.string(),
+  "number": zod.string(),
+  "address": zod.string(),
+  "status": zod.string(),
+  "myRole": zod.string(),
+  "handoverDate": zod.string().nullable(),
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "rooms": zod.number().int(),
+  "photos": zod.number().int(),
+  "stage": zod.string().optional(),
+  "decisions": zod.unknown().optional()
+})
+export const ListHomeProtocolsResponse = zod.array(ListHomeProtocolsResponseItem)
+
+
+/**
  * @summary Photos and videos of the home visible to the caller
  */
 export const ListHomeMediaParams = zod.object({
@@ -9450,7 +9531,12 @@ export const ListHomeMediaResponseItem = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })
 export const ListHomeMediaResponse = zod.array(ListHomeMediaResponseItem)
 
@@ -10176,7 +10262,12 @@ export const GetWorkResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10264,6 +10355,7 @@ export const UpdateWorkBody = zod.object({
   "visibility": zod.enum(['public', 'private']).optional(),
   "status": zod.enum(['planned', 'in_progress', 'completed']).optional(),
   "smetaProjectId": zod.string().uuid().nullish(),
+  "sortOrder": zod.number().int().nullish(),
   "cost": zod.number().nullish(),
   "currency": zod.enum(['AZN', 'USD', 'EUR']).optional(),
   "warrantyNote": zod.string().min(updateWorkBodyWarrantyNoteMin).max(updateWorkBodyWarrantyNoteMax).optional()
@@ -10332,7 +10424,12 @@ export const UpdateWorkResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10462,7 +10559,12 @@ export const ChangeWorkStatusResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10592,7 +10694,12 @@ export const AddWorkNoteResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10739,7 +10846,12 @@ export const AddWorkParticipantResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -10874,7 +10986,12 @@ export const UpdateWorkParticipantResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -11007,7 +11124,12 @@ export const CreateReviewResponse = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })),
   "notes": zod.array(zod.object({
   "id": zod.string(),
@@ -11187,7 +11309,8 @@ export const GetMyInboxResponse = zod.object({
   "materials": zod.string(),
   "description": zod.string(),
   "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
 }),
   "homeName": zod.string()
 }))
@@ -11223,7 +11346,8 @@ export const ListMyHomeWorksResponseItem = zod.object({
   "materials": zod.string(),
   "description": zod.string(),
   "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
 }),
   "homeName": zod.string(),
   "myRole": zod.string()
@@ -11976,7 +12100,8 @@ export const CreateProtocolBody = zod.object({
   "realtorName": zod.string().min(createProtocolBodyRealtorNameMin).max(createProtocolBodyRealtorNameMax).optional(),
   "realtorPhone": zod.string().min(createProtocolBodyRealtorPhoneMin).max(createProtocolBodyRealtorPhoneMax).optional(),
   "realtorAgency": zod.string().min(createProtocolBodyRealtorAgencyMin).max(createProtocolBodyRealtorAgencyMax).optional(),
-  "handoverTime": zod.string().min(createProtocolBodyHandoverTimeMin).max(createProtocolBodyHandoverTimeMax).optional()
+  "handoverTime": zod.string().min(createProtocolBodyHandoverTimeMin).max(createProtocolBodyHandoverTimeMax).optional(),
+  "homeId": zod.string().uuid().nullish()
 })
 
 export const CreateProtocolResponse = zod.object({
@@ -12940,7 +13065,8 @@ export const ListMyWorksResponseItem = zod.object({
   "materials": zod.string(),
   "description": zod.string(),
   "createdAt": zod.string().datetime({"offset":true}),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "sortOrder": zod.number().int().nullish()
 }),
   "homeName": zod.string(),
   "role": zod.string(),
@@ -13989,7 +14115,10 @@ export const AttachHomeMediaBody = zod.object({
   "roomId": zod.string().uuid().nullish(),
   "workerId": zod.string().uuid().nullish(),
   "caption": zod.string().min(attachHomeMediaBodyCaptionMin).max(attachHomeMediaBodyCaptionMax).optional(),
-  "phase": zod.enum(['before', 'during', 'after', 'hidden', 'other', 'document']).optional()
+  "phase": zod.enum(['before', 'during', 'after', 'hidden', 'other', 'document']).optional(),
+  "takenAt": zod.string().datetime({"offset":true}).nullish(),
+  "takenSource": zod.union([zod.literal('camera'),zod.literal('exif'),zod.literal(null)]).nullish(),
+  "clientMeta": zod.unknown().optional()
 })
 
 export const AttachHomeMediaResponseItem = zod.object({
@@ -14002,7 +14131,12 @@ export const AttachHomeMediaResponseItem = zod.object({
   "workId": zod.string().nullable(),
   "roomId": zod.string().nullable(),
   "uploadedByMe": zod.boolean(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "takenAt": zod.string().nullish(),
+  "takenSource": zod.string().nullish(),
+  "hasGps": zod.boolean().optional(),
+  "gps": zod.unknown().optional(),
+  "size": zod.number().int().optional()
 })
 export const AttachHomeMediaResponse = zod.array(AttachHomeMediaResponseItem)
 
@@ -14088,7 +14222,8 @@ export const GetPublicHomeResponse = zod.object({
   "authorRole": zod.string(),
   "createdAt": zod.string().datetime({"offset":true})
 })),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "photoFacts": zod.unknown().optional()
 })),
   "equipment": zod.array(zod.object({
   "id": zod.string(),
@@ -14189,7 +14324,8 @@ export const GetSharedHomeResponse = zod.object({
   "authorRole": zod.string(),
   "createdAt": zod.string().datetime({"offset":true})
 })),
-  "updatedAt": zod.string().datetime({"offset":true})
+  "updatedAt": zod.string().datetime({"offset":true}),
+  "photoFacts": zod.unknown().optional()
 })),
   "equipment": zod.array(zod.object({
   "id": zod.string(),

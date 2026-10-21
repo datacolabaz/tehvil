@@ -31,4 +31,6 @@ export interface WorkSummary {
   description: string;
   createdAt: string;
   updatedAt: string;
+  /** @nullable */
+  sortOrder?: number | null;
 }

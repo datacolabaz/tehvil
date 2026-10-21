@@ -30,4 +30,5 @@ export interface PublicWork {
   hasDocuments: boolean;
   notes: PublicWorkNote[];
   updatedAt: string;
+  photoFacts?: unknown;
 }

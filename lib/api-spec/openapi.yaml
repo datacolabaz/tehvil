@@ -1775,6 +1775,41 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/WorkDetail'}
+  /homes/{homeId}/works/order:
+    post:
+      operationId: reorderHomeWorks
+      tags: [home]
+      summary: Set the order of works (stages) on the history timeline
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/WorkOrderInput'}
+      responses:
+        '200':
+          description: Works
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/WorkSummary'}
+  /homes/{homeId}/protocols:
+    get:
+      operationId: listHomeProtocols
+      tags: [home]
+      summary: Handover protocols linked to this home that the caller takes part in
+      parameters:
+      - {$ref: '#/components/parameters/HomeId'}
+      responses:
+        '200':
+          description: Protocols
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/ProtocolSummary'}
   /homes/{homeId}/media:
     get:
       operationId: listHomeMedia
@@ -5151,6 +5186,13 @@ components:
           type: [string, 'null']
         uploadedByMe: {type: boolean}
         createdAt: {type: string, format: date-time}
+        takenAt:
+          type: [string, 'null']
+        takenSource:
+          type: [string, 'null']
+        hasGps: {type: boolean}
+        gps: {}
+        size: {type: integer}
       required: [id, url, contentType, originalName, caption, phase, workId, roomId, uploadedByMe, createdAt]
     HomeMediaAttachInput:
       type: object
@@ -5175,6 +5217,13 @@ components:
         phase:
           type: string
           enum: [before, during, after, hidden, other, document]
+        takenAt:
+          type: [string, 'null']
+          format: date-time
+        takenSource:
+          type: [string, 'null']
+          enum: [camera, exif, null]
+        clientMeta: {}
       required: [files]
     HomePermissions:
       type: object
@@ -5381,6 +5430,8 @@ components:
         description: {type: string}
         createdAt: {type: string, format: date-time}
         updatedAt: {type: string, format: date-time}
+        sortOrder:
+          type: [integer, 'null']
       required: [id, homeId, title, category, kind, status, startDate, endDate, roomId, roomName, participants, mediaCount, openDefects, inspected, visibility, materials, description, createdAt, updatedAt]
     WorkNote:
       type: object
@@ -5556,6 +5607,8 @@ components:
         smetaProjectId:
           type: [string, 'null']
           format: uuid
+        sortOrder:
+          type: [integer, 'null']
         cost:
           type: [number, 'null']
         currency:
@@ -6271,6 +6324,7 @@ components:
           type: array
           items: {$ref: '#/components/schemas/PublicWorkNote'}
         updatedAt: {type: string, format: date-time}
+        photoFacts: {}
       required: [id, title, category, kind, status, startDate, endDate, roomName, performers, photos, confirmed, inspected, description, materials, source, hasDocuments, notes, updatedAt]
     PublicWorkNote:
       type: object
@@ -6830,6 +6884,9 @@ components:
         realtorPhone: {type: string, minLength: 0, maxLength: 40}
         realtorAgency: {type: string, minLength: 0, maxLength: 160}
         handoverTime: {type: string, minLength: 0, maxLength: 5}
+        homeId:
+          type: [string, 'null']
+          format: uuid
       required: [role, propertyType, address]
     ProtocolPatch:
       type: object
@@ -7029,6 +7086,13 @@ components:
       properties:
         result: {}
       required: [result]
+    WorkOrderInput:
+      type: object
+      properties:
+        ids:
+          type: array
+          items: {type: string}
+      required: [ids]
     ProtocolInviteInput:
       type: object
       properties:
