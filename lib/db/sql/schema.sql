@@ -660,7 +660,8 @@ CREATE TABLE IF NOT EXISTS "home_media" (
 	"taken_at" timestamp with time zone,
 	"taken_source" varchar(8),
 	"client_meta" jsonb,
-	"sha256" varchar(64) DEFAULT '' NOT NULL
+	"sha256" varchar(64) DEFAULT '' NOT NULL,
+	"invite_id" uuid
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "home_members" (
@@ -753,6 +754,22 @@ CREATE TABLE IF NOT EXISTS "service_interests" (
 	"contact" varchar(200) DEFAULT '' NOT NULL,
 	"note" text DEFAULT '' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "stage_photo_invites" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid NOT NULL,
+	"work_id" uuid NOT NULL,
+	"token_hash" varchar(64) NOT NULL,
+	"permission" varchar(16) DEFAULT 'photos' NOT NULL,
+	"label" varchar(120) DEFAULT '' NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"expires_at" timestamp with time zone,
+	"max_uploads" integer,
+	"upload_count" integer DEFAULT 0 NOT NULL,
+	"revoked_at" timestamp with time zone,
+	"last_used_at" timestamp with time zone
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "work_approvals" (
@@ -2196,6 +2213,8 @@ ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "client_meta" jsonb;
 --> statement
 ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "sha256" varchar(64) DEFAULT '' NOT NULL;
 --> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "invite_id" uuid;
+--> statement
 ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
@@ -2343,6 +2362,32 @@ ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "contact" varchar(200) 
 ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
 --> statement
 ALTER TABLE "service_interests" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "work_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "token_hash" varchar(64) NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "permission" varchar(16) DEFAULT 'photos' NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "label" varchar(120) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "expires_at" timestamp with time zone;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "max_uploads" integer;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "upload_count" integer DEFAULT 0 NOT NULL;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "revoked_at" timestamp with time zone;
+--> statement
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "last_used_at" timestamp with time zone;
 --> statement
 ALTER TABLE "work_approvals" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
@@ -3270,6 +3315,16 @@ EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 --> statement
 DO $$ BEGIN
+  ALTER TABLE "stage_photo_invites" ADD CONSTRAINT "stage_photo_invites_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "stage_photo_invites" ADD CONSTRAINT "stage_photo_invites_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
   ALTER TABLE "work_approvals" ADD CONSTRAINT "work_approvals_work_id_work_records_id_fk" FOREIGN KEY ("work_id") REFERENCES "public"."work_records"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
@@ -3506,6 +3561,10 @@ CREATE INDEX IF NOT EXISTS "homes_creator_idx" ON "homes" USING btree ("created_
 CREATE INDEX IF NOT EXISTS "infrastructure_items_home_idx" ON "infrastructure_items" USING btree ("home_id","type");
 --> statement
 CREATE INDEX IF NOT EXISTS "service_interests_kind_idx" ON "service_interests" USING btree ("kind","created_at");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "stage_photo_invites_token_idx" ON "stage_photo_invites" USING btree ("token_hash");
+--> statement
+CREATE INDEX IF NOT EXISTS "stage_photo_invites_home_idx" ON "stage_photo_invites" USING btree ("home_id");
 --> statement
 CREATE INDEX IF NOT EXISTS "work_approvals_work_idx" ON "work_approvals" USING btree ("work_id","created_at");
 --> statement

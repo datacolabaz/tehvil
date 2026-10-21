@@ -69,6 +69,7 @@ const HomesPage = lazy(() => import('@/pages/home/homes-page').then(m => ({ defa
 const HomeProfilePage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeProfilePage })));
 const HomeHistoryPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeHistoryPage })));
 const HomeStagesPage = lazy(() => import('@/pages/home/stages-page').then(m => ({ default: m.HomeStagesPage })));
+const PhotoInvitePage = lazy(() => import('@/pages/home/photo-invite-page').then(m => ({ default: m.PhotoInvitePage })));
 const HomeRoomsPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeRoomsPage })));
 const RoomPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.RoomPage })));
 const HomePerformersPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomePerformersPage })));
@@ -435,6 +436,7 @@ function ClerkRoutes() {
       <Route path="/kiraye/yeni">{() => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Yeni' }]} lang={lang} change={changeLang} t={t}><RentalNewPage/></ProtocolShell>}</Route>
       <Route path="/kiraye/:id">{params => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Kirayə' }]} lang={lang} change={changeLang} t={t}><RentalPage id={params.id}/></ProtocolShell>}</Route>
       <Route path="/k/:token">{params => <PublicSuspense t={t}><RentalInvitePage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/f/:token">{params => <PublicSuspense t={t}><PhotoInvitePage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/v/:code">{params => <PublicSuspense t={t}><VerifyPage code={params.code}/></PublicSuspense>}</Route>
       <Route path="/admin/statistika">{() => <ProtocolShell active="settingsNav" crumbs={[{ label: 'Statistika' }]} lang={lang} change={changeLang} t={t}><RentalStatsPage/></ProtocolShell>}</Route>
       <Route path="/protokollar">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları' }]} lang={lang} change={changeLang} t={t}><ProtocolListPage/></ProtocolShell>}</Route>

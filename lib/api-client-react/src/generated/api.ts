@@ -71,6 +71,11 @@ import type {
   InvitationInput,
   InvitationLink,
   InvitationPreview,
+  InvitePhotoInput,
+  InvitePhotoResult,
+  InviteStatusInput,
+  InviteUploadRequest,
+  InviteUploadUrl,
   ListingDraft,
   ListingImport,
   ListingImportInput,
@@ -95,6 +100,9 @@ import type {
   PaymentInput,
   PaymentItem,
   PaymentNote,
+  PhotoInvite,
+  PhotoInviteInput,
+  PhotoInvitePreview,
   PriceBase,
   PriceImportInput,
   PriceImportResult,
@@ -9215,6 +9223,592 @@ export const useReorderHomeWorks = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getReorderHomeWorksMutationOptions(options));
+    }
+
+export const getCreatePhotoInviteUrl = (workId: string,) => {
+
+
+
+
+  return `/api/works/${workId}/photo-invites`
+}
+
+/**
+ * @summary Link for someone without an account to add photos to this stage
+ */
+export const createPhotoInvite = async (workId: string,
+    photoInviteInput: PhotoInviteInput, options?: Parameters<typeof customFetch>[1]): Promise<PhotoInvite> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PhotoInvite>(getCreatePhotoInviteUrl(workId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(photoInviteInput)
+  }
+);}
+
+
+
+
+
+export const getCreatePhotoInviteMutationKey = () => ['createPhotoInvite'] as const;
+
+export const getCreatePhotoInviteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPhotoInvite>>, TError,CreatePhotoInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPhotoInvite>>, TError,CreatePhotoInviteMutationVariables, TContext> => {
+
+const mutationKey = getCreatePhotoInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPhotoInvite>>, CreatePhotoInviteMutationVariables> = (props) => {
+          const {workId,data} = props ?? {};
+
+          return  createPhotoInvite(workId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePhotoInviteMutationResult = NonNullable<Awaited<ReturnType<typeof createPhotoInvite>>>
+    export type CreatePhotoInviteMutationBody = BodyType<PhotoInviteInput>
+    export type CreatePhotoInviteMutationError = ErrorType<unknown>
+    export type CreatePhotoInviteMutationVariables = {workId: string;data: BodyType<PhotoInviteInput>}
+
+    /**
+ * @summary Link for someone without an account to add photos to this stage
+ */
+export const useCreatePhotoInvite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPhotoInvite>>, TError,CreatePhotoInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createPhotoInvite>>,
+        TError,
+        CreatePhotoInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreatePhotoInviteMutationOptions(options));
+    }
+
+export const getListPhotoInvitesUrl = (homeId: string,) => {
+
+
+
+
+  return `/api/homes/${homeId}/photo-invites`
+}
+
+/**
+ * @summary Photo invitation links of this home (active, revoked, expired)
+ */
+export const listPhotoInvites = async (homeId: string, options?: Parameters<typeof customFetch>[1]): Promise<PhotoInvite[]> => {
+
+  return customFetch<PhotoInvite[]>(getListPhotoInvitesUrl(homeId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListPhotoInvitesQueryKey = (homeId: string,) => {
+    return [
+    `/api/homes/${homeId}/photo-invites`
+    ] as const;
+    }
+
+
+export const getListPhotoInvitesQueryOptions = <TData = Awaited<ReturnType<typeof listPhotoInvites>>, TError = ErrorType<unknown>>(homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPhotoInvites>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListPhotoInvitesQueryKey(homeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPhotoInvites>>> = ({ signal }) => listPhotoInvites(homeId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: homeId !== null && homeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPhotoInvites>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListPhotoInvitesQueryResult = NonNullable<Awaited<ReturnType<typeof listPhotoInvites>>>
+export type ListPhotoInvitesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Photo invitation links of this home (active, revoked, expired)
+ */
+
+export function useListPhotoInvites<TData = Awaited<ReturnType<typeof listPhotoInvites>>, TError = ErrorType<unknown>>(
+ homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPhotoInvites>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListPhotoInvitesQueryOptions(homeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRevokePhotoInviteUrl = (homeId: string,
+    inviteId: string,) => {
+
+
+
+
+  return `/api/homes/${homeId}/photo-invites/${inviteId}`
+}
+
+/**
+ * @summary Revoke a photo invitation link
+ */
+export const revokePhotoInvite = async (homeId: string,
+    inviteId: string, options?: Parameters<typeof customFetch>[1]): Promise<PhotoInvite> => {
+
+  return customFetch<PhotoInvite>(getRevokePhotoInviteUrl(homeId,inviteId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokePhotoInviteMutationKey = () => ['revokePhotoInvite'] as const;
+
+export const getRevokePhotoInviteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokePhotoInvite>>, TError,RevokePhotoInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokePhotoInvite>>, TError,RevokePhotoInviteMutationVariables, TContext> => {
+
+const mutationKey = getRevokePhotoInviteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokePhotoInvite>>, RevokePhotoInviteMutationVariables> = (props) => {
+          const {homeId,inviteId} = props ?? {};
+
+          return  revokePhotoInvite(homeId,inviteId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokePhotoInviteMutationResult = NonNullable<Awaited<ReturnType<typeof revokePhotoInvite>>>
+
+    export type RevokePhotoInviteMutationError = ErrorType<unknown>
+    export type RevokePhotoInviteMutationVariables = {homeId: string;inviteId: string}
+
+    /**
+ * @summary Revoke a photo invitation link
+ */
+export const useRevokePhotoInvite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokePhotoInvite>>, TError,RevokePhotoInviteMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof revokePhotoInvite>>,
+        TError,
+        RevokePhotoInviteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevokePhotoInviteMutationOptions(options));
+    }
+
+export const getGetPhotoInviteUrl = (token: string,) => {
+
+
+
+
+  return `/api/photo-invites/${token}`
+}
+
+/**
+ * @summary What a photo invitation link shows (no sign-in)
+ */
+export const getPhotoInvite = async (token: string, options?: Parameters<typeof customFetch>[1]): Promise<PhotoInvitePreview> => {
+
+  return customFetch<PhotoInvitePreview>(getGetPhotoInviteUrl(token),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPhotoInviteQueryKey = (token: string,) => {
+    return [
+    `/api/photo-invites/${token}`
+    ] as const;
+    }
+
+
+export const getGetPhotoInviteQueryOptions = <TData = Awaited<ReturnType<typeof getPhotoInvite>>, TError = ErrorType<unknown>>(token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPhotoInvite>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPhotoInviteQueryKey(token);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPhotoInvite>>> = ({ signal }) => getPhotoInvite(token, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: token !== null && token !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPhotoInvite>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPhotoInviteQueryResult = NonNullable<Awaited<ReturnType<typeof getPhotoInvite>>>
+export type GetPhotoInviteQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary What a photo invitation link shows (no sign-in)
+ */
+
+export function useGetPhotoInvite<TData = Awaited<ReturnType<typeof getPhotoInvite>>, TError = ErrorType<unknown>>(
+ token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPhotoInvite>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPhotoInviteQueryOptions(token,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRequestInviteUploadUrlUrl = (token: string,) => {
+
+
+
+
+  return `/api/photo-invites/${token}/upload-url`
+}
+
+/**
+ * @summary Presigned upload for a photo through an invitation link
+ */
+export const requestInviteUploadUrl = async (token: string,
+    inviteUploadRequest: InviteUploadRequest, options?: Parameters<typeof customFetch>[1]): Promise<InviteUploadUrl> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<InviteUploadUrl>(getRequestInviteUploadUrlUrl(token),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(inviteUploadRequest)
+  }
+);}
+
+
+
+
+
+export const getRequestInviteUploadUrlMutationKey = () => ['requestInviteUploadUrl'] as const;
+
+export const getRequestInviteUploadUrlMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestInviteUploadUrl>>, TError,RequestInviteUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestInviteUploadUrl>>, TError,RequestInviteUploadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestInviteUploadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestInviteUploadUrl>>, RequestInviteUploadUrlMutationVariables> = (props) => {
+          const {token,data} = props ?? {};
+
+          return  requestInviteUploadUrl(token,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestInviteUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestInviteUploadUrl>>>
+    export type RequestInviteUploadUrlMutationBody = BodyType<InviteUploadRequest>
+    export type RequestInviteUploadUrlMutationError = ErrorType<unknown>
+    export type RequestInviteUploadUrlMutationVariables = {token: string;data: BodyType<InviteUploadRequest>}
+
+    /**
+ * @summary Presigned upload for a photo through an invitation link
+ */
+export const useRequestInviteUploadUrl = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestInviteUploadUrl>>, TError,RequestInviteUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestInviteUploadUrl>>,
+        TError,
+        RequestInviteUploadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestInviteUploadUrlMutationOptions(options));
+    }
+
+export const getAddInvitePhotoUrl = (token: string,) => {
+
+
+
+
+  return `/api/photo-invites/${token}/photos`
+}
+
+/**
+ * @summary Attach an uploaded photo to the invited stage
+ */
+export const addInvitePhoto = async (token: string,
+    invitePhotoInput: InvitePhotoInput, options?: Parameters<typeof customFetch>[1]): Promise<InvitePhotoResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<InvitePhotoResult>(getAddInvitePhotoUrl(token),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(invitePhotoInput)
+  }
+);}
+
+
+
+
+
+export const getAddInvitePhotoMutationKey = () => ['addInvitePhoto'] as const;
+
+export const getAddInvitePhotoMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addInvitePhoto>>, TError,AddInvitePhotoMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addInvitePhoto>>, TError,AddInvitePhotoMutationVariables, TContext> => {
+
+const mutationKey = getAddInvitePhotoMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addInvitePhoto>>, AddInvitePhotoMutationVariables> = (props) => {
+          const {token,data} = props ?? {};
+
+          return  addInvitePhoto(token,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddInvitePhotoMutationResult = NonNullable<Awaited<ReturnType<typeof addInvitePhoto>>>
+    export type AddInvitePhotoMutationBody = BodyType<InvitePhotoInput>
+    export type AddInvitePhotoMutationError = ErrorType<unknown>
+    export type AddInvitePhotoMutationVariables = {token: string;data: BodyType<InvitePhotoInput>}
+
+    /**
+ * @summary Attach an uploaded photo to the invited stage
+ */
+export const useAddInvitePhoto = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addInvitePhoto>>, TError,AddInvitePhotoMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addInvitePhoto>>,
+        TError,
+        AddInvitePhotoMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddInvitePhotoMutationOptions(options));
+    }
+
+export const getSetInviteStageStatusUrl = (token: string,) => {
+
+
+
+
+  return `/api/photo-invites/${token}/status`
+}
+
+/**
+ * @summary Mark the stage started or finished (sends it for the owner's review; never accepts it)
+ */
+export const setInviteStageStatus = async (token: string,
+    inviteStatusInput: InviteStatusInput, options?: Parameters<typeof customFetch>[1]): Promise<PhotoInvitePreview> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PhotoInvitePreview>(getSetInviteStageStatusUrl(token),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(inviteStatusInput)
+  }
+);}
+
+
+
+
+
+export const getSetInviteStageStatusMutationKey = () => ['setInviteStageStatus'] as const;
+
+export const getSetInviteStageStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setInviteStageStatus>>, TError,SetInviteStageStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setInviteStageStatus>>, TError,SetInviteStageStatusMutationVariables, TContext> => {
+
+const mutationKey = getSetInviteStageStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setInviteStageStatus>>, SetInviteStageStatusMutationVariables> = (props) => {
+          const {token,data} = props ?? {};
+
+          return  setInviteStageStatus(token,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetInviteStageStatusMutationResult = NonNullable<Awaited<ReturnType<typeof setInviteStageStatus>>>
+    export type SetInviteStageStatusMutationBody = BodyType<InviteStatusInput>
+    export type SetInviteStageStatusMutationError = ErrorType<unknown>
+    export type SetInviteStageStatusMutationVariables = {token: string;data: BodyType<InviteStatusInput>}
+
+    /**
+ * @summary Mark the stage started or finished (sends it for the owner's review; never accepts it)
+ */
+export const useSetInviteStageStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setInviteStageStatus>>, TError,SetInviteStageStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setInviteStageStatus>>,
+        TError,
+        SetInviteStageStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetInviteStageStatusMutationOptions(options));
     }
 
 export const getListHomeProtocolsUrl = (homeId: string,) => {

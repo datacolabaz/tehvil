@@ -131,6 +131,8 @@ export function mediaDto(m: MediaRow, userId: string | null, shareToken?: string
     takenAt: m.takenAt?.toISOString() ?? null, takenSource: m.takenSource ?? null, size: m.size,
     // Coordinates can reveal the address: only signed-in viewers inside the account see them; share links get just the indicator.
     hasGps: !!gpsOf(m), gps: !shareToken && userId ? gpsOf(m) : null,
+    // Photos sent through a photo invitation link have no account behind them; no name is invented.
+    uploadedVia: m.inviteId ? "invite" : "account", inviteId: !shareToken && userId ? m.inviteId ?? null : null,
   };
 }
 
