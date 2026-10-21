@@ -1,3 +1,4 @@
+// Release 2026-10-21: home history stages, photo invite links, evidence integrity.
 import express, { type Express, type ErrorRequestHandler } from "express";
 import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
