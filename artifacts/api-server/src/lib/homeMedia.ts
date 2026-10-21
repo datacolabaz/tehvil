@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { and, eq, gt, isNull } from "drizzle-orm";
 import { db, evidenceUploadsTable, homeMediaTable, homeSharesTable, homesTable, workRecordsTable } from "@workspace/db";
 import { ObjectStorageService } from "./objectStorage";
@@ -17,7 +18,10 @@ export class HomeMediaError extends Error {}
 /** Claims fresh, unattached uploads of this user (same checks as project evidence). */
 export async function attachHomeMedia(userId: string, files: MediaInputValue[], target: {
   homeId: string | null; workId: string | null; roomId: string | null; workerId: string | null; caption: string; phase: string;
+  /** Device data for every file of this request (one photo per request from the camera flow). */
+  takenAt?: Date | null; takenSource?: string | null; clientMeta?: Record<string, unknown> | null;
 }): Promise<MediaRow[]> {
+  const hashes = new Map<string, string>();
   const storage = new ObjectStorageService();
   for (const file of files) {
     if (!file.objectPath.startsWith("/objects/uploads/") || !HOME_MEDIA_TYPES.includes(file.contentType) || file.size < 1 || file.size > MAX_BYTES) {
@@ -37,6 +41,10 @@ export async function attachHomeMedia(userId: string, files: MediaInputValue[], 
     if (Number(metadata.size) !== file.size || metadata.contentType !== file.contentType) {
       throw new HomeMediaError("Yüklənən fayl elan edilən ölçü və ya tiplə uyğun gəlmir");
     }
+    // Server fingerprint of exactly what was stored (detects a later swap of the file).
+    const h = createHash("sha256");
+    for await (const chunk of object.createReadStream()) h.update(chunk as Buffer);
+    hashes.set(file.objectPath, h.digest("hex"));
   }
   return db.transaction(async (tx) => {
     for (const file of files) {
@@ -51,6 +59,8 @@ export async function attachHomeMedia(userId: string, files: MediaInputValue[], 
       homeId: target.homeId, workId: target.workId, roomId: target.roomId, workerId: target.workerId,
       objectPath: f.objectPath, originalName: f.originalName.slice(0, 255), contentType: f.contentType, size: f.size,
       caption: target.caption, phase: target.phase, uploadedByUserId: userId,
+      takenAt: target.takenAt ?? null, takenSource: target.takenAt ? target.takenSource ?? null : null, clientMeta: target.clientMeta ?? null,
+      sha256: hashes.get(f.objectPath) ?? "",
     }))).returning();
   });
 }

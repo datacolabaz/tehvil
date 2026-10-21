@@ -451,8 +451,22 @@ router.post("/home-media", async (req, res): Promise<void> => {
       roomId = d.roomId;
     }
   } else return bad(res, "Faylın aid olduğu yeri seçin");
+  // Videos: storage is limited — a fixed number per home (HOME_VIDEO_LIMIT, default 5).
+  const newVideos = d.files.filter((f) => f.contentType.startsWith("video/")).length;
+  if (newVideos && homeId) {
+    const limit = Math.max(0, Number(process.env.HOME_VIDEO_LIMIT ?? 5) || 0);
+    const [{ n }] = (await db.execute(sql`select count(*)::int n from home_media where home_id = ${homeId} and deleted_at is null and content_type like 'video/%'`)).rows as { n: number }[];
+    if (n + newVideos > limit) return bad(res, `Bu ev üçün video limiti ${limit}-dir. Köhnə videonu silin və ya yalnız foto əlavə edin.`);
+  }
+  // Device data: kept only if plausible; never proof.
+  const taken = d.takenAt ? new Date(d.takenAt) : null;
+  const takenAt = taken && !Number.isNaN(taken.getTime()) && taken.getTime() <= Date.now() + 5 * 60_000 && taken.getTime() > Date.now() - 30 * 365 * 86_400_000 ? taken : null;
+  const cm = (d as { clientMeta?: { gps?: { lat?: unknown; lon?: unknown }; gpsSource?: unknown } }).clientMeta;
+  const lat = Number(cm?.gps?.lat), lon = Number(cm?.gps?.lon);
+  const clientMeta = Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && (lat !== 0 || lon !== 0)
+    ? { gps: { lat: Math.round(lat * 1e5) / 1e5, lon: Math.round(lon * 1e5) / 1e5 }, gpsSource: cm?.gpsSource === "device" ? "device" : "exif" } : null;
   try {
-    const rows = await attachHomeMedia(userId, d.files, { homeId, workId, roomId, workerId, caption: (d.caption ?? "").trim(), phase: d.phase ?? "other" });
+    const rows = await attachHomeMedia(userId, d.files, { homeId, workId, roomId, workerId, caption: (d.caption ?? "").trim(), phase: d.phase ?? "other", takenAt, takenSource: d.takenSource ?? null, clientMeta });
     if (homeId) await audit({ homeId, actorUserId: userId, actorRole: "uploader", action: "media.added", entityType: workId ? "work" : "home", entityId: workId ?? homeId, summary: `${rows.length} fayl${d.phase ? ` (${d.phase})` : ""}` });
     res.json(rows.map((m) => mediaDto(m, userId)));
   } catch (err) {

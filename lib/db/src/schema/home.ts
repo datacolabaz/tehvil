@@ -171,7 +171,15 @@ export const homeMediaTable = pgTable("home_media", {
   phase: varchar("phase", { length: 12 }).notNull().default("other"),
   uploadedByUserId: user("uploaded_by_user_id").notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  /** Upload time (server). */
   createdAt: createdAt(),
+  /** When the device says the photo was taken (EXIF or camera); not proof. */
+  takenAt: timestamp("taken_at", { withTimezone: true }),
+  takenSource: varchar("taken_source", { length: 8 }),
+  /** Device data, e.g. { gps: { lat, lon }, gpsSource: "exif" | "device" }; only with the person's permission; not proof. */
+  clientMeta: jsonb("client_meta").$type<Record<string, unknown>>(),
+  /** SHA-256 of the stored file, computed by the server ('' for older files). */
+  sha256: varchar("sha256", { length: 64 }).notNull().default(""),
 }, (t) => [
   uniqueIndex("home_media_object_idx").on(t.objectPath),
   index("home_media_home_idx").on(t.homeId, t.createdAt),
@@ -209,6 +217,8 @@ export const workRecordsTable = pgTable("work_records", {
   warrantyNote: text("warranty_note").notNull().default(""),
   /** Optional link to an AI Smeta project of the owner. */
   smetaProjectId: uuid("smeta_project_id"),
+  /** Order chosen by the owner on the history timeline (null: by date). */
+  sortOrder: integer("sort_order"),
   createdByUserId: user("created_by_user_id").notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),

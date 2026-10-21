@@ -80,6 +80,9 @@ function HomeView({ h, shared }: { h: PublicHome; shared?: boolean }) {
       <ul className="hp-docs">{h.documents.map(d => <li key={d.id} className="surface"><a href={d.url} target="_blank" rel="noreferrer" className="hp-doc"><FileText size={20} /><span><b>{d.title}</b><small>Əlavə olunub: {day(d.createdAt)}</small></span></a></li>)}</ul>
       <p className="rl-hint">Sənədləri ev sahibi yükləyib. Təhvil.az onların məzmununu yoxlamır.</p></section>}
     {!h.works.length && !h.equipment.length && !h.infrastructure.length && !h.documents.length && <p className="rl-hint">Ev sahibi burada yalnız evin ümumi məlumatlarını göstərir.</p>}
-    {photo && <div className="hp-lightbox" role="dialog" aria-modal="true" onClick={() => setPhoto(null)}><img src={photo} alt="" /></div>}
+    {photo && <div className="hp-lightbox" role="dialog" aria-modal="true" onClick={() => setPhoto(null)}><img src={photo} alt="" />{(() => {
+      const f = h.works.flatMap((w) => ((w as { photoFacts?: { url: string; uploadedAt: string; takenAt: string | null; hasGps: boolean }[] }).photoFacts ?? [])).find((x) => x.url === photo);
+      return f ? <p className="hp-lb-facts" data-testid="photo-facts">{f.takenAt ? `Çəkilib: ${dayTime(f.takenAt)} (cihazın məlumatı) · ` : ''}Yüklənib: {dayTime(f.uploadedAt)} · {f.hasGps ? 'GPS məlumatı qeydə alınıb' : 'Məkan məlumatı yoxdur'}</p> : null;
+    })()}</div>}
   </>;
 }

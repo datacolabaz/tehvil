@@ -11,7 +11,7 @@ export interface Extras { meters: { water: Meter; gas: Meter; electric: Meter };
 export interface Protocol {
   id: string; number: string; kind: Kind; rentalId: string | null; baseProtocolId: string | null; baseVersion: number | null;
   landlordName: string; landlordPhone: string; tenantName: string; tenantPhone: string; address: string; propertyType: string; handoverDate: string | null; status: Status; creatorRole: Role;
-  sellerName: string; sellerPhone: string; buyerName: string; buyerPhone: string; realtorName: string; realtorPhone: string; realtorAgency: string; handoverTime: string; stage: Stage;
+  sellerName: string; sellerPhone: string; buyerName: string; buyerPhone: string; realtorName: string; realtorPhone: string; realtorAgency: string; handoverTime: string; stage: Stage; homeId?: string | null;
   extras: Extras; revision: number; currentVersion: number; createdAt: string; updatedAt: string;
 }
 export interface Room { id: string; name: string; kind: string; condition: Condition | null; note: string; position: number; prevRoomId?: string | null }

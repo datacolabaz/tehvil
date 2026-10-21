@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { HomeMediaAttachInputPhase } from './homeMediaAttachInputPhase';
+import type { HomeMediaAttachInputTakenSource } from './homeMediaAttachInputTakenSource';
 import type { MediaInput } from './mediaInput';
 
 export interface HomeMediaAttachInput {
@@ -25,4 +26,9 @@ export interface HomeMediaAttachInput {
      */
   caption?: string;
   phase?: HomeMediaAttachInputPhase;
+  /** @nullable */
+  takenAt?: string | null;
+  /** @nullable */
+  takenSource?: HomeMediaAttachInputTakenSource;
+  clientMeta?: unknown;
 }

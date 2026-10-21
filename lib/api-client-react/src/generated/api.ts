@@ -182,6 +182,7 @@ import type {
   WorkDetail,
   WorkInput,
   WorkNoteInput,
+  WorkOrderInput,
   WorkStatusInput,
   WorkSummary,
   Worker,
@@ -9126,6 +9127,172 @@ export const useCreateWork = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getCreateWorkMutationOptions(options));
     }
+
+export const getReorderHomeWorksUrl = (homeId: string,) => {
+
+
+
+
+  return `/api/homes/${homeId}/works/order`
+}
+
+/**
+ * @summary Set the order of works (stages) on the history timeline
+ */
+export const reorderHomeWorks = async (homeId: string,
+    workOrderInput: WorkOrderInput, options?: Parameters<typeof customFetch>[1]): Promise<WorkSummary[]> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<WorkSummary[]>(getReorderHomeWorksUrl(homeId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(workOrderInput)
+  }
+);}
+
+
+
+
+
+export const getReorderHomeWorksMutationKey = () => ['reorderHomeWorks'] as const;
+
+export const getReorderHomeWorksMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderHomeWorks>>, TError,ReorderHomeWorksMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reorderHomeWorks>>, TError,ReorderHomeWorksMutationVariables, TContext> => {
+
+const mutationKey = getReorderHomeWorksMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reorderHomeWorks>>, ReorderHomeWorksMutationVariables> = (props) => {
+          const {homeId,data} = props ?? {};
+
+          return  reorderHomeWorks(homeId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReorderHomeWorksMutationResult = NonNullable<Awaited<ReturnType<typeof reorderHomeWorks>>>
+    export type ReorderHomeWorksMutationBody = BodyType<WorkOrderInput>
+    export type ReorderHomeWorksMutationError = ErrorType<unknown>
+    export type ReorderHomeWorksMutationVariables = {homeId: string;data: BodyType<WorkOrderInput>}
+
+    /**
+ * @summary Set the order of works (stages) on the history timeline
+ */
+export const useReorderHomeWorks = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderHomeWorks>>, TError,ReorderHomeWorksMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reorderHomeWorks>>,
+        TError,
+        ReorderHomeWorksMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReorderHomeWorksMutationOptions(options));
+    }
+
+export const getListHomeProtocolsUrl = (homeId: string,) => {
+
+
+
+
+  return `/api/homes/${homeId}/protocols`
+}
+
+/**
+ * @summary Handover protocols linked to this home that the caller takes part in
+ */
+export const listHomeProtocols = async (homeId: string, options?: Parameters<typeof customFetch>[1]): Promise<ProtocolSummary[]> => {
+
+  return customFetch<ProtocolSummary[]>(getListHomeProtocolsUrl(homeId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListHomeProtocolsQueryKey = (homeId: string,) => {
+    return [
+    `/api/homes/${homeId}/protocols`
+    ] as const;
+    }
+
+
+export const getListHomeProtocolsQueryOptions = <TData = Awaited<ReturnType<typeof listHomeProtocols>>, TError = ErrorType<unknown>>(homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listHomeProtocols>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListHomeProtocolsQueryKey(homeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listHomeProtocols>>> = ({ signal }) => listHomeProtocols(homeId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: homeId !== null && homeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listHomeProtocols>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListHomeProtocolsQueryResult = NonNullable<Awaited<ReturnType<typeof listHomeProtocols>>>
+export type ListHomeProtocolsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Handover protocols linked to this home that the caller takes part in
+ */
+
+export function useListHomeProtocols<TData = Awaited<ReturnType<typeof listHomeProtocols>>, TError = ErrorType<unknown>>(
+ homeId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listHomeProtocols>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListHomeProtocolsQueryOptions(homeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListHomeMediaUrl = (homeId: string,) => {
 

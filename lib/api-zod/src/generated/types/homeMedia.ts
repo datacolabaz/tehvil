@@ -19,4 +19,11 @@ export interface HomeMedia {
   roomId: string | null;
   uploadedByMe: boolean;
   createdAt: string;
+  /** @nullable */
+  takenAt?: string | null;
+  /** @nullable */
+  takenSource?: string | null;
+  hasGps?: boolean;
+  gps?: unknown;
+  size?: number;
 }

@@ -3,7 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { useQueryClient } from '@tanstack/react-query';
 import { Show } from '@clerk/react';
 import {
-  AlertTriangle, ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronRight, ClipboardCheck, Copy, Download, FileText, Gauge, History, KeyRound, Link2,
+  AlertTriangle, ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronRight, ClipboardCheck, Copy, Download, FileText, Gauge, History, ImagePlus, KeyRound, Link2,
   LoaderCircle, LogIn, MessageCircle, Plus, RotateCcw, Send, Trash2, Users, X,
 } from 'lucide-react';
 import {
@@ -124,6 +124,7 @@ export function ProtocolPage({ id }: { id: string }) {
     <div className="pt-top">
       {p.rentalId ? <Link href={`/kiraye/${p.rentalId}`} className="pt-back" data-testid="back-rental"><ArrowLeft size={15} />Kirayə qeydi</Link> : <Link href="/protokollar" className="pt-back"><ArrowLeft size={15} />Protokollar</Link>}
       {p.kind !== 'sale' && <div className={`pt-kind ${p.kind}`} data-testid="protocol-kind">{KIND_LABEL[p.kind]}</div>}
+      {p.homeId && <Link href={`/homes/${p.homeId}/tarixce`} className="pt-home-link" data-testid="protocol-home"><ImagePlus size={14} />Bu evin tikinti tarixçəsi</Link>}
       <h1 className="pt-title">{p.address}</h1>
       <div className="pt-meta"><span>№ {p.number}</span><span>{PROPERTY_LABEL[p.propertyType]}</span><span>{dayAz(p.handoverDate)}{p.handoverTime ? `, ${p.handoverTime}` : ''}</span><StatusPill s={p.status} /></div>
       {p.kind === 'sale' && p.stage && <Stepper stage={p.stage} />}

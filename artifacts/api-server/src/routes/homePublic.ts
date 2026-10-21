@@ -131,6 +131,10 @@ async function publicHomeDto(home: HomeRow, opts: { mode: "qr" } | { mode: "shar
         return { id: registered ? wk.id : "", displayName: registered ? wk.displayName : "Usta (hesabı yoxdur)", kind: wk.kind, role: p.role, profilePublic: registered };
       }),
       photos: media.filter((m) => m.workId === w.id && m.contentType.startsWith("image/") && (technical || m.phase !== "hidden" || !!share)).map((m) => homeMediaUrl(m.id, share?.token)),
+      // Times and whether GPS exists — never the coordinates (they would reveal the address).
+      photoFacts: media.filter((m) => m.workId === w.id && m.contentType.startsWith("image/") && (technical || m.phase !== "hidden" || !!share)).map((m) => ({
+        url: homeMediaUrl(m.id, share?.token), uploadedAt: m.createdAt.toISOString(), takenAt: m.takenAt?.toISOString() ?? null, hasGps: !!(m.clientMeta as { gps?: unknown } | null)?.gps,
+      })),
       confirmed: w.status === "confirmed", inspected: !!w.inspectedAt, description: w.description, materials: share ? w.materials : "",
       source: created.find((c) => c.workId === w.id)?.actorRole ?? "owner",
       hasDocuments: files.some((f) => f.workId === w.id && !f.contentType.startsWith("image/") && !f.contentType.startsWith("video/")),

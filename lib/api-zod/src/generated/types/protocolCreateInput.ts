@@ -58,4 +58,6 @@ export interface ProtocolCreateInput {
      * @maxLength 5
      */
   handoverTime?: string;
+  /** @nullable */
+  homeId?: string | null;
 }

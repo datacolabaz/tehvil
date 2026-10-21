@@ -116,16 +116,21 @@ export async function workSummaries(works: WorkRow[]) {
       mediaCount: mediaCounts.find((m) => m.workId === w.id)?.n ?? 0,
       openDefects: Math.max(0, defects - fixes),
       inspected: !!w.inspectedAt, visibility: w.visibility, materials: w.materials, description: w.description.slice(0, 300),
-      createdAt: w.createdAt.toISOString(), updatedAt: w.updatedAt.toISOString(),
+      createdAt: w.createdAt.toISOString(), updatedAt: w.updatedAt.toISOString(), sortOrder: w.sortOrder ?? null,
     };
   });
 }
 export type WorkSummaryDto = Awaited<ReturnType<typeof workSummaries>>[number];
 
+const gpsOf = (m: MediaRow) => { const g = (m.clientMeta as { gps?: { lat: number; lon: number }; gpsSource?: string } | null); return g?.gps ? { lat: g.gps.lat, lon: g.gps.lon, source: g.gpsSource ?? "exif" } : null; };
+
 export function mediaDto(m: MediaRow, userId: string | null, shareToken?: string) {
   return {
     id: m.id, url: homeMediaUrl(m.id, shareToken), contentType: m.contentType, originalName: m.originalName, caption: m.caption, phase: m.phase,
     workId: m.workId, roomId: m.roomId, uploadedByMe: !!userId && m.uploadedByUserId === userId, createdAt: m.createdAt.toISOString(),
+    takenAt: m.takenAt?.toISOString() ?? null, takenSource: m.takenSource ?? null, size: m.size,
+    // Coordinates can reveal the address: only signed-in viewers inside the account see them; share links get just the indicator.
+    hasGps: !!gpsOf(m), gps: !shareToken && userId ? gpsOf(m) : null,
   };
 }
 

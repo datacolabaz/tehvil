@@ -27,6 +27,8 @@ export const handoverProtocolsTable = pgTable("handover_protocols", {
   /** sale (purchase handover) | move_in | move_out (rental). Rental protocols take parties and access from their rental. */
   kind: varchar("kind", { length: 10 }).notNull().default("sale"),
   rentalId: uuid("rental_id"),
+  /** The home history this handover belongs to (optional; access to the home is checked separately). */
+  homeId: uuid("home_id"),
   /** A move-out protocol is built from this move-in protocol and version. */
   baseProtocolId: uuid("base_protocol_id"),
   baseVersion: integer("base_version"),

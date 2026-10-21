@@ -1,0 +1,55 @@
+/** Home history (stages) and its link to the handover protocol: AZ / RU / EN micro-copy. */
+export const extra3 = {
+  az: {
+    historyNav: 'Ev tarixçəsi', handoverNav: 'Təhvil protokolu',
+    hHistory: 'Ev tarixçəsi', hNewHome: 'Yeni ev əlavə et', hAddStage: 'Mərhələ əlavə et', hEditStage: 'Mərhələni redaktə et',
+    hTakePhoto: 'Foto çək', hUploadPhoto: 'Şəkil yüklə', hAddVideo: 'Video əlavə et', hViewHistory: 'Tarixçəyə bax',
+    hShareHistory: 'Tarixçəni paylaş', hDisableLink: 'Linki deaktiv et', hCreateProtocol: 'Təhvil protokolu yarat', hViewProtocol: 'Təhvil protokoluna bax',
+    hGpsRecorded: 'GPS məlumatı qeydə alınıb', hNoLocation: 'Məkan məlumatı yoxdur', hPhotoAdded: 'Şəkil uğurla əlavə edildi', hUploadFailed: 'Yükləmə uğursuz oldu',
+    hNoPhotos: 'Hələ foto əlavə edilməyib', hFirstPhoto: 'İlk fotonu əlavə et', hProVideo: 'Pro ilə video əlavə et', hFreePlan: 'Pulsuz plan', hProPlan: 'Pro plan',
+    hSharePerms: 'Paylaşım icazələri', hNoHistory: 'Bu ev üçün tarixçə yaradılmayıb',
+    hTaken: 'Çəkilib', hUploaded: 'Yüklənib', hLocation: 'Məkan', hDeviceData: 'cihazın məlumatı', hRecordLocation: 'Məkanı qeyd et', hOwnStage: 'Öz mərhələn',
+    hStageName: 'Mərhələnin adı', hStageDate: 'Tarix', hMoveUp: 'Yuxarı', hMoveDown: 'Aşağı', hPhotos: 'foto', hVideos: 'video', hUploading: 'Yüklənir…', hRetry: 'Yenidən cəhd et',
+    hComingSoon: 'tezliklə', hEvidenceNote: 'Tarix, saat və GPS cihazın verdiyi məlumatdır; fotonun məhz həmin yerdə və vaxtda çəkildiyinin sübutu deyil.',
+  },
+  ru: {
+    historyNav: 'История дома', handoverNav: 'Протокол передачи',
+    hHistory: 'История дома', hNewHome: 'Добавить дом', hAddStage: 'Добавить этап', hEditStage: 'Изменить этап',
+    hTakePhoto: 'Сделать фото', hUploadPhoto: 'Загрузить фото', hAddVideo: 'Добавить видео', hViewHistory: 'Открыть историю',
+    hShareHistory: 'Поделиться историей', hDisableLink: 'Отключить ссылку', hCreateProtocol: 'Создать протокол передачи', hViewProtocol: 'Открыть протокол передачи',
+    hGpsRecorded: 'GPS сохранён', hNoLocation: 'Нет данных о местоположении', hPhotoAdded: 'Фото добавлено', hUploadFailed: 'Не удалось загрузить',
+    hNoPhotos: 'Фото пока нет', hFirstPhoto: 'Добавить первое фото', hProVideo: 'Видео в Pro', hFreePlan: 'Бесплатный план', hProPlan: 'Pro план',
+    hSharePerms: 'Доступ по ссылке', hNoHistory: 'Для этого дома история ещё не создана',
+    hTaken: 'Снято', hUploaded: 'Загружено', hLocation: 'Место', hDeviceData: 'данные устройства', hRecordLocation: 'Сохранять место', hOwnStage: 'Свой этап',
+    hStageName: 'Название этапа', hStageDate: 'Дата', hMoveUp: 'Выше', hMoveDown: 'Ниже', hPhotos: 'фото', hVideos: 'видео', hUploading: 'Загрузка…', hRetry: 'Повторить',
+    hComingSoon: 'скоро', hEvidenceNote: 'Дата, время и GPS — данные устройства; это не доказательство того, что фото снято именно там и тогда.',
+  },
+  en: {
+    historyNav: 'Home history', handoverNav: 'Handover protocol',
+    hHistory: 'Home history', hNewHome: 'Add a home', hAddStage: 'Add a stage', hEditStage: 'Edit stage',
+    hTakePhoto: 'Take photo', hUploadPhoto: 'Upload photo', hAddVideo: 'Add video', hViewHistory: 'View history',
+    hShareHistory: 'Share history', hDisableLink: 'Disable link', hCreateProtocol: 'Create handover protocol', hViewProtocol: 'View handover protocol',
+    hGpsRecorded: 'GPS recorded', hNoLocation: 'No location data', hPhotoAdded: 'Photo added', hUploadFailed: 'Upload failed',
+    hNoPhotos: 'No photos yet', hFirstPhoto: 'Add the first photo', hProVideo: 'Add video with Pro', hFreePlan: 'Free plan', hProPlan: 'Pro plan',
+    hSharePerms: 'Sharing permissions', hNoHistory: 'No history for this home yet',
+    hTaken: 'Taken', hUploaded: 'Uploaded', hLocation: 'Location', hDeviceData: 'device data', hRecordLocation: 'Record location', hOwnStage: 'Your own stage',
+    hStageName: 'Stage name', hStageDate: 'Date', hMoveUp: 'Up', hMoveDown: 'Down', hPhotos: 'photos', hVideos: 'videos', hUploading: 'Uploading…', hRetry: 'Try again',
+    hComingSoon: 'coming soon', hEvidenceNote: 'Date, time and GPS come from the device; they do not prove where or when a photo was taken.',
+  },
+} as const;
+
+/** Construction and renovation stages offered first; people can add their own. kind/category map to work records. */
+export const STAGE_PRESETS: { key: string; az: string; ru: string; en: string; category: string; kind: string }[] = [
+  { key: 'foundation', az: 'Təməl', ru: 'Фундамент', en: 'Foundation', category: 'general', kind: 'construction' },
+  { key: 'rebar', az: 'Armatur', ru: 'Арматура', en: 'Rebar', category: 'general', kind: 'construction' },
+  { key: 'concrete', az: 'Beton və monolit işləri', ru: 'Бетон и монолит', en: 'Concrete and frame', category: 'general', kind: 'construction' },
+  { key: 'walls', az: 'Divarlar', ru: 'Стены', en: 'Walls', category: 'general', kind: 'construction' },
+  { key: 'roof', az: 'Dam', ru: 'Кровля', en: 'Roof', category: 'roofing', kind: 'construction' },
+  { key: 'plaster', az: 'Suvaq', ru: 'Штукатурка', en: 'Plaster', category: 'plaster', kind: 'construction' },
+  { key: 'electric', az: 'Elektrik', ru: 'Электрика', en: 'Electrical', category: 'electrical', kind: 'construction' },
+  { key: 'plumbing', az: 'Santexnika', ru: 'Сантехника', en: 'Plumbing', category: 'plumbing', kind: 'construction' },
+  { key: 'floor', az: 'Döşəmə və daxili işlər', ru: 'Полы и внутренние работы', en: 'Floors and interior', category: 'flooring', kind: 'construction' },
+  { key: 'finish', az: 'Son təmir', ru: 'Чистовой ремонт', en: 'Final finishing', category: 'painting', kind: 'renovation' },
+  { key: 'prep', az: 'Təhvilə hazırlıq', ru: 'Подготовка к передаче', en: 'Handover preparation', category: 'general', kind: 'inspection' },
+  { key: 'handover', az: 'Təhvil günü', ru: 'День передачи', en: 'Handover day', category: 'general', kind: 'inspection' },
+];
