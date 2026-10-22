@@ -1,4 +1,4 @@
-// Release 2026-10-21: home history stages, photo invite links, evidence integrity.
+// Release 2026-10-22: redeploy after Railway outage (home history, photo invites, integrity).
 import express, { type Express, type ErrorRequestHandler } from "express";
 import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
