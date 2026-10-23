@@ -1167,6 +1167,187 @@ CREATE TABLE IF NOT EXISTS "rentals" (
 	"archived_at" timestamp with time zone
 );
 --> statement
+CREATE TABLE IF NOT EXISTS "finance_budget_versions" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" uuid NOT NULL,
+	"version" integer NOT NULL,
+	"total" numeric(14, 2) NOT NULL,
+	"reason" varchar(16) NOT NULL,
+	"note" text DEFAULT '' NOT NULL,
+	"change_order_id" uuid,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "finance_change_orders" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" uuid NOT NULL,
+	"number" integer NOT NULL,
+	"party_id" uuid,
+	"title" varchar(200) NOT NULL,
+	"description" text DEFAULT '' NOT NULL,
+	"reason" text DEFAULT '' NOT NULL,
+	"amount" numeric(14, 2) NOT NULL,
+	"date" date NOT NULL,
+	"media_ids" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"status" varchar(16) DEFAULT 'proposed' NOT NULL,
+	"proposed_by_user_id" varchar(128) NOT NULL,
+	"decided_by_user_id" varchar(128),
+	"decided_at" timestamp with time zone,
+	"decision_note" text DEFAULT '' NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "finance_expense_items" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"expense_id" uuid NOT NULL,
+	"position" integer DEFAULT 0 NOT NULL,
+	"name" varchar(200) NOT NULL,
+	"quantity" numeric(14, 3),
+	"unit" varchar(16) DEFAULT '' NOT NULL,
+	"unit_price" numeric(14, 2),
+	"line_total" numeric(14, 2) NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "finance_expenses" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" uuid NOT NULL,
+	"home_id" uuid NOT NULL,
+	"date" date NOT NULL,
+	"category" varchar(24) NOT NULL,
+	"description" varchar(300) NOT NULL,
+	"party_id" uuid,
+	"vendor_name" varchar(200) DEFAULT '' NOT NULL,
+	"room_id" uuid,
+	"subtotal" numeric(14, 2) NOT NULL,
+	"discount" numeric(14, 2) DEFAULT '0' NOT NULL,
+	"tax" numeric(14, 2) DEFAULT '0' NOT NULL,
+	"total" numeric(14, 2) NOT NULL,
+	"payment_method" varchar(12) DEFAULT '' NOT NULL,
+	"funded_by_party_id" uuid,
+	"invoice_id" uuid,
+	"note" text DEFAULT '' NOT NULL,
+	"status" varchar(10) DEFAULT 'pending' NOT NULL,
+	"approved_by_user_id" varchar(128),
+	"approved_at" timestamp with time zone,
+	"void_reason" text,
+	"idempotency_key" varchar(64),
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "finance_invoices" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" uuid NOT NULL,
+	"home_id" uuid NOT NULL,
+	"media_id" uuid NOT NULL,
+	"sha256" varchar(64) DEFAULT '' NOT NULL,
+	"status" varchar(12) DEFAULT 'uploaded' NOT NULL,
+	"ai_result" jsonb,
+	"ai_model" varchar(64),
+	"ai_error" text,
+	"confirmed" jsonb,
+	"doc_number" varchar(80) DEFAULT '' NOT NULL,
+	"vendor" varchar(200) DEFAULT '' NOT NULL,
+	"doc_date" date,
+	"total" numeric(14, 2),
+	"duplicate_of_id" uuid,
+	"expense_id" uuid,
+	"uploaded_by_user_id" varchar(128) NOT NULL,
+	"confirmed_by_user_id" varchar(128),
+	"confirmed_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "finance_parties" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" uuid NOT NULL,
+	"home_id" uuid NOT NULL,
+	"name" varchar(160) NOT NULL,
+	"role" varchar(12) NOT NULL,
+	"phone" varchar(32) DEFAULT '' NOT NULL,
+	"note" text DEFAULT '' NOT NULL,
+	"contract_amount" numeric(14, 2),
+	"contract_note" text DEFAULT '' NOT NULL,
+	"worker_id" uuid,
+	"user_id" varchar(128),
+	"invite_token_hash" varchar(64),
+	"invite_expires_at" timestamp with time zone,
+	"archived_at" timestamp with time zone,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "finance_payments" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" uuid NOT NULL,
+	"home_id" uuid NOT NULL,
+	"kind" varchar(8) NOT NULL,
+	"date" date NOT NULL,
+	"amount" numeric(14, 2) NOT NULL,
+	"party_id" uuid,
+	"payee_name" varchar(200) DEFAULT '' NOT NULL,
+	"payer_name" varchar(200) DEFAULT '' NOT NULL,
+	"purpose" varchar(300) DEFAULT '' NOT NULL,
+	"method" varchar(12) DEFAULT '' NOT NULL,
+	"expense_id" uuid,
+	"change_order_id" uuid,
+	"proof_media_id" uuid,
+	"status" varchar(10) DEFAULT 'recorded' NOT NULL,
+	"confirmed_by_user_id" varchar(128),
+	"confirmed_at" timestamp with time zone,
+	"cancel_reason" text,
+	"idempotency_key" varchar(64),
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "home_projects" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"home_id" uuid NOT NULL,
+	"name" varchar(160) NOT NULL,
+	"kind" varchar(16) DEFAULT 'construction' NOT NULL,
+	"start_date" date,
+	"end_date" date,
+	"status" varchar(10) DEFAULT 'active' NOT NULL,
+	"currency" varchar(3) DEFAULT 'AZN' NOT NULL,
+	"smeta_project_id" uuid,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "media_stage_tags" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"media_id" uuid NOT NULL,
+	"home_id" uuid NOT NULL,
+	"ai_status" varchar(12) DEFAULT 'queued' NOT NULL,
+	"ai_stage" varchar(24),
+	"ai_confidence" numeric(4, 3),
+	"ai_room_kind" varchar(24),
+	"ai_utility" varchar(16),
+	"ai_utilities" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"ai_work_type" varchar(24),
+	"ai_evidence" text,
+	"ai_model" varchar(64),
+	"ai_error" text,
+	"analyzed_sha256" varchar(64),
+	"attempts" integer DEFAULT 0 NOT NULL,
+	"claimed_at" timestamp with time zone,
+	"analyzed_at" timestamp with time zone,
+	"stage" varchar(24),
+	"stage_status" varchar(14) DEFAULT 'ai_suggested' NOT NULL,
+	"room_kind" varchar(24),
+	"utility" varchar(16),
+	"decided_by_user_id" varchar(128),
+	"decided_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
 ALTER TABLE "change_orders" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "change_orders" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
@@ -3029,6 +3210,314 @@ ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time 
 --> statement
 ALTER TABLE "rentals" ADD COLUMN IF NOT EXISTS "archived_at" timestamp with time zone;
 --> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "version" integer NOT NULL;
+--> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "total" numeric(14, 2) NOT NULL;
+--> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "reason" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "change_order_id" uuid;
+--> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "finance_budget_versions" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "number" integer NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "party_id" uuid;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "title" varchar(200) NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "description" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "reason" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "amount" numeric(14, 2) NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "date" date NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "media_ids" jsonb DEFAULT '[]'::jsonb NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "status" varchar(16) DEFAULT 'proposed' NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "proposed_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "decided_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "decided_at" timestamp with time zone;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "decision_note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_change_orders" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "expense_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "position" integer DEFAULT 0 NOT NULL;
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "name" varchar(200) NOT NULL;
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "quantity" numeric(14, 3);
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "unit" varchar(16) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "unit_price" numeric(14, 2);
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "line_total" numeric(14, 2) NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "date" date NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "category" varchar(24) NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "description" varchar(300) NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "party_id" uuid;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "vendor_name" varchar(200) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "room_id" uuid;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "subtotal" numeric(14, 2) NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "discount" numeric(14, 2) DEFAULT '0' NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "tax" numeric(14, 2) DEFAULT '0' NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "total" numeric(14, 2) NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "payment_method" varchar(12) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "funded_by_party_id" uuid;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "invoice_id" uuid;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "status" varchar(10) DEFAULT 'pending' NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "approved_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "approved_at" timestamp with time zone;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "void_reason" text;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "idempotency_key" varchar(64);
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "media_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "sha256" varchar(64) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "status" varchar(12) DEFAULT 'uploaded' NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "ai_result" jsonb;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "ai_model" varchar(64);
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "ai_error" text;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "confirmed" jsonb;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "doc_number" varchar(80) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "vendor" varchar(200) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "doc_date" date;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "total" numeric(14, 2);
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "duplicate_of_id" uuid;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "expense_id" uuid;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "uploaded_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "confirmed_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "confirmed_at" timestamp with time zone;
+--> statement
+ALTER TABLE "finance_invoices" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "name" varchar(160) NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "role" varchar(12) NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "phone" varchar(32) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "contract_amount" numeric(14, 2);
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "contract_note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "worker_id" uuid;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "user_id" varchar(128);
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "invite_token_hash" varchar(64);
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "invite_expires_at" timestamp with time zone;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "archived_at" timestamp with time zone;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "finance_parties" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "kind" varchar(8) NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "date" date NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "amount" numeric(14, 2) NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "party_id" uuid;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "payee_name" varchar(200) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "payer_name" varchar(200) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "purpose" varchar(300) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "method" varchar(12) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "expense_id" uuid;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "change_order_id" uuid;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "proof_media_id" uuid;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "status" varchar(10) DEFAULT 'recorded' NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "confirmed_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "confirmed_at" timestamp with time zone;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "cancel_reason" text;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "idempotency_key" varchar(64);
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "name" varchar(160) NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "kind" varchar(16) DEFAULT 'construction' NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "start_date" date;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "end_date" date;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "status" varchar(10) DEFAULT 'active' NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'AZN' NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "smeta_project_id" uuid;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "media_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_status" varchar(12) DEFAULT 'queued' NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_stage" varchar(24);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_confidence" numeric(4, 3);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_room_kind" varchar(24);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_utility" varchar(16);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_utilities" jsonb DEFAULT '[]'::jsonb NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_work_type" varchar(24);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_evidence" text;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_model" varchar(64);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "ai_error" text;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "analyzed_sha256" varchar(64);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "attempts" integer DEFAULT 0 NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "claimed_at" timestamp with time zone;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "analyzed_at" timestamp with time zone;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "stage" varchar(24);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "stage_status" varchar(14) DEFAULT 'ai_suggested' NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "room_kind" varchar(24);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "utility" varchar(16);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "decided_by_user_id" varchar(128);
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "decided_at" timestamp with time zone;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
 DO $$ BEGIN
   ALTER TABLE "change_orders" ADD CONSTRAINT "change_orders_project_id_renovation_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."renovation_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
@@ -3444,6 +3933,111 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 --> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_budget_versions" ADD CONSTRAINT "finance_budget_versions_project_id_home_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."home_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_change_orders" ADD CONSTRAINT "finance_change_orders_project_id_home_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."home_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_change_orders" ADD CONSTRAINT "finance_change_orders_party_id_finance_parties_id_fk" FOREIGN KEY ("party_id") REFERENCES "public"."finance_parties"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_expense_items" ADD CONSTRAINT "finance_expense_items_expense_id_finance_expenses_id_fk" FOREIGN KEY ("expense_id") REFERENCES "public"."finance_expenses"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_expenses" ADD CONSTRAINT "finance_expenses_project_id_home_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."home_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_expenses" ADD CONSTRAINT "finance_expenses_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_expenses" ADD CONSTRAINT "finance_expenses_party_id_finance_parties_id_fk" FOREIGN KEY ("party_id") REFERENCES "public"."finance_parties"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_expenses" ADD CONSTRAINT "finance_expenses_room_id_home_rooms_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."home_rooms"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_expenses" ADD CONSTRAINT "finance_expenses_funded_by_party_id_finance_parties_id_fk" FOREIGN KEY ("funded_by_party_id") REFERENCES "public"."finance_parties"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_invoices" ADD CONSTRAINT "finance_invoices_project_id_home_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."home_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_invoices" ADD CONSTRAINT "finance_invoices_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_invoices" ADD CONSTRAINT "finance_invoices_media_id_home_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."home_media"("id") ON DELETE restrict ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_parties" ADD CONSTRAINT "finance_parties_project_id_home_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."home_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_parties" ADD CONSTRAINT "finance_parties_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_parties" ADD CONSTRAINT "finance_parties_worker_id_workers_id_fk" FOREIGN KEY ("worker_id") REFERENCES "public"."workers"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_payments" ADD CONSTRAINT "finance_payments_project_id_home_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."home_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_payments" ADD CONSTRAINT "finance_payments_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "finance_payments" ADD CONSTRAINT "finance_payments_party_id_finance_parties_id_fk" FOREIGN KEY ("party_id") REFERENCES "public"."finance_parties"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "home_projects" ADD CONSTRAINT "home_projects_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "media_stage_tags" ADD CONSTRAINT "media_stage_tags_media_id_home_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."home_media"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "media_stage_tags" ADD CONSTRAINT "media_stage_tags_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
 CREATE INDEX IF NOT EXISTS "change_orders_project_idx" ON "change_orders" USING btree ("project_id");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "change_orders_project_number_idx" ON "change_orders" USING btree ("project_id","number");
@@ -3643,3 +4237,35 @@ CREATE INDEX IF NOT EXISTS "rental_participants_user_idx" ON "rental_participant
 CREATE UNIQUE INDEX IF NOT EXISTS "rentals_number_idx" ON "rentals" USING btree ("number");
 --> statement
 CREATE INDEX IF NOT EXISTS "rentals_creator_idx" ON "rentals" USING btree ("created_by_user_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "finance_budget_versions_idx" ON "finance_budget_versions" USING btree ("project_id","version");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "finance_change_orders_number_idx" ON "finance_change_orders" USING btree ("project_id","number");
+--> statement
+CREATE INDEX IF NOT EXISTS "finance_expense_items_expense_idx" ON "finance_expense_items" USING btree ("expense_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "finance_expenses_project_idx" ON "finance_expenses" USING btree ("project_id","date");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "finance_expenses_idem_idx" ON "finance_expenses" USING btree ("project_id","idempotency_key");
+--> statement
+CREATE INDEX IF NOT EXISTS "finance_invoices_project_idx" ON "finance_invoices" USING btree ("project_id","created_at");
+--> statement
+CREATE INDEX IF NOT EXISTS "finance_invoices_sha_idx" ON "finance_invoices" USING btree ("home_id","sha256");
+--> statement
+CREATE INDEX IF NOT EXISTS "finance_parties_project_idx" ON "finance_parties" USING btree ("project_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "finance_parties_user_idx" ON "finance_parties" USING btree ("user_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "finance_parties_invite_idx" ON "finance_parties" USING btree ("invite_token_hash");
+--> statement
+CREATE INDEX IF NOT EXISTS "finance_payments_project_idx" ON "finance_payments" USING btree ("project_id","date");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "finance_payments_idem_idx" ON "finance_payments" USING btree ("project_id","idempotency_key");
+--> statement
+CREATE INDEX IF NOT EXISTS "home_projects_home_idx" ON "home_projects" USING btree ("home_id","created_at");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "media_stage_tags_media_idx" ON "media_stage_tags" USING btree ("media_id");
+--> statement
+CREATE INDEX IF NOT EXISTS "media_stage_tags_home_idx" ON "media_stage_tags" USING btree ("home_id","stage");
+--> statement
+CREATE INDEX IF NOT EXISTS "media_stage_tags_queue_idx" ON "media_stage_tags" USING btree ("ai_status","created_at");

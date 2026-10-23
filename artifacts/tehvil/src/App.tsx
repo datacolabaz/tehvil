@@ -10,6 +10,7 @@ import {
   LayoutDashboard, ListChecks, LoaderCircle, LogOut, Menu, Plus, ShieldCheck,
   WalletCards, X,
   KeyRound,
+  Layers, Wallet,
 } from 'lucide-react';
 import {
   useListProjects, useCreateProject, useGetProjectDashboard, useListRooms, useCreateRoom,
@@ -69,6 +70,10 @@ const HomesPage = lazy(() => import('@/pages/home/homes-page').then(m => ({ defa
 const HomeProfilePage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeProfilePage })));
 const HomeHistoryPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeHistoryPage })));
 const HomeStagesPage = lazy(() => import('@/pages/home/stages-page').then(m => ({ default: m.HomeStagesPage })));
+const HomeFinancePage = lazy(() => import('@/pages/home/finance-page').then(m => ({ default: m.HomeFinancePage })));
+const ProjectFinancePage = lazy(() => import('@/pages/home/finance-page').then(m => ({ default: m.ProjectFinancePage })));
+const FinanceInvitePage = lazy(() => import('@/pages/home/finance-page').then(m => ({ default: m.FinanceInvitePage })));
+const PhotoStagesPage = lazy(() => import('@/pages/home/photo-stages-page').then(m => ({ default: m.PhotoStagesPage })));
 const PhotoInvitePage = lazy(() => import('@/pages/home/photo-invite-page').then(m => ({ default: m.PhotoInvitePage })));
 const HomeRoomsPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeRoomsPage })));
 const RoomPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.RoomPage })));
@@ -110,10 +115,12 @@ const RentalStatsPage = lazy(() => import('@/pages/rental/rental-pages').then(m 
 const HOME_NAV = [
   { path: '', key: 'profile', label: 'Ümumi məlumat', icon: House },
   { path: '/tarixce', key: 'stages', label: 'Tikinti tarixçəsi', icon: ImagePlus },
+  { path: '/foto-merheleler', key: 'photoStages', label: 'Fotolar mərhələlər üzrə', icon: Layers },
   { path: '/rooms', key: 'rooms', label: 'Otaqlar', icon: DoorOpen },
   { path: '/history', key: 'history', label: 'İşlər və tarixçə', icon: History },
   { path: '/map', key: 'map', label: 'Texniki məlumatlar', icon: Cable },
   { path: '/equipment', key: 'equipment', label: 'Materiallar və avadanlıqlar', icon: Boxes },
+  { path: '/maliyye', key: 'finance', label: 'Maliyyə', icon: Wallet },
   { path: '/documents', key: 'documents', label: 'Sənədlər', icon: FileText },
   { path: '/sharing', key: 'sharing', label: 'Paylaşım və giriş', icon: QrCode },
 ] as const;
@@ -188,7 +195,7 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
         <Link href="/homes?new=1" onClick={() => setOpen(false)} className="button button-primary hp-side-add" data-testid="nav-add-home"><Plus size={16}/>{t('addHome')}</Link>
         {navList(mainNav)}
       </>}
-      {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => (n.key !== 'sharing' && n.key !== 'documents') || !!home.member).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${home.section === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{home.section === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
+      {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => (n.key !== 'sharing' && n.key !== 'documents' && n.key !== 'finance') || !!home.member).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${home.section === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{home.section === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       {realtorSection && <><div className="sidebar-label">{t('realtor')}</div><nav className="side-nav rl-side-nav">{REALTOR_NAV.map(({ href, key, label, icon: Icon }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${realtorSection === key ? 'selected' : ''}`} data-testid={`nav-realtor-${key}`}><Icon size={17}/><span>{label}</span>{realtorSection === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       {projectId && <><div className="sidebar-label">{t('extraServices')}</div>{navList([{ href: '/homes', icon: House, key: 'myHomes' }, { href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' }])}</>}
       <div className="sidebar-bottom"><Link href="/settings" onClick={() => setOpen(false)} className={`side-link ${active === 'settingsNav' ? 'selected' : ''}`} data-testid="nav-settingsNav"><Settings size={17}/><span>{t('settingsNav')}</span></Link><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
@@ -444,6 +451,10 @@ function ClerkRoutes() {
       <Route path="/protokol/:id">{params => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları', href: '/protokollar' }, { label: 'Protokol' }]} lang={lang} change={changeLang} t={t}><ProtocolPage id={params.id}/></ProtocolShell>}</Route>
       <Route path="/d/:token">{params => <PublicSuspense t={t}><ProtocolInvitePage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/homes">{() => <PlainShell active="myHomes" crumbs={[{ label: t('myHomes') }]} lang={lang} change={changeLang} t={t}><HomesPage/></PlainShell>}</Route>
+      <Route path="/homes/:homeId/maliyye/:projectId">{params => <HomeShell homeId={params.homeId} section="finance" lang={lang} change={changeLang} t={t}><ProjectFinancePage homeId={params.homeId} projectId={params.projectId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/maliyye">{params => <HomeShell homeId={params.homeId} section="finance" lang={lang} change={changeLang} t={t}><HomeFinancePage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/foto-merheleler">{params => <HomeShell homeId={params.homeId} section="photoStages" lang={lang} change={changeLang} t={t}><PhotoStagesPage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/hesab/:token">{params => <PlainShell active="myHomes" crumbs={[{ label: 'Maliyyəyə dəvət' }]} lang={lang} change={changeLang} t={t}><FinanceInvitePage token={params.token}/></PlainShell>}</Route>
       <Route path="/homes/:homeId/tarixce">{params => <HomeShell homeId={params.homeId} section="stages" lang={lang} change={changeLang} t={t}><HomeStagesPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/history">{params => <HomeShell homeId={params.homeId} section="history" lang={lang} change={changeLang} t={t}><HomeHistoryPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/rooms/:roomId">{params => <HomeShell homeId={params.homeId} section="rooms" lang={lang} change={changeLang} t={t}><RoomPage homeId={params.homeId} roomId={params.roomId}/></HomeShell>}</Route>

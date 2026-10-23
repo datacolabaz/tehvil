@@ -1,5 +1,5 @@
 import { getAuth } from "@clerk/express";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { Router, type IRouter, type Request } from "express";
 import { CreateServiceInterestBody, GetHomeCostsParams, GetHomePassportParams } from "@workspace/api-zod";
 import {
@@ -41,7 +41,7 @@ router.get("/homes/:homeId/passport", async (req, res): Promise<void> => {
   const [rooms, works, media, infra, equipment, [lastAudit]] = await Promise.all([
     db.select({ id: homeRoomsTable.id }).from(homeRoomsTable).where(eq(homeRoomsTable.homeId, homeId)),
     db.select().from(workRecordsTable).where(eq(workRecordsTable.homeId, homeId)),
-    db.select({ id: homeMediaTable.id, workId: homeMediaTable.workId, contentType: homeMediaTable.contentType, phase: homeMediaTable.phase }).from(homeMediaTable).where(and(eq(homeMediaTable.homeId, homeId), isNull(homeMediaTable.deletedAt))),
+    db.select({ id: homeMediaTable.id, workId: homeMediaTable.workId, contentType: homeMediaTable.contentType, phase: homeMediaTable.phase }).from(homeMediaTable).where(and(eq(homeMediaTable.homeId, homeId), isNull(homeMediaTable.deletedAt), ne(homeMediaTable.phase, "finance"))),
     db.select().from(infrastructureItemsTable).where(eq(infrastructureItemsTable.homeId, homeId)),
     db.select().from(equipmentTable).where(eq(equipmentTable.homeId, homeId)),
     db.select({ at: homeAuditTable.createdAt, role: homeAuditTable.actorRole, actor: homeAuditTable.actorUserId, action: homeAuditTable.action, summary: homeAuditTable.summary }).from(homeAuditTable).where(eq(homeAuditTable.homeId, homeId)).orderBy(desc(homeAuditTable.createdAt)).limit(1),

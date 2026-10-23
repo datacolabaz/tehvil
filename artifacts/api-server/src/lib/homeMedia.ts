@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
 import { and, eq, gt, isNull } from "drizzle-orm";
-import { db, evidenceUploadsTable, homeMediaTable, homeSharesTable, homesTable, workRecordsTable } from "@workspace/db";
+import { db, evidenceUploadsTable, financePartiesTable, homeMediaTable, homeSharesTable, homesTable, workRecordsTable } from "@workspace/db";
 import { ObjectStorageService } from "./objectStorage";
+import { enqueuePhotos } from "./photoStageAi";
+import { logger } from "./logger";
 import type { MediaInputValue } from "./projectMedia";
 import { hashToken } from "./realtorCore";
 import type { ShareScopeJson as ShareScope } from "@workspace/db";
@@ -10,7 +12,7 @@ import type { MediaRow } from "./homeDtos";
 
 export const HOME_MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm", "video/quicktime", "application/pdf"];
 /** Only photos and videos can ever leave the account (QR page, share links); files and documents stay private. */
-const isVisual = (m: { contentType: string; phase: string }) => (m.contentType.startsWith("image/") || m.contentType.startsWith("video/")) && m.phase !== "document";
+const isVisual = (m: { contentType: string; phase: string }) => (m.contentType.startsWith("image/") || m.contentType.startsWith("video/")) && m.phase !== "document" && m.phase !== "finance";
 const MAX_BYTES = 50 * 1024 * 1024;
 
 export class HomeMediaError extends Error {}
@@ -46,7 +48,7 @@ export async function attachHomeMedia(userId: string, files: MediaInputValue[], 
     for await (const chunk of object.createReadStream()) h.update(chunk as Buffer);
     hashes.set(file.objectPath, h.digest("hex"));
   }
-  return db.transaction(async (tx) => {
+  const rows = await db.transaction(async (tx) => {
     for (const file of files) {
       const claimed = await tx.update(evidenceUploadsTable).set({ attachedAt: new Date() }).where(and(
         eq(evidenceUploadsTable.objectPath, file.objectPath),
@@ -63,6 +65,9 @@ export async function attachHomeMedia(userId: string, files: MediaInputValue[], 
       sha256: hashes.get(f.objectPath) ?? "",
     }))).returning();
   });
+  // AI stage tagging runs after the photo is saved; a failure there never affects the upload.
+  await enqueuePhotos(rows).catch((err) => logger.warn({ err }, "photo stage queue failed"));
+  return rows;
 }
 
 /** Resolves an active share link by its secret token. */
@@ -91,6 +96,15 @@ export async function canReadMedia(media: MediaRow, userId: string | null, share
   if (media.deletedAt) return null;
   if (userId && media.uploadedByUserId === userId) return "private";
   if (!media.homeId) return media.workerId ? "public" : null;
+  if (media.phase === "finance") {
+    // Invoices, receipts and payment proofs: owner / members who manage the home and the parties of its projects only.
+    if (!userId) return null;
+    const access = await getHomeAccess(userId, media.homeId, await loadActor(userId));
+    if (access?.memberRole === "owner" || access?.memberRole === "member") return "private";
+    const [party] = await db.select({ id: financePartiesTable.id }).from(financePartiesTable)
+      .where(and(eq(financePartiesTable.homeId, media.homeId), eq(financePartiesTable.userId, userId), isNull(financePartiesTable.archivedAt))).limit(1);
+    return party ? "private" : null;
+  }
   if (userId) {
     const access = await getHomeAccess(userId, media.homeId, await loadActor(userId));
     if (access?.memberRole) return "private";

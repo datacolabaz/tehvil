@@ -23,6 +23,8 @@ import pricesRouter, { pricesPublicRouter } from "./prices";
 import protocolsRouter, { protocolPublicRouter } from "./protocols";
 import rentalsRouter, { rentalPublicRouter } from "./rentals";
 import photoInvitesRouter, { photoInvitePublicRouter } from "./photoInvites";
+import financeRouter from "./finance";
+import photoStagesRouter from "./photoStages";
 
 const router: IRouter = Router();
 
@@ -54,5 +56,7 @@ router.use(pricesRouter);
 router.use(protocolsRouter);
 router.use(rentalsRouter);
 router.use(photoInvitesRouter);
+router.use(financeRouter);
+router.use(photoStagesRouter);
 
 export default router;
