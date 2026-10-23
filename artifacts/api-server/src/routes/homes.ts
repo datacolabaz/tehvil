@@ -1,5 +1,5 @@
 import { getAuth } from "@clerk/express";
-import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { Router, type IRouter, type Request, type Response } from "express";
 import {
   ArchiveHomeParams,
@@ -144,7 +144,7 @@ export async function homeOverview(a: HomeAccess, userId: string) {
   const [equipment, infra, media] = await Promise.all([
     db.select({ id: equipmentTable.id, installWorkId: equipmentTable.installWorkId, createdByUserId: equipmentTable.createdByUserId }).from(equipmentTable).where(eq(equipmentTable.homeId, a.home.id)),
     db.select({ id: infrastructureItemsTable.id, workId: infrastructureItemsTable.workId, createdByUserId: infrastructureItemsTable.createdByUserId }).from(infrastructureItemsTable).where(eq(infrastructureItemsTable.homeId, a.home.id)),
-    db.select({ id: homeMediaTable.id, workId: homeMediaTable.workId }).from(homeMediaTable).where(and(eq(homeMediaTable.homeId, a.home.id), isNull(homeMediaTable.deletedAt))),
+    db.select({ id: homeMediaTable.id, workId: homeMediaTable.workId }).from(homeMediaTable).where(and(eq(homeMediaTable.homeId, a.home.id), isNull(homeMediaTable.deletedAt), ne(homeMediaTable.phase, "finance"))),
   ]);
   const mine = (row: { workId?: string | null; installWorkId?: string | null; createdByUserId?: string }) =>
     member || (row.workId && workIds.has(row.workId)) || (row.installWorkId && workIds.has(row.installWorkId)) || row.createdByUserId === userId;
@@ -495,7 +495,7 @@ router.get("/homes/:homeId/media", async (req, res): Promise<void> => {
   const a = await access(req, res, p.data.homeId);
   if (!a) return;
   const userId = uid(req);
-  const rows = await db.select().from(homeMediaTable).where(and(eq(homeMediaTable.homeId, a.home.id), isNull(homeMediaTable.deletedAt))).orderBy(desc(homeMediaTable.createdAt));
+  const rows = await db.select().from(homeMediaTable).where(and(eq(homeMediaTable.homeId, a.home.id), isNull(homeMediaTable.deletedAt), ne(homeMediaTable.phase, "finance"))).orderBy(desc(homeMediaTable.createdAt));
   res.json(rows.filter((m) => a.memberRole || (m.workId && (a.performerWorkIds.has(m.workId) || a.invitedWorkIds.has(m.workId))) || m.uploadedByUserId === userId).map((m) => mediaDto(m, userId)));
 });
 

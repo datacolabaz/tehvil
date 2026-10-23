@@ -483,6 +483,8 @@ router.delete("/home-media/:mediaId", async (req, res): Promise<void> => {
   if (!m) return notFound(res, "Fayl tapılmadı");
   const a = m.homeId ? await getHomeAccess(userId, m.homeId) : null;
   if (m.uploadedByUserId !== userId && !manages(a?.memberRole ?? null)) return forbidden(res);
+  // Invoices and payment proofs stay with their financial records (an invoice is discarded, not its file).
+  if (m.phase === "finance") return bad(res, "Maliyyə sənədi ayrıca silinmir: qaiməni və ya qeydi ləğv edin");
   // Soft delete: the file record stays for the audit trail.
   await db.update(homeMediaTable).set({ deletedAt: new Date() }).where(eq(homeMediaTable.id, m.id));
   if (m.homeId) {
