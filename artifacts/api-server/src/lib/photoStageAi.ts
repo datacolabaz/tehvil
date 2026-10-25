@@ -1,6 +1,6 @@
 import { and, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db, homeMediaTable, mediaStageTagsTable } from "@workspace/db";
-import { AI_MODEL, aiConfigured } from "./invoiceAi";
+import { aiConfigured, callTool } from "./aiClient";
 import { ObjectStorageService } from "./objectStorage";
 import { logger } from "./logger";
 
@@ -42,7 +42,7 @@ export const UTILITIES = ["electric", "water", "sewer", "heating", "gas", "venti
 export const ROOM_KINDS = ["living", "bedroom", "kitchen", "bathroom", "toilet", "hall", "balcony", "utility", "yard", "basement", "exterior", "other"] as const;
 /** Below this the photo is shown as "Mərhələni təsdiqlə". */
 export const CONFIDENT = 0.7;
-const MAX_IMAGE = 5 * 1024 * 1024; // Anthropic image limit (base64 of ≤ 5 MB)
+const MAX_IMAGE = 5 * 1024 * 1024; // keeps requests small for every provider
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 const TOOL = {
@@ -85,20 +85,7 @@ class SkipError extends Error {}
 
 export async function classifyPhoto(objectPath: string, contentType: string): Promise<StageResult & { model: string }> {
   const data = await readImage(objectPath);
-  const model = AI_MODEL();
-  const res = await fetch(`${process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com"}/v1/messages`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY!, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({
-      model, max_tokens: 600, system: SYSTEM, tools: [TOOL], tool_choice: { type: "tool", name: TOOL.name },
-      messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: contentType, data: data.toString("base64") } }, { type: "text", text: "Classify this photo." }] }],
-    }),
-    signal: AbortSignal.timeout(60_000),
-  });
-  if (!res.ok) throw new Error(res.status === 429 || res.status === 529 ? "AI xidməti məşğuldur" : `AI cavab vermədi (${res.status})`);
-  const json = await res.json() as { content?: { type: string; input?: Record<string, unknown> }[] };
-  const r = json.content?.find((c) => c.type === "tool_use")?.input;
-  if (!r) throw new Error("AI cavabı boşdur");
+  const { input: r, model } = await callTool({ system: SYSTEM, parts: [{ file: { mime: contentType, data: data.toString("base64") } }, { text: "Classify this photo." }], tool: TOOL, maxTokens: 600, timeoutMs: 60_000 });
   const stage = typeof r.stage === "string" && STAGE_KEYS.includes(r.stage) ? r.stage : null;
   const conf = typeof r.confidence === "number" && r.confidence >= 0 && r.confidence <= 1 ? Math.round(r.confidence * 1000) / 1000 : 0;
   const pick = <T extends readonly string[]>(v: unknown, list: T) => (typeof v === "string" && (list as readonly string[]).includes(v) ? v : null);

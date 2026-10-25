@@ -43,8 +43,8 @@
 
 Dəvəti qəbul edən podratçı evə “məlumat əlavə edə bilər”, usta isə “yalnız baxa bilər” rolu ilə qoşulur (mövcud rol aşağı salınmır). Qaimə və sübut faylları (`phase = finance`) yalnız evi idarə edənlərə və layihənin tərəflərinə açılır, ev fotoları arasında görünmür, ayrıca silinmir.
 
-## 5. AI (Anthropic Claude, yalnız serverdə)
-- Açar: Railway backend-də `ANTHROPIC_API_KEY` (istəyə görə `ANTHROPIC_MODEL`, default `claude-sonnet-5-5`). Açar brauzerə getmir. Açar yoxdursa, hər şey əl ilə işləyir və UI bunu açıq deyir.
+## 5. AI (Gemini və ya Claude, yalnız serverdə)
+- Açar: Railway backend-də `AI_API_KEY`, `AI_MODEL`, istəyə görə `AI_API_URL` (bax `docs/AI_SMETA.md`, bölmə 7). Köhnə `ANTHROPIC_API_KEY` də işləyir. Açar brauzerə getmir. Açar yoxdursa, hər şey əl ilə işləyir və UI bunu açıq deyir.
 - **Qaimə:** foto və ya PDF → model yalnız görünəni “tool” formatında qaytarır: satıcı, nömrə, çap və əl ilə yazılmış tarix ayrı-ayrı, sətirlər, cəmlər, hər sahə üçün əminlik, oxunmayan hissələr. Tarix oxunmursa `null` olur. Formada insan tarix mənbəyini seçir (çap / əl yazısı / bu gün / özü). Zəif oxunan sahələr sarı göstərilir. Hesab uyğun gəlmirsə, xəbərdarlıq çıxır, məbləğ dəyişdirilmir.
 - **Dublikat:** eyni fayl (SHA-256), eyni satıcı + nömrə, eyni satıcı + tarix + məbləğ. Avtomatik birləşdirilmir; oxşar, amma fərqli məbləğ dublikat sayılmır.
 - **Sual ver:** model serverin hesabladığı yekunları və layihənin qeydlərini alır (ev ünvanı göndərilmir). Cavabla birlikdə istinad etdiyi qeydləri qaytarır; mövcud olmayan id-lər süzülür.
@@ -71,7 +71,7 @@ Dəvəti qəbul edən podratçı evə “məlumat əlavə edə bilər”, usta i
 | 5 | Tarixçə tarix və kateqoriyaya görə filtr | qismən — foto mərhələ / kommunikasiya / otaq, xərclər tarix və kateqoriya üzrə filtrlənir; xərc + foto + ödəniş vahid zaman xətti yalnız Excel-dədir |
 | 6 | Kommunikasiya fotosu otaqla | işləyir (mövcud + AI təklifi) |
 | 7 | Xətti plan üzərində işarələmək | qismən — mövcud foto üzərində xətt çəkmə; ayrıca plan redaktoru yoxdur |
-| 8 | AI qaimədən formanı doldurur | işləyir — test modeli ilə yoxlanılıb; real Claude açarı ilə hələ yoxlanmayıb |
+| 8 | AI qaimədən formanı doldurur | işləyir — test modeli ilə yoxlanılıb; real açarla hələ yoxlanmayıb |
 | 9 | Əl yazısı tarixi göstərilir və təsdiqlənir | işləyir (test modeli ilə) |
 | 10 | Təsdiqlənmiş xərc düzgün tarixli hesabatda | işləyir |
 | 11 | Dublikat xəbərdarlığı | işləyir |

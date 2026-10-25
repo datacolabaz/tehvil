@@ -41,12 +41,12 @@
   - PDF, JPG, PNG, WebP çertyojlar; XLSX və CSV material siyahısı.
   - **DWG, DXF, IFC hələ oxunmur.** Brauzerdə də, serverdə də aydın mesajla rədd edilir və PDF kimi yükləmək təklif olunur.
 - **Xidmətlər bir-birindən ayrıdır:**
-  - `drawingAi.ts` — çertyoj analizi. Claude yalnız elementləri və ölçüləri qaytarır: hər dəyər üçün əminlik və harada oxunduğu. Mümkün olmayan dəyər (məs. 999 m) etibarlı sayılmır.
+  - `drawingAi.ts` — çertyoj analizi. AI yalnız elementləri və ölçüləri qaytarır: hər dəyər üçün əminlik və harada oxunduğu. Mümkün olmayan dəyər (məs. 999 m) etibarlı sayılmır.
   - `estimateEngine.ts` — hesablama. Təmiz funksiyalardır, AI yoxdur, unit testləri var.
   - `questionsFor` — sual mexanizmi.
   - `tableImport.ts` — Excel/CSV oxuma.
   - `estimateExport.ts` — Excel ixracı.
-  - Model `ANTHROPIC_MODEL` ilə dəyişdirilir.
+  - `aiClient.ts` — bütün AI çağırışları bir yerdədir (Gemini, Claude və ya OpenAI-uyğun API). Model `AI_MODEL` ilə dəyişdirilir.
 - **Hesablama:**
   - **Fundament:** Σ seqment × en × hündürlük − kəsişmələr × en² × hündürlük. Künclər iki dəfə sayılmır. Yoxlama: 10×8 m üzük, en 0,5, hündürlük 1 → 17 m³.
   - **Kolon, rigel, monolit döşəmə** (boşluqlar çıxılır) və **beton divar.**
@@ -106,10 +106,20 @@
 - **Köhnə landing testləri:** `hh-flow` və `hf-flow` yeniləndi. `pt-flow`-un köhnə protokol landing yoxlamaları (4) artıq aktual deyil, çünki landing dəyişdi.
 
 ## 7. Konfiqurasiya tələb edən
-- `ANTHROPIC_API_KEY` (Railway backend). Açar olmadan:
-  - xərclər əl ilə işləyir;
-  - smetada elementlər və ölçülər əl ilə daxil edilir, hesablama, Excel və müqayisə tam işləyir.
-- Real Claude ilə real çertyoj və qəbz hələ sınanmayıb. Açar əlavə ediləndən sonra bir neçə real layihə ilə yoxlanmalıdır.
+Railway backend → Variables:
+
+| Dəyişən | Nümunə (Gemini) | Qeyd |
+|---|---|---|
+| `AI_API_KEY` | Google AI Studio açarı (`AIza…`) | məcburi; yalnız serverdə |
+| `AI_MODEL` | `gemini-3.8-flash` | yazılmasa Gemini üçün `gemini-3.8-flash` |
+| `AI_API_URL` | `https://generativelanguage.googleapis.com` | istəyə bağlı; `/v1beta`, `/v1beta/models` və ya tam `…:generateContent` linki də qəbul olunur |
+| `AI_PROVIDER` | `gemini` | istəyə bağlı; adətən linkdən, modeldən və ya açardan özü tapılır |
+
+- Claude-a keçmək: `AI_MODEL=claude-…` və Anthropic açarı. OpenAI-uyğun API: `AI_API_URL` sonu `/openai` və ya `/chat/completions` olan link.
+- Köhnə `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` da işləyir.
+- Açar olmadan: xərclər əl ilə işləyir; smetada ölçülər əl ilə daxil edilir, hesablama, Excel və müqayisə tam işləyir.
+- Real model ilə real çertyoj və qəbz hələ sınanmayıb. Açar əlavə ediləndən sonra bir neçə real layihə ilə yoxlanmalıdır.
+- Testlər həm Gemini, həm Claude formatında təqlid serveri ilə keçib; `aiClient` üçün 3 unit test (provayder seçimi, sxem çevrilməsi, URL formaları).
 
 ## 8. Sonrakı mərhələyə qalanlar
 - DWG, DXF, IFC oxuyucu.

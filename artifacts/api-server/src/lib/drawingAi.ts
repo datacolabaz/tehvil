@@ -1,4 +1,4 @@
-import { AI_MODEL, aiConfigured, AiNotConfigured } from "./invoiceAi";
+import { aiConfigured, AiHttpError, AiNotConfigured, callTool, type Part } from "./aiClient";
 import { ObjectStorageService } from "./objectStorage";
 import { logger } from "./logger";
 import type { Element, ElementType, Param, ParamMap } from "./estimateEngine";
@@ -82,28 +82,17 @@ export interface DrawingResult {
 
 export async function analyzeDrawings(files: { objectPath: string; contentType: string; name: string }[], focus: string[] = []): Promise<{ result: DrawingResult; model: string }> {
   if (!aiConfigured()) throw new AiNotConfigured("AI analizi hələ qoşulmayıb");
-  const content: unknown[] = [];
-  for (const f of files.slice(0, 8)) {
-    const data = await readFile(f.objectPath, f.contentType);
-    content.push(f.contentType === "application/pdf"
-      ? { type: "document", source: { type: "base64", media_type: "application/pdf", data }, title: f.name }
-      : { type: "image", source: { type: "base64", media_type: f.contentType, data } });
+  const parts: Part[] = [];
+  for (const f of files.slice(0, 8)) parts.push({ file: { mime: f.contentType, data: await readFile(f.objectPath, f.contentType), name: f.name } });
+  parts.push({ text: `Extract the reinforced-concrete elements from these drawings.${focus.length ? ` The owner could not answer these; look for them specifically: ${focus.join("; ")}.` : ""}` });
+  let input: Record<string, unknown>, model: string;
+  try {
+    ({ input, model } = await callTool({ system: SYSTEM, parts, tool: TOOL, maxTokens: 8000, timeoutMs: 180_000 }));
+  } catch (e) {
+    if (e instanceof AiHttpError && e.status === 413) throw new Error("Fayllar AI üçün çox böyükdür");
+    if (e instanceof AiHttpError && e.status !== 429 && e.status !== 503 && e.status !== 529) throw new Error("AI çertyoju oxuya bilmədi");
+    throw e;
   }
-  content.push({ type: "text", text: `Extract the reinforced-concrete elements from these drawings.${focus.length ? ` The owner could not answer these; look for them specifically: ${focus.join("; ")}.` : ""}` });
-  const model = AI_MODEL();
-  const res = await fetch(`${process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com"}/v1/messages`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY!, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({ model, max_tokens: 8000, system: SYSTEM, tools: [TOOL], tool_choice: { type: "tool", name: TOOL.name }, messages: [{ role: "user", content }] }),
-    signal: AbortSignal.timeout(180_000),
-  });
-  if (!res.ok) {
-    logger.warn({ status: res.status }, "drawing AI request failed");
-    throw new Error(res.status === 429 || res.status === 529 ? "AI xidməti hazırda məşğuldur, bir az sonra yenidən cəhd edin" : res.status === 413 ? "Fayllar AI üçün çox böyükdür" : "AI çertyoju oxuya bilmədi");
-  }
-  const json = await res.json() as { content?: { type: string; input?: unknown }[] };
-  const input = json.content?.find((c) => c.type === "tool_use")?.input as Record<string, unknown> | undefined;
-  if (!input) throw new Error("AI cavabı boşdur");
   return { result: sanitize(input), model };
 }
 

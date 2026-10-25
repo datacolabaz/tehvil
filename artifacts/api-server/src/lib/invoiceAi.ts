@@ -1,21 +1,20 @@
 import { ObjectStorageService } from "./objectStorage";
-import { logger } from "./logger";
+import { aiConfigured, aiModel, AiNotConfigured, callTool, type Part } from "./aiClient";
 
 /*
- * Reads an invoice / receipt / handwritten note with Claude (Anthropic Messages API, server side only).
- * The key never reaches the browser. Without ANTHROPIC_API_KEY the feature reports "not configured"
+ * Reads an invoice / receipt / handwritten note with the configured AI (see aiClient.ts, server side only).
+ * The key never reaches the browser. Without AI_API_KEY the feature reports "not configured"
  * and every form keeps working by hand.
  *
  * The model only extracts what it sees. It never invents a date or an amount: missing values are null,
  * every field carries a confidence, and printed and handwritten dates are returned separately.
  */
 
-export const AI_MODEL = () => process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5";
-export const aiConfigured = () => !!process.env.ANTHROPIC_API_KEY;
+export { aiConfigured, AiNotConfigured } from "./aiClient";
+export const AI_MODEL = aiModel;
 const MAX_BYTES = 15 * 1024 * 1024;
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-export class AiNotConfigured extends Error {}
 
 export interface InvoiceExtraction {
   documentType: "invoice" | "receipt" | "handwritten" | "other";
@@ -72,7 +71,7 @@ const TOOL = {
       confidence: {
         type: "object",
         description: "0..1 per field: vendor, docNumber, printedDate, handwrittenDate, total, subtotal, discount, tax",
-        additionalProperties: { type: "number" },
+        properties: Object.fromEntries(["vendor", "docNumber", "printedDate", "handwrittenDate", "total", "subtotal", "discount", "tax"].map((k) => [k, { type: "number", minimum: 0, maximum: 1 }])),
       },
       suggestedCategory: {
         type: ["string", "null"],
@@ -108,36 +107,10 @@ export async function extractInvoice(objectPath: string): Promise<{ result: Invo
   if (!aiConfigured()) throw new AiNotConfigured("AI oxuma hələ qoşulmayıb");
   const { data, contentType } = await readObject(objectPath);
   const b64 = data.toString("base64");
-  const block = contentType === "application/pdf"
-    ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: b64 } }
-    : IMAGE_TYPES.includes(contentType)
-      ? { type: "image", source: { type: "base64", media_type: contentType, data: b64 } }
-      : null;
-  if (!block) throw new Error("Bu fayl tipi AI ilə oxunmur (JPG, PNG, WebP və ya PDF)");
-  const model = AI_MODEL();
-  const base = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com";
-  const res = await fetch(`${base}/v1/messages`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY!, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({
-      model,
-      max_tokens: 4000,
-      system: SYSTEM,
-      tools: [TOOL],
-      tool_choice: { type: "tool", name: TOOL.name },
-      messages: [{ role: "user", content: [block, { type: "text", text: "Read this document and record it with the tool." }] }],
-    }),
-    signal: AbortSignal.timeout(90_000),
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    logger.warn({ status: res.status, body: body.slice(0, 500) }, "invoice AI request failed");
-    throw new Error(res.status === 429 || res.status === 529 ? "AI xidməti hazırda məşğuldur, bir az sonra yenidən cəhd edin" : "AI sənədi oxuya bilmədi");
-  }
-  const json = await res.json() as { content?: { type: string; name?: string; input?: unknown }[] };
-  const use = json.content?.find((c) => c.type === "tool_use" && c.name === TOOL.name);
-  if (!use?.input) throw new Error("AI cavabı boşdur");
-  return { result: sanitize(use.input as Record<string, unknown>), model };
+  if (contentType !== "application/pdf" && !IMAGE_TYPES.includes(contentType)) throw new Error("Bu fayl tipi AI ilə oxunmur (JPG, PNG, WebP və ya PDF)");
+  const parts: Part[] = [{ file: { mime: contentType, data: b64 } }, { text: "Read this document and record it with the tool." }];
+  const { input, model } = await callTool({ system: SYSTEM, parts, tool: TOOL, maxTokens: 4000, timeoutMs: 90_000 });
+  return { result: sanitize(input), model };
 }
 
 const str = (v: unknown, max = 200) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null);
@@ -189,8 +162,6 @@ export function sanitize(raw: Record<string, unknown>): InvoiceExtraction {
  */
 export async function answerFinanceQuestion(question: string, context: unknown): Promise<{ answer: string; refs: { type: string; id: string }[]; model: string }> {
   if (!aiConfigured()) throw new AiNotConfigured("AI köməkçisi hələ qoşulmayıb");
-  const model = AI_MODEL();
-  const base = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com";
   const tool = {
     name: "answer",
     description: "Give the answer and the ids of records it is based on.",
@@ -203,29 +174,18 @@ export async function answerFinanceQuestion(question: string, context: unknown):
       required: ["answer", "refs"],
     },
   };
-  const res = await fetch(`${base}/v1/messages`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY!, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({
-      model,
-      max_tokens: 1500,
-      system: `You answer questions about one home construction project using ONLY the JSON data provided.
+  const { input, model } = await callTool({
+    system: `You answer questions about one home construction project using ONLY the JSON data provided.
 - Totals in "totals" and "parties" are computed by the system: quote them, do not recompute them.
 - For questions needing a filter (e.g. "how much on rebar"), add up only the listed approved expense/line amounts that match and say which records you used.
 - Unapproved (pending) or disputed records are not part of final totals; mention them separately if relevant.
 - If the data does not contain the answer, say so plainly. Never invent records, amounts or dates.
 - Money is in AZN.`,
-      tools: [tool],
-      tool_choice: { type: "tool", name: "answer" },
-      messages: [{ role: "user", content: `DATA:\n${JSON.stringify(context)}\n\nQUESTION: ${question}` }],
-    }),
-    signal: AbortSignal.timeout(60_000),
+    parts: [{ text: `DATA:\n${JSON.stringify(context)}\n\nQUESTION: ${question}` }],
+    tool, maxTokens: 1500, timeoutMs: 60_000,
   });
-  if (!res.ok) throw new Error(res.status === 429 || res.status === 529 ? "AI xidməti hazırda məşğuldur" : "AI cavab verə bilmədi");
-  const json = await res.json() as { content?: { type: string; input?: { answer?: unknown; refs?: unknown } }[] };
-  const input = json.content?.find((c) => c.type === "tool_use")?.input;
-  const answer = typeof input?.answer === "string" ? input.answer.slice(0, 4000) : "";
-  const refs = Array.isArray(input?.refs) ? (input!.refs as { type?: unknown; id?: unknown }[]).filter((r) => typeof r?.type === "string" && typeof r?.id === "string").map((r) => ({ type: r.type as string, id: r.id as string })).slice(0, 50) : [];
+  const answer = typeof input.answer === "string" ? (input.answer as string).slice(0, 4000) : "";
+  const refs = Array.isArray(input.refs) ? (input.refs as { type?: unknown; id?: unknown }[]).filter((r) => typeof r?.type === "string" && typeof r?.id === "string").map((r) => ({ type: r.type as string, id: r.id as string })).slice(0, 50) : [];
   if (!answer) throw new Error("AI cavabı boşdur");
   return { answer, refs, model };
 }
