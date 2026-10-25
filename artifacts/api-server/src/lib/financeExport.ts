@@ -229,85 +229,123 @@ export async function buildFinanceWorkbook(a: ProjectAccess, d: ProjectData): Pr
 
 /*
  * "Evimin xərcləri" journal: the simple export of the expense book.
- * Totals are formulas over the "Bütün xərclər" sheet, so they stay right after edits in Excel
- * (edits in Excel are never written back to the site).
+ * "Bütün xərclər" has one row per material / work line (a day with cement, rebar and a worker's fee gives three rows),
+ * plus a correction row when an expense total differs from its lines (discount, tax). So the rows always add up to the
+ * expense totals: nothing is lost and nothing is counted twice. Every other sheet is formulas over these rows.
+ * Edits in Excel are never written back to the site.
  */
 export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, range: { from?: string; to?: string } = {}, comparison?: { category: string; planned: number; actual: number }[] | null): Promise<Buffer> {
   const cat = (c: string) => EXPENSE_CATEGORIES[c as keyof typeof EXPENSE_CATEGORIES]?.label ?? c;
+  const GROUP: Record<string, string> = { material: "Material", labor: "İşçilik", other: "Digər" };
+  const grp = (c: string) => GROUP[EXPENSE_CATEGORIES[c as keyof typeof EXPENSE_CATEGORIES]?.group ?? "other"];
   const party = new Map(d.parties.map((p) => [p.id, p.name]));
   const inv = new Map(d.invoices.map((i) => [i.id, i]));
   const media = d.invoices.length ? await db.select({ id: homeMediaTable.id, name: homeMediaTable.originalName, sha: homeMediaTable.sha256 }).from(homeMediaTable).where(eq(homeMediaTable.homeId, a.home.id)) : [];
-  const mediaBy = new Map(media.map((m) => [m.id, m]));
+  const mediaBy = new Map(media.map((x) => [x.id, x]));
   const inRange = (date: string) => (!range.from || date >= range.from) && (!range.to || date <= range.to);
-  const rows = d.expenses.filter((e) => e.status !== "void" && inRange(e.date)).sort((x, y) => x.date.localeCompare(y.date));
+  const rows = d.expenses.filter((e) => e.status !== "void" && inRange(e.date)).sort((x, y) => x.date.localeCompare(y.date) || x.createdAt.getTime() - y.createdAt.getTime());
   const itemsBy = new Map<string, typeof d.items>();
   for (const i of d.items) itemsBy.set(i.expenseId, [...(itemsBy.get(i.expenseId) ?? []), i]);
+  const ledger = computeLedger(d);
   const wb = new ExcelJS.Workbook();
   wb.creator = "Tehvil.az"; wb.created = new Date();
   const APPROVED = STATUS.approved;
+  const UNPAID = EXP_PAY.unpaid;
+  const asDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
+  const DATE = "dd.mm.yyyy";
 
-  /* Bütün xərclər — first built, the other sheets refer to it. */
+  /* Bütün xərclər — first built, the other sheets refer to it. A..M as asked, N..P helper columns for the totals. */
   const all = sheet(wb, "Bütün xərclər", [
-    { header: "Qeyd ID", key: "id", width: 38 }, { header: "Tarix", key: "date", width: 12 }, { header: "Ay", key: "month", width: 9 }, { header: "Ev layihəsi", key: "home", width: 22 },
-    { header: "Xərcin adı", key: "name", width: 34 }, { header: "Kateqoriya", key: "cat", width: 26 }, { header: "Miqdar", key: "q", width: 10 }, { header: "Vahid", key: "u", width: 8 },
-    { header: "Məbləğ", key: "amount", width: 14, money: true }, { header: "Valyuta", key: "cur", width: 8 }, { header: "Satıcı", key: "vendor", width: 24 }, { header: "Qeyd", key: "note", width: 30 },
-    { header: "Qəbzə istinad", key: "receipt", width: 38 }, { header: "Status", key: "status", width: 16 },
+    { header: "Tarix", key: "date", width: 12 }, { header: "Ev layihəsi", key: "home", width: 22 }, { header: "Qeyd ID-si", key: "id", width: 38 },
+    { header: "Məhsul və ya iş", key: "name", width: 34 }, { header: "Kateqoriya", key: "cat", width: 26 }, { header: "Miqdar", key: "q", width: 10 }, { header: "Vahid", key: "u", width: 8 },
+    { header: "Vahid qiymət", key: "p", width: 14, money: true }, { header: "Ümumi məbləğ", key: "amount", width: 15, money: true }, { header: "Ödəniş statusu", key: "pay", width: 16 },
+    { header: "Satıcı", key: "vendor", width: 24 }, { header: "Qeyd", key: "note", width: 30 }, { header: "Qaimə və ya fayl identifikatoru", key: "receipt", width: 38 },
+    { header: "Ay", key: "month", width: 9 }, { header: "Qeydin statusu", key: "status", width: 16 }, { header: "Qrup", key: "group", width: 10 },
   ]);
+  let lineCount = 0;
   for (const e of rows) {
     const items = itemsBy.get(e.id) ?? [];
-    const one = items.length === 1 ? items[0] : null;
-    all.addRow({ id: e.id, date: e.date, month: e.date.slice(0, 7), home: a.home.name, name: e.description, cat: cat(e.category), q: one?.quantity ? Number(one.quantity) : null, u: one?.unit ?? "",
-      amount: m(e.total), cur: a.project.currency, vendor: e.vendorName || (e.partyId ? party.get(e.partyId) : "") || "", note: e.note, receipt: e.invoiceId ?? "", status: STATUS[e.status] ?? e.status });
+    const pay = EXP_PAY[ledger.payState.get(e.id)?.status ?? "n/a"] ?? "—";
+    const i0 = e.invoiceId ? inv.get(e.invoiceId) : null;
+    const base = {
+      date: asDate(e.date), home: a.home.name, id: e.entryId ?? e.id, pay, vendor: e.vendorName || (e.partyId ? party.get(e.partyId) : "") || "",
+      receipt: e.invoiceId ? `${i0?.docNumber ? `№ ${i0.docNumber} · ` : ""}${e.invoiceId}` : "", month: e.date.slice(0, 7), status: STATUS[e.status] ?? e.status,
+    };
+    const add = (v: Record<string, unknown>, formula?: string) => {
+      const r = all.addRow({ ...base, ...v });
+      r.getCell("date").numFmt = DATE;
+      if (formula) r.getCell("amount").value = { formula: formula.replace(/#/g, String(r.number)), result: v.amount as number };
+      lineCount++;
+    };
+    if (!items.length) { add({ name: e.description, cat: cat(e.category), group: grp(e.category), amount: m(e.total), note: e.note }); continue; }
+    let covered = 0;
+    for (const i of items) {
+      const c = i.category ?? e.category;
+      covered += Math.round(Number(i.lineTotal) * 100);
+      const q = i.quantity ? Number(i.quantity) : null, p = i.unitPrice ? Number(i.unitPrice) : null;
+      // Quantity × unit price as a formula when it is what was recorded; the receipt's own figure otherwise.
+      const exact = q != null && p != null && Math.round(q * p * 100) === Math.round(Number(i.lineTotal) * 100);
+      add({ name: i.name, cat: cat(c), group: grp(c), q, u: i.unit, p, amount: m(i.lineTotal), note: [i.note, e.note].filter(Boolean).join(" · ") }, exact ? "ROUND(F#*H#,2)" : undefined);
+    }
+    const diff = Math.round(Number(e.total) * 100) - covered;
+    if (diff !== 0) add({ name: `${e.description} — endirim / vergi / fərq`, cat: cat(e.category), group: grp(e.category), amount: n(diff), note: "Xərcin yekunu ilə sətirlərin cəmi arasındakı fərq" });
   }
   const last = Math.max(2, all.rowCount);
-  totalRow(all, "Cəmi (təsdiqlənmiş)", "name", ["I"], "N", APPROVED);
+  totalRow(all, "Cəmi (təsdiqlənmiş)", "name", ["I"], "O", APPROVED);
   finish(all);
   const R = (col: string) => `'Bütün xərclər'!$${col}$2:$${col}$${last}`;
+  const ok = `${R("O")},"${APPROVED}"`;
 
   /* Ümumi xülasə */
-  const ledger = computeLedger(d);
-  const s = sheet(wb, "Ümumi xülasə", [{ header: "Göstərici", key: "k", width: 36 }, { header: "Dəyər", key: "v", width: 22 }, { header: "Qeyd", key: "n", width: 60 }]);
+  const s = sheet(wb, "Ümumi xülasə", [{ header: "Göstərici", key: "k", width: 36 }, { header: "Dəyər", key: "v", width: 22 }, { header: "Qeyd", key: "n", width: 64 }]);
   s.addRow({ k: "Ev", v: a.home.name });
   s.addRow({ k: "Dövr", v: `${range.from ? range.from : "əvvəldən"} — ${range.to ? range.to : "bu günə qədər"}` });
   s.addRow({ k: "Hesabat tarixi", v: new Date().toISOString().slice(0, 10) });
-  const tot = s.addRow({ k: "Ümumi xərc (təsdiqlənmiş)", n: "Bütün xərclər vərəqindəki təsdiqlənmiş qeydlərin cəmi" });
-  tot.getCell("v").value = { formula: `SUMIFS(${R("I")},${R("N")},"${APPROVED}")` }; tot.getCell("v").numFmt = MONEY;
+  const money = (k: string, formula: string, note: string) => { const r = s.addRow({ k, n: note }); r.getCell("v").value = { formula }; r.getCell("v").numFmt = MONEY; return r; };
+  const tot = money("Ümumi xərc (təsdiqlənmiş)", `SUMIFS(${R("I")},${ok})`, "Bütün xərclər vərəqindəki təsdiqlənmiş sətirlərin cəmi");
+  money("O cümlədən material", `SUMIFS(${R("I")},${ok},${R("P")},"Material")`, "Material kateqoriyalı sətirlər");
+  money("O cümlədən usta və işlər", `SUMIFS(${R("I")},${ok},${R("P")},"İşçilik")`, "Usta və fəhlə haqqı, digər işlər");
+  money("O cümlədən digər", `SUMIFS(${R("I")},${ok},${R("P")},"Digər")`, "Texnika, nəqliyyat, layihə və digər xərclər");
+  money("Ödənilməyib", `SUMIFS(${R("I")},${ok},${R("J")},"${UNPAID}")`, "“Ödənilməyib” statuslu sətirlər (qismən ödənilənlər daxil deyil)");
   const bud = s.addRow({ k: "Büdcə", v: n(ledger.totals.budgetCurrent), n: ledger.totals.budgetCurrent == null ? "Büdcə daxil edilməyib" : "Son razılaşdırılmış büdcə" });
   bud.getCell("v").numFmt = MONEY;
   const left = s.addRow({ k: "Büdcədən qalan", n: ledger.totals.budgetCurrent == null ? "Büdcə olmadığı üçün hesablanmır" : "Büdcə − ümumi xərc" });
   if (ledger.totals.budgetCurrent != null) { left.getCell("v").value = { formula: `B${bud.number}-B${tot.number}` }; left.getCell("v").numFmt = MONEY; } else left.getCell("v").value = "—";
-  s.addRow({ k: "Qeyd sayı", v: rows.length });
+  s.addRow({ k: "Xərc qeydi", v: rows.length, n: "Bir gündəlik qeyd ödənilən və ödənilməyən hissəyə bölünə bilər" });
+  s.addRow({ k: "Sətir", v: lineCount, n: "Material və iş sətirləri" });
   s.addRow({});
   s.addRow({ k: "Qeyd", n: "Excel-də etdiyiniz dəyişikliklər sayta avtomatik yazılmır." });
   finish(s);
 
-  /* Kateqoriyalar üzrə */
-  const bc = sheet(wb, "Kateqoriyalar üzrə", [{ header: "Kateqoriya", key: "c", width: 30 }, { header: "Say", key: "n", width: 8 }, { header: "Məbləğ", key: "t", width: 16, money: true }]);
-  const cats = [...new Set(rows.map((e) => cat(e.category)))].sort();
-  for (const c of cats) {
-    const r = bc.addRow({ c });
-    r.getCell("n").value = { formula: `COUNTIFS(${R("F")},A${r.number},${R("N")},"${APPROVED}")` };
-    r.getCell("t").value = { formula: `SUMIFS(${R("I")},${R("F")},A${r.number},${R("N")},"${APPROVED}")` };
-  }
-  const bcEnd = bc.rowCount;
-  const bct = bc.addRow({ c: "Cəmi" });
-  bct.getCell("n").value = bcEnd >= 2 ? { formula: `SUM(B2:B${bcEnd})` } : 0;
-  bct.getCell("t").value = bcEnd >= 2 ? { formula: `SUM(C2:C${bcEnd})` } : 0;
-  bct.font = { bold: true, name: "Arial", size: 10 };
-  finish(bc);
-
-  /* Aylıq xərclər */
-  const mo = sheet(wb, "Aylıq xərclər", [{ header: "Ay", key: "m", width: 10 }, { header: "Say", key: "n", width: 8 }, { header: "Məbləğ", key: "t", width: 16, money: true }]);
-  for (const month of [...new Set(rows.map((e) => e.date.slice(0, 7)))].sort()) {
-    const r = mo.addRow({ m: month });
-    r.getCell("n").value = { formula: `COUNTIFS(${R("C")},A${r.number},${R("N")},"${APPROVED}")` };
-    r.getCell("t").value = { formula: `SUMIFS(${R("I")},${R("C")},A${r.number},${R("N")},"${APPROVED}")` };
-  }
-  const moEnd = mo.rowCount;
-  const mot = mo.addRow({ m: "Cəmi" });
-  mot.getCell("t").value = moEnd >= 2 ? { formula: `SUM(C2:C${moEnd})` } : 0;
-  mot.font = { bold: true, name: "Arial", size: 10 };
-  finish(mo);
+  /* Day / month / category sheets: the same columns, grouped by a different key. */
+  const grouped = (name: string, keyHeader: string, keyCol: string, keys: (string | Date)[], dateKeys = false) => {
+    const ws = sheet(wb, name, [
+      { header: keyHeader, key: "k", width: 26 }, { header: "Sətir sayı", key: "c", width: 10 }, { header: "Material", key: "mat", width: 15, money: true },
+      { header: "Usta və işlər", key: "lab", width: 15, money: true }, { header: "Digər", key: "oth", width: 15, money: true }, { header: "Cəmi", key: "t", width: 16, money: true },
+      { header: "O cümlədən ödənilməyib", key: "u", width: 18, money: true },
+    ]);
+    for (const k of keys) {
+      const r = ws.addRow({ k });
+      if (dateKeys) r.getCell("k").numFmt = DATE;
+      const by = `${R(keyCol)},A${r.number}`;
+      r.getCell("c").value = { formula: `COUNTIFS(${by},${ok})` };
+      r.getCell("mat").value = { formula: `SUMIFS(${R("I")},${by},${ok},${R("P")},"Material")` };
+      r.getCell("lab").value = { formula: `SUMIFS(${R("I")},${by},${ok},${R("P")},"İşçilik")` };
+      r.getCell("oth").value = { formula: `SUMIFS(${R("I")},${by},${ok},${R("P")},"Digər")` };
+      r.getCell("t").value = { formula: `SUMIFS(${R("I")},${by},${ok})` };
+      r.getCell("u").value = { formula: `SUMIFS(${R("I")},${by},${ok},${R("J")},"${UNPAID}")` };
+    }
+    const end = ws.rowCount;
+    const t = ws.addRow({ k: "Cəmi" });
+    for (const col of ["B", "C", "D", "E", "F", "G"]) t.getCell(col).value = end >= 2 ? { formula: `SUM(${col}2:${col}${end})` } : 0;
+    t.font = { bold: true, name: "Arial", size: 10 }; t.border = { top: { style: "thin" } };
+    finish(ws);
+  };
+  grouped("Günlər üzrə xərclər", "Tarix", "A", [...new Set(rows.map((e) => e.date))].sort().map(asDate), true);
+  grouped("Aylar üzrə xərclər", "Ay", "N", [...new Set(rows.map((e) => e.date.slice(0, 7)))].sort());
+  const usedCats = new Set<string>();
+  for (const e of rows) { const it = itemsBy.get(e.id) ?? []; usedCats.add(e.category); for (const i of it) usedCats.add(i.category ?? e.category); }
+  grouped("Kateqoriyalar üzrə xərclər", "Kateqoriya", "E", [...usedCats].map(cat).filter((v, i, arr) => arr.indexOf(v) === i).sort());
 
   /* Smeta və faktiki xərc */
   if (comparison?.length) {
@@ -319,17 +357,17 @@ export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, ran
     finish(cm);
   }
 
-  /* Əlavə məlumatlar və qəbzlər */
-  const ex = sheet(wb, "Qəbzlər və əlavə məlumat", [{ header: "Qeyd ID", key: "id", width: 38 }, { header: "Qəbz ID", key: "inv", width: 38 }, { header: "Fayl", key: "file", width: 30 }, { header: "SHA-256", key: "sha", width: 66 }, { header: "AI oxuyub", key: "ai", width: 10 }, { header: "Satıcı (qəbzdə)", key: "v", width: 24 }, { header: "Sənəd №", key: "no", width: 14 }]);
+  /* Qəbzlər və əlavə məlumat: which file is behind each record. */
+  const ex = sheet(wb, "Qəbzlər və əlavə məlumat", [{ header: "Qeyd ID-si", key: "id", width: 38 }, { header: "Xərc ID", key: "eid", width: 38 }, { header: "Qəbz ID", key: "inv", width: 38 }, { header: "Fayl", key: "file", width: 30 }, { header: "SHA-256", key: "sha", width: 66 }, { header: "AI oxuyub", key: "ai", width: 10 }, { header: "Satıcı (qəbzdə)", key: "v", width: 24 }, { header: "Sənəd №", key: "no", width: 14 }]);
   for (const e of rows) {
     const i = e.invoiceId ? inv.get(e.invoiceId) : null;
     const f = i ? mediaBy.get(i.mediaId) : null;
-    ex.addRow({ id: e.id, inv: i?.id ?? "", file: f?.name ?? "", sha: f?.sha ?? "", ai: i?.aiResult ? "Bəli" : i ? "Xeyr" : "", v: i?.vendor ?? "", no: i?.docNumber ?? "" });
+    ex.addRow({ id: e.entryId ?? e.id, eid: e.id, inv: i?.id ?? "", file: f?.name ?? "", sha: f?.sha ?? "", ai: i?.aiResult ? "Bəli" : i ? "Xeyr" : "", v: i?.vendor ?? "", no: i?.docNumber ?? "" });
   }
   finish(ex);
 
   // Summary first, as people open the file.
-  const order = ["Ümumi xülasə", "Bütün xərclər", "Kateqoriyalar üzrə", "Aylıq xərclər", "Smeta və faktiki", "Qəbzlər və əlavə məlumat"];
+  const order = ["Ümumi xülasə", "Bütün xərclər", "Günlər üzrə xərclər", "Aylar üzrə xərclər", "Kateqoriyalar üzrə xərclər", "Smeta və faktiki", "Qəbzlər və əlavə məlumat"];
   wb.worksheets.sort((x, y) => order.indexOf(x.name) - order.indexOf(y.name)).forEach((w, i) => { (w as unknown as { orderNo: number }).orderNo = i; });
   return Buffer.from(await wb.xlsx.writeBuffer());
 }

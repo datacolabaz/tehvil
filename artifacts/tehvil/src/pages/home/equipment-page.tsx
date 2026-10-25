@@ -68,7 +68,7 @@ export function HomeEquipmentPage({ homeId }: { homeId: string }) {
         : <p className="rl-hint">Hələ material qeyd olunmayıb. İş əlavə edərkən “Əlavə məlumat” bölməsində materialları yazın — burada görünəcək.</p>}
     </section>
     {editing && <EquipmentModal homeId={homeId} item={editing === 'new' ? undefined : editing} performer={role === 'performer'} onClose={() => setEditing(null)} />}
-    {service && <QuickWorkModal homeId={homeId} equipmentId={service.id} roomId={service.roomId ?? undefined} category={service.category === 'air_conditioner' ? 'hvac' : service.category === 'boiler' || service.category === 'water_heater' ? 'heating' : 'other'} onClose={() => setService(null)} onSaved={id => setLocation(`/works/${id}`)} key={service.id} />}
+    {service && <QuickWorkModal homeId={homeId} equipmentId={service.id} roomId={service.roomId ?? undefined} category={service.category === 'air_conditioner' ? 'hvac' : service.category === 'boiler' || service.category === 'water_heater' ? 'heating' : 'other'} onClose={() => setService(null)} onSaved={(id, h) => setLocation(id ? `/works/${id}` : `/xercler/${h}`)} key={service.id} />}
     <HomeToaster />
   </>;
 }

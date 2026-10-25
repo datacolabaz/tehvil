@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { AlertTriangle, BellRing, Calculator, CheckCircle2, Circle, Download, Info, Search } from 'lucide-react';
 import { useCreateServiceInterest, useGetHomeCosts, useGetHomePassport, useListMyReminders, type HomeCosts } from '@workspace/api-client-react';
+import { useBooks } from '@/lib/finance/api';
 import { PageHeading } from '@/components/kit';
 import { Modal, toast } from '@/components/home/ui';
 import { WORK_CATEGORY, day, dayTime, money } from '@/lib/home/labels';
@@ -64,16 +65,20 @@ function csv(costs: HomeCosts, homeName: string) {
 /** Costs: the actual amounts entered on works, and estimates saved in the home — never mixed into one number. */
 export function HomeCostsCard({ homeId, homeName }: { homeId: string; homeName: string }) {
   const q = useGetHomeCosts(homeId);
+  const books = useBooks();
+  const book = books.data?.books.find(b => b.homeId === homeId && b.projectId && b.count > 0);
   if (!q.data) return null;
   const c = q.data;
   const download = () => {
     const blob = new Blob([csv(c, homeName)], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `tehvil-xercler-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
   };
-  const empty = !c.byCurrency.length && !c.estimates.length;
+  const empty = !c.byCurrency.length && !c.estimates.length && !book;
   return <section className="surface hp-section hp-costs" data-testid="home-costs">
     <div className="section-head"><h2><Calculator size={15} className="sm-ii" /> Xərclər</h2>{!empty && <button type="button" className="sm-link-btn" onClick={download} data-testid="button-costs-csv"><Download size={13} />CSV yüklə</button>}</div>
-    {empty ? <p className="rl-hint">Hələ xərc qeyd olunmayıb. İş əlavə edərkən “Əlavə məlumat” bölməsində məbləği yazın, ilkin hesablama üçün isə <Link href="/smeta/new">AI Smeta</Link> hazırlayın.</p> : <>
+    {book && <Link href={`/xercler/${homeId}`} className="hp-kvline hp-journal-link" data-testid="home-costs-journal"><span><b>Xərc jurnalı: {money(book.total / 100, 'AZN')}</b></span><small>{book.count} qeyd · gündəlik qeydlərdən — material, usta haqqı, qaimələr. Açmaq üçün toxunun.</small></Link>}
+    {empty ? <p className="rl-hint">Hələ xərc qeyd olunmayıb. “Gündəlik qeyd əlavə et” ilə alınan materialı və usta haqqını yazın, ilkin hesablama üçün isə <Link href="/smeta-ai/yeni">AI Smeta</Link> hazırlayın.</p> : (c.byCurrency.length > 0 || c.estimates.length > 0) && <>
+      {book && <small className="rl-hint">Aşağıdakılar köhnə iş qeydlərinə yazılmış məbləğlərdir; xərc jurnalına qatılmır.</small>}
       <div className="hp-cost-totals">{c.byCurrency.map(x => <div key={x.currency}><small>Faktiki xərc ({x.count} iş)</small><b>{money(x.total, x.currency)}</b></div>)}
         {!c.byCurrency.length && <div><small>Faktiki xərc</small><b className="muted">Məlumat yoxdur</b></div>}</div>
       {c.byCategory.length > 0 && <ul className="hp-cost-cats">{c.byCategory.map(x => {

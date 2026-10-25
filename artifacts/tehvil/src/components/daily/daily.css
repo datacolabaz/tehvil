@@ -1,0 +1,42 @@
+/* "Gündəlik qeyd": material and work lines (mobile first). */
+.dl-section { border: 1px solid hsl(var(--border)); border-radius: 14px; padding: 12px; background: hsl(var(--card)); display: grid; gap: 10px; }
+.dl-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.dl-head h3 { margin: 0; font-size: 15px; }
+.dl-lines { display: grid; gap: 10px; }
+.dl-line { border: 1px solid hsl(var(--border)); border-radius: 12px; padding: 10px; display: grid; gap: 8px; background: hsl(var(--background)); }
+.dl-line.weak { border-color: #e7c56f; background: #fffaf0; }
+.dl-line.bad { border-color: hsl(var(--destructive) / .55); }
+.dl-row1 { display: flex; gap: 8px; align-items: center; }
+.dl-no { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+.dl-line input, .dl-line select { width: 100%; min-width: 0; font: inherit; font-size: 16px; padding: 9px 10px; border: 1px solid hsl(var(--input)); border-radius: 10px; background: hsl(var(--card)); color: inherit; }
+.dl-name { flex: 1 1 auto; font-weight: 600; }
+.dl-nums { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.dl-nums label { display: grid; gap: 3px; font-size: 12px; color: hsl(var(--muted-foreground)); }
+.dl-total output { display: block; padding: 9px 10px; border-radius: 10px; background: hsl(var(--muted)); color: hsl(var(--foreground)); font-weight: 700; font-size: 16px; }
+.dl-row3 { display: grid; gap: 8px; }
+.dl-paid { justify-self: start; }
+.dl-hint { font-size: 12px; color: hsl(var(--muted-foreground)); }
+.dl-warn { display: flex; gap: 5px; align-items: flex-start; font-size: 12.5px; color: #7a4b06; }
+.dl-warn svg { flex: 0 0 auto; margin-top: 2px; }
+.dl-err { font-size: 12.5px; color: hsl(var(--destructive)); }
+.dl-add { justify-self: start; }
+.dl-totals { border-top: 1px dashed hsl(var(--border)); padding-top: 10px; display: grid; gap: 4px; }
+.dl-total-main { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.dl-total-main b { font-size: 20px; }
+.dl-total-split { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: hsl(var(--muted-foreground)); }
+.dl-total-split b { color: hsl(var(--foreground)); }
+.dl-unpaid, .dl-unpaid b { color: #a14a08 !important; }
+.dl-receipt { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 10px; align-items: start; }
+.dl-receipt img { width: 84px; height: 108px; object-fit: cover; border-radius: 10px; border: 1px solid hsl(var(--border)); }
+.dl-receipt > div { display: grid; gap: 8px; }
+.dl-date { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #fdf0dc; color: #6b4204; border-radius: 12px; padding: 10px; font-size: 13.5px; }
+.dl-date > span { flex: 1 1 220px; }
+.dl-foot-total { margin-right: auto; font-size: 14px; }
+@media (min-width: 640px) {
+  .dl-nums { grid-template-columns: 1fr .8fr 1fr 1.2fr; }
+  .dl-row3 { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+}
+.dark .dl-line.weak { background: #3a3220; border-color: #8a6d2a; }
+.dark .dl-date { background: #3a2d18; color: #f2d7a6; }
+.dark .dl-warn { color: #e9c27a; }
+.dark .dl-unpaid, .dark .dl-unpaid b { color: #f0a868 !important; }

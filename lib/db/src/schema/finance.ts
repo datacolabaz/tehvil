@@ -170,6 +170,10 @@ export const financeExpensesTable = pgTable("finance_expenses", {
   /** Party whose advance paid for this (the contractor bought it with the owner's advance); null = not from an advance. */
   fundedByPartyId: uuid("funded_by_party_id").references(() => financePartiesTable.id, { onDelete: "set null" }),
   invoiceId: uuid("invoice_id"),
+  /** One "gündəlik qeyd" (daily entry) can produce several expenses (paid / unpaid); they share this id. */
+  entryId: uuid("entry_id"),
+  /** Work record (work_records) done that day, when the entry also described work. Its cost stays empty: money lives here. */
+  workId: uuid("work_id"),
   note: text("note").notNull().default(""),
   /** pending | approved | disputed | void */
   status: varchar("status", { length: 10 }).notNull().default("pending"),
@@ -182,6 +186,7 @@ export const financeExpensesTable = pgTable("finance_expenses", {
   updatedAt: updatedAt(),
 }, (t) => [
   index("finance_expenses_project_idx").on(t.projectId, t.date),
+  index("finance_expenses_entry_idx").on(t.entryId),
   uniqueIndex("finance_expenses_idem_idx").on(t.projectId, t.idempotencyKey),
 ]);
 
@@ -195,6 +200,9 @@ export const financeExpenseItemsTable = pgTable("finance_expense_items", {
   unit: varchar("unit", { length: 16 }).notNull().default(""),
   unitPrice: money("unit_price"),
   lineTotal: money("line_total").notNull(),
+  /** Category of this line (material vs labour on one receipt); null = the expense's category. */
+  category: varchar("category", { length: 24 }),
+  note: text("note").notNull().default(""),
 }, (t) => [index("finance_expense_items_expense_idx").on(t.expenseId)]);
 
 /**

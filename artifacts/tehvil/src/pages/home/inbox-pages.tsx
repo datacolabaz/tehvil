@@ -37,7 +37,7 @@ export function MyWorksPage() {
         <WorkRow w={x.work} showHome={x.homeName} />
         <small className="hp-mywork-meta">{x.worker.displayName} ({WORKER_KIND[x.worker.kind]}) · {PART_ROLE[x.role] ?? x.role} · <Pill small tone={PART_TONE[x.participantStatus]}>{PART_STATUS[x.participantStatus]}</Pill></small>
       </div>)}</div>}
-    {adding && <QuickWorkModal onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
+    {adding && <QuickWorkModal onClose={() => setAdding(false)} onSaved={(id, h) => setLocation(id ? `/works/${id}` : `/xercler/${h}`)} />}
     <HomeToaster />
   </>;
 }
@@ -57,7 +57,7 @@ export function AllHistoryPage() {
   const list = all.filter(x => (!homeF || x.work.homeId === homeF) && (!yearF || year(x) === yearF));
   return <>
     <PageHeading eyebrow="Bütün evlərim" title="İş tarixçəsi" description="Evlərinizdə görülən bütün işlər, tarix üzrə. Eyni məlumatlar evin “İşlər və tarixçə” bölməsində də görünür."
-      action={<button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-history-add"><Plus size={16} />İş əlavə et</button>} />
+      action={<button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-history-add"><Plus size={16} />Gündəlik qeyd əlavə et</button>} />
     {all.length > 0 && <div className="hp-filters" role="group" aria-label="Süzgəc">
       {homes.length > 1 && <label className="field"><span>Ev</span><select value={homeF} onChange={e => setHomeF(e.target.value)} data-testid="filter-home"><option value="">Bütün evlər</option>{homes.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>}
       {years.length > 0 && <label className="field"><span>İl</span><select value={yearF} onChange={e => setYearF(e.target.value)} data-testid="filter-year"><option value="">Bütün illər</option>{years.map(y => <option key={y} value={y}>{y}</option>)}</select></label>}
@@ -65,7 +65,7 @@ export function AllHistoryPage() {
     {!all.length ? <Empty icon={<ClipboardCheck size={28} />} title="Hələ iş yoxdur" text="Evinizi əlavə edin, sonra görülən işləri — keçmişdə görülənlər də daxil — bir neçə düymə ilə qeyd edin." action={<Link href="/homes?new=1" className="button button-primary"><Plus size={16} />Ev əlavə et</Link>} />
       : !list.length ? <p className="rl-hint">Bu süzgəcə uyğun iş yoxdur.</p>
       : <div className="hp-wlist">{list.map(x => <WorkRow key={x.work.id} w={x.work} showHome={homes.length > 1 ? x.homeName : undefined} />)}</div>}
-    {adding && <QuickWorkModal homeId={homeF || undefined} onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
+    {adding && <QuickWorkModal homeId={homeF || undefined} onClose={() => setAdding(false)} onSaved={(id, h) => setLocation(id ? `/works/${id}` : `/xercler/${h}`)} />}
     <HomeToaster />
   </>;
 }

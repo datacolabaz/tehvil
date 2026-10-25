@@ -61,7 +61,7 @@ export function HomeProfilePage({ homeId }: { homeId: string }) {
         </dl>
         {home.notes && <p className="hp-text">{home.notes}</p>}
         <div className="hp-actions">
-          {p.addWorks && <button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-quick-work"><Plus size={15} />İş əlavə et</button>}
+          {p.addWorks && <button type="button" className="button button-primary" onClick={() => setAdding(true)} data-testid="button-quick-work"><Plus size={15} />Gündəlik qeyd əlavə et</button>}
           {p.edit && <button type="button" className="button button-secondary" onClick={() => setEditing(true)} data-testid="button-edit-home"><Pencil size={15} />Məlumatları dəyiş</button>}
           {p.manageSharing && <Link href={`/homes/${homeId}/sharing`} className="button button-secondary"><QrCode size={15} />Məlumatları paylaş</Link>}
           {owner && <button type="button" className="button button-quiet" onClick={() => setArchiving(true)}><Archive size={15} />Arxivlə</button>}
@@ -90,7 +90,7 @@ export function HomeProfilePage({ homeId }: { homeId: string }) {
       </section>
     </div>
     {home.myRole !== 'performer' && <HomeCostsCard homeId={homeId} homeName={home.name} />}
-    {adding && <QuickWorkModal homeId={homeId} onClose={() => setAdding(false)} onSaved={id => setLocation(`/works/${id}`)} />}
+    {adding && <QuickWorkModal homeId={homeId} onClose={() => setAdding(false)} onSaved={(id, h) => setLocation(id ? `/works/${id}` : `/xercler/${h}`)} />}
     {editing && <HomeFormModal open home={home} onClose={() => setEditing(false)} onSaved={() => setEditing(false)} />}
     <Modal open={archiving} onClose={() => setArchiving(false)} eyebrow={home.name} title="Evi arxivə köçürmək" footer={<button type="button" className="button button-danger" disabled={archive.isPending} onClick={() => archive.mutate({ homeId }, { onSuccess: () => { void refreshHomeData(qc); setLocation('/homes'); } })}>Arxivlə</button>}>
       <p className="rl-hint">Ev “Evlərim” siyahısından və QR səhifəsindən gizlənəcək. Heç nə silinmir — təmir tarixçəsi və fotolar saxlanılır.</p>
@@ -121,7 +121,7 @@ function HomeSmetas({ homeId, canAdd }: { homeId: string; canAdd: boolean }) {
     </div>)}
     {canAdd && options.length > 0 && <div className="hp-inline"><select className="hp-input" value={pick} onChange={e => setPick(e.target.value)} aria-label="Smeta seç" data-testid="select-home-smeta"><option value="">Mövcud smetanı evdə saxla…</option>{options.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}</select><button type="button" className="button button-secondary sm-btn-sm" disabled={!pick || link.isPending} onClick={() => save(pick, true)} data-testid="button-link-smeta">Saxla</button></div>}
     {!saved.length && !options.length && <p className="rl-hint">Hələ smeta yoxdur.</p>}
-    {fromSmeta && <QuickWorkModal homeId={homeId} smetaProjectId={fromSmeta.id} title={fromSmeta.name} onClose={() => setFromSmeta(null)} onSaved={id => setLocation(`/works/${id}`)} />}
+    {fromSmeta && <QuickWorkModal homeId={homeId} smetaProjectId={fromSmeta.id} title={fromSmeta.name} onClose={() => setFromSmeta(null)} onSaved={(id, h) => setLocation(id ? `/works/${id}` : `/xercler/${h}`)} />}
   </>;
 }
 
@@ -208,15 +208,15 @@ export function HomeHistoryPage({ homeId }: { homeId: string }) {
   const p = home.data.home.permissions;
   return <>
     <PageHeading eyebrow={home.data.home.name} title="İşlər və tarixçə" description="Evdə görülən bütün işlər tarix üzrə: nə, harada, nə vaxt və kim. İşə toxunun — fotolar, qeydlər və təsdiqlər açılacaq."
-      action={p.addWorks ? <button type="button" className="button button-primary" onClick={() => setCreating(true)} data-testid="button-create-work"><Plus size={16} />İş əlavə et</button> : undefined} />
+      action={p.addWorks ? <button type="button" className="button button-primary" onClick={() => setCreating(true)} data-testid="button-create-work"><Plus size={16} />Gündəlik qeyd əlavə et</button> : undefined} />
     <div className="hp-filters">
       <Select label="Kateqoriya" name="f-category" value={category} onChange={setCategory} empty="Hamısı" options={opts(WORK_CATEGORY)} />
       <Select label="Status" name="f-status" value={status} onChange={setStatus} empty="Hamısı" options={opts(WORK_STATUS)} />
       <Select label="Otaq" name="f-room" value={room} onChange={setRoom} empty="Hamısı" options={home.data.rooms.map(r => [r.id, r.name])} />
     </div>
-    {works.isLoading ? <Skeleton rows={3} /> : !list.length ? <Empty icon={<CalendarDays size={28} />} title={works.data?.length ? 'Seçiminizə uyğun iş yoxdur' : 'Hələ görülən iş əlavə etməmisiniz'} text="Elektrik, santexnika, boya, döşəmə — hər işi bir neçə düymə ilə qeyd edin, fotosunu və ustanı əlavə edin." action={p.addWorks ? <button type="button" className="button button-primary" onClick={() => setCreating(true)}><Plus size={16} />İş əlavə et</button> : undefined} />
+    {works.isLoading ? <Skeleton rows={3} /> : !list.length ? <Empty icon={<CalendarDays size={28} />} title={works.data?.length ? 'Seçiminizə uyğun iş yoxdur' : 'Hələ görülən iş əlavə etməmisiniz'} text="Elektrik, santexnika, boya, döşəmə — hər işi bir neçə düymə ilə qeyd edin, fotosunu və ustanı əlavə edin." action={p.addWorks ? <button type="button" className="button button-primary" onClick={() => setCreating(true)}><Plus size={16} />Gündəlik qeyd əlavə et</button> : undefined} />
       : <div className="hp-timeline">{byYear.map(([y, ws]) => <section key={y}><h3 className="hp-year">{y}</h3><div className="hp-wlist">{ws.map(w => <WorkRow key={w.id} w={w} />)}</div></section>)}</div>}
-    {creating && <QuickWorkModal homeId={homeId} onClose={() => setCreating(false)} onSaved={id => { setCreating(false); void refreshHomeData(qc); setLocation(`/works/${id}`); }} />}
+    {creating && <QuickWorkModal homeId={homeId} onClose={() => setCreating(false)} onSaved={(id, h) => { setCreating(false); void refreshHomeData(qc); setLocation(id ? `/works/${id}` : `/xercler/${h}`); }} />}
     <HomeToaster />
   </>;
 }
@@ -299,7 +299,7 @@ export function RoomPage({ homeId, roomId }: { homeId: string; roomId: string })
       <MediaGrid media={media} />
       {canUpload && <MediaUpload target={{ homeId, roomId }} onDone={() => { void refreshHomeData(qc); toast('Fotolar əlavə olundu'); }} />}</section>
     {editing && <RoomFormModal homeId={homeId} room={room} onClose={() => setEditing(false)} />}
-    {creating && <QuickWorkModal homeId={homeId} roomId={roomId} onClose={() => setCreating(false)} onSaved={id => setLocation(`/works/${id}`)} />}
+    {creating && <QuickWorkModal homeId={homeId} roomId={roomId} onClose={() => setCreating(false)} onSaved={(id, h) => setLocation(id ? `/works/${id}` : `/xercler/${h}`)} />}
     <HomeToaster />
   </>;
 }

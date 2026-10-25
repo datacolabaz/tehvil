@@ -1,5 +1,6 @@
 import { getAuth } from "@clerk/express";
-import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
+import { and, desc, eq, inArray, isNull, max, sql } from "drizzle-orm";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import {
@@ -16,6 +17,7 @@ import {
   homeProjectsTable,
   homeRoomsTable,
   smetaProjectsTable,
+  workRecordsTable,
   type FinanceExpenseRow,
   type FinancePartyRow,
   type FinancePaymentRow,
@@ -25,7 +27,7 @@ import { attachHomeMedia, HomeMediaError } from "../lib/homeMedia";
 import { mediaDto } from "../lib/homeDtos";
 import {
   computeLedger, duplicateCandidates, EXPENSE_CATEGORIES, expenseMismatch, financeWarnings, FORMULAS, fromCents, getProjectAccess,
-  homeFinanceLevel, isCategory, lineCents, loadProjectData, parseAmount, parseQty, PAYMENT_METHODS, PARTY_ROLES, toCents,
+  homeFinanceLevel, isCategory, lineCents, loadProjectData, parseAmount, parseQty, PAYMENT_METHODS, paymentCounts, PARTY_ROLES, toCents,
   type ProjectAccess, type ProjectData,
 } from "../lib/financeCore";
 import { aiConfigured, AiNotConfigured, answerFinanceQuestion, extractInvoice, type InvoiceExtraction } from "../lib/invoiceAi";
@@ -267,9 +269,9 @@ function expenseDto(e: FinanceExpenseRow, items: ProjectData["items"]) {
   return {
     id: e.id, date: e.date, category: e.category, description: e.description, partyId: e.partyId, vendorName: e.vendorName, roomId: e.roomId,
     subtotal: e.subtotal, discount: e.discount, tax: e.tax, total: e.total, paymentMethod: e.paymentMethod, fundedByPartyId: e.fundedByPartyId,
-    invoiceId: e.invoiceId, note: e.note, status: e.status, approvedAt: e.approvedAt?.toISOString() ?? null, voidReason: e.voidReason,
+    invoiceId: e.invoiceId, entryId: e.entryId, workId: e.workId, note: e.note, status: e.status, approvedAt: e.approvedAt?.toISOString() ?? null, voidReason: e.voidReason,
     createdAt: e.createdAt.toISOString(),
-    items: items.map((i) => ({ id: i.id, name: i.name, quantity: i.quantity, unit: i.unit, unitPrice: i.unitPrice, lineTotal: i.lineTotal })),
+    items: items.map((i) => ({ id: i.id, name: i.name, quantity: i.quantity, unit: i.unit, unitPrice: i.unitPrice, lineTotal: i.lineTotal, category: i.category, note: i.note })),
     mismatch: expenseMismatch(e, items),
   };
 }
@@ -394,6 +396,8 @@ const ItemBody = z.object({
   unit: z.string().trim().max(16).default(""),
   unitPrice: optAmount,
   lineTotal: optAmount,
+  category: z.string().refine(isCategory, "category").nullable().optional(),
+  note: z.string().trim().max(500).default(""),
 });
 const ExpenseBody = z.object({
   date: isoDate,
@@ -441,7 +445,7 @@ function normalizeItems(items: ExpenseInput["items"]) {
   return items.map((i, position) => {
     const quantity = parseQty(i.quantity);
     const lineTotal = i.lineTotal ?? (quantity && i.unitPrice ? fromCents(lineCents(quantity, i.unitPrice)) : null);
-    return { position, name: i.name, quantity, unit: i.unit, unitPrice: i.unitPrice ?? null, lineTotal: lineTotal ?? "0.00" };
+    return { position, name: i.name, quantity, unit: i.unit, unitPrice: i.unitPrice ?? null, lineTotal: lineTotal ?? "0.00", category: i.category ?? null, note: i.note ?? "" };
   });
 }
 
@@ -511,6 +515,151 @@ router.post("/home-projects/:projectId/expenses", async (req, res): Promise<void
 });
 
 class UserError extends Error {}
+
+/*
+ * "Gündəlik qeyd" (daily entry): one day's materials, work and fees in one form.
+ * Lines keep their own category (cement and a worker's fee on the same day stay apart). Paid and unpaid lines become
+ * two expenses sharing one entryId, so "Ödənilməyib" is a real debt in the ledger, not a label.
+ * A receipt (invoice) read by AI is confirmed here only after the person reviewed every line.
+ */
+const DailyLine = ItemBody.extend({ paid: z.boolean().default(true) });
+const DailyBody = z.object({
+  date: isoDate,
+  description: z.string().trim().max(300).default(""),
+  vendorName: z.string().trim().max(200).default(""),
+  note: z.string().trim().max(2000).default(""),
+  roomId: optUuid,
+  workId: optUuid,
+  invoiceId: optUuid,
+  paymentMethod: z.enum(PAYMENT_METHODS).default(""),
+  dateSource: z.enum(["printed", "handwritten", "manual", "today"]).optional(),
+  /** Receipt-level discount and tax (from the receipt); applied to the first expense of the entry. */
+  discount: optAmount,
+  tax: optAmount,
+  lines: z.array(DailyLine).min(1).max(200),
+  idempotencyKey: idemKey,
+});
+
+router.post("/home-projects/:projectId/daily-entries", async (req, res): Promise<void> => {
+  const a = await projectAccess(req, res); if (!a) return;
+  if (a.level !== "manage") return forbidden(res);
+  const b = DailyBody.safeParse(req.body ?? {});
+  if (!b.success) return bad(res, b.error.issues.some((i) => i.path[0] === "lines" && i.code === "too_small") ? "Ən azı bir material və ya iş sətri yazın" : `Məlumatları yoxlayın (${b.error.issues.map((i) => i.path.join(".")).join(", ")})`);
+  const d = b.data;
+  const refErr = await checkRefs(a, { roomId: d.roomId });
+  if (refErr) return bad(res, refErr);
+  if (d.workId) {
+    const [w] = await db.select({ id: workRecordsTable.id }).from(workRecordsTable).where(and(eq(workRecordsTable.id, d.workId), eq(workRecordsTable.homeId, a.home.id)));
+    if (!w) return bad(res, "Görülən iş bu evə aid deyil");
+  }
+  // Every line needs a real amount: quantity × price, or the total typed in. Nothing is guessed.
+  const lines: { name: string; quantity: string | null; unit: string; unitPrice: string | null; lineTotal: string; category: string | null; note: string; paid: boolean }[] = [];
+  for (const [k, l] of d.lines.entries()) {
+    const quantity = parseQty(l.quantity);
+    if (l.quantity != null && l.quantity !== "" && !quantity) return bad(res, `${k + 1}-ci sətir: miqdarı rəqəmlə yazın`);
+    const computed = quantity && l.unitPrice ? fromCents(lineCents(quantity, l.unitPrice)) : null;
+    const lineTotal = computed ?? l.lineTotal ?? null;
+    if (!lineTotal) return bad(res, `“${l.name}”: məbləği yazın (və ya miqdar və vahid qiyməti)`);
+    lines.push({ name: l.name, quantity, unit: l.unit, unitPrice: l.unitPrice ?? null, lineTotal, category: l.category ?? null, note: l.note ?? "", paid: l.paid });
+  }
+  const userId = uid(req);
+  if (d.idempotencyKey) {
+    const dup = await db.select({ id: financeExpensesTable.id, entryId: financeExpensesTable.entryId }).from(financeExpensesTable)
+      .where(and(eq(financeExpensesTable.projectId, a.project.id), inArray(financeExpensesTable.idempotencyKey, [`${d.idempotencyKey}:p`, `${d.idempotencyKey}:u`])));
+    if (dup.length) return void res.json({ entryId: dup[0].entryId, expenseIds: dup.map((x) => x.id), duplicateRequest: true });
+  }
+  try {
+    const out = await db.transaction(async (tx) => {
+      let invoice: typeof financeInvoicesTable.$inferSelect | undefined;
+      if (d.invoiceId) {
+        [invoice] = await tx.select().from(financeInvoicesTable).where(and(eq(financeInvoicesTable.id, d.invoiceId), eq(financeInvoicesTable.projectId, a.project.id))).for("update");
+        if (!invoice) throw new UserError("Qaimə tapılmadı");
+        if (invoice.expenseId || invoice.status === "confirmed") throw new UserError("Bu qaimə artıq xərc kimi təsdiqlənib");
+        if (invoice.status === "discarded") throw new UserError("Bu qaimə ləğv edilib");
+      }
+      const entryId = randomUUID();
+      const groups = [lines.filter((l) => l.paid), lines.filter((l) => !l.paid)].filter((g) => g.length);
+      const ids: string[] = [];
+      let unpaidC = 0;
+      for (const [gi, g] of groups.entries()) {
+        const paid = g[0].paid;
+        const subtotalC = g.reduce((s, l) => s + toCents(l.lineTotal), 0);
+        const discount = gi === 0 ? d.discount ?? "0.00" : "0.00", tax = gi === 0 ? d.tax ?? "0.00" : "0.00";
+        const totalC = subtotalC - toCents(discount) + toCents(tax);
+        if (totalC < 0) throw new UserError("Endirim sətirlərin cəmindən böyük ola bilməz");
+        const total = fromCents(totalC);
+        // The expense's own category is that of its largest line (lines keep theirs).
+        const biggest = [...g].sort((x, y) => toCents(y.lineTotal) - toCents(x.lineTotal))[0];
+        const category = biggest.category ?? (g.length === 1 ? "other" : "building_materials");
+        const names = g.map((l) => l.name);
+        const namesText = names.length > 2 ? `${names.slice(0, 2).join(", ")} və ${names.length - 2} digər` : names.join(", ");
+        // Paid and unpaid parts of one day stay recognisable: "Fundament betonu töküldü: Fəhlə haqqı".
+        const description = (d.description ? (groups.length > 1 ? `${d.description}: ${namesText}` : d.description) : namesText).slice(0, 300);
+        const [e] = await tx.insert(financeExpensesTable).values({
+          projectId: a.project.id, homeId: a.home.id, date: d.date, category, description, vendorName: d.vendorName, roomId: d.roomId ?? null,
+          subtotal: fromCents(subtotalC), discount, tax, total, paymentMethod: paid ? d.paymentMethod : "", invoiceId: invoice?.id ?? null,
+          entryId, workId: d.workId ?? null, note: d.note, status: "approved", approvedByUserId: userId, approvedAt: new Date(),
+          idempotencyKey: d.idempotencyKey ? `${d.idempotencyKey}:${paid ? "p" : "u"}` : null, createdByUserId: userId,
+        }).returning();
+        await tx.insert(financeExpenseItemsTable).values(g.map((l, position) => ({
+          expenseId: e.id, position, name: l.name, quantity: l.quantity, unit: l.unit, unitPrice: l.unitPrice, lineTotal: l.lineTotal, category: l.category, note: l.note,
+        })));
+        if (paid && totalC > 0) {
+          await tx.insert(financePaymentsTable).values({
+            projectId: a.project.id, homeId: a.home.id, kind: "payment", date: d.date, amount: total, payeeName: d.vendorName,
+            purpose: description, method: d.paymentMethod, expenseId: e.id, createdByUserId: userId,
+          });
+        }
+        await audit({ homeId: a.home.id, actorUserId: userId, actorRole: roleOf(a), action: "expense.created", entityType: "expense", entityId: e.id,
+          summary: `${d.date} · ${description} · ${total} AZN · ${paid ? "ödənilib" : "ödənilməyib"}${invoice ? " · qaimədən" : ""}` }, tx);
+        ids.push(e.id);
+        if (!paid) unpaidC += totalC;
+      }
+      if (invoice) {
+        await tx.update(financeInvoicesTable).set({
+          status: "confirmed", expenseId: ids[0], confirmed: { ...d, lines, idempotencyKey: undefined }, confirmedByUserId: userId, confirmedAt: new Date(),
+          vendor: d.vendorName || invoice.vendor, docDate: d.date, total: fromCents(lines.reduce((s, l) => s + toCents(l.lineTotal), 0) - toCents(d.discount) + toCents(d.tax)),
+        }).where(eq(financeInvoicesTable.id, invoice.id));
+      }
+      return { entryId, ids, unpaidC };
+    });
+    const sumC = lines.reduce((s, l) => s + toCents(l.lineTotal), 0) - toCents(d.discount) + toCents(d.tax);
+    res.status(201).json({ entryId: out.entryId, expenseIds: out.ids, total: fromCents(sumC), unpaid: fromCents(out.unpaidC) });
+  } catch (err) {
+    if (err instanceof UserError) return bad(res, err.message);
+    if (String((err as { code?: string }).code) === "23505" && d.idempotencyKey) return bad(res, "Bu qeyd artıq yadda saxlanılıb");
+    throw err;
+  }
+});
+
+/** Mark an unpaid expense as paid now (records a payment for what is left). */
+router.post("/home-projects/:projectId/expenses/:expenseId/mark-paid", async (req, res): Promise<void> => {
+  const a = await projectAccess(req, res); if (!a) return;
+  if (a.level !== "manage") return forbidden(res);
+  const e = await loadExpense(a, String(req.params.expenseId));
+  if (!e) return notFound(res, "Xərc tapılmadı");
+  if (e.status !== "approved") return bad(res, "Yalnız təsdiqlənmiş xərc ödənilmiş kimi qeyd olunur");
+  if (e.fundedByPartyId) return bad(res, "Bu xərc avansdan ödənib");
+  const b = z.object({ date: isoDate.optional(), method: z.enum(PAYMENT_METHODS).default("") }).safeParse(req.body ?? {});
+  if (!b.success) return bad(res, "Tarixi yoxlayın");
+  const userId = uid(req);
+  const r = await db.transaction(async (tx) => {
+    await tx.execute(sql`select id from finance_expenses where id = ${e.id} for update`);
+    const paid = (await tx.select().from(financePaymentsTable).where(and(eq(financePaymentsTable.expenseId, e.id), eq(financePaymentsTable.kind, "payment"))))
+      .filter(paymentCounts).reduce((s, x) => s + toCents(x.amount), 0);
+    const left = toCents(e.total) - paid;
+    if (left <= 0) return { error: "Bu xərc artıq ödənilib" };
+    const date = b.data.date ?? new Date().toISOString().slice(0, 10);
+    const [p] = await tx.insert(financePaymentsTable).values({
+      projectId: a.project.id, homeId: a.home.id, kind: "payment", date, amount: fromCents(left), partyId: e.partyId, payeeName: e.vendorName,
+      purpose: e.description.slice(0, 300), method: b.data.method, expenseId: e.id, createdByUserId: userId,
+    }).returning();
+    await audit({ homeId: a.home.id, actorUserId: userId, actorRole: roleOf(a), action: "payment.payment", entityType: "expense", entityId: e.id, summary: `${date} · ${fromCents(left)} AZN ödənildi · ${e.description}` }, tx);
+    return { paymentId: p.id, amount: fromCents(left) };
+  });
+  if ("error" in r) return bad(res, r.error!);
+  res.json(r);
+});
 
 async function loadExpense(a: ProjectAccess, id: string) {
   if (!isUuid(id)) return null;

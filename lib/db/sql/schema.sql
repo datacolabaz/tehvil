@@ -1206,7 +1206,9 @@ CREATE TABLE IF NOT EXISTS "finance_expense_items" (
 	"quantity" numeric(14, 3),
 	"unit" varchar(16) DEFAULT '' NOT NULL,
 	"unit_price" numeric(14, 2),
-	"line_total" numeric(14, 2) NOT NULL
+	"line_total" numeric(14, 2) NOT NULL,
+	"category" varchar(24),
+	"note" text DEFAULT '' NOT NULL
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "finance_expenses" (
@@ -1226,6 +1228,8 @@ CREATE TABLE IF NOT EXISTS "finance_expenses" (
 	"payment_method" varchar(12) DEFAULT '' NOT NULL,
 	"funded_by_party_id" uuid,
 	"invoice_id" uuid,
+	"entry_id" uuid,
+	"work_id" uuid,
 	"note" text DEFAULT '' NOT NULL,
 	"status" varchar(10) DEFAULT 'pending' NOT NULL,
 	"approved_by_user_id" varchar(128),
@@ -3322,6 +3326,10 @@ ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "unit_price" numeri
 --> statement
 ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "line_total" numeric(14, 2) NOT NULL;
 --> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "category" varchar(24);
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
 ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
@@ -3353,6 +3361,10 @@ ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "payment_method" varchar
 ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "funded_by_party_id" uuid;
 --> statement
 ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "invoice_id" uuid;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "entry_id" uuid;
+--> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "work_id" uuid;
 --> statement
 ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
 --> statement
@@ -4380,6 +4392,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS "finance_change_orders_number_idx" ON "finance
 CREATE INDEX IF NOT EXISTS "finance_expense_items_expense_idx" ON "finance_expense_items" USING btree ("expense_id");
 --> statement
 CREATE INDEX IF NOT EXISTS "finance_expenses_project_idx" ON "finance_expenses" USING btree ("project_id","date");
+--> statement
+CREATE INDEX IF NOT EXISTS "finance_expenses_entry_idx" ON "finance_expenses" USING btree ("entry_id");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "finance_expenses_idem_idx" ON "finance_expenses" USING btree ("project_id","idempotency_key");
 --> statement

@@ -1,7 +1,7 @@
-import { and, asc, desc, eq } from "drizzle-orm";
-import { aiEstimatesTable, db, financeExpensesTable, homeProjectsTable } from "@workspace/db";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { aiEstimatesTable, db, financeExpenseItemsTable, financeExpensesTable, homeProjectsTable } from "@workspace/db";
 import { computeEstimate, DEFAULT_SETTINGS, type Category, type EstimateDoc } from "./estimateEngine";
-import { EXPENSE_CATEGORIES, toCents } from "./financeCore";
+import { EXPENSE_CATEGORIES, expenseSlices } from "./financeCore";
 
 /** Estimate category → "Evimin xərcləri" category for the plan / actual comparison. */
 export const TO_EXPENSE: Record<Category, string> = { concrete: "concrete", rebar: "rebar_metal", formwork: "timber_formwork", timber: "timber_formwork", other: "building_materials" };
@@ -12,8 +12,11 @@ export async function comparisonFor(homeId: string, planned: Map<string, number>
   const [p] = await db.select().from(homeProjectsTable).where(eq(homeProjectsTable.homeId, homeId)).orderBy(asc(homeProjectsTable.createdAt)).limit(1);
   const actual = new Map<string, number>();
   if (p) {
-    const rows = await db.select({ category: financeExpensesTable.category, total: financeExpensesTable.total }).from(financeExpensesTable).where(and(eq(financeExpensesTable.projectId, p.id), eq(financeExpensesTable.status, "approved")));
-    for (const r of rows) { const c = LEGACY[r.category] ?? r.category; actual.set(c, (actual.get(c) ?? 0) + toCents(r.total)); }
+    const rows = await db.select({ id: financeExpensesTable.id, category: financeExpensesTable.category, total: financeExpensesTable.total }).from(financeExpensesTable).where(and(eq(financeExpensesTable.projectId, p.id), eq(financeExpensesTable.status, "approved")));
+    const items = rows.length ? await db.select({ expenseId: financeExpenseItemsTable.expenseId, category: financeExpenseItemsTable.category, lineTotal: financeExpenseItemsTable.lineTotal }).from(financeExpenseItemsTable).where(inArray(financeExpenseItemsTable.expenseId, rows.map((r) => r.id))) : [];
+    for (const r of rows) for (const sl of expenseSlices(r, items.filter((i) => i.expenseId === r.id))) {
+      const c = LEGACY[sl.category] ?? sl.category; actual.set(c, (actual.get(c) ?? 0) + sl.cents);
+    }
   }
   const keys = [...new Set([...planned.keys(), ...actual.keys()])];
   return keys.map((k) => ({ category: k, label: EXPENSE_CATEGORIES[k as keyof typeof EXPENSE_CATEGORIES]?.label ?? k, planned: planned.get(k) ?? 0, actual: actual.get(k) ?? 0, diff: (actual.get(k) ?? 0) - (planned.get(k) ?? 0) }))
