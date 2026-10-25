@@ -40,3 +40,6 @@
 .dark .dl-date { background: #3a2d18; color: #f2d7a6; }
 .dark .dl-warn { color: #e9c27a; }
 .dark .dl-unpaid, .dark .dl-unpaid b { color: #f0a868 !important; }
+.dl-restored { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #eef3fb; color: #22416e; border-radius: 12px; padding: 10px; font-size: 13.5px; }
+.dl-restored > span { flex: 1 1 220px; }
+.dark .dl-restored { background: #1f2c40; color: #c9d8f0; }
