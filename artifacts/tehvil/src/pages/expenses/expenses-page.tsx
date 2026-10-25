@@ -145,7 +145,8 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
     <div className="ex-figs" data-testid="ex-figs">
       <div className="ex-fig main"><small>İndiyə qədər ümumi xərc</small><b data-testid="ex-total">{azn(total)}</b></div>
       <div className="ex-fig"><small>Bu ay</small><b data-testid="ex-month">{azn(month)}</b></div>
-      <div className="ex-fig"><small>Büdcə</small>{budget == null ? <button className="text-link" onClick={() => setBudgetOpen(true)} data-testid="ex-set-budget">Büdcəni yaz</button> : <b>{azn(budget)}</b>}</div>
+      {budget == null ? <div className="ex-fig"><small>Büdcə</small><button className="text-link" onClick={() => setBudgetOpen(true)} data-testid="ex-set-budget">Büdcəni yaz</button></div>
+        : <button className="ex-fig ex-fig-btn" onClick={() => setBudgetOpen(true)} data-testid="ex-edit-budget" aria-label="Büdcəni dəyiş"><small>Büdcə <PencilLine size={12} /></small><b data-testid="ex-budget-fig">{azn(budget)}</b></button>}
       <div className={`ex-fig ${budget != null && budget - total < 0 ? 'risk' : ''}`}><small>Büdcədən qalan</small><b data-testid="ex-left">{budget == null ? '—' : azn(budget - total)}</b>{budget == null && <small className="ex-muted">büdcə yazılmayıb</small>}</div>
       {unpaid > 0 && <button className="ex-fig warn" onClick={() => setPay('unpaid')} data-testid="ex-unpaid-fig"><small>Ödənilməyib</small><b data-testid="ex-unpaid">{azn(unpaid)}</b><small className="ex-muted">ümumi xərcə daxildir — göstər</small></button>}
     </div>
@@ -177,7 +178,7 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
     {daily && <DailyEntryModal homeId={book.homeId} mode={daily.mode} receiptFile={daily.file} invoice={daily.invoice} onClose={() => { setDaily(null); void refresh(); }} onSaved={() => { setDaily(null); void refresh(); }} />}
     {form && <SimpleExpenseForm d={d} projectId={projectId} invoice={null} existing={form.existing} onClose={() => setForm(null)} onSaved={refresh} />}
     {detail && <ExpenseDetail d={d} projectId={projectId} e={d.expenses.find((x) => x.id === detail.id) ?? detail} onClose={() => setDetail(null)} onEdit={(e) => { setDetail(null); setForm({ existing: e }); }} onChanged={refresh} />}
-    {budgetOpen && <BudgetModal projectId={projectId} onClose={() => setBudgetOpen(false)} onSaved={refresh} />}
+    {budgetOpen && <BudgetModal projectId={projectId} current={budget} onClose={() => setBudgetOpen(false)} onSaved={refresh} />}
   </div>;
 }
 
@@ -296,12 +297,16 @@ function ExpenseDetail({ d, projectId, e, onClose, onEdit, onChanged }: { d: Fin
   </Modal>;
 }
 
-function BudgetModal({ projectId, onClose, onSaved }: { projectId: string; onClose: () => void; onSaved: () => Promise<unknown> }) {
-  const [v, setV] = useState(''); const [err, setErr] = useState(''); const [busy, setBusy] = useState(false);
-  const save = async () => { setBusy(true); try { await api(`/home-projects/${projectId}/budget`, 'POST', { total: v, note: '' }); await onSaved(); onClose(); } catch (e) { setErr(errorText(e)); } finally { setBusy(false); } };
-  return <Modal open onClose={onClose} eyebrow="Büdcə" title="İlkin büdcə" footer={<button className="button button-primary" disabled={busy || !v} onClick={save} data-testid="ex-budget-save">Yadda saxla</button>}>
+function BudgetModal({ projectId, current, onClose, onSaved }: { projectId: string; current: number | null; onClose: () => void; onSaved: () => Promise<unknown> }) {
+  const [v, setV] = useState(current != null ? (current / 100).toFixed(2) : ''); const [note, setNote] = useState('');
+  const [err, setErr] = useState(''); const [busy, setBusy] = useState(false);
+  const send = async (body: unknown) => { setBusy(true); setErr(''); try { await api(`/home-projects/${projectId}/budget`, 'POST', body); await onSaved(); onClose(); } catch (e) { setErr(errorText(e)); } finally { setBusy(false); } };
+  const editing = current != null;
+  return <Modal open onClose={onClose} eyebrow="Büdcə" title={editing ? 'Büdcəni dəyiş' : 'İlkin büdcə'}
+    footer={<>{editing && <button className="button button-secondary" disabled={busy || !note.trim()} onClick={() => send({ remove: true, note })} data-testid="ex-budget-remove"><Ban size={15} />Büdcəni götür</button>}
+      <button className="button button-primary" disabled={busy || !v || (editing && !note.trim())} onClick={() => send({ total: v, note })} data-testid="ex-budget-save">Yadda saxla</button></>}>
     <label className="fn-field"><span>Məbləğ, AZN</span><input inputMode="decimal" value={v} onChange={(e) => setV(e.target.value)} autoFocus data-testid="ex-budget" /></label>
+    {editing && <label className="fn-field"><span>Səbəb</span><input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Məs. səhvən yazılmışdı" data-testid="ex-budget-note" /><small>Köhnə büdcə tarixçədə qalır. “Büdcəni götür” seçsəniz, büdcə göstərilməyəcək və qalıq hesablanmayacaq.</small></label>}
     {err && <p className="form-error">{err}</p>}
   </Modal>;
 }
-

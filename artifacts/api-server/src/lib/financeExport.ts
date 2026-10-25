@@ -205,7 +205,7 @@ export async function buildFinanceWorkbook(a: ProjectAccess, d: ProjectData): Pr
 
   /* 9. Budget changes */
   const bv = sheet(wb, "Büdcə dəyişiklikləri", [{ header: "Versiya", key: "v", width: 9 }, { header: "Tarix", key: "date", width: 12 }, { header: "Səbəb", key: "r", width: 18 }, { header: "Qeyd", key: "note", width: 44 }, { header: "Büdcə", key: "t", width: 16, money: true }]);
-  const REASON: Record<string, string> = { initial: "İlkin büdcə", change_order: "Əlavə iş", correction: "Düzəliş" };
+  const REASON: Record<string, string> = { initial: "İlkin büdcə", change_order: "Əlavə iş", correction: "Düzəliş", removed: "Büdcə götürüldü" };
   for (const v of d.budget) bv.addRow({ v: v.version, date: v.createdAt.toISOString().slice(0, 10), r: REASON[v.reason] ?? v.reason, note: v.note, t: m(v.total) });
   bv.addRow({});
   bv.addRow({ v: "Əlavə iş təklifləri" }).font = { bold: true, name: "Arial", size: 10 };

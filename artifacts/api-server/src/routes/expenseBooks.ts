@@ -42,7 +42,7 @@ router.get("/expense-books", async (req, res): Promise<void> => {
       for (const r of rows) { total += toCents(r.total); if (r.date >= monthStart) month += toCents(r.total); }
       count = rows.length;
       const [v] = await db.select().from(financeBudgetVersionsTable).where(eq(financeBudgetVersionsTable.projectId, p.id)).orderBy(desc(financeBudgetVersionsTable.version)).limit(1);
-      budget = v ? toCents(v.total) : null;
+      budget = v && v.reason !== "removed" ? toCents(v.total) : null;
     }
     out.push({ homeId: h.id, homeName: h.name, location: h.address || h.city, projectId: p?.id ?? null, total, month, count, budget });
   }
