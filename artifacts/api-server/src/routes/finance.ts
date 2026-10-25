@@ -1076,9 +1076,17 @@ router.get("/home-projects/:projectId/export.xlsx", async (req, res): Promise<vo
   if (a.level === "party") return forbidden(res);
   const data = await loadProjectData(a.project);
   const day = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
-  const buf = req.query.view === "journal"
-    ? await buildJournalWorkbook(a, data, { from: day(req.query.from), to: day(req.query.to) }, await categoryComparison(a, data))
-    : await buildFinanceWorkbook(a, data);
+  const cat = typeof req.query.cat === "string" && isCategory(req.query.cat) ? req.query.cat : undefined;
+  const pay = req.query.pay === "paid" || req.query.pay === "unpaid" ? req.query.pay : undefined;
+  let buf: Buffer;
+  try {
+    buf = req.query.view === "journal"
+      ? await buildJournalWorkbook(a, data, { from: day(req.query.from), to: day(req.query.to), cat, pay }, await categoryComparison(a, data))
+      : await buildFinanceWorkbook(a, data);
+  } catch (err) {
+    logger.error({ err, projectId: a.project.id, query: req.query }, "excel export failed");
+    return bad(res, "Excel faylı hazırlanmadı. Bir az sonra yenidən cəhd edin; təkrarlansa, bizə yazın.", 500);
+  }
   const safe = a.project.name.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 60) || "layihe";
   noStore(res);
   res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");

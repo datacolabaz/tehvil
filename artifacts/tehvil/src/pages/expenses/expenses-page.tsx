@@ -107,6 +107,7 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
   const [busy, setBusy] = useState(false);
   const [budgetOpen, setBudgetOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
+  const [xlErr, setXlErr] = useState('');
   if (q.isLoading) return <Skeleton rows={4} />;
   if (q.isError) return <Empty icon={<Wallet size={28} />} title="Açılmadı" text={errorText(q.error)} />;
   const d = q.data!;
@@ -128,12 +129,19 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
   const usedCats = [...new Set(live.flatMap((e) => slices(e).map((x) => x.category)))];
   const catLabel = (k: string) => d.categories.find((x) => x.key === k)?.label ?? k;
   const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: financeKey(projectId) }), qc.invalidateQueries({ queryKey: booksKey })]);
-  const exportX = async () => { setBusy(true); try { await downloadExcel(projectId, book.homeName, range); } catch (e) { window.alert(errorText(e)); } finally { setBusy(false); } };
+  // The file follows what the page shows: period, category and paid / unpaid.
+  const exportX = async () => {
+    setBusy(true); setXlErr('');
+    try { await downloadExcel(projectId, book.homeName, { ...range, cat: cat === 'all' ? undefined : cat, pay: pay === 'all' ? undefined : pay }); }
+    catch (e) { setXlErr(errorText(e, 'Excel faylı yüklənmədi. İnternet bağlantısını yoxlayıb yenidən cəhd edin.')); }
+    finally { setBusy(false); }
+  };
   return <div className="ex-page">
     <div className="ex-head">
       <button className="ex-home" onClick={() => setSwitchOpen(!switchOpen)} aria-expanded={switchOpen}><span className="eyebrow">Evimin xərcləri</span><b className="font-display">{book.homeName}</b>{others.length > 0 && <ChevronDown size={16} />}</button>
-      <button className="button button-secondary" onClick={exportX} disabled={busy} data-testid="ex-export">{busy ? <LoaderCircle className="spin" size={16} /> : <Download size={16} />}Excel</button>
+      <button className="button button-secondary" onClick={exportX} disabled={busy} data-testid="ex-export">{busy ? <LoaderCircle className="spin" size={16} /> : <Download size={16} />}{period === 'all' && cat === 'all' && pay === 'all' ? 'Excel' : 'Seçiləni Excel-ə'}</button>
     </div>
+    {xlErr && <p className="form-error" role="alert" data-testid="ex-export-error">{xlErr}</p>}
     {switchOpen && <div className="ex-switch">{others.map((b) => <Link key={b.homeId} href={`/xercler/${b.homeId}`} onClick={() => setSwitchOpen(false)}>{b.homeName}</Link>)}<Link href="/xercler">Bütün evlər</Link></div>}
 
     <div className="ex-actions">
