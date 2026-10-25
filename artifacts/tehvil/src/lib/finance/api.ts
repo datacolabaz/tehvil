@@ -33,7 +33,7 @@ export interface Finance {
   project: { id: string; homeId: string; homeName: string; name: string; kind: string; status: string; startDate: string | null; endDate: string | null; smetaProjectId: string | null };
   level: Level; aiConfigured: boolean;
   permissions: { manage: boolean; addExpense: boolean; addInvoice: boolean; addPayment: boolean; proposeChange: boolean; export: boolean; ask: boolean };
-  categories: { key: string; label: string; group: string }[];
+  categories: { key: string; label: string; group: string; legacy?: boolean }[];
   totals: Totals | null; formulas: Record<string, string>; parties: Party[]; byCategory: { category: string; label: string; total: number; count: number }[];
   warnings: { kind: string; text: string; refType?: string; refId?: string }[];
   budget: { id: string; version: number; total: string; reason: string; note: string; changeOrderId: string | null; createdAt: string }[];
@@ -81,8 +81,9 @@ export async function shrinkImage(file: File, maxEdge = 2000): Promise<File> {
   } catch { return file; }
 }
 
-export async function downloadExcel(projectId: string, name: string) {
-  const blob = await customFetch<Blob>(`/api/home-projects/${projectId}/export.xlsx`, { responseType: 'blob' });
+export async function downloadExcel(projectId: string, name: string, journal?: { from?: string; to?: string }) {
+  const qs = journal ? `?view=journal${journal.from ? `&from=${journal.from}` : ''}${journal.to ? `&to=${journal.to}` : ''}` : '';
+  const blob = await customFetch<Blob>(`/api/home-projects/${projectId}/export.xlsx${qs}`, { responseType: 'blob' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = `tehvil-${name.replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 60) || 'layihe'}.xlsx`;
@@ -138,3 +139,10 @@ export const useStageData = (homeId: string) => useQuery({
 });
 export const UTILITY: Record<string, string> = { electric: 'Elektrik xətləri', water: 'Su xətləri', sewer: 'Kanalizasiya', heating: 'İstilik', gas: 'Qaz', ventilation: 'Ventilyasiya', internet: 'İnternet / zəif cərəyan' };
 export const ROOM_KIND: Record<string, string> = { living: 'Qonaq otağı', bedroom: 'Yataq otağı', kitchen: 'Mətbəx', bathroom: 'Hamam', toilet: 'Tualet', hall: 'Dəhliz', balcony: 'Balkon', utility: 'Texniki otaq', yard: 'Həyət', basement: 'Zirzəmi', exterior: 'Bayır / fasad', other: 'Digər' };
+
+/* ---------------------------------------------------------- expense books */
+
+export interface Book { homeId: string; homeName: string; location: string; projectId: string | null; total: number; month: number; count: number; budget: number | null }
+export const booksKey = ['expense-books'];
+export const useBooks = () => useQuery({ queryKey: booksKey, queryFn: () => api<{ aiConfigured: boolean; books: Book[] }>('/expense-books') });
+export interface HistoryRow { at: string; action: string; summary: string; changes: Record<string, { from: unknown; to: unknown }> | null; byMe: boolean; actorRole: string }

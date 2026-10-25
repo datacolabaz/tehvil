@@ -25,6 +25,8 @@ import rentalsRouter, { rentalPublicRouter } from "./rentals";
 import photoInvitesRouter, { photoInvitePublicRouter } from "./photoInvites";
 import financeRouter from "./finance";
 import photoStagesRouter from "./photoStages";
+import expenseBooksRouter from "./expenseBooks";
+import aiEstimatesRouter from "./aiEstimates";
 
 const router: IRouter = Router();
 
@@ -58,5 +60,7 @@ router.use(rentalsRouter);
 router.use(photoInvitesRouter);
 router.use(financeRouter);
 router.use(photoStagesRouter);
+router.use(expenseBooksRouter);
+router.use(aiEstimatesRouter);
 
 export default router;

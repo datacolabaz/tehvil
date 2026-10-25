@@ -30,7 +30,7 @@ import { emitFeedback, errorToMsg, onFeedback, type FeedbackMsg } from '@/lib/fe
 import { Brand, Button, ErrorNotice, EmptyLine, Field, Loading, PageHeading, Status, actionItemText, date, money, propLabel, roleLabel, typeLabel } from '@/components/kit';
 import { LanguagePicker } from '@/components/language-picker';
 import { Partners } from '@/components/partners';
-import { HomePassportLanding } from '@/pages/landing-page';
+import { TwoToolsLanding } from '@/pages/landing-two';
 import { ScopePage } from '@/pages/scope-page';
 import { ChangesPage } from '@/pages/changes-page';
 import { MilestonesPage } from '@/pages/milestones-page';
@@ -74,6 +74,12 @@ const HomeFinancePage = lazy(() => import('@/pages/home/finance-page').then(m =>
 const ProjectFinancePage = lazy(() => import('@/pages/home/finance-page').then(m => ({ default: m.ProjectFinancePage })));
 const FinanceInvitePage = lazy(() => import('@/pages/home/finance-page').then(m => ({ default: m.FinanceInvitePage })));
 const PhotoStagesPage = lazy(() => import('@/pages/home/photo-stages-page').then(m => ({ default: m.PhotoStagesPage })));
+const ExpensesEntryPage = lazy(() => import('@/pages/expenses/expenses-page').then(m => ({ default: m.ExpensesEntryPage })));
+const ExpenseBookPage = lazy(() => import('@/pages/expenses/expenses-page').then(m => ({ default: m.ExpenseBookPage })));
+const StartPage = lazy(() => import('@/pages/expenses/start-page').then(m => ({ default: m.StartPage })));
+const EstimateListPage = lazy(() => import('@/pages/estimate/estimate-pages').then(m => ({ default: m.EstimateListPage })));
+const EstimateNewPage = lazy(() => import('@/pages/estimate/estimate-pages').then(m => ({ default: m.EstimateNewPage })));
+const EstimatePage = lazy(() => import('@/pages/estimate/estimate-pages').then(m => ({ default: m.EstimatePage })));
 const PhotoInvitePage = lazy(() => import('@/pages/home/photo-invite-page').then(m => ({ default: m.PhotoInvitePage })));
 const HomeRoomsPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeRoomsPage })));
 const RoomPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.RoomPage })));
@@ -167,15 +173,21 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
   const reminders = useListMyReminders({ query: { staleTime: 60_000, queryKey: ['/api/me/reminders'] } });
   const pending = (inbox.data?.participations.length ?? 0) + (inbox.data?.memberships.length ?? 0) + (inbox.data?.approvals.length ?? 0) + (reminders.data?.length ?? 0);
   const r = roles.data;
-  type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number };
+  type NavItem = { href: string; icon: typeof Home; key: TKey; badge?: boolean; count?: number; label?: string };
   // Home-first menu: the same three sections on desktop and mobile. Other modules stay reachable from Parametrlər.
+  // Two tools first (AI Smeta, Evimin xərcləri), the home history next; older modules stay one tap away under "Digər".
   const mainNav: NavItem[] = [
-    { href: '/homes', icon: House, key: 'myHomes' },
+    { href: '/smeta-ai', icon: Calculator, key: 'aiSmetaNav' as TKey, label: 'AI Smeta' },
+    { href: '/xercler', icon: Wallet, key: 'expensesNav' as TKey, label: 'Evimin xərcləri' },
+    { href: '/homes', icon: House, key: 'myHomes', label: 'Evimin tarixçəsi' },
+  ];
+  const moreNav: NavItem[] = [
     { href: '/protokollar', icon: ClipboardCheck, key: 'protocolsNav' },
     { href: '/kiraye', icon: KeyRound, key: 'rentalsNav' },
     { href: '/history', icon: History, key: 'repairHistory' },
-    { href: '/ai-smeta', icon: Calculator, key: 'smeta' },
+    { href: '/ai-smeta', icon: Calculator, key: 'smeta', label: 'Təmir və tikinti smetası (köhnə)' },
   ];
+  const [moreOpen, setMoreOpen] = useState(() => moreNav.some((n) => n.key === active));
   void r;
   const projectNav: NavItem[] = projectId ? [
       { href: `/projects/${projectId}`, icon: Home, key: 'projects' as const },
@@ -187,13 +199,15 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
       { href: `/projects/${projectId}/passport`, icon: FileText, key: 'passport' as const },
     ] : [];
   const isActive = (key: TKey, href: string) => active === key || (!active && href === '/dashboard' && !!projectId);
-  const navList = (items: NavItem[]) => <nav className="side-nav">{items.map(({ href, icon: Icon, key, badge, count }) => <Link key={href} href={href} onClick={() => setOpen(false)} className={`side-link ${isActive(key, href) ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{t(key)}</span>{badge && <span className="nav-badge">{t('newBadge')}</span>}{!!count && <span className="nav-count">{count}</span>}{isActive(key, href) && <span className="nav-active-dot"/>}</Link>)}</nav>;
+  const navList = (items: NavItem[]) => <nav className="side-nav">{items.map(({ href, icon: Icon, key, badge, count, label }) => <Link key={href} href={href} onClick={() => setOpen(false)} className={`side-link ${isActive(key, href) ? 'selected' : ''}`} data-testid={`nav-${key}`}><Icon size={17}/><span>{label ?? t(key)}</span>{badge && <span className="nav-badge">{t('newBadge')}</span>}{!!count && <span className="nav-count">{count}</span>}{isActive(key, href) && <span className="nav-active-dot"/>}</Link>)}</nav>;
   return <div className="workspace">
     <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}><div className="sidebar-head"><Brand inverse/><button className="mobile-close" onClick={() => setOpen(false)} aria-label={t('close')}><X size={18}/></button></div>
       {project && <div className="project-switcher"><span className="project-symbol">⌂</span><div><small>{t('projects')}</small><strong>{project.name}</strong></div><ChevronDown size={14}/></div>}
       {projectId ? <><div className="sidebar-label">{project?.name || t('projects')}</div>{navList(projectNav)}</> : <>
-        <Link href="/homes?new=1" onClick={() => setOpen(false)} className="button button-primary hp-side-add" data-testid="nav-add-home"><Plus size={16}/>{t('addHome')}</Link>
+        <Link href="/xercler?add=1" onClick={() => setOpen(false)} className="button button-primary hp-side-add" data-testid="nav-add-expense"><Plus size={16}/>Xərc əlavə et</Link>
         {navList(mainNav)}
+        <button className="side-link side-more" onClick={() => setMoreOpen(!moreOpen)} aria-expanded={moreOpen} data-testid="nav-more"><ChevronDown size={17} style={{ transform: moreOpen ? 'rotate(180deg)' : undefined }}/><span>Digər</span></button>
+        {moreOpen && navList(moreNav)}
       </>}
       {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => (n.key !== 'sharing' && n.key !== 'documents' && n.key !== 'finance') || !!home.member).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${home.section === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{home.section === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       {realtorSection && <><div className="sidebar-label">{t('realtor')}</div><nav className="side-nav rl-side-nav">{REALTOR_NAV.map(({ href, key, label, icon: Icon }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${realtorSection === key ? 'selected' : ''}`} data-testid={`nav-realtor-${key}`}><Icon size={17}/><span>{label}</span>{realtorSection === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
@@ -207,7 +221,7 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
 }
 function Landing(props: { lang: Lang; change: (v: Lang)=>void; t: (k:TKey)=>string }) {
   // The home-passport landing is written in Azerbaijani; Russian and English keep the earlier page for now.
-  return props.lang === 'az' ? <HomePassportLanding lang={props.lang} change={props.change} /> : <LegacyLanding {...props} />;
+  return props.lang === 'az' ? <TwoToolsLanding lang={props.lang} change={props.change} /> : <LegacyLanding {...props} />;
 }
 function LegacyLanding({ lang, change, t }: { lang: Lang; change: (v: Lang)=>void; t: (k:TKey)=>string }) {
   const [, setLocation] = useLocation();
@@ -403,11 +417,11 @@ function realtorRedirect() {
   const qs = new URLSearchParams(window.location.search);
   // Only same-site paths (e.g. an invitation link) are accepted as a redirect target.
   const next = qs.get('redirect');
-  if (next && (/^\/(invite|works|homes|workers|d|k|protokol|kiraye)\/[A-Za-z0-9_/?=&-]{1,80}$/.test(next) || /^\/(homes|protokollar|kiraye)(\?new=1)?$/.test(next))) return { forceRedirectUrl: `${basePath}${next}` };
+  if (next && (/^\/(invite|works|homes|workers|d|k|protokol|kiraye)\/[A-Za-z0-9_/?=&-]{1,80}$/.test(next) || /^\/(homes|protokollar|kiraye)(\?new=1)?$/.test(next) || /^\/(xercler|baslangic|smeta-ai)(\/yeni)?(\?add=1)?$/.test(next) || /^\/hesab\/[A-Za-z0-9_-]{20,64}$/.test(next))) return { forceRedirectUrl: `${basePath}${next}` };
   return qs.get('realtor') ? { forceRedirectUrl: `${basePath}/realtor` } : {};
 }
 function SignUpPage() { const c=authCopy(); const realtor=!!new URLSearchParams(window.location.search).get('realtor'); return <div className="auth-page"><div className="auth-side"><Brand inverse/><div><div className="eyebrow">{realtor?'REALTOR':c.artTop}</div><h1 className="font-display">{realtor?'Satışı idarə edin, güvəni sübut edin.':c.hero}</h1><p>{c.disclaimer}</p></div><span>{authTag()}</span></div><div className="auth-form-side"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in${window.location.search}`} {...realtorRedirect()}/></div></div>; }
-function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/homes"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
+function HomeRedirect({lang,change,t}:{lang:Lang;change:(v:Lang)=>void;t:(k:TKey)=>string}) { return <><Show when="signed-in"><Redirect to="/baslangic"/></Show><Show when="signed-out"><Landing lang={lang} change={change} t={t}/></Show></>; }
 function FeedbackBanner({ t }: { t: (k: TKey) => any }) {
   const [msg, setMsg] = useState<FeedbackMsg | null>(null);
   useEffect(() => onFeedback(m => setMsg(m)), []);
@@ -451,6 +465,12 @@ function ClerkRoutes() {
       <Route path="/protokol/:id">{params => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları', href: '/protokollar' }, { label: 'Protokol' }]} lang={lang} change={changeLang} t={t}><ProtocolPage id={params.id}/></ProtocolShell>}</Route>
       <Route path="/d/:token">{params => <PublicSuspense t={t}><ProtocolInvitePage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/homes">{() => <PlainShell active="myHomes" crumbs={[{ label: t('myHomes') }]} lang={lang} change={changeLang} t={t}><HomesPage/></PlainShell>}</Route>
+      <Route path="/baslangic">{() => <PlainShell active="start" crumbs={[{ label: 'Başlanğıc' }]} lang={lang} change={changeLang} t={t}><StartPage/></PlainShell>}</Route>
+      <Route path="/xercler/:homeId">{params => <PlainShell active="expensesNav" crumbs={[{ label: 'Evimin xərcləri', href: '/xercler' }]} lang={lang} change={changeLang} t={t}><ExpenseBookPage homeId={params.homeId}/></PlainShell>}</Route>
+      <Route path="/xercler">{() => <PlainShell active="expensesNav" crumbs={[{ label: 'Evimin xərcləri' }]} lang={lang} change={changeLang} t={t}><ExpensesEntryPage/></PlainShell>}</Route>
+      <Route path="/smeta-ai/yeni">{() => <PlainShell active="aiSmetaNav" crumbs={[{ label: 'AI Smeta', href: '/smeta-ai' }, { label: 'Yeni' }]} lang={lang} change={changeLang} t={t}><EstimateNewPage/></PlainShell>}</Route>
+      <Route path="/smeta-ai/:id">{params => <PlainShell active="aiSmetaNav" crumbs={[{ label: 'AI Smeta', href: '/smeta-ai' }, { label: 'Smeta' }]} lang={lang} change={changeLang} t={t}><EstimatePage id={params.id}/></PlainShell>}</Route>
+      <Route path="/smeta-ai">{() => <PlainShell active="aiSmetaNav" crumbs={[{ label: 'AI Smeta' }]} lang={lang} change={changeLang} t={t}><EstimateListPage/></PlainShell>}</Route>
       <Route path="/homes/:homeId/maliyye/:projectId">{params => <HomeShell homeId={params.homeId} section="finance" lang={lang} change={changeLang} t={t}><ProjectFinancePage homeId={params.homeId} projectId={params.projectId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/maliyye">{params => <HomeShell homeId={params.homeId} section="finance" lang={lang} change={changeLang} t={t}><HomeFinancePage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/homes/:homeId/foto-merheleler">{params => <HomeShell homeId={params.homeId} section="photoStages" lang={lang} change={changeLang} t={t}><PhotoStagesPage homeId={params.homeId}/></HomeShell>}</Route>

@@ -76,7 +76,8 @@ const TOOL = {
       },
       suggestedCategory: {
         type: ["string", "null"],
-        enum: ["material", "concrete_rebar", "labor", "contractor", "transport", "meals", "tool_rental", "machinery", "utilities", "cleaning", "design", "permits", "appliances", "other", null],
+        enum: ["concrete", "rebar_metal", "timber_formwork", "building_materials", "labor", "machinery_transport", "design", "electrical", "plumbing", "other", null],
+        description: "concrete=beton/sement, rebar_metal=armatur/metal, timber_formwork=taxta/dikt/qəlib, building_materials=kərpic/blok/qum/suvaq və s., labor=usta/fəhlə, machinery_transport=texnika/daşınma, design=layihə/mühəndis, electrical, plumbing, other",
       },
       unreadable: { type: "array", items: { type: "string" }, description: "Fields or parts you could not read" },
     },
