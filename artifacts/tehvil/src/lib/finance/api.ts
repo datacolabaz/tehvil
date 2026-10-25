@@ -9,10 +9,10 @@ export interface Party {
   linked: boolean; isMe: boolean; invitePending: boolean; archived: boolean;
   balance: null | { basis: 'contract' | 'invoices'; contract: number; approvedChangeOrders: number; invoicedExpenses: number; obligation: number; paid: number; advanceGiven: number; advanceSpent: number; advanceBalance: number; refunds: number; credited: number; remaining: number; status: string; disputedPayments: number };
 }
-export interface ExpenseItem { id?: string; name: string; quantity: string | null; unit: string; unitPrice: string | null; lineTotal: string | null }
+export interface ExpenseItem { id?: string; name: string; quantity: string | null; unit: string; unitPrice: string | null; lineTotal: string | null; category?: string | null; note?: string }
 export interface Expense {
   id: string; date: string; category: string; description: string; partyId: string | null; vendorName: string; roomId: string | null;
-  subtotal: string; discount: string; tax: string; total: string; paymentMethod: string; fundedByPartyId: string | null; invoiceId: string | null; note: string;
+  subtotal: string; discount: string; tax: string; total: string; paymentMethod: string; fundedByPartyId: string | null; invoiceId: string | null; entryId?: string | null; workId?: string | null; note: string;
   status: 'pending' | 'approved' | 'disputed' | 'void'; approvedAt: string | null; voidReason: string | null; createdAt: string; items: ExpenseItem[]; mismatch: string[];
   payState: { paid: number; status: string } | null; mine: boolean;
 }
@@ -23,7 +23,7 @@ export interface Payment {
 export interface ChangeOrder { id: string; number: number; partyId: string | null; title: string; description: string; reason: string; amount: string; date: string; mediaIds: string[]; status: string; decisionNote: string; decidedAt: string | null; mine: boolean; createdAt: string }
 export interface AiInvoice {
   documentType: string; vendor: string | null; docNumber: string | null; printedDate: string | null; handwrittenDate: string | null; currency: string | null;
-  items: { name: string; quantity: string | null; unit: string | null; unitPrice: string | null; lineTotal: string | null; confidence: number }[];
+  items: { name: string; quantity: string | null; unit: string | null; unitPrice: string | null; lineTotal: string | null; confidence: number; category?: string | null }[];
   subtotal: string | null; discount: string | null; tax: string | null; total: string | null; paymentMethod: string | null; notes: string | null;
   confidence: Record<string, number>; suggestedCategory: string | null; unreadable: string[]; duplicates?: { type: string; id: string; reason: string }[];
 }
@@ -146,3 +146,12 @@ export interface Book { homeId: string; homeName: string; location: string; proj
 export const booksKey = ['expense-books'];
 export const useBooks = () => useQuery({ queryKey: booksKey, queryFn: () => api<{ aiConfigured: boolean; books: Book[] }>('/expense-books') });
 export interface HistoryRow { at: string; action: string; summary: string; changes: Record<string, { from: unknown; to: unknown }> | null; byMe: boolean; actorRole: string }
+
+/** Line categories offered in "Gündəlik qeyd" (same keys as the server's active categories, in this order). */
+export const LINE_CATEGORIES: [string, string, 'material' | 'labor' | 'other'][] = [
+  ['concrete', 'Beton və sement', 'material'], ['rebar_metal', 'Armatur və metal', 'material'], ['timber_formwork', 'Taxta və qəlib', 'material'],
+  ['electrical', 'Elektrik materialları', 'material'], ['plumbing', 'Santexnika materialları', 'material'], ['building_materials', 'Digər materiallar', 'material'],
+  ['labor', 'Usta və fəhlə haqqı', 'labor'], ['machinery_transport', 'Texnika və nəqliyyat', 'other'], ['other_work', 'Digər işlər', 'labor'],
+  ['design', 'Layihələndirmə və mühəndislik', 'other'], ['other', 'Digər xərclər', 'other'],
+];
+export const PAY_LABEL: Record<string, string> = { paid: 'Ödənilib', unpaid: 'Ödənilməyib', partial: 'Qismən ödənilib', advance: 'Avansdan' };

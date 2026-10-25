@@ -1,4 +1,5 @@
 import { ObjectStorageService } from "./objectStorage";
+import { ACTIVE_CATEGORIES } from "./financeCore";
 import { aiConfigured, aiModel, AiNotConfigured, callTool, type Part } from "./aiClient";
 
 /*
@@ -23,7 +24,7 @@ export interface InvoiceExtraction {
   printedDate: string | null;
   handwrittenDate: string | null;
   currency: string | null;
-  items: { name: string; quantity: string | null; unit: string | null; unitPrice: string | null; lineTotal: string | null; confidence: number }[];
+  items: { name: string; quantity: string | null; unit: string | null; unitPrice: string | null; lineTotal: string | null; confidence: number; category: string | null }[];
   subtotal: string | null;
   discount: string | null;
   tax: string | null;
@@ -58,8 +59,9 @@ const TOOL = {
             unitPrice: { type: ["string", "null"], description: "Decimal with a dot" },
             lineTotal: { type: ["string", "null"], description: "Decimal with a dot" },
             confidence: { type: "number", minimum: 0, maximum: 1 },
+            category: { type: ["string", "null"], enum: [...ACTIVE_CATEGORIES, null], description: "What this line is: material kind, or labor / other_work for work and fees, machinery_transport for delivery or machinery" },
           },
-          required: ["name", "quantity", "unit", "unitPrice", "lineTotal", "confidence"],
+          required: ["name", "quantity", "unit", "unitPrice", "lineTotal", "confidence", "category"],
         },
       },
       subtotal: { type: ["string", "null"] },
@@ -75,7 +77,7 @@ const TOOL = {
       },
       suggestedCategory: {
         type: ["string", "null"],
-        enum: ["concrete", "rebar_metal", "timber_formwork", "building_materials", "labor", "machinery_transport", "design", "electrical", "plumbing", "other", null],
+        enum: [...ACTIVE_CATEGORIES, null],
         description: "concrete=beton/sement, rebar_metal=armatur/metal, timber_formwork=taxta/dikt/qəlib, building_materials=kərpic/blok/qum/suvaq və s., labor=usta/fəhlə, machinery_transport=texnika/daşınma, design=layihə/mühəndis, electrical, plumbing, other",
       },
       unreadable: { type: "array", items: { type: "string" }, description: "Fields or parts you could not read" },
@@ -127,6 +129,8 @@ const isoDate = (v: unknown) => {
 };
 const conf = (v: unknown) => (typeof v === "number" && v >= 0 && v <= 1 ? Math.round(v * 100) / 100 : 0);
 
+const activeCat = (v: unknown) => (typeof v === "string" && (ACTIVE_CATEGORIES as string[]).includes(v) ? v : null);
+
 /** Never trust model output shape: keep only well-formed values. */
 export function sanitize(raw: Record<string, unknown>): InvoiceExtraction {
   const items = Array.isArray(raw.items) ? raw.items.slice(0, 200) : [];
@@ -142,7 +146,7 @@ export function sanitize(raw: Record<string, unknown>): InvoiceExtraction {
     currency: str(raw.currency, 8),
     items: items.map((i) => {
       const r = (i ?? {}) as Record<string, unknown>;
-      return { name: str(r.name) ?? "—", quantity: num(r.quantity), unit: str(r.unit, 16), unitPrice: num(r.unitPrice), lineTotal: num(r.lineTotal), confidence: conf(r.confidence) };
+      return { name: str(r.name) ?? "—", quantity: num(r.quantity), unit: str(r.unit, 16), unitPrice: num(r.unitPrice), lineTotal: num(r.lineTotal), confidence: conf(r.confidence), category: activeCat(r.category) };
     }),
     subtotal: num(raw.subtotal),
     discount: num(raw.discount),
@@ -151,7 +155,7 @@ export function sanitize(raw: Record<string, unknown>): InvoiceExtraction {
     paymentMethod: pm === "cash" || pm === "card" || pm === "transfer" || pm === "other" ? pm : null,
     notes: str(raw.notes, 500),
     confidence,
-    suggestedCategory: str(raw.suggestedCategory, 24),
+    suggestedCategory: activeCat(raw.suggestedCategory),
     unreadable: Array.isArray(raw.unreadable) ? raw.unreadable.map((u) => str(u, 80)).filter((u): u is string => !!u).slice(0, 30) : [],
   };
 }

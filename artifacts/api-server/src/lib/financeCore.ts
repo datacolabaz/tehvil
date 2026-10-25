@@ -65,12 +65,13 @@ export const EXPENSE_CATEGORIES = {
   concrete: { label: "Beton və sement", group: "material", legacy: false },
   rebar_metal: { label: "Armatur və metal", group: "material", legacy: false },
   timber_formwork: { label: "Taxta və qəlib", group: "material", legacy: false },
-  building_materials: { label: "Tikinti materialları", group: "material", legacy: false },
-  labor: { label: "Usta və fəhlə ödənişləri", group: "labor", legacy: false },
+  electrical: { label: "Elektrik materialları", group: "material", legacy: false },
+  plumbing: { label: "Santexnika materialları", group: "material", legacy: false },
+  building_materials: { label: "Digər materiallar", group: "material", legacy: false },
+  labor: { label: "Usta və fəhlə haqqı", group: "labor", legacy: false },
   machinery_transport: { label: "Texnika və nəqliyyat", group: "other", legacy: false },
+  other_work: { label: "Digər işlər", group: "labor", legacy: false },
   design: { label: "Layihələndirmə və mühəndislik", group: "other", legacy: false },
-  electrical: { label: "Elektrik", group: "material", legacy: false },
-  plumbing: { label: "Santexnika", group: "material", legacy: false },
   other: { label: "Digər xərclər", group: "other", legacy: false },
   // Earlier keys (October 2026 finance module): still valid on old records, no longer offered.
   material: { label: "Material alışı", group: "material", legacy: true },
@@ -209,16 +210,43 @@ export function expenseMismatch(e: Pick<FinanceExpenseRow, "subtotal" | "discoun
   return problems;
 }
 
+/**
+ * How an expense splits across categories: each line in its own category (or the expense's), and whatever
+ * the lines do not cover (discount, tax, or an expense without lines) in the expense's category.
+ * The slices always add up to the expense total, so nothing is counted twice or lost.
+ */
+export function expenseSlices(e: Pick<FinanceExpenseRow, "category" | "total">, items: Pick<FinanceExpenseItemRow, "category" | "lineTotal">[]): { category: string; cents: Cents }[] {
+  const total = toCents(e.total);
+  if (!items.length) return [{ category: e.category, cents: total }];
+  const by = new Map<string, Cents>();
+  let covered = 0;
+  for (const i of items) {
+    const c = i.category && isCategory(i.category) ? i.category : e.category;
+    const v = toCents(i.lineTotal);
+    by.set(c, (by.get(c) ?? 0) + v); covered += v;
+  }
+  if (total !== covered) by.set(e.category, (by.get(e.category) ?? 0) + total - covered);
+  return [...by.entries()].filter(([, v]) => v !== 0).map(([category, cents]) => ({ category, cents }));
+}
+
 export function computeLedger(d: ProjectData) {
   const approved = d.expenses.filter((e) => e.status === "approved");
   const pending = d.expenses.filter((e) => e.status === "pending");
   const disputed = d.expenses.filter((e) => e.status === "disputed");
   const sum = (rows: { total: string }[]) => rows.reduce((s, r) => s + toCents(r.total), 0);
-  const group = (g: string) => approved.filter((e) => (EXPENSE_CATEGORIES[e.category as ExpenseCategory]?.group ?? "other") === g);
-  const byCategory = Object.keys(EXPENSE_CATEGORIES).map((c) => {
-    const rows = approved.filter((e) => e.category === c);
-    return { category: c, label: EXPENSE_CATEGORIES[c as ExpenseCategory].label, total: sum(rows), count: rows.length };
-  }).filter((r) => r.count > 0);
+  const itemsBy = new Map<string, FinanceExpenseItemRow[]>();
+  for (const i of d.items) itemsBy.set(i.expenseId, [...(itemsBy.get(i.expenseId) ?? []), i]);
+  // Category and material / labour totals follow the lines, so one receipt with cement and a worker's fee splits correctly.
+  const catTotals = new Map<string, { total: Cents; ids: Set<string> }>();
+  for (const e of approved) for (const sl of expenseSlices(e, itemsBy.get(e.id) ?? [])) {
+    const r = catTotals.get(sl.category) ?? { total: 0, ids: new Set<string>() };
+    r.total += sl.cents; r.ids.add(e.id); catTotals.set(sl.category, r);
+  }
+  const groupSum = (g: string) => [...catTotals.entries()].filter(([c]) => (EXPENSE_CATEGORIES[c as ExpenseCategory]?.group ?? "other") === g).reduce((s, [, r]) => s + r.total, 0);
+  const byCategory = Object.keys(EXPENSE_CATEGORIES).filter((c) => catTotals.has(c)).map((c) => {
+    const r = catTotals.get(c)!;
+    return { category: c, label: EXPENSE_CATEGORIES[c as ExpenseCategory].label, total: r.total, count: r.ids.size };
+  });
 
   const counting = d.payments.filter(paymentCounts);
   const approvedCOs = d.changeOrders.filter((c) => c.status === "approved");
@@ -272,9 +300,9 @@ export function computeLedger(d: ProjectData) {
     budgetInitial,
     budgetCurrent,
     actual,
-    material: sum(group("material")),
-    labor: sum(group("labor")),
-    other: sum(group("other")),
+    material: groupSum("material"),
+    labor: groupSum("labor"),
+    other: groupSum("other"),
     paidToContractors: roleSum("contractor", (b) => b.credited),
     remainingToContractors: roleSum("contractor", (b) => Math.max(0, b.remaining)),
     paidToSuppliers: roleSum("supplier", (b) => b.credited) + counting.filter((x) => !x.partyId && x.kind === "payment").reduce((s, x) => s + toCents(x.amount), 0),
