@@ -277,11 +277,17 @@ function ExpenseDetail({ d, projectId, e, onClose, onEdit, onChanged }: { d: Fin
   const label = (k: string | null | undefined) => d.categories.find((x) => x.key === k)?.label ?? LINE_CATEGORIES.find((x) => x[0] === k)?.[1] ?? k ?? cat;
   const left = e.payState && (e.payState.status === 'unpaid' || e.payState.status === 'partial') ? toCentsS(e.total) - e.payState.paid : 0;
   const [paying, setPaying] = useState(false);
+  const [xl, setXl] = useState<'' | 'busy' | string>('');
+  const exportOne = async () => {
+    setXl('busy');
+    try { await downloadExcel(projectId, `${d.project.homeName}-${e.date}-${e.description.slice(0, 30)}`, { entry: e.entryId ?? e.id }); setXl(''); }
+    catch (x) { setXl(errorText(x, 'Excel faylı yüklənmədi. Yenidən cəhd edin.')); }
+  };
   const markPaid = async () => {
     setPaying(true);
     try { await api(`/home-projects/${projectId}/expenses/${e.id}/mark-paid`, 'POST', { date: today() }); await onChanged(); } catch (x) { window.alert(errorText(x)); } finally { setPaying(false); }
   };
-  return <Modal open onClose={onClose} eyebrow={azDate(e.date)} title={e.description} footer={<>{d.permissions.manage && e.status !== 'void' && <button className="button button-secondary" onClick={voidIt}><Ban size={15} />Ləğv et</button>}{(d.permissions.manage || (e.mine && e.status === 'pending')) && e.status !== 'void' && <button className="button button-primary" onClick={() => onEdit(e)} data-testid="ex-edit"><PencilLine size={15} />Düzəlt</button>}</>}>
+  return <Modal open onClose={onClose} eyebrow={azDate(e.date)} title={e.description} footer={<><button className="button button-secondary" onClick={exportOne} disabled={xl === 'busy'} data-testid="ex-detail-excel">{xl === 'busy' ? <LoaderCircle className="spin" size={15} /> : <Download size={15} />}Excel şəklində endir</button>{d.permissions.manage && e.status !== 'void' && <button className="button button-secondary" onClick={voidIt}><Ban size={15} />Ləğv et</button>}{(d.permissions.manage || (e.mine && e.status === 'pending')) && e.status !== 'void' && <button className="button button-primary" onClick={() => onEdit(e)} data-testid="ex-edit"><PencilLine size={15} />Düzəlt</button>}</>}>
     <div className="ex-detail" data-testid="ex-detail">
       <div className="ex-detail-amt"><b>{aznS(e.total)}</b><span>{catText(e, (k) => label(k) ?? k)}</span>{e.status !== 'approved' && <Pill small tone={EXP_TONE[e.status]}>{EXP_STATUS[e.status]}</Pill>}{e.payState && e.status === 'approved' && <Pill small tone={left > 0 ? 'warn' : 'ok'}>{PAY_LABEL[e.payState.status] ?? e.payState.status}</Pill>}</div>
       {left > 0 && d.permissions.manage && <div className="ex-owed" data-testid="ex-owed"><CircleDollarSign size={16} /><span>Ödənilməyib: <b>{azn(left)}</b></span><button className="button button-secondary" onClick={markPaid} disabled={paying} data-testid="ex-mark-paid">{paying ? <LoaderCircle className="spin" size={14} /> : <Check size={14} />}Ödənildi kimi qeyd et</button></div>}
@@ -296,6 +302,7 @@ function ExpenseDetail({ d, projectId, e, onClose, onEdit, onChanged }: { d: Fin
       </dl>
       {e.items.length > 0 && <table className="fn-items" data-testid="ex-detail-items"><thead><tr><th>Ad</th><th>Kateqoriya</th><th>Miqdar</th><th>Qiymət</th><th>Cəmi</th></tr></thead><tbody>{e.items.map((i, k) => <tr key={k}><td>{i.name}{i.note ? <small className="ex-muted"> · {i.note}</small> : null}</td><td>{label(i.category || e.category)}</td><td>{qtyText(i.quantity)} {i.unit}</td><td>{aznS(i.unitPrice)}</td><td>{aznS(i.lineTotal)}</td></tr>)}</tbody></table>}
       {e.mismatch.length > 0 && <p className="fn-mismatch"><AlertTriangle size={13} />{e.mismatch[0]}</p>}
+      {xl && xl !== 'busy' && <p className="form-error" role="alert" data-testid="ex-detail-excel-error">{xl}</p>}
       <h4 className="ex-hist-h"><History size={15} />Dəyişiklik tarixçəsi</h4>
       {hist == null ? <LoaderCircle className="spin" size={16} /> : <ol className="ex-hist" data-testid="ex-history">{hist.map((h, i) => <li key={i}><b>{ACTION[h.action] ?? h.action}</b><small>{new Date(h.at).toLocaleString('az-AZ', { dateStyle: 'short', timeStyle: 'short' })}{h.byMe ? ' · siz' : ''}</small>
         {h.changes && Object.entries(h.changes).filter(([k]) => k !== 'items').map(([k, v]) => <span key={k} className="ex-change">{FIELD[k] ?? k}: <s>{String(v.from ?? '—')}</s> → {String(v.to ?? '—')}</span>)}
