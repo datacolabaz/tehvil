@@ -48,10 +48,19 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
   const qc = useQueryClient();
   const prefilled = !!(roomId || category || equipmentId || smetaProjectId || title || receiptFile || pendingInvoice);
   const draftKey = `day:${homeId || 'any'}`;
+  const fresh = (): Draft => ({ ...empty({ category, roomId, title }), lines: mode === 'manual' ? [newLine()] : [] });
   const [f, setF] = useState<Draft>(() => {
     const d = (!prefilled && loadDraft<Draft>(draftKey)) || empty({ category, roomId, title });
     return { ...empty(), ...d, lines: d.lines?.length ? d.lines : mode === 'manual' ? [newLine()] : [] };
   });
+  // A draft left from an earlier, unsaved form is never restored silently: the person sees it and can clear it.
+  const [restored, setRestored] = useState<null | { lines: number; date: string }>(() => {
+    if (prefilled) return null;
+    const d = loadDraft<Draft>(draftKey);
+    const n = d?.lines?.filter(l => l.name?.trim() || l.lineTotal || l.quantity || l.unitPrice).length ?? 0;
+    return d && (n || d.title?.trim() || d.description?.trim()) ? { lines: n, date: d.date } : null;
+  });
+  const startOver = () => { clearDraft(draftKey); setF(fresh()); setFiles([]); setRestored(null); };
   const [more, setMore] = useState(!!(roomId || category || equipmentId || smetaProjectId || title));
   const [files, setFiles] = useState<File[]>([]);
   const [doer, setDoer] = useState<Doer>({ key: '', name: '', phone: '', kind: 'individual', note: '' });
@@ -203,6 +212,11 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
   return <Modal open onClose={onClose} eyebrow={home.data?.home.name ?? 'Gündəlik qeyd'} title="Gündəlik qeyd əlavə et" wide
     footer={<>{lines.length > 0 && <span className="dl-foot-total">Cəmi: <b>{azn(dayTotal)}</b></span>}<button type="submit" form="quick-work" className="button button-primary hp-big" disabled={busy || !!reading} data-testid="button-save-work">{busy && <LoaderCircle className="spin" size={15} />}{busy ? 'Saxlanılır…' : saveLabel}</button></>}>
     <form id="quick-work" className="rl-form hp-quick" onSubmit={e => { void submit(e); }}>
+      {restored && <div className="dl-restored" role="status" data-testid="day-restored">
+        <Info size={16} /><span>Əvvəl başlayıb yadda saxlamadığınız qeyd bərpa olundu{restored.date ? ` (tarix: ${azDate(restored.date)})` : ''}{restored.lines ? ` — ${restored.lines} sətir` : ''}. Yeni qeyd üçün təmizləyin.</span>
+        <button type="button" className="button button-primary" onClick={startOver} data-testid="day-start-over">Təmizlə, yenidən başla</button>
+        <button type="button" className="button button-quiet" onClick={() => setRestored(null)} data-testid="day-keep-draft">Davam et</button>
+      </div>}
       {!fixedHome && <div className="field"><span>Hansı ev?</span>
         {canPickHome.length ? <div className="hp-chipset">{canPickHome.map(h => <button key={h.id} type="button" className={homeId === h.id ? 'on' : ''} onClick={() => { setHomeId(h.id); set('roomId', ''); projectRef.current = null; }} data-testid={`chip-home-${h.id}`}>{h.name}</button>)}</div>
           : <p className="rl-hint">Əvvəlcə ev əlavə edin.</p>}
