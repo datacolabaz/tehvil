@@ -81,8 +81,9 @@ export async function shrinkImage(file: File, maxEdge = 2000): Promise<File> {
   } catch { return file; }
 }
 
-export async function downloadExcel(projectId: string, name: string, journal?: { from?: string; to?: string }) {
-  const qs = journal ? `?view=journal${journal.from ? `&from=${journal.from}` : ''}${journal.to ? `&to=${journal.to}` : ''}` : '';
+export async function downloadExcel(projectId: string, name: string, journal?: { from?: string; to?: string; cat?: string; pay?: string }) {
+  const qs = journal ? `?view=journal${journal.from ? `&from=${journal.from}` : ''}${journal.to ? `&to=${journal.to}` : ''}${journal.cat ? `&cat=${journal.cat}` : ''}${journal.pay ? `&pay=${journal.pay}` : ''}` : '';
+  if (journal?.from || journal?.to) name = `${name}-${journal.from ?? ''}${journal.to && journal.to !== journal.from ? `_${journal.to}` : ''}`;
   const blob = await customFetch<Blob>(`/api/home-projects/${projectId}/export.xlsx${qs}`, { responseType: 'blob' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

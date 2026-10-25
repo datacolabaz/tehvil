@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { and, asc, eq, isNull, ne, sql } from "drizzle-orm";
 import { db, homeMediaTable, homeRoomsTable, infrastructureItemsTable, workRecordsTable } from "@workspace/db";
-import { computeLedger, EXPENSE_CATEGORIES, FORMULAS, fromCents, type ProjectAccess, type ProjectData } from "./financeCore";
+import { computeLedger, EXPENSE_CATEGORIES, expenseSlices, FORMULAS, fromCents, toCents, type ProjectAccess, type ProjectData } from "./financeCore";
 
 /*
  * Excel report of one project, built from the same ledger the site shows (computeLedger), so every
@@ -234,7 +234,7 @@ export async function buildFinanceWorkbook(a: ProjectAccess, d: ProjectData): Pr
  * expense totals: nothing is lost and nothing is counted twice. Every other sheet is formulas over these rows.
  * Edits in Excel are never written back to the site.
  */
-export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, range: { from?: string; to?: string } = {}, comparison?: { category: string; planned: number; actual: number }[] | null): Promise<Buffer> {
+export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, range: { from?: string; to?: string; cat?: string; pay?: "paid" | "unpaid" } = {}, comparison?: { category: string; planned: number; actual: number }[] | null): Promise<Buffer> {
   const cat = (c: string) => EXPENSE_CATEGORIES[c as keyof typeof EXPENSE_CATEGORIES]?.label ?? c;
   const GROUP: Record<string, string> = { material: "Material", labor: "İşçilik", other: "Digər" };
   const grp = (c: string) => GROUP[EXPENSE_CATEGORIES[c as keyof typeof EXPENSE_CATEGORIES]?.group ?? "other"];
@@ -243,10 +243,15 @@ export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, ran
   const media = d.invoices.length ? await db.select({ id: homeMediaTable.id, name: homeMediaTable.originalName, sha: homeMediaTable.sha256 }).from(homeMediaTable).where(eq(homeMediaTable.homeId, a.home.id)) : [];
   const mediaBy = new Map(media.map((x) => [x.id, x]));
   const inRange = (date: string) => (!range.from || date >= range.from) && (!range.to || date <= range.to);
-  const rows = d.expenses.filter((e) => e.status !== "void" && inRange(e.date)).sort((x, y) => x.date.localeCompare(y.date) || x.createdAt.getTime() - y.createdAt.getTime());
   const itemsBy = new Map<string, typeof d.items>();
   for (const i of d.items) itemsBy.set(i.expenseId, [...(itemsBy.get(i.expenseId) ?? []), i]);
   const ledger = computeLedger(d);
+  // Same filters as the page: period, category (only that category's lines), paid / unpaid.
+  const owed = (e: (typeof d.expenses)[number]) => { const p = ledger.payState.get(e.id); return e.status === "approved" && p && (p.status === "unpaid" || p.status === "partial") ? toCents(e.total) - p.paid : 0; };
+  const rows = d.expenses.filter((e) => e.status !== "void" && inRange(e.date)
+    && (!range.pay || (range.pay === "unpaid" ? owed(e) > 0 : owed(e) === 0))
+    && (!range.cat || expenseSlices(e, itemsBy.get(e.id) ?? []).some((x) => x.category === range.cat)))
+    .sort((x, y) => x.date.localeCompare(y.date) || x.createdAt.getTime() - y.createdAt.getTime());
   const wb = new ExcelJS.Workbook();
   wb.creator = "Tehvil.az"; wb.created = new Date();
   const APPROVED = STATUS.approved;
@@ -281,6 +286,7 @@ export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, ran
     let covered = 0;
     for (const i of items) {
       const c = i.category ?? e.category;
+      if (range.cat && c !== range.cat) { covered += Math.round(Number(i.lineTotal) * 100); continue; }
       covered += Math.round(Number(i.lineTotal) * 100);
       const q = i.quantity ? Number(i.quantity) : null, p = i.unitPrice ? Number(i.unitPrice) : null;
       // Quantity × unit price as a formula when it is what was recorded; the receipt's own figure otherwise.
@@ -288,7 +294,7 @@ export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, ran
       add({ name: i.name, cat: cat(c), group: grp(c), q, u: i.unit, p, amount: m(i.lineTotal), note: [i.note, e.note].filter(Boolean).join(" · ") }, exact ? "ROUND(F#*H#,2)" : undefined);
     }
     const diff = Math.round(Number(e.total) * 100) - covered;
-    if (diff !== 0) add({ name: `${e.description} — endirim / vergi / fərq`, cat: cat(e.category), group: grp(e.category), amount: n(diff), note: "Xərcin yekunu ilə sətirlərin cəmi arasındakı fərq" });
+    if (diff !== 0 && (!range.cat || e.category === range.cat)) add({ name: `${e.description} — endirim / vergi / fərq`, cat: cat(e.category), group: grp(e.category), amount: n(diff), note: "Xərcin yekunu ilə sətirlərin cəmi arasındakı fərq" });
   }
   const last = Math.max(2, all.rowCount);
   totalRow(all, "Cəmi (təsdiqlənmiş)", "name", ["I"], "O", APPROVED);
@@ -300,6 +306,7 @@ export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, ran
   const s = sheet(wb, "Ümumi xülasə", [{ header: "Göstərici", key: "k", width: 36 }, { header: "Dəyər", key: "v", width: 22 }, { header: "Qeyd", key: "n", width: 64 }]);
   s.addRow({ k: "Ev", v: a.home.name });
   s.addRow({ k: "Dövr", v: `${range.from ? range.from : "əvvəldən"} — ${range.to ? range.to : "bu günə qədər"}` });
+  if (range.cat || range.pay) s.addRow({ k: "Filtr", v: [range.cat ? cat(range.cat) : "", range.pay === "unpaid" ? "Yalnız ödənilməyib" : range.pay === "paid" ? "Yalnız ödənilib" : ""].filter(Boolean).join(" · "), n: "Saytdakı seçimə uyğun" });
   s.addRow({ k: "Hesabat tarixi", v: new Date().toISOString().slice(0, 10) });
   const money = (k: string, formula: string, note: string) => { const r = s.addRow({ k, n: note }); r.getCell("v").value = { formula }; r.getCell("v").numFmt = MONEY; return r; };
   const tot = money("Ümumi xərc (təsdiqlənmiş)", `SUMIFS(${R("I")},${ok})`, "Bütün xərclər vərəqindəki təsdiqlənmiş sətirlərin cəmi");
