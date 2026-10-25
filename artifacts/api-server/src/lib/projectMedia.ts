@@ -12,7 +12,9 @@ export interface MediaInputValue {
 export function isAllowedEvidenceType(contentType: string): boolean {
   return (
     ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif", "video/mp4", "video/webm", "video/quicktime"].includes(contentType) ||
-    contentType === "application/pdf"
+    contentType === "application/pdf" ||
+    // Material lists for AI Smeta (never attached to homes or projects; those check their own type lists).
+    contentType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || contentType === "text/csv"
   );
 }
 
@@ -26,7 +28,7 @@ export async function attachProjectMedia(input: {
   for (const file of input.media) {
     if (
       !file.objectPath.startsWith("/objects/uploads/") ||
-      !isAllowedEvidenceType(file.contentType) ||
+      !isAllowedEvidenceType(file.contentType) || file.contentType === "text/csv" || file.contentType.includes("spreadsheetml") ||
       file.size < 1 ||
       file.size > 52_428_800
     ) {

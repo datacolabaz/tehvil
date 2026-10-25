@@ -1348,6 +1348,52 @@ CREATE TABLE IF NOT EXISTS "media_stage_tags" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement
+CREATE TABLE IF NOT EXISTS "ai_estimate_files" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"estimate_id" uuid NOT NULL,
+	"object_path" text NOT NULL,
+	"original_name" varchar(255) NOT NULL,
+	"content_type" varchar(120) NOT NULL,
+	"size" integer NOT NULL,
+	"sha256" varchar(64) DEFAULT '' NOT NULL,
+	"kind" varchar(10) NOT NULL,
+	"status" varchar(10) DEFAULT 'uploaded' NOT NULL,
+	"error" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "ai_estimate_versions" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"estimate_id" uuid NOT NULL,
+	"version" integer NOT NULL,
+	"reason" varchar(12) NOT NULL,
+	"doc" jsonb NOT NULL,
+	"totals" jsonb NOT NULL,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "ai_estimates" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"owner_user_id" varchar(128) NOT NULL,
+	"home_id" uuid,
+	"name" varchar(200) NOT NULL,
+	"kind" varchar(16) NOT NULL,
+	"location" varchar(200) DEFAULT '' NOT NULL,
+	"area_m2" integer,
+	"floors" integer,
+	"status" varchar(12) DEFAULT 'draft' NOT NULL,
+	"ai_error" text,
+	"ai_model" varchar(64),
+	"doc" jsonb NOT NULL,
+	"answers" jsonb DEFAULT '{}'::jsonb NOT NULL,
+	"ai_result" jsonb,
+	"contractor" jsonb,
+	"version" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
 ALTER TABLE "change_orders" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "change_orders" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
@@ -3518,6 +3564,80 @@ ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "created_at" timestamp w
 --> statement
 ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "estimate_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "object_path" text NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "original_name" varchar(255) NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "content_type" varchar(120) NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "size" integer NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "sha256" varchar(64) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "kind" varchar(10) NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "status" varchar(10) DEFAULT 'uploaded' NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "error" text;
+--> statement
+ALTER TABLE "ai_estimate_files" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_versions" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_versions" ADD COLUMN IF NOT EXISTS "estimate_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_versions" ADD COLUMN IF NOT EXISTS "version" integer NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_versions" ADD COLUMN IF NOT EXISTS "reason" varchar(12) NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_versions" ADD COLUMN IF NOT EXISTS "doc" jsonb NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_versions" ADD COLUMN IF NOT EXISTS "totals" jsonb NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_versions" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "ai_estimate_versions" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "owner_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "home_id" uuid;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "name" varchar(200) NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "kind" varchar(16) NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "location" varchar(200) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "area_m2" integer;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "floors" integer;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "status" varchar(12) DEFAULT 'draft' NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "ai_error" text;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "ai_model" varchar(64);
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "doc" jsonb NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "answers" jsonb DEFAULT '{}'::jsonb NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "ai_result" jsonb;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "contractor" jsonb;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "version" integer DEFAULT 0 NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "ai_estimates" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
 DO $$ BEGIN
   ALTER TABLE "change_orders" ADD CONSTRAINT "change_orders_project_id_renovation_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."renovation_projects"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
@@ -4038,6 +4158,21 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 --> statement
+DO $$ BEGIN
+  ALTER TABLE "ai_estimate_files" ADD CONSTRAINT "ai_estimate_files_estimate_id_ai_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."ai_estimates"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "ai_estimate_versions" ADD CONSTRAINT "ai_estimate_versions_estimate_id_ai_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."ai_estimates"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "ai_estimates" ADD CONSTRAINT "ai_estimates_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
 CREATE INDEX IF NOT EXISTS "change_orders_project_idx" ON "change_orders" USING btree ("project_id");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "change_orders_project_number_idx" ON "change_orders" USING btree ("project_id","number");
@@ -4269,3 +4404,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS "media_stage_tags_media_idx" ON "media_stage_t
 CREATE INDEX IF NOT EXISTS "media_stage_tags_home_idx" ON "media_stage_tags" USING btree ("home_id","stage");
 --> statement
 CREATE INDEX IF NOT EXISTS "media_stage_tags_queue_idx" ON "media_stage_tags" USING btree ("ai_status","created_at");
+--> statement
+CREATE INDEX IF NOT EXISTS "ai_estimate_files_estimate_idx" ON "ai_estimate_files" USING btree ("estimate_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "ai_estimate_files_object_idx" ON "ai_estimate_files" USING btree ("object_path");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "ai_estimate_versions_idx" ON "ai_estimate_versions" USING btree ("estimate_id","version");
+--> statement
+CREATE INDEX IF NOT EXISTS "ai_estimates_owner_idx" ON "ai_estimates" USING btree ("owner_user_id","updated_at");

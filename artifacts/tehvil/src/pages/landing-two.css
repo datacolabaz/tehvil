@@ -1,0 +1,51 @@
+.l2 { background:#f6f1e7; min-height:100vh; color:#1f2a24; }
+.l2 .wrap { max-width:1120px; margin:0 auto; padding:0 16px; }
+.l2-nav { display:flex; align-items:center; justify-content:space-between; gap:12px; height:72px; }
+.l2-links { display:flex; gap:24px; }
+.l2-links a { color:#2c3a33; text-decoration:none; font-weight:600; font-size:15px; }
+.l2-signin-m { display:none; }
+.l2-actions { display:flex; gap:10px; align-items:center; }
+.l2-signin { color:#2c3a33; text-decoration:none; font-weight:600; }
+.l2-burger { display:none; border:0; background:none; padding:6px; cursor:pointer; }
+.l2-hero { padding-top:36px; padding-bottom:28px; text-align:center; }
+.l2-hero h1 { font-size:clamp(32px, 5vw, 56px); line-height:1.05; margin:14px auto 12px; max-width:860px; letter-spacing:-.02em; }
+.l2-lead { font-size:18px; color:#4a463f; max-width:640px; margin:0 auto 28px; }
+.l2-tools { display:grid; grid-template-columns:1fr 1fr; gap:16px; text-align:left; }
+.l2-tool { background:#fff; border:1px solid #e5e0d5; border-radius:24px; padding:24px; display:flex; flex-direction:column; gap:10px; box-shadow:0 10px 30px -18px rgba(31,61,51,.35); }
+.l2-icon { width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#e3f1e8; color:#1f5c47; }
+.l2-tool h2 { margin:4px 0 0; font-size:26px; }
+.l2-tool p { margin:0; font-size:16px; color:#3d3a33; }
+.l2-tool ul { list-style:none; padding:0; margin:6px 0 8px; display:grid; gap:8px; font-size:14px; color:#4a463f; }
+.l2-tool li { display:flex; gap:8px; align-items:flex-start; }
+.l2-tool li svg { flex:0 0 auto; margin-top:2px; color:#1f5c47; }
+.l2-cta { margin-top:auto; min-height:52px; justify-content:center; font-size:17px; border-radius:14px; }
+.l2-history { display:inline-flex; gap:8px; align-items:center; margin-top:18px; color:#1f5c47; font-weight:600; text-decoration:none; font-size:15px; }
+.l2-how { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding-top:24px; padding-bottom:24px; }
+.l2-how > div { background:#fffdf8; border:1px solid #ece6d9; border-radius:20px; padding:20px; }
+.l2-how h3 { margin:0 0 10px; font-size:18px; }
+.l2-how ol { margin:0; padding-left:20px; display:grid; gap:10px; font-size:15px; color:#3d3a33; }
+.l2-honest { display:flex; gap:10px; align-items:flex-start; color:#5b574f; font-size:14px; padding-bottom:24px; }
+.l2-honest p { margin:0; }
+.l2-faq { padding-bottom:40px; }
+.l2-faq h2 { font-size:30px; margin:0 0 12px; }
+.l2-q { border-bottom:1px solid #e5e0d5; }
+.l2-q button { width:100%; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:16px 0; background:none; border:0; font:inherit; font-size:16px; font-weight:600; text-align:left; cursor:pointer; color:inherit; }
+.l2-q.open svg { transform:rotate(180deg); }
+.l2-q p { margin:0 0 16px; color:#4a463f; }
+.l2-foot { display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; padding-top:20px; padding-bottom:28px; border-top:1px solid #e5e0d5; color:#6f6a60; font-size:13px; }
+.l2-foot-links { display:flex; gap:14px; }
+.l2-foot-links a { color:#6f6a60; }
+@media (max-width: 760px) {
+  .l2-tools, .l2-how { grid-template-columns:1fr; }
+  .l2-hero { padding-top:16px; text-align:left; }
+  .l2-hero h1 { margin-left:0; }
+  .l2-lead { margin-left:0; font-size:16px; }
+  .l2-links { display:none; position:absolute; top:64px; left:0; right:0; background:#fff; flex-direction:column; padding:16px; gap:14px; border-bottom:1px solid #e5e0d5; z-index:20; }
+  .l2-links.open { display:flex; }
+  .l2-signin-m { display:block; }
+  .l2-signin { display:none; }
+  .l2-burger { display:inline-flex; }
+  .l2-actions .button { padding:8px 12px; font-size:14px; }
+  .l2-tool { padding:18px; }
+}
+.l2-actions .button { white-space:nowrap; }

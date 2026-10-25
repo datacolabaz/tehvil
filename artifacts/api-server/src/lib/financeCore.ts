@@ -62,21 +62,30 @@ export const lineCents = (quantity: string, unitPrice: string) => Math.round((qt
 /* ------------------------------------------------------------- categories */
 
 export const EXPENSE_CATEGORIES = {
-  material: { label: "Material alışı", group: "material" },
-  concrete_rebar: { label: "Beton və armatur", group: "material" },
-  labor: { label: "Usta və işçi xərcləri", group: "labor" },
-  contractor: { label: "Podratçı ilə hesablaşmalar", group: "labor" },
-  transport: { label: "Nəqliyyat və daşınma", group: "other" },
-  meals: { label: "Yemək və digər işçi xərcləri", group: "other" },
-  tool_rental: { label: "Alət və avadanlıq kirayəsi", group: "other" },
-  machinery: { label: "Beton pompası və xüsusi texnika", group: "other" },
-  utilities: { label: "Kommunal xərclər", group: "other" },
-  cleaning: { label: "Təmizlik və məişət xərcləri", group: "other" },
-  design: { label: "Layihə və ekspertiza", group: "other" },
-  permits: { label: "İcazə və digər sənədlər", group: "other" },
-  appliances: { label: "Avadanlıqlar", group: "material" },
-  other: { label: "Digər xərclər", group: "other" },
+  concrete: { label: "Beton və sement", group: "material", legacy: false },
+  rebar_metal: { label: "Armatur və metal", group: "material", legacy: false },
+  timber_formwork: { label: "Taxta və qəlib", group: "material", legacy: false },
+  building_materials: { label: "Tikinti materialları", group: "material", legacy: false },
+  labor: { label: "Usta və fəhlə ödənişləri", group: "labor", legacy: false },
+  machinery_transport: { label: "Texnika və nəqliyyat", group: "other", legacy: false },
+  design: { label: "Layihələndirmə və mühəndislik", group: "other", legacy: false },
+  electrical: { label: "Elektrik", group: "material", legacy: false },
+  plumbing: { label: "Santexnika", group: "material", legacy: false },
+  other: { label: "Digər xərclər", group: "other", legacy: false },
+  // Earlier keys (October 2026 finance module): still valid on old records, no longer offered.
+  material: { label: "Material alışı", group: "material", legacy: true },
+  concrete_rebar: { label: "Beton və armatur", group: "material", legacy: true },
+  contractor: { label: "Podratçı ilə hesablaşmalar", group: "labor", legacy: true },
+  transport: { label: "Nəqliyyat və daşınma", group: "other", legacy: true },
+  meals: { label: "Yemək və digər işçi xərcləri", group: "other", legacy: true },
+  tool_rental: { label: "Alət və avadanlıq kirayəsi", group: "other", legacy: true },
+  machinery: { label: "Beton pompası və xüsusi texnika", group: "other", legacy: true },
+  utilities: { label: "Kommunal xərclər", group: "other", legacy: true },
+  cleaning: { label: "Təmizlik və məişət xərcləri", group: "other", legacy: true },
+  permits: { label: "İcazə və digər sənədlər", group: "other", legacy: true },
+  appliances: { label: "Avadanlıqlar", group: "material", legacy: true },
 } as const;
+export const ACTIVE_CATEGORIES = Object.entries(EXPENSE_CATEGORIES).filter(([, v]) => !v.legacy).map(([k]) => k);
 export type ExpenseCategory = keyof typeof EXPENSE_CATEGORIES;
 export const isCategory = (v: unknown): v is ExpenseCategory => typeof v === "string" && v in EXPENSE_CATEGORIES;
 export const PARTY_ROLES = ["contractor", "worker", "supplier", "other"] as const;
@@ -295,8 +304,8 @@ export const FORMULAS: Record<string, string> = {
   budgetInitial: "Layihə yaradılarkən daxil edilən büdcə (versiya 1).",
   budgetCurrent: "Son büdcə versiyası: ilkin büdcə + təsdiqlənmiş əlavə işlər. Təsdiqlənməmiş təkliflər daxil deyil.",
   actual: "Təsdiqlənmiş xərc qeydlərinin yekun məbləğləri. Ödənişlər və avanslar bura daxil deyil.",
-  material: "Təsdiqlənmiş xərclər: Material alışı, Beton və armatur, Avadanlıqlar.",
-  labor: "Təsdiqlənmiş xərclər: Usta və işçi xərcləri, Podratçı ilə hesablaşmalar.",
+  material: "Təsdiqlənmiş xərclər: beton, armatur, taxta, tikinti materialları, elektrik, santexnika.",
+  labor: "Təsdiqlənmiş xərclər: usta və fəhlə ödənişləri.",
   other: "Qalan kateqoriyalar üzrə təsdiqlənmiş xərclər.",
   paidToContractors: "Podratçılara ödəniş + avans − geri qaytarılan − avansdan alınmış materiallar. Mübahisəli və ləğv edilmiş ödənişlər daxil deyil.",
   remainingToContractors: "Müqavilə + təsdiqlənmiş əlavə işlər − podratçıya hesablanan ödəniş.",

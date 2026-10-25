@@ -29,7 +29,8 @@ import {
   type ProjectAccess, type ProjectData,
 } from "../lib/financeCore";
 import { aiConfigured, AiNotConfigured, answerFinanceQuestion, extractInvoice, type InvoiceExtraction } from "../lib/invoiceAi";
-import { buildFinanceWorkbook } from "../lib/financeExport";
+import { buildFinanceWorkbook, buildJournalWorkbook } from "../lib/financeExport";
+import { homeEstimateComparison } from "../lib/estimateLink";
 import { rateLimit } from "../lib/rateLimit";
 import { hashToken, newToken, publicOrigin } from "../lib/realtorCore";
 import { logger } from "../lib/logger";
@@ -237,7 +238,7 @@ router.get("/home-projects/:projectId/finance", async (req, res): Promise<void> 
       export: a.level !== "party",
       ask: a.level !== "party",
     },
-    categories: Object.entries(EXPENSE_CATEGORIES).map(([key, v]) => ({ key, label: v.label, group: v.group })),
+    categories: Object.entries(EXPENSE_CATEGORIES).map(([key, v]) => ({ key, label: v.label, group: v.group, legacy: v.legacy })),
     totals,
     formulas: FORMULAS,
     parties: d.parties.map((p) => ({ ...partyDto(p, a), balance: ledger.parties.find((b) => b.partyId === p.id) ?? null })),
@@ -534,7 +535,10 @@ router.patch("/home-projects/:projectId/expenses/:expenseId", async (req, res): 
   const set: Partial<typeof financeExpensesTable.$inferInsert> = { updatedAt: new Date() };
   const changes: Record<string, { from: unknown; to: unknown }> = {};
   for (const k of ["date", "category", "description", "partyId", "vendorName", "roomId", "subtotal", "discount", "tax", "total", "paymentMethod", "fundedByPartyId", "note"] as const) {
-    const v = d[k];
+    let v = d[k];
+    // Money columns are never empty: no value means "keep" (subtotal) or zero (discount, tax).
+    if (v === null && (k === "subtotal" || k === "total")) v = undefined;
+    if (v === null && (k === "discount" || k === "tax")) v = "0.00";
     if (v !== undefined && v !== e[k]) { (set as Record<string, unknown>)[k] = v; changes[k] = { from: e[k], to: v }; }
   }
   await db.transaction(async (tx) => {
@@ -912,7 +916,10 @@ router.get("/home-projects/:projectId/export.xlsx", async (req, res): Promise<vo
   const a = await projectAccess(req, res); if (!a) return;
   if (a.level === "party") return forbidden(res);
   const data = await loadProjectData(a.project);
-  const buf = await buildFinanceWorkbook(a, data);
+  const day = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
+  const buf = req.query.view === "journal"
+    ? await buildJournalWorkbook(a, data, { from: day(req.query.from), to: day(req.query.to) }, await categoryComparison(a, data))
+    : await buildFinanceWorkbook(a, data);
   const safe = a.project.name.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 60) || "layihe";
   noStore(res);
   res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -962,6 +969,12 @@ router.post("/home-projects/:projectId/ask", askLimit, async (req, res): Promise
     return bad(res, err instanceof Error ? err.message : "AI cavab verə bilmədi", 502);
   }
 });
+
+/** Planned (estimate) vs actual by category — filled in by the AI Smeta link (phase 3); null when no estimate is linked. */
+async function categoryComparison(a: ProjectAccess, _d: ProjectData): Promise<{ category: string; planned: number; actual: number }[] | null> {
+  const c = await homeEstimateComparison(a.home.id);
+  return c ? c.rows.map((r) => ({ category: r.label, planned: r.planned, actual: r.actual })) : null;
+}
 
 export type { InvoiceExtraction };
 export default router;
