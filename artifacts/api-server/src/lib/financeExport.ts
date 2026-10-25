@@ -234,7 +234,7 @@ export async function buildFinanceWorkbook(a: ProjectAccess, d: ProjectData): Pr
  * expense totals: nothing is lost and nothing is counted twice. Every other sheet is formulas over these rows.
  * Edits in Excel are never written back to the site.
  */
-export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, range: { from?: string; to?: string; cat?: string; pay?: "paid" | "unpaid" } = {}, comparison?: { category: string; planned: number; actual: number }[] | null): Promise<Buffer> {
+export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, range: { from?: string; to?: string; cat?: string; pay?: "paid" | "unpaid"; entry?: string } = {}, comparison?: { category: string; planned: number; actual: number }[] | null): Promise<Buffer> {
   const cat = (c: string) => EXPENSE_CATEGORIES[c as keyof typeof EXPENSE_CATEGORIES]?.label ?? c;
   const GROUP: Record<string, string> = { material: "Material", labor: "İşçilik", other: "Digər" };
   const grp = (c: string) => GROUP[EXPENSE_CATEGORIES[c as keyof typeof EXPENSE_CATEGORIES]?.group ?? "other"];
@@ -249,6 +249,7 @@ export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, ran
   // Same filters as the page: period, category (only that category's lines), paid / unpaid.
   const owed = (e: (typeof d.expenses)[number]) => { const p = ledger.payState.get(e.id); return e.status === "approved" && p && (p.status === "unpaid" || p.status === "partial") ? toCents(e.total) - p.paid : 0; };
   const rows = d.expenses.filter((e) => e.status !== "void" && inRange(e.date)
+    && (!range.entry || e.id === range.entry || e.entryId === range.entry)
     && (!range.pay || (range.pay === "unpaid" ? owed(e) > 0 : owed(e) === 0))
     && (!range.cat || expenseSlices(e, itemsBy.get(e.id) ?? []).some((x) => x.category === range.cat)))
     .sort((x, y) => x.date.localeCompare(y.date) || x.createdAt.getTime() - y.createdAt.getTime());
@@ -306,6 +307,7 @@ export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, ran
   const s = sheet(wb, "Ümumi xülasə", [{ header: "Göstərici", key: "k", width: 36 }, { header: "Dəyər", key: "v", width: 22 }, { header: "Qeyd", key: "n", width: 64 }]);
   s.addRow({ k: "Ev", v: a.home.name });
   s.addRow({ k: "Dövr", v: `${range.from ? range.from : "əvvəldən"} — ${range.to ? range.to : "bu günə qədər"}` });
+  if (range.entry) s.addRow({ k: "Qeyd", v: rows[0] ? `${rows[0].date} · ${rows[0].description}` : "—", n: "Yalnız bu gündəlik qeyd" });
   if (range.cat || range.pay) s.addRow({ k: "Filtr", v: [range.cat ? cat(range.cat) : "", range.pay === "unpaid" ? "Yalnız ödənilməyib" : range.pay === "paid" ? "Yalnız ödənilib" : ""].filter(Boolean).join(" · "), n: "Saytdakı seçimə uyğun" });
   s.addRow({ k: "Hesabat tarixi", v: new Date().toISOString().slice(0, 10) });
   const money = (k: string, formula: string, note: string) => { const r = s.addRow({ k, n: note }); r.getCell("v").value = { formula }; r.getCell("v").numFmt = MONEY; return r; };
@@ -374,7 +376,9 @@ export async function buildJournalWorkbook(a: ProjectAccess, d: ProjectData, ran
   finish(ex);
 
   // Summary first, as people open the file.
-  const order = ["Ümumi xülasə", "Bütün xərclər", "Günlər üzrə xərclər", "Aylar üzrə xərclər", "Kateqoriyalar üzrə xərclər", "Smeta və faktiki", "Qəbzlər və əlavə məlumat"];
+  // The lines first: that is what people look for when they open the file; the summary right after.
+  const order = ["Bütün xərclər", "Ümumi xülasə", "Günlər üzrə xərclər", "Aylar üzrə xərclər", "Kateqoriyalar üzrə xərclər", "Smeta və faktiki", "Qəbzlər və əlavə məlumat"];
   wb.worksheets.sort((x, y) => order.indexOf(x.name) - order.indexOf(y.name)).forEach((w, i) => { (w as unknown as { orderNo: number }).orderNo = i; });
+  wb.views = [{ x: 0, y: 0, width: 20000, height: 12000, firstSheet: 0, activeTab: 0, visibility: "visible" }];
   return Buffer.from(await wb.xlsx.writeBuffer());
 }

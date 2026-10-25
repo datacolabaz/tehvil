@@ -1078,10 +1078,11 @@ router.get("/home-projects/:projectId/export.xlsx", async (req, res): Promise<vo
   const day = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
   const cat = typeof req.query.cat === "string" && isCategory(req.query.cat) ? req.query.cat : undefined;
   const pay = req.query.pay === "paid" || req.query.pay === "unpaid" ? req.query.pay : undefined;
+  const entry = typeof req.query.entry === "string" && isUuid(req.query.entry) ? req.query.entry : undefined;
   let buf: Buffer;
   try {
     buf = req.query.view === "journal"
-      ? await buildJournalWorkbook(a, data, { from: day(req.query.from), to: day(req.query.to), cat, pay }, await categoryComparison(a, data))
+      ? await buildJournalWorkbook(a, data, { from: day(req.query.from), to: day(req.query.to), cat, pay, entry }, await categoryComparison(a, data))
       : await buildFinanceWorkbook(a, data);
   } catch (err) {
     logger.error({ err, projectId: a.project.id, query: req.query }, "excel export failed");
