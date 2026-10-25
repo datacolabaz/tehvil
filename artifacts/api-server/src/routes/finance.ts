@@ -281,17 +281,26 @@ function expenseDto(e: FinanceExpenseRow, items: ProjectData["items"]) {
 router.post("/home-projects/:projectId/budget", async (req, res): Promise<void> => {
   const a = await projectAccess(req, res); if (!a) return;
   if (a.level !== "manage") return forbidden(res);
-  const b = z.object({ total: amount, note: z.string().trim().max(500).default("") }).safeParse(req.body ?? {});
+  // { total } sets or corrects the budget; { remove: true } takes it away (kept in history as a version, never deleted).
+  const b = z.union([
+    z.object({ total: amount, note: z.string().trim().max(500).default("") }),
+    z.object({ remove: z.literal(true), note: z.string().trim().max(500).default("") }),
+  ]).safeParse(req.body ?? {});
   if (!b.success) return bad(res, "Büdcə məbləğini yoxlayın");
+  const remove = "remove" in b.data;
+  const total = "total" in b.data ? b.data.total : "0.00";
   const userId = uid(req);
   const r = await db.transaction(async (tx) => {
     await tx.execute(sql`select id from home_projects where id = ${a.project.id} for update`);
     const [{ v }] = await tx.select({ v: max(financeBudgetVersionsTable.version) }).from(financeBudgetVersionsTable).where(eq(financeBudgetVersionsTable.projectId, a.project.id));
     const version = (v ?? 0) + 1;
-    // Changing an existing budget by hand is a correction and needs a reason; change orders add versions on their own.
-    if (version > 1 && !b.data.note) return { error: "Büdcəni dəyişmək üçün səbəbi yazın" };
-    await tx.insert(financeBudgetVersionsTable).values({ projectId: a.project.id, version, total: b.data.total, reason: version === 1 ? "initial" : "correction", note: b.data.note, createdByUserId: userId });
-    await audit({ homeId: a.home.id, actorUserId: userId, actorRole: roleOf(a), action: version === 1 ? "budget.set" : "budget.corrected", entityType: "project", entityId: a.project.id, summary: `Büdcə v${version}: ${b.data.total} AZN${b.data.note ? ` — ${b.data.note}` : ""}` }, tx);
+    const [last] = v ? await tx.select().from(financeBudgetVersionsTable).where(and(eq(financeBudgetVersionsTable.projectId, a.project.id), eq(financeBudgetVersionsTable.version, v))) : [];
+    const none = !last || last.reason === "removed";
+    if (remove && none) return { error: "Büdcə yazılmayıb" };
+    // Changing an existing budget by hand is a correction and needs a reason; setting one again after it was taken away does not.
+    if (!none && !b.data.note) return { error: remove ? "Büdcəni götürmək üçün səbəbi yazın" : "Büdcəni dəyişmək üçün səbəbi yazın" };
+    await tx.insert(financeBudgetVersionsTable).values({ projectId: a.project.id, version, total, reason: remove ? "removed" : version === 1 ? "initial" : "correction", note: b.data.note, createdByUserId: userId });
+    await audit({ homeId: a.home.id, actorUserId: userId, actorRole: roleOf(a), action: remove ? "budget.removed" : version === 1 ? "budget.set" : "budget.corrected", entityType: "project", entityId: a.project.id, summary: `Büdcə v${version}: ${remove ? "götürüldü" : `${total} AZN`}${b.data.note ? ` — ${b.data.note}` : ""}` }, tx);
     return { version };
   });
   if ("error" in r) return bad(res, r.error!);
@@ -931,7 +940,8 @@ router.post("/home-projects/:projectId/change-orders/:changeId/decision", async 
     if (next === "approved") {
       // Only an approved change order moves the budget. Earlier versions stay.
       const [last] = await tx.select().from(financeBudgetVersionsTable).where(eq(financeBudgetVersionsTable.projectId, a.project.id)).orderBy(desc(financeBudgetVersionsTable.version)).limit(1);
-      if (last) {
+      // No budget (never set or taken away) → nothing to move.
+      if (last && last.reason !== "removed") {
         budgetVersion = last.version + 1;
         await tx.insert(financeBudgetVersionsTable).values({
           projectId: a.project.id, version: budgetVersion, total: fromCents(toCents(last.total) + toCents(c.amount)), reason: "change_order",

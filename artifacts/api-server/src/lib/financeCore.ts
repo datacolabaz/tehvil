@@ -292,7 +292,9 @@ export function computeLedger(d: ProjectData) {
 
   const roleSum = (role: string, f: (b: PartyBalance) => number) => parties.filter((b) => b.role === role).reduce((s, b) => s + f(b), 0);
   const budgetInitial = d.budget.length ? toCents(d.budget[0].total) : null;
-  const budgetCurrent = d.budget.length ? toCents(d.budget[d.budget.length - 1].total) : null;
+  // A budget taken away ("removed" version) means: no budget now — nothing is compared against it.
+  const lastBudget = d.budget[d.budget.length - 1];
+  const budgetCurrent = lastBudget && lastBudget.reason !== "removed" ? toCents(lastBudget.total) : null;
   const actual = sum(approved);
   const unpaidLooseCount = approved.filter((e) => !e.partyId && !e.fundedByPartyId && payState.get(e.id)?.status !== "paid").length;
 
