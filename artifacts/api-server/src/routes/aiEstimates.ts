@@ -10,6 +10,8 @@ import {
 import { isUuid } from "../lib/homeAccess";
 import { aiConfigured, AiNotConfigured } from "../lib/invoiceAi";
 import { analyzeDrawings, architecturalOnly, mergeElements } from "../lib/drawingAi";
+import { analyzeWalls, MAX_PAGES } from "../lib/wallsAi";
+import { applyEdit, emptyWalls, KIND_LABEL, mergeWalls, PARAM_LABEL, wallsState, type WallsDoc } from "../lib/wallsModel";
 import {
   CATEGORY_LABEL, computeEstimate, DEFAULT_SETTINGS, questionsFor, STATUS_LABEL, type Category, type Element, type EstimateDoc, type ManualItem, type Param,
 } from "../lib/estimateEngine";
@@ -28,7 +30,7 @@ const router: IRouter = Router();
 const uid = (req: Request) => getAuth(req).userId!;
 const bad = (res: Response, error: string, status = 400) => { res.status(status).json({ error }); };
 const noStore = (res: Response) => res.setHeader("Cache-Control", "private, no-store");
-const KINDS = ["house", "renovation", "annex", "concrete_rebar", "other"] as const;
+const KINDS = ["house", "renovation", "annex", "concrete_rebar", "other", "masonry_plaster"] as const;
 const DRAWING_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 const TABLE_TYPES = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"];
 const UNSUPPORTED = /\.(dwg|dxf|ifc|rvt|skp|pln|3dm)$/i;
@@ -39,6 +41,11 @@ const docOf = (e: AiEstimateRow): EstimateDoc => {
   const d = e.doc as unknown as Partial<EstimateDoc>;
   return { ...emptyDoc(), ...d, settings: { ...DEFAULT_SETTINGS, ...(d.settings ?? {}), plywood: { ...DEFAULT_SETTINGS.plywood, ...(d.settings?.plywood ?? {}) } } };
 };
+/** "Hörgü və suvaq (çertyojdan)": floors / walls / openings live under doc.walls. */
+const isWalls = (e: Pick<AiEstimateRow, "kind">) => e.kind === "masonry_plaster";
+const wallsOf = (e: AiEstimateRow): WallsDoc => ({ ...emptyWalls(), ...((e.doc as { walls?: Partial<WallsDoc> }).walls ?? {}) });
+const withWalls = (e: AiEstimateRow, walls: WallsDoc) => ({ ...docOf(e), walls }) as EstimateDoc & { walls: WallsDoc };
+const wallsStatus = (w: WallsDoc) => (!w.floors.length ? "draft" : wallsState(w).allConfirmed ? "ready" : "questions");
 const answeredSet = (e: AiEstimateRow) => new Set(Object.entries(e.answers ?? {}).filter(([, a]) => a.kind !== "value").map(([k]) => k));
 
 async function own(req: Request, res: Response) {
@@ -73,6 +80,7 @@ router.get("/ai-estimates", async (req, res): Promise<void> => {
   const rows = await db.select().from(aiEstimatesTable).where(eq(aiEstimatesTable.ownerUserId, uid(req))).orderBy(desc(aiEstimatesTable.updatedAt));
   res.json(rows.map((e) => {
     const doc = docOf(e); const r = computeEstimate(doc);
+    if (isWalls(e)) { const w = wallsOf(e); return { id: e.id, name: e.name, kind: e.kind, status: e.status, openQuestions: wallsState(w).openIssues, itemCount: w.floors.reduce((n, f) => n + f.walls.length, 0), total: 0, homeId: e.homeId, updatedAt: e.updatedAt.toISOString() }; }
     return { id: e.id, name: e.name, kind: e.kind, status: e.status, openQuestions: questionsFor(doc, answeredSet(e)).length, itemCount: r.items.length, total: r.totals.amount, homeId: e.homeId, updatedAt: e.updatedAt.toISOString() };
   }));
 });
@@ -118,7 +126,39 @@ router.get("/ai-estimates/:estimateId", async (req, res): Promise<void> => {
     versions: versions.map((v) => ({ ...v, createdAt: v.createdAt.toISOString() })),
     contractor: e.contractor ?? null,
     comparison: await comparison(e, result),
+    walls: isWalls(e) ? { ...wallsOf(e), state: wallsState(wallsOf(e)), maxPages: MAX_PAGES, kindLabels: KIND_LABEL, paramLabels: PARAM_LABEL } : null,
   });
+});
+
+/* ---------------------------------------------------------------- hörgü və suvaq: pages and review */
+
+/** Which pages of a PDF go to the AI (the floor plans, a section, the window schedule). */
+router.put("/ai-estimates/:estimateId/pages", async (req, res): Promise<void> => {
+  const e = await own(req, res); if (!e) return;
+  if (!isWalls(e)) return bad(res, "Bu smeta növü üçün deyil");
+  const b = z.object({ fileId: z.string().uuid(), pages: z.array(z.number().int().min(1).max(2000)).max(MAX_PAGES) }).safeParse(req.body ?? {});
+  if (!b.success) return bad(res, `Ən çox ${MAX_PAGES} səhifə seçin`);
+  const [f] = await db.select().from(aiEstimateFilesTable).where(and(eq(aiEstimateFilesTable.id, b.data.fileId), eq(aiEstimateFilesTable.estimateId, e.id)));
+  if (!f || f.contentType !== "application/pdf") return bad(res, "PDF tapılmadı", 404);
+  const w = wallsOf(e);
+  w.pages = { ...w.pages, [f.id]: [...new Set(b.data.pages)].sort((x, y) => x - y) };
+  await db.update(aiEstimatesTable).set({ doc: withWalls(e, w) as unknown as Record<string, unknown>, updatedAt: new Date() }).where(eq(aiEstimatesTable.id, e.id));
+  res.json({ pages: w.pages[f.id] });
+});
+
+/** The person's checked version of floors, walls and openings (a floor is confirmed only when nothing is missing or assumed). */
+router.put("/ai-estimates/:estimateId/walls", async (req, res): Promise<void> => {
+  const e = await own(req, res); if (!e) return;
+  if (!isWalls(e)) return bad(res, "Bu smeta növü üçün deyil");
+  if (e.status === "analyzing") return bad(res, "AI hələ oxuyur — bir az gözləyin");
+  const r = applyEdit(wallsOf(e), (req.body ?? {}).floors);
+  if (r.error) return bad(res, r.error);
+  const doc = withWalls(e, r.doc);
+  const status = wallsStatus(r.doc);
+  await db.update(aiEstimatesTable).set({ doc: doc as unknown as Record<string, unknown>, status, floors: r.doc.floors.length || e.floors, updatedAt: new Date() }).where(eq(aiEstimatesTable.id, e.id));
+  const confirmed = r.doc.floors.filter((f) => f.confirmed).length;
+  await snapshot(e, doc, confirmed === r.doc.floors.length && confirmed > 0 ? "walls-ok" : "walls-edited", uid(req));
+  res.json({ status, state: wallsState(r.doc) });
 });
 
 router.get("/ai-estimates/:estimateId/files/:fileId", async (req, res): Promise<void> => {
@@ -199,6 +239,7 @@ router.post("/ai-estimates/:estimateId/analyze", aiLimit, async (req, res): Prom
   if (!files.length) return bad(res, "Əvvəlcə çertyoj (PDF və ya şəkil) yükləyin");
   if (e.status === "analyzing") return void res.json({ status: "analyzing" });
   await db.update(aiEstimatesTable).set({ status: "analyzing", aiError: null, updatedAt: new Date() }).where(eq(aiEstimatesTable.id, e.id));
+  if (isWalls(e)) { void runWallsAnalysis(e.id, uid(req)); return void res.json({ status: "analyzing" }); }
   const focus = Object.entries(e.answers ?? {}).filter(([, a]) => a.kind === "unknown").map(([k]) => k);
   void runAnalysis(e.id, uid(req), focus);
   res.json({ status: "analyzing" });
@@ -222,6 +263,25 @@ async function runAnalysis(estimateId: string, userId: string, focus: string[]) 
   } catch (err) {
     const msg = err instanceof AiNotConfigured ? "AI analizi qoşulmayıb" : err instanceof Error ? err.message : "AI çertyoju oxuya bilmədi";
     logger.warn({ estimateId, err: msg }, "drawing analysis failed");
+    await db.update(aiEstimatesTable).set({ status: "failed", aiError: msg, updatedAt: new Date() }).where(eq(aiEstimatesTable.id, e.id));
+  }
+}
+
+async function runWallsAnalysis(estimateId: string, userId: string) {
+  const [e] = await db.select().from(aiEstimatesTable).where(eq(aiEstimatesTable.id, estimateId));
+  if (!e) return;
+  const files = await db.select().from(aiEstimateFilesTable).where(and(eq(aiEstimateFilesTable.estimateId, e.id), eq(aiEstimateFilesTable.kind, "drawing")));
+  const prev = wallsOf(e);
+  try {
+    const { result, model, sentPages } = await analyzeWalls(files.map((f) => ({ id: f.id, objectPath: f.objectPath, contentType: f.contentType, name: f.originalName, size: f.size })), prev.pages);
+    const walls = mergeWalls(prev, result);
+    const doc = withWalls(e, walls);
+    await db.update(aiEstimatesTable).set({ doc: doc as unknown as Record<string, unknown>, aiResult: { ...result, sentPages } as unknown as Record<string, unknown>, aiModel: model, status: wallsStatus(walls), aiError: null, floors: walls.floors.length || e.floors, updatedAt: new Date() }).where(eq(aiEstimatesTable.id, e.id));
+    await db.update(aiEstimateFilesTable).set({ status: "analyzed", error: null }).where(and(eq(aiEstimateFilesTable.estimateId, e.id), eq(aiEstimateFilesTable.kind, "drawing")));
+    await snapshot(e, doc, "analysis", userId);
+  } catch (err) {
+    const msg = err instanceof AiNotConfigured ? "AI analizi qoşulmayıb" : err instanceof Error ? err.message : "AI çertyoju oxuya bilmədi";
+    logger.warn({ estimateId, err: msg }, "walls analysis failed");
     await db.update(aiEstimatesTable).set({ status: "failed", aiError: msg, updatedAt: new Date() }).where(eq(aiEstimatesTable.id, e.id));
   }
 }

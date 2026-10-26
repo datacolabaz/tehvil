@@ -148,7 +148,7 @@ test('cement-sand on site: ratio and factors drive cement and sand', () => {
   const t = mixTotals('cement_sand', [r], mix);
   const dry = 0.225 * 1.1 * 1.3;
   near(t.site!.dryM3, dry); near(t.site!.cementM3, dry / 4); near(t.site!.sandM3, (dry * 3) / 4);
-  near(t.site!.cementKg, (dry / 4) * 1300); assert.equal(t.site!.cementBags, Math.ceil(((dry / 4) * 1300) / 50));
+  near(t.site!.cementKg, (dry / 4) * 1300); assert.equal(t.site!.cementBags, Math.ceil(((dry / 4) * 1300) / 40));
   const t4 = mixTotals('cement_sand', [r], { ...mix, ratioSand: 4 });
   assert.ok(t4.site!.cementKg < t.site!.cementKg);
   assert.ok(t.assumptions.some((a) => a.includes('Quru həcm əmsalı 1.3')));

@@ -50,7 +50,7 @@ Girişsiz açılan dörd səhifə var: `/armatur-konvertor`, `/taxta-kalkulyator
   - Quru həcm = yaş həcm (ehtiyatla) × quru həcm əmsalı (1,3).
   - Sement həcmi = quru həcm / (1 + N); qum həcmi = quru həcm × N / (1 + N). Nisbət 1 : N.
   - Sementin kütləsi töküm sıxlığı ilə hesablanır (1 300 kq/m³), qumun da (1 600 kq/m³).
-  - Sement 50 kq-lıq kisələrlə.
+  - Sement 40 kq-lıq kisələrlə (standart, dəyişdirilə bilər).
   - Bütün əmsallar ekranda fərziyyə kimi göstərilir və dəyişdirilə bilir.
 - **Yekun:** daxili divarlar, xarici divarlar və hamısı ayrıca.
 - **Qiymətlər:** qarışıq kisə və ya kq ilə; sement kisə ilə; qum m³ və ya ton ilə. Vahidlər qarışdırılmır.

@@ -28,6 +28,20 @@ export interface Estimate {
   versions: { version: number; reason: string; totals: Result['totals']; createdAt: string }[];
   contractor: { fileName: string; skipped: number; rows: { row: number; name: string; qty: number | null; unit: string; unitPrice: number | null; amount: number | null; category: Category; confirmed: boolean | null }[] } | null;
   comparison: { category: string; label: string; planned: number; actual: number; diff: number; contractor?: number | null }[] | null;
+  walls: WallsView | null;
+}
+
+/* "Hörgü və suvaq (çertyojdan)" — mirrors lib/wallsModel.ts */
+export type WSource = 'drawing' | 'assumed' | 'missing' | 'user';
+export interface WParam { value: number | null; source: WSource; confidence?: number; where?: string; page?: number; how?: string }
+export interface WOpening { id: string; kind: 'door' | 'window'; count: WParam; width: WParam; height: WParam }
+export type WallKind = 'external' | 'internal' | 'partition';
+export interface WWall { id: string; name: string; kind: WallKind; length: WParam; thickness: WParam; junctions: WParam; openings: WOpening[]; origin: 'ai' | 'user' }
+export interface WFloor { id: string; name: string; level: number; floorHeight: WParam; slabThickness: WParam; walls: WWall[]; confirmed: boolean; confirmedAt?: string | null }
+export interface WallsView {
+  floors: WFloor[]; pages: Record<string, number[]>; drawingKinds: string[]; scaleNote: string | null; unreadable: string[]; notes: string | null; analyzedAt: string | null;
+  state: { issues: { floorId: string; issues: { path: string; text: string }[] }[]; allConfirmed: boolean; openIssues: number };
+  maxPages: number; kindLabels: Record<WallKind, string>; paramLabels: Record<string, string>;
 }
 export interface EstimateListItem { id: string; name: string; kind: string; status: string; openQuestions: number; itemCount: number; total: number; homeId: string | null; updatedAt: string }
 
@@ -46,7 +60,7 @@ export async function downloadEstimate(id: string, name: string) {
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-export const KIND: Record<string, string> = { house: 'Fərdi ev tikintisi', renovation: 'Ev təmiri', annex: 'Əlavə tikili', concrete_rebar: 'Yalnız beton və armatur hesablaması', other: 'Digər' };
+export const KIND: Record<string, string> = { house: 'Fərdi ev tikintisi', renovation: 'Ev təmiri', annex: 'Əlavə tikili', concrete_rebar: 'Yalnız beton və armatur hesablaması', masonry_plaster: 'Hörgü və suvaq (çertyojdan)', other: 'Digər' };
 export const TYPE: Record<ElementType, string> = { strip_foundation: 'Lent fundament', column: 'Kolonlar', beam: 'Rigel / tir', slab: 'Monolit döşəmə', wall: 'Beton divar', other_concrete: 'Digər beton element' };
 export const SOURCE: Record<Source, string> = { drawing: 'Çertyojdan', user: 'Siz təsdiqləmisiniz', assumed: 'Təxmini', missing: 'Yoxdur', engineer: 'Mühəndisə', list: 'Siyahıdan' };
 export const STATUS_TONE: Record<ItemStatus, 'neutral' | 'info' | 'ok' | 'warn' | 'risk'> = { drawing: 'ok', user: 'ok', list: 'info', manual: 'info', estimated: 'warn', missing: 'risk', engineer: 'risk' };
