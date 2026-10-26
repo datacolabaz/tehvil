@@ -51,6 +51,8 @@ import './home.css';
 
 const RebarPage = lazy(() => import('@/pages/calc/calc-pages').then(m => ({ default: m.RebarPage })));
 const TimberPage = lazy(() => import('@/pages/calc/calc-pages').then(m => ({ default: m.TimberPage })));
+const MasonryPage = lazy(() => import('@/pages/calc/masonry-page').then(m => ({ default: m.MasonryPage })));
+const PlasterPage = lazy(() => import('@/pages/calc/plaster-page').then(m => ({ default: m.PlasterPage })));
 const SmetaDashboardPage = lazy(() => import('@/pages/smeta/dashboard-page').then(m => ({ default: m.SmetaDashboardPage })));
 const NewEstimatePage = lazy(() => import('@/pages/smeta/new-estimate-page').then(m => ({ default: m.NewEstimatePage })));
 const EstimateDetailPage = lazy(() => import('@/pages/smeta/estimate-page').then(m => ({ default: m.EstimateDetailPage })));
@@ -191,6 +193,8 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
     { href: '/ai-smeta', icon: Calculator, key: 'smeta', label: 'Təmir və tikinti smetası (köhnə)' },
     { href: '/armatur-konvertor', icon: Ruler, key: 'rebarCalc' as TKey, label: 'Armatur konvertoru' },
     { href: '/taxta-kalkulyator', icon: Ruler, key: 'timberCalc' as TKey, label: 'Taxta kalkulyatoru' },
+    { href: '/horgu-kalkulyator', icon: Ruler, key: 'masonryCalc' as TKey, label: 'Hörgü kalkulyatoru' },
+    { href: '/suvaq-kalkulyator', icon: Ruler, key: 'plasterCalc' as TKey, label: 'Suvaq kalkulyatoru' },
   ];
   const [moreOpen, setMoreOpen] = useState(() => moreNav.some((n) => n.key === active));
   void r;
@@ -465,6 +469,8 @@ function ClerkRoutes() {
       <Route path="/f/:token">{params => <PublicSuspense t={t}><PhotoInvitePage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/armatur-konvertor">{() => <PublicSuspense t={t}><RebarPage/></PublicSuspense>}</Route>
       <Route path="/taxta-kalkulyator">{() => <PublicSuspense t={t}><TimberPage/></PublicSuspense>}</Route>
+      <Route path="/horgu-kalkulyator">{() => <PublicSuspense t={t}><MasonryPage/></PublicSuspense>}</Route>
+      <Route path="/suvaq-kalkulyator">{() => <PublicSuspense t={t}><PlasterPage/></PublicSuspense>}</Route>
       <Route path="/v/:code">{params => <PublicSuspense t={t}><VerifyPage code={params.code}/></PublicSuspense>}</Route>
       <Route path="/admin/statistika">{() => <ProtocolShell active="settingsNav" crumbs={[{ label: 'Statistika' }]} lang={lang} change={changeLang} t={t}><RentalStatsPage/></ProtocolShell>}</Route>
       <Route path="/protokollar">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları' }]} lang={lang} change={changeLang} t={t}><ProtocolListPage/></ProtocolShell>}</Route>

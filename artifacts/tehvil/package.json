@@ -9,7 +9,7 @@
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "start": "node server.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test src/lib/calc/construction.test.ts"
+    "test": "tsx --test src/lib/calc/construction.test.ts src/lib/calc/masonry-plaster.test.ts"
   },
   "devDependencies": {
     "tsx": "catalog:",
