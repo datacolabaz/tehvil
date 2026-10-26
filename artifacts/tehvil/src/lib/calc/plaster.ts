@@ -33,7 +33,7 @@ export interface PlasterMix {
 }
 export const defaultMix = (m: PlasterMaterial): PlasterMix => ({
   consumption: PLASTER_MATERIALS.find((x) => x.key === m)?.consumption ?? null, bagKg: m === 'gypsum' ? 30 : 25, reservePct: 10,
-  price: null, priceUnit: 'bag', mode: 'dry', ratioSand: 3, dryFactor: 1.3, cementDensity: 1300, sandDensity: 1600, cementBagKg: 50,
+  price: null, priceUnit: 'bag', mode: 'dry', ratioSand: 3, dryFactor: 1.3, cementDensity: 1300, sandDensity: 1600, cementBagKg: 40,
   cementPrice: null, sandPrice: null, sandPriceUnit: 'm3',
 });
 

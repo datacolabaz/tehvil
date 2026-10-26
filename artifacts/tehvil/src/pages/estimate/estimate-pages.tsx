@@ -10,6 +10,7 @@ import {
   downloadEstimate, estimateKey, estimatesKey, KIND, nf, PARAMS, SOURCE, STATUS_TONE, TYPE, useEstimate, useEstimates,
   type Category, type Element, type ElementType, type Estimate, type Item, type Question,
 } from '@/lib/estimate/api';
+import { WallsEstimatePage } from './walls-review';
 import '../home/finance.css';
 import '../expenses/expenses.css';
 import './estimate.css';
@@ -69,7 +70,8 @@ export function EstimateNewPage() {
       if (files.length) {
         setBusy('Fayllar yüklənir…');
         const u = await uploadFiles(r.id, files);
-        if (u.drawings) { setBusy('AI analizə başlayır…'); await api(`/ai-estimates/${r.id}/analyze`, 'POST', {}).catch(() => null); }
+        // Masonry and plaster: pages are chosen first, then the drawings are read.
+        if (u.drawings && f.kind !== 'masonry_plaster') { setBusy('AI analizə başlayır…'); await api(`/ai-estimates/${r.id}/analyze`, 'POST', {}).catch(() => null); }
         if (u.errors.length) sessionStorage.setItem(`es-msg-${r.id}`, u.errors.join('\n'));
       }
       await qc.invalidateQueries({ queryKey: estimatesKey });
@@ -93,7 +95,7 @@ export function EstimateNewPage() {
       {files.length > 0 && <ul className="es-files">{files.map((x, i) => <li key={i} className={CAD.test(x.name) ? 'bad' : ''}><FileText size={14} />{x.name}{CAD.test(x.name) && <em> — oxunmur, PDF kimi yükləyin</em>}<button className="icon-button" aria-label="Sil" onClick={() => setFiles(files.filter((_, j) => j !== i))}><X size={13} /></button></li>)}</ul>}
       <p className="fn-note"><Info size={14} />Fayl yoxdursa, smetanı yaradıb ölçüləri özünüz daxil edə bilərsiniz. DWG, DXF və IFC hələ oxunmur.</p>
       {err && <p className="form-error">{err}</p>}
-      <button className="button button-primary ex-big" disabled={!!busy || !f.name.trim()} onClick={create} data-testid="es-create">{busy ? <><LoaderCircle className="spin" size={18} />{busy}</> : <><Sparkles size={18} />{files.length ? 'Yarat və AI ilə analiz et' : 'Yarat'}</>}</button>
+      <button className="button button-primary ex-big" disabled={!!busy || !f.name.trim()} onClick={create} data-testid="es-create">{busy ? <><LoaderCircle className="spin" size={18} />{busy}</> : <><Sparkles size={18} />{!files.length ? 'Yarat' : f.kind === 'masonry_plaster' ? 'Yarat və səhifələri seç' : 'Yarat və AI ilə analiz et'}</>}</button>
     </section>
   </div>;
 }
@@ -117,7 +119,7 @@ export function EstimatePage({ id }: { id: string }) {
     if (!list?.length) return; setBusy(true); setMsg('');
     const u = await uploadFiles(id, Array.from(list));
     setMsg([...u.notes, ...u.errors].join('\n'));
-    if (u.drawings && e.aiConfigured) await api(`/ai-estimates/${id}/analyze`, 'POST', {}).catch(() => null);
+    if (u.drawings && e.aiConfigured && e.kind !== 'masonry_plaster') await api(`/ai-estimates/${id}/analyze`, 'POST', {}).catch(() => null);
     await refresh(); setBusy(false);
     if (fileInput.current) fileInput.current.value = '';
   };
@@ -125,7 +127,7 @@ export function EstimatePage({ id }: { id: string }) {
   return <div className="es-page">
     <div className="ex-head">
       <div><span className="eyebrow">AI Smeta · {KIND[e.kind]}</span><h1 className="font-display ex-title">{e.name}</h1></div>
-      <button className="button button-secondary" onClick={() => void downloadEstimate(id, e.name).catch((x) => setMsg(errorText(x)))} data-testid="es-export"><Download size={16} />Excel</button>
+      {e.kind !== 'masonry_plaster' && <button className="button button-secondary" onClick={() => void downloadEstimate(id, e.name).catch((x) => setMsg(errorText(x)))} data-testid="es-export"><Download size={16} />Excel</button>}
     </div>
 
     <section className="es-files-bar">
@@ -135,9 +137,10 @@ export function EstimatePage({ id }: { id: string }) {
       {msg && <p className="es-msg" role="status">{msg}</p>}
     </section>
 
-    {e.status === 'analyzing' && <div className="es-banner info" data-testid="es-analyzing"><LoaderCircle className="spin" size={18} /><div><b>AI çertyoju oxuyur</b><small>Ölçülər, kəsiklər və armatur qeydləri axtarılır. Bu 20–90 saniyə çəkə bilər; səhifəni bağlaya bilərsiniz.</small></div></div>}
+    {e.status === 'analyzing' && <div className="es-banner info" data-testid="es-analyzing"><LoaderCircle className="spin" size={18} /><div><b>AI çertyoju oxuyur</b><small>{e.kind === 'masonry_plaster' ? 'Mərtəbələr, divarlar, qapı və pəncərələr axtarılır.' : 'Ölçülər, kəsiklər və armatur qeydləri axtarılır.'} Bu 20–90 saniyə çəkə bilər; səhifəni bağlaya bilərsiniz.</small></div></div>}
     {e.status === 'failed' && <div className="es-banner risk"><AlertTriangle size={18} /><div><b>AI çertyoju oxuya bilmədi</b><small>{e.aiError}</small></div><button className="button button-secondary sm-btn-sm" onClick={analyze} disabled={busy}><RotateCcw size={14} />Yenidən</button></div>}
     {!e.aiConfigured && <div className="es-banner"><Info size={18} /><div><b>AI analizi hələ qoşulmayıb</b><small>Elementləri və ölçüləri aşağıda özünüz daxil edin — hesablama eyni qaydada işləyir.</small></div></div>}
+    {e.kind === 'masonry_plaster' && e.walls ? <WallsEstimatePage e={e} banner={null} /> : <>
     {e.aiConfigured && drawings.length > 0 && e.status !== 'analyzing' && !e.ai && e.status !== 'failed' && <div className="es-banner"><Sparkles size={18} /><div><b>Çertyoj yüklənib</b><small>AI ilə analiz edək?</small></div><button className="button button-primary sm-btn-sm" onClick={analyze} disabled={busy}>Analiz et</button></div>}
     {e.ai && <div className="es-ai-note"><Sparkles size={14} /><span>AI {e.ai.drawingKinds.length ? `gördü: ${e.ai.drawingKinds.map((k) => DRAWING[k] ?? k).join(', ')}` : 'çertyoju oxudu'}.{e.doc.architecturalOnly ? ' Konstruktiv (armatur) çertyoj tapılmadı — armatur miqdarları mühəndis tərəfindən yoxlanmalıdır.' : ''}{e.ai.unreadable.length ? ` Oxunmayan: ${e.ai.unreadable.slice(0, 4).join(', ')}.` : ''}</span></div>}
 
@@ -148,12 +151,13 @@ export function EstimatePage({ id }: { id: string }) {
     <SettingsPanel e={e} patch={patch} />
     <LinkPanel e={e} onDone={refresh} />
     <ContractorPanel e={e} onDone={refresh} />
+    </>}
     {e.versions.length > 0 && <details className="es-section"><summary>Versiyalar ({e.versions.length})</summary><ol className="fn-versions">{e.versions.map((v) => <li key={v.version}><b>v{v.version}</b><span>{REASON[v.reason] ?? v.reason}</span><small>{new Date(v.createdAt).toLocaleString('az-AZ', { dateStyle: 'short', timeStyle: 'short' })}</small><b>{v.totals.amount ? azn(Math.round(v.totals.amount * 100)) : '—'}</b></li>)}</ol></details>}
     <p className="fn-note"><HardHat size={14} />AI smetası mühəndis layihəsini və konstruktiv təhlükəsizlik yoxlamasını əvəz etmir. AI konstruktiv həlli dəyişmir; armaturun diametri, sinfi və düzülüşü mühəndis layihəsi ilə uyğunlaşdırılmalıdır.</p>
   </div>;
 }
 const DRAWING: Record<string, string> = { architectural_plan: 'memarlıq planı', structural_plan: 'konstruktiv plan', foundation_plan: 'fundament planı', rebar_detail: 'armatur detalları', section: 'kəsiklər', elevation: 'fasadlar', material_list: 'material cədvəli', sketch: 'eskiz', other: 'digər' };
-const REASON: Record<string, string> = { analysis: 'AI analizi', answers: 'Cavablar', edit: 'Düzəliş', export: 'Excel ixracı', manual: 'Saxlanılıb' };
+const REASON: Record<string, string> = { analysis: 'AI analizi', answers: 'Cavablar', edit: 'Düzəliş', export: 'Excel ixracı', manual: 'Saxlanılıb', 'walls-edited': 'Ölçülər düzəldildi', 'walls-ok': 'Bütün mərtəbələr təsdiqləndi' };
 
 /* -------------------------------------------------------------- questions */
 
