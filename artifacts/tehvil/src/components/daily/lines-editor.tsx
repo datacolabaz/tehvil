@@ -14,7 +14,11 @@ export interface DayLine {
   weak?: boolean;
   /** The receipt's own line total when it differs from quantity × price. */
   receiptTotal?: string | null;
+  /** A service line shown with quantity × price (days, hours, trips) instead of one fee. */
+  byQty?: boolean;
 }
+/** Work, fees and services: one amount is enough (quantity and unit only when asked for). */
+export const isService = (category: string) => (LINE_CATEGORIES.find((c) => c[0] === category)?.[2] ?? 'other') !== 'material';
 
 const UNITS = ['ədəd', 'kisə', 'ton', 'kq', 'm', 'm²', 'm³', 'l', 'gün', 'saat', 'reys', 'dəst'];
 export const num = (s: string) => { const t = String(s ?? '').replace(/\s/g, '').replace(',', '.'); if (!t) return null; const v = Number(t); return Number.isFinite(v) && v >= 0 ? v : NaN; };
@@ -45,17 +49,21 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
       const cents = lineCents(l);
       const problem = l.name || l.quantity || l.unitPrice || l.lineTotal ? lineProblem(l) : null;
       const receiptDiff = l.receiptTotal && cents != null && Math.round(Number(l.receiptTotal) * 100) !== cents;
+      const simple = isService(l.category) && !l.byQty && !l.quantity && !l.unitPrice;
       return <div key={l.key} className={`dl-line ${l.weak ? 'weak' : ''} ${problem ? 'bad' : ''}`} data-testid={`${testid}-line`}>
         <div className="dl-row1">
           <span className="dl-no">{i + 1}</span>
-          <input className="dl-name" value={l.name} onChange={(e) => set(l.key, { name: e.target.value })} placeholder="Məhsul və ya iş, məs. Sement M400" aria-label="Məhsulun və ya işin adı" data-testid={`${testid}-name`} />
+          <input className="dl-name" value={l.name} onChange={(e) => set(l.key, { name: e.target.value })} placeholder={isService(l.category) ? 'İş və ya xidmət, məs. Topoqrafiya, fəhlə haqqı' : 'Material, məs. Sement M400'} aria-label="Məhsulun və ya işin adı" data-testid={`${testid}-name`} />
           <button type="button" className="icon-button" aria-label="Sətri sil" onClick={() => onChange(lines.filter((x) => x.key !== l.key))} data-testid={`${testid}-remove`}><Trash2 size={15} /></button>
         </div>
         <select value={l.category} onChange={(e) => set(l.key, { category: e.target.value })} aria-label="Kateqoriya" data-testid={`${testid}-cat`}>
           <optgroup label="Material">{LINE_CATEGORIES.filter((c) => c[2] === 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
           <optgroup label="İş və ödənişlər">{LINE_CATEGORIES.filter((c) => c[2] !== 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
         </select>
-        <div className="dl-nums">
+        {simple ? <div className="dl-fee">
+          <label><span>Xidmət haqqı, AZN</span><input inputMode="decimal" value={l.lineTotal} onChange={(e) => set(l.key, { lineTotal: e.target.value })} placeholder="məs. 100" data-testid={`${testid}-fee`} /></label>
+          <button type="button" className="text-link" onClick={() => set(l.key, { byQty: true })} data-testid={`${testid}-byqty`}>Gün, saat və ya reys ilə hesabla</button>
+        </div> : <div className="dl-nums">
           <label><span>Miqdar</span><input inputMode="decimal" value={l.quantity} onChange={(e) => set(l.key, { quantity: e.target.value })} placeholder="50" data-testid={`${testid}-qty`} /></label>
           <label><span>Vahid</span><input list="dl-units" value={l.unit} onChange={(e) => set(l.key, { unit: e.target.value })} placeholder="kisə" data-testid={`${testid}-unit`} /></label>
           <label><span>Vahid qiymət</span><input inputMode="decimal" value={l.unitPrice} onChange={(e) => set(l.key, { unitPrice: e.target.value })} placeholder="9,50" data-testid={`${testid}-price`} /></label>
@@ -63,7 +71,8 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
             {auto ? <output data-testid={`${testid}-line-total`}>{azn(cents)}</output>
               : <input inputMode="decimal" value={l.lineTotal} onChange={(e) => set(l.key, { lineTotal: e.target.value })} placeholder="0,00" data-testid={`${testid}-total-input`} />}
           </label>
-        </div>
+          {isService(l.category) && <button type="button" className="text-link dl-back" onClick={() => set(l.key, { byQty: false, quantity: '', unit: '', unitPrice: '' })}>Yalnız ümumi məbləğ yaz</button>}
+        </div>}
         <div className="dl-row3">
           <input className="dl-note" value={l.note} onChange={(e) => set(l.key, { note: e.target.value })} placeholder="Qeyd (istəyə bağlı)" aria-label="Qeyd" />
           {showPaid && <div className="rl-seg dl-paid" role="radiogroup" aria-label="Ödəniş">
@@ -78,7 +87,10 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
       </div>;
     })}
     <datalist id="dl-units">{UNITS.map((u) => <option key={u} value={u} />)}</datalist>
-    <button type="button" className="button button-secondary dl-add" onClick={() => onChange([...lines, newLine({ category: lines[lines.length - 1]?.category ?? 'building_materials', paid: lines[lines.length - 1]?.paid ?? true })])} data-testid={`${testid}-add`}><Plus size={15} />Material və ya iş əlavə et</button>
+    <div className="dl-adds">
+      <button type="button" className="button button-secondary dl-add" onClick={() => { const last = [...lines].reverse().find((x) => !isService(x.category)); onChange([...lines, newLine({ category: last?.category ?? 'building_materials', paid: lines[lines.length - 1]?.paid ?? true })]); }} data-testid={`${testid}-add`}><Plus size={15} />Material əlavə et</button>
+      <button type="button" className="button button-secondary dl-add" onClick={() => onChange([...lines, newLine({ category: 'labor', paid: lines[lines.length - 1]?.paid ?? true })])} data-testid={`${testid}-add-service`}><Plus size={15} />İş və ya xidmət haqqı</button>
+    </div>
   </div>;
 }
 

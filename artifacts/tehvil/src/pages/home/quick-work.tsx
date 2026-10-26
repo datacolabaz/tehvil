@@ -48,10 +48,11 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
   const qc = useQueryClient();
   const prefilled = !!(roomId || category || equipmentId || smetaProjectId || title || receiptFile || pendingInvoice);
   const draftKey = `day:${homeId || 'any'}`;
-  const fresh = (): Draft => ({ ...empty({ category, roomId, title }), lines: mode === 'manual' ? [newLine()] : [] });
+  const startLines = () => (mode === 'manual' ? [newLine()] : mode === 'work' ? [newLine({ category: 'labor' })] : []);
+  const fresh = (): Draft => ({ ...empty({ category, roomId, title }), lines: startLines() });
   const [f, setF] = useState<Draft>(() => {
     const d = (!prefilled && loadDraft<Draft>(draftKey)) || empty({ category, roomId, title });
-    return { ...empty(), ...d, lines: d.lines?.length ? d.lines : mode === 'manual' ? [newLine()] : [] };
+    return { ...empty(), ...d, lines: d.lines?.length ? d.lines : (mode === 'manual' ? [newLine()] : mode === 'work' && !prefilled ? [newLine({ category: 'labor' })] : []) };
   });
   // A draft left from an earlier, unsaved form is never restored silently: the person sees it and can clear it.
   const [restored, setRestored] = useState<null | { lines: number; date: string }>(() => {
