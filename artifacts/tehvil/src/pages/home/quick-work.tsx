@@ -35,9 +35,9 @@ type Receipt = { invoice: Invoice; mediaUrl: string | null; pdf: boolean; aiDate
  */
 export function QuickWorkModal(p: Parameters<typeof DailyEntryModal>[0]) { return <DailyEntryModal {...p} />; }
 
-export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipmentId, smetaProjectId, title, mode = 'work', receiptFile, invoice: pendingInvoice, onClose, onSaved }: {
+export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipmentId, smetaProjectId, title, mode = 'work', heading, receiptFile, invoice: pendingInvoice, onClose, onSaved }: {
   homeId?: string; roomId?: string; category?: string; equipmentId?: string; smetaProjectId?: string; title?: string;
-  mode?: DailyMode; receiptFile?: File; invoice?: Invoice;
+  mode?: DailyMode; heading?: string; receiptFile?: File; invoice?: Invoice;
   onClose: () => void; onSaved: (workId: string | null, homeId: string) => void;
 }) {
   const homes = useListHomes({ query: { enabled: !fixedHome, queryKey: ['/api/homes'] } });
@@ -210,7 +210,7 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
   };
 
   const saveLabel = lines.length && !f.title.trim() && !files.length ? 'Xərclərə əlavə et' : 'Yadda saxla';
-  return <Modal open onClose={onClose} eyebrow={home.data?.home.name ?? 'Gündəlik qeyd'} title="Gündəlik qeyd əlavə et" wide
+  return <Modal open onClose={onClose} eyebrow={home.data?.home.name ?? 'Gündəlik qeyd'} title={heading ?? 'Gündəlik qeyd əlavə et'} wide
     footer={<>{lines.length > 0 && <span className="dl-foot-total">Cəmi: <b>{azn(dayTotal)}</b></span>}<button type="submit" form="quick-work" className="button button-primary hp-big" disabled={busy || !!reading} data-testid="button-save-work">{busy && <LoaderCircle className="spin" size={15} />}{busy ? 'Saxlanılır…' : saveLabel}</button></>}>
     <form id="quick-work" className="rl-form hp-quick" onSubmit={e => { void submit(e); }}>
       {restored && <div className="dl-restored" role="status" data-testid="day-restored">

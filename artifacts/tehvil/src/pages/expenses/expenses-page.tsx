@@ -102,6 +102,11 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
   const [cat, setCat] = useState('all');
   const [pay, setPay] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [daily, setDaily] = useState<null | { mode: DailyMode; file?: File; invoice?: Invoice }>(() => (new URLSearchParams(window.location.search).get('add') === '1' ? { mode: 'manual' } : null));
+  // "?add=1" (sidebar "Xərc əlavə et", landing) opens the form once; it is removed from the address so a refresh does not open it again.
+  useEffect(() => {
+    const u = new URL(window.location.href);
+    if (u.searchParams.has('add')) { u.searchParams.delete('add'); window.history.replaceState(window.history.state, '', `${u.pathname}${u.search}${u.hash}`); }
+  }, []);
   const [form, setForm] = useState<null | { existing: Expense }>(null);
   const [detail, setDetail] = useState<Expense | null>(null);
   const [busy, setBusy] = useState(false);
@@ -183,7 +188,7 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
 
     <Link href={`/homes/${book.homeId}/maliyye/${projectId}`} className="ex-more"><Settings2 size={15} />Ətraflı: podratçı, usta, ödəniş, avans və borc hesabları</Link>
 
-    {daily && <DailyEntryModal homeId={book.homeId} mode={daily.mode} receiptFile={daily.file} invoice={daily.invoice} onClose={() => { setDaily(null); void refresh(); }} onSaved={() => { setDaily(null); void refresh(); }} />}
+    {daily && <DailyEntryModal homeId={book.homeId} mode={daily.mode} heading={daily.mode === 'manual' ? 'Əl ilə xərc əlavə et' : daily.mode === 'work' ? 'Görülən işi qeyd et' : 'Qaimədən xərc əlavə et'} receiptFile={daily.file} invoice={daily.invoice} onClose={() => { setDaily(null); void refresh(); }} onSaved={() => { setDaily(null); void refresh(); }} />}
     {form && <SimpleExpenseForm d={d} projectId={projectId} invoice={null} existing={form.existing} onClose={() => setForm(null)} onSaved={refresh} />}
     {detail && <ExpenseDetail d={d} projectId={projectId} e={d.expenses.find((x) => x.id === detail.id) ?? detail} onClose={() => setDetail(null)} onEdit={(e) => { setDetail(null); setForm({ existing: e }); }} onChanged={refresh} />}
     {budgetOpen && <BudgetModal projectId={projectId} current={budget} onClose={() => setBudgetOpen(false)} onSaved={refresh} />}
