@@ -12,12 +12,12 @@ import './calc.css';
  * Results update as you type; copy, WhatsApp and print; FAQ and schema.org markup for search.
  */
 
-const NOTE = 'Nəticələr təxminidir. Real sifarişdə ölçü, marka və tədarükçü məlumatı təsdiqlənməlidir.';
-const SITE = 'https://tehvil.az';
+export const NOTE = 'Nəticələr təxminidir. Real sifarişdə ölçü, marka və tədarükçü məlumatı təsdiqlənməlidir.';
+export const SITE = 'https://tehvil.az';
 
 /* ------------------------------------------------------------ page frame */
 
-function useSeo(path: string, title: string, description: string, faq: [string, string][]) {
+export function useSeo(path: string, title: string, description: string, faq: [string, string][]) {
   useEffect(() => {
     const prevTitle = document.title;
     document.title = title;
@@ -52,13 +52,15 @@ function useSeo(path: string, title: string, description: string, faq: [string, 
   }, [path, title, description, faq]);
 }
 
-function Frame({ current, children }: { current: 'rebar' | 'timber'; children: ReactNode }) {
+export function Frame({ current, children }: { current: 'rebar' | 'timber' | 'masonry' | 'plaster'; children: ReactNode }) {
   return <div className="cx-page">
     <header className="cx-top">
       <Link href="/" className="cx-brand"><img src="/favicon.svg" alt="" width="28" height="28" />Tehvil.az</Link>
       <nav aria-label="Kalkulyatorlar">
         <Link href="/armatur-konvertor" className={current === 'rebar' ? 'on' : ''}>Armatur</Link>
         <Link href="/taxta-kalkulyator" className={current === 'timber' ? 'on' : ''}>Taxta</Link>
+        <Link href="/horgu-kalkulyator" className={current === 'masonry' ? 'on' : ''}>Hörgü</Link>
+        <Link href="/suvaq-kalkulyator" className={current === 'plaster' ? 'on' : ''}>Suvaq</Link>
       </nav>
     </header>
     <main className="cx-main">{children}</main>
@@ -69,7 +71,7 @@ function Frame({ current, children }: { current: 'rebar' | 'timber'; children: R
   </div>;
 }
 
-function NumInput({ label, value, onChange, unit, testid, placeholder }: { label: string; value: string; onChange: (v: string) => void; unit?: string; testid: string; placeholder?: string }) {
+export function NumInput({ label, value, onChange, unit, testid, placeholder }: { label: string; value: string; onChange: (v: string) => void; unit?: string; testid: string; placeholder?: string }) {
   const bad = Number.isNaN(parseNum(value) as number) || (parseNum(value) ?? 0) < 0;
   return <label className={`cx-field ${bad ? 'bad' : ''}`}><span>{label}</span>
     <span className="cx-input"><input inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} data-testid={testid} aria-invalid={bad} />{unit && <em>{unit}</em>}</span>
@@ -77,12 +79,12 @@ function NumInput({ label, value, onChange, unit, testid, placeholder }: { label
   </label>;
 }
 
-function Seg<T extends string>({ value, options, onChange, label, testid }: { value: T; options: [NoInfer<T>, string][]; onChange: (v: NoInfer<T>) => void; label: string; testid: string }) {
+export function Seg<T extends string>({ value, options, onChange, label, testid }: { value: T; options: [NoInfer<T>, string][]; onChange: (v: NoInfer<T>) => void; label: string; testid: string }) {
   return <div className="cx-seg" role="radiogroup" aria-label={label}>{options.map(([k, l]) => <button key={k} type="button" role="radio" aria-checked={value === k} className={value === k ? 'on' : ''} onClick={() => onChange(k)} data-testid={`${testid}-${k}`}>{l}</button>)}</div>;
 }
 
 /** Copy, WhatsApp, print. The text is what the person sees, line by line. */
-function ShareBar({ text }: { text: string }) {
+export function ShareBar({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => { try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { window.prompt('Kopyalayın:', text); } };
   return <div className="cx-share" data-testid="cx-share">
@@ -92,7 +94,7 @@ function ShareBar({ text }: { text: string }) {
   </div>;
 }
 
-function Faq({ items }: { items: [string, string][] }) {
+export function Faq({ items }: { items: [string, string][] }) {
   return <section className="cx-faq" aria-labelledby="cx-faq-h"><h2 id="cx-faq-h">Tez-tez verilən suallar</h2>
     {items.map(([q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}
   </section>;
@@ -271,6 +273,12 @@ export function CalcBlocks() {
       </Link>
       <Link href="/taxta-kalkulyator" className="cx-block" data-testid="cx-block-timber">
         <b>Taxta kalkulyatoru</b><span>3×10, 5×10 və istənilən ölçü: m³, m², ədəd, qiymət</span><em>3×10 sm, 3 m: 0,009 m³ · 0,3 m²</em><ArrowRight size={16} />
+      </Link>
+      <Link href="/horgu-kalkulyator" className="cx-block" data-testid="cx-block-masonry">
+        <b>Hörgü kalkulyatoru</b><span>Mişardaşı, qırmızı və silikat kərpic, qazbeton: say, məhlul, xərc</span><em>Bir neçə divar, qapı və pəncərələr çıxılır</em><ArrowRight size={16} />
+      </Link>
+      <Link href="/suvaq-kalkulyator" className="cx-block" data-testid="cx-block-plaster">
+        <b>Suvaq kalkulyatoru</b><span>Sement-qum və gips: sahə, quru qarışıq, kisə, sement və qum</span><em>Bir və ya iki tərəf, daxili və xarici divarlar</em><ArrowRight size={16} />
       </Link>
     </div>
   </section>;
