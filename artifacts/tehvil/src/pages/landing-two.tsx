@@ -5,6 +5,7 @@ import { Brand } from '@/components/kit';
 import { LanguagePicker } from '@/components/language-picker';
 import type { Lang } from '@/lib/i18n';
 import './landing-two.css';
+import { CalcBlocks } from './calc/calc-pages';
 
 /**
  * Landing (Azerbaijani): two tools only — AI Smeta and "Evimin xərcləri"; the home history is a small link.
@@ -56,6 +57,7 @@ export function TwoToolsLanding({ lang, change }: { lang: Lang; change: (v: Lang
       <Link href="/sign-up?redirect=/homes" className="l2-history" data-testid="link-history"><History size={16} />Evimin tarixçəsi — tikinti fotoları mərhələlər üzrə<ArrowRight size={14} /></Link>
     </section>
 
+    <CalcBlocks />
     <section className="l2-how wrap" aria-label="Necə işləyir">
       <div><h3>AI Smeta necə işləyir</h3><ol><li><b>Faylı yükləyin.</b> Çertyoj PDF-i, plan şəkli və ya mühəndisin material siyahısı.</li><li><b>Suallara cavab verin.</b> AI çertyojda görə bilmədiyi ölçünü və armatur diametrini soruşur; “bilmirəm” də demək olar.</li><li><b>Smetanı alın.</b> Beton m³, armatur kq/ton, qəlib və taxta — hər sətrin izahı ilə. Qiyməti yazın, Excel-ə çıxarın.</li></ol></div>
       <div><h3>Evimin xərcləri necə işləyir</h3><ol><li><b>Evi bir dəfə yaradın.</b> Yalnız ad kifayətdir; büdcə istəyə bağlıdır.</li><li><b>Qəbzi çəkin və ya məbləği yazın.</b> AI satıcını, tarixi və məbləği oxuyur, siz təsdiqləyirsiniz.</li><li><b>Görün və yükləyin.</b> Ümumi xərc, bu ay, büdcədən qalan, kateqoriyalar və Excel.</li></ol></div>

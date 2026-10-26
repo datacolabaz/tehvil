@@ -11,6 +11,7 @@ import {
   WalletCards, X,
   KeyRound,
   Layers, Wallet,
+  Ruler,
 } from 'lucide-react';
 import {
   useListProjects, useCreateProject, useGetProjectDashboard, useListRooms, useCreateRoom,
@@ -48,6 +49,8 @@ import './smeta.css';
 import './realtor.css';
 import './home.css';
 
+const RebarPage = lazy(() => import('@/pages/calc/calc-pages').then(m => ({ default: m.RebarPage })));
+const TimberPage = lazy(() => import('@/pages/calc/calc-pages').then(m => ({ default: m.TimberPage })));
 const SmetaDashboardPage = lazy(() => import('@/pages/smeta/dashboard-page').then(m => ({ default: m.SmetaDashboardPage })));
 const NewEstimatePage = lazy(() => import('@/pages/smeta/new-estimate-page').then(m => ({ default: m.NewEstimatePage })));
 const EstimateDetailPage = lazy(() => import('@/pages/smeta/estimate-page').then(m => ({ default: m.EstimateDetailPage })));
@@ -186,6 +189,8 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
     { href: '/kiraye', icon: KeyRound, key: 'rentalsNav' },
     { href: '/history', icon: History, key: 'repairHistory' },
     { href: '/ai-smeta', icon: Calculator, key: 'smeta', label: 'Təmir və tikinti smetası (köhnə)' },
+    { href: '/armatur-konvertor', icon: Ruler, key: 'rebarCalc' as TKey, label: 'Armatur konvertoru' },
+    { href: '/taxta-kalkulyator', icon: Ruler, key: 'timberCalc' as TKey, label: 'Taxta kalkulyatoru' },
   ];
   const [moreOpen, setMoreOpen] = useState(() => moreNav.some((n) => n.key === active));
   void r;
@@ -458,6 +463,8 @@ function ClerkRoutes() {
       <Route path="/kiraye/:id">{params => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Kirayə' }]} lang={lang} change={changeLang} t={t}><RentalPage id={params.id}/></ProtocolShell>}</Route>
       <Route path="/k/:token">{params => <PublicSuspense t={t}><RentalInvitePage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/f/:token">{params => <PublicSuspense t={t}><PhotoInvitePage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/armatur-konvertor">{() => <PublicSuspense t={t}><RebarPage/></PublicSuspense>}</Route>
+      <Route path="/taxta-kalkulyator">{() => <PublicSuspense t={t}><TimberPage/></PublicSuspense>}</Route>
       <Route path="/v/:code">{params => <PublicSuspense t={t}><VerifyPage code={params.code}/></PublicSuspense>}</Route>
       <Route path="/admin/statistika">{() => <ProtocolShell active="settingsNav" crumbs={[{ label: 'Statistika' }]} lang={lang} change={changeLang} t={t}><RentalStatsPage/></ProtocolShell>}</Route>
       <Route path="/protokollar">{() => <ProtocolShell crumbs={[{ label: 'Təhvil protokolları' }]} lang={lang} change={changeLang} t={t}><ProtocolListPage/></ProtocolShell>}</Route>
