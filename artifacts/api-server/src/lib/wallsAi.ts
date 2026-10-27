@@ -49,7 +49,7 @@ const TOOL = {
                   kind: { type: "string", enum: ["external", "internal", "partition"] },
                   length: reading("Length in metres. For external walls the outside dimension of that side; for internal walls the clear length between the walls it meets"),
                   thickness: reading("Wall thickness in metres (e.g. 0.40, 0.20, 0.10)"),
-                  junctions: reading("How many other walls this wall's length runs INTO at its ends (so the overlap is not counted twice); 0 for free ends"),
+                  junctions: reading("External walls: how many of its two ends are corners with another external wall (0-2), so the corner is not counted twice. Internal walls / partitions: how many walls its ends meet (their clear length already avoids double counting)"),
                   openings: {
                     type: "array",
                     items: {
@@ -82,7 +82,7 @@ Rules:
 - Report only what the drawings show. Prefer written dimension lines and schedules ("how": "dimension"). Use the scale only when a scale is printed, and then say "how": "scale". Never invent a value: use null and list it in "unreadable".
 - Convert mm and cm to metres.
 - One entry per floor plan. Walls: every masonry wall on that floor, external walls side by side, then internal walls and partitions. Do not list reinforced-concrete columns or the same wall twice.
-- Length: external walls by the outside dimension of each side; internal walls by the clear length between the walls they meet. Count in "junctions" how many walls this wall's length runs into at its ends.
+- Length: external walls by the outside dimension of each side; internal walls by the clear length between the walls they meet. In "junctions" give, for an external wall, how many of its ends are corners with another external wall (0-2); for an internal wall, how many walls its ends meet.
 - Openings: each door and window in the wall it belongs to; group identical ones with "count". Window heights usually come from the window schedule or elevations.
 - Floor height: floor-to-floor from a section; slab thickness from a section or note. Null when not shown.
 - confidence: 1 = printed dimension, 0.6–0.8 = derived, below 0.5 = unsure (prefer null).

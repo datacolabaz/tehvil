@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Check, CheckCircle2, FileText, Info, LoaderCircle, Plus, RotateCcw, Save, Sparkles, Trash2, X } from 'lucide-react';
 import { api, errorText } from '@/lib/finance/api';
 import { estimateKey, KIND, type Estimate, type WallKind, type WallsView, type WFloor, type WOpening, type WParam, type WWall } from '@/lib/estimate/api';
+import { MasonryPanel } from './masonry-panel';
 import './walls.css';
 
 /*
@@ -40,7 +41,8 @@ export function WallsEstimatePage({ e, banner }: { e: Estimate; banner: React.Re
     {msg && <p className="es-msg" role="alert">{msg}</p>}
     {w.analyzedAt && <div className="es-ai-note"><Sparkles size={14} /><span>AI {w.drawingKinds.length ? `gördü: ${w.drawingKinds.map((k) => DK[k] ?? k).join(', ')}` : 'çertyojları oxudu'}.{w.scaleNote ? ` Miqyas: ${w.scaleNote}.` : ''}{w.unreadable.length ? ` Oxunmayan: ${w.unreadable.slice(0, 5).join(', ')}.` : ''}{w.notes ? ` ${w.notes}` : ''}</span></div>}
     <Review e={e} w={w} onSaved={refresh} />
-    <p className="fn-note"><Info size={14} />Növbəti mərhələdə təsdiqlənmiş ölçülərdən hər mərtəbə üçün hörgü (daş, blok, mişardaşı, məhlul, sement 40 kq və qum) və daxili/xarici suvaq hesablanacaq. AI yalnız ölçüləri oxuyur — hesablamanı proqram aparır.</p>
+    <MasonryPanel e={e} w={w} />
+    <p className="fn-note"><Info size={14} />AI yalnız ölçüləri oxuyur — hesablamanı proqram aparır. Növbəti mərhələdə daxili və xarici suvaq (sement 40 kq, qum, gips ayrıca) hesablanacaq.</p>
   </>;
 }
 const DK: Record<string, string> = { floor_plan: 'mərtəbə planı', section: 'kəsik', elevation: 'fasad', structural_plan: 'konstruktiv plan', site_plan: 'baş plan', detail: 'detal', other: 'digər' };

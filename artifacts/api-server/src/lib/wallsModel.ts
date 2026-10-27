@@ -16,6 +16,8 @@ export interface WallsDoc {
   /** Selected PDF pages per file id (1-based). */
   pages: Record<string, number[]>;
   drawingKinds: string[]; scaleNote: string | null; unreadable: string[]; notes: string | null; analyzedAt: string | null;
+  /** Stage 2: materials and mortar chosen by the person (see wallsCalc.ts). */
+  masonry?: import("./wallsCalc").MasonrySettings;
 }
 export const emptyWalls = (): WallsDoc => ({ floors: [], pages: {}, drawingKinds: [], scaleNote: null, unreadable: [], notes: null, analyzedAt: null });
 

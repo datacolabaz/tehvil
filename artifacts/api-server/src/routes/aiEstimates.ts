@@ -11,6 +11,7 @@ import { isUuid } from "../lib/homeAccess";
 import { aiConfigured, AiNotConfigured } from "../lib/invoiceAi";
 import { analyzeDrawings, architecturalOnly, mergeElements } from "../lib/drawingAi";
 import { analyzeWalls, MAX_PAGES } from "../lib/wallsAi";
+import { defaultMasonry, masonryCalc, METHOD_LABEL, sanitizeMasonry, UNIT_MATERIALS } from "../lib/wallsCalc";
 import { applyEdit, emptyWalls, KIND_LABEL, mergeWalls, PARAM_LABEL, wallsState, type WallsDoc } from "../lib/wallsModel";
 import {
   CATEGORY_LABEL, computeEstimate, DEFAULT_SETTINGS, questionsFor, STATUS_LABEL, type Category, type Element, type EstimateDoc, type ManualItem, type Param,
@@ -126,11 +127,31 @@ router.get("/ai-estimates/:estimateId", async (req, res): Promise<void> => {
     versions: versions.map((v) => ({ ...v, createdAt: v.createdAt.toISOString() })),
     contractor: e.contractor ?? null,
     comparison: await comparison(e, result),
-    walls: isWalls(e) ? { ...wallsOf(e), state: wallsState(wallsOf(e)), maxPages: MAX_PAGES, kindLabels: KIND_LABEL, paramLabels: PARAM_LABEL } : null,
+    walls: isWalls(e) ? wallsView(wallsOf(e)) : null,
   });
 });
 
 /* ---------------------------------------------------------------- hörgü və suvaq: pages and review */
+
+function wallsView(w: WallsDoc) {
+  const masonry = w.masonry ?? defaultMasonry();
+  return {
+    ...w, masonry, state: wallsState(w), maxPages: MAX_PAGES, kindLabels: KIND_LABEL, paramLabels: PARAM_LABEL,
+    masonryCalc: masonryCalc(w, masonry), unitMaterials: UNIT_MATERIALS, methodLabels: METHOD_LABEL,
+  };
+}
+
+/** Stage 2: materials per wall kind (or per wall) and the mortar recipe; quantities are recalculated on every read. */
+router.put("/ai-estimates/:estimateId/masonry", async (req, res): Promise<void> => {
+  const e = await own(req, res); if (!e) return;
+  if (!isWalls(e)) return bad(res, "Bu smeta növü üçün deyil");
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  if (typeof body.masonry !== "object" || body.masonry == null || Array.isArray(body.masonry)) return bad(res, "Hörgü parametrlərini göndərin");
+  const w = wallsOf(e);
+  w.masonry = sanitizeMasonry(body.masonry, w);
+  await db.update(aiEstimatesTable).set({ doc: withWalls(e, w) as unknown as Record<string, unknown>, updatedAt: new Date() }).where(eq(aiEstimatesTable.id, e.id));
+  res.json({ masonry: w.masonry, masonryCalc: masonryCalc(w, w.masonry) });
+});
 
 /** Which pages of a PDF go to the AI (the floor plans, a section, the window schedule). */
 router.put("/ai-estimates/:estimateId/pages", async (req, res): Promise<void> => {
