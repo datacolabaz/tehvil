@@ -42,7 +42,26 @@ export interface WallsView {
   floors: WFloor[]; pages: Record<string, number[]>; drawingKinds: string[]; scaleNote: string | null; unreadable: string[]; notes: string | null; analyzedAt: string | null;
   state: { issues: { floorId: string; issues: { path: string; text: string }[] }[]; allConfirmed: boolean; openIssues: number };
   maxPages: number; kindLabels: Record<WallKind, string>; paramLabels: Record<string, string>;
+  masonry: MasonrySettings; masonryCalc: MasonryCalc;
+  unitMaterials: UnitMaterialInfo[]; methodLabels: Record<MasonryMethod, string>;
 }
+/* Stage 2 — mirrors lib/wallsCalc.ts */
+export type UnitMaterial = 'red_brick' | 'silicate_brick' | 'misar' | 'concrete_block' | 'aerated' | 'custom';
+export type MasonryMethod = 'single' | 'double' | 'auto';
+export interface UnitMaterialInfo { key: UnitMaterial; label: string; l: number | null; h: number | null; w: number | null; joint: number; binder: 'mortar' | 'glue'; note: string }
+export interface MasonrySpec { id: string; name: string; material: UnitMaterial; l: number | null; h: number | null; w: number | null; jointH: number; jointV: number; method: MasonryMethod; reservePct: number; binder: 'mortar' | 'glue' }
+export interface MortarSettings { mode: 'geometry' | 'norm'; normM3PerM3: number | null; ratioSand: number; cementBagKg: number; dryFactor: number; cementDensity: number; sandDensity: number; reservePct: number }
+export interface MasonrySettings { specs: MasonrySpec[]; byKind: Record<WallKind, string | null>; byWall: Record<string, string>; mortar: MortarSettings }
+export interface WallCalc {
+  wallId: string; name: string; kind: WallKind; specId: string | null; status: 'ok' | 'no-material' | 'no-size' | 'no-norm' | 'error';
+  L: number; deduct: number; Leff: number; H: number; T: number; gross: number; openings: number; net: number; volume: number;
+  rows: number | null; rowsExact: number | null; Tm: number | null; units: number | null; mortarM3: number | null; binder: 'mortar' | 'glue' | null; notes: string[];
+}
+export interface GroupTotal { kind: WallKind; walls: number; gross: number; openings: number; net: number; volume: number }
+export interface UnitTotal { specId: string; name: string; size: string; reservePct: number; unitsRaw: number; units: number; volume: number }
+export interface MortarTotal { wetM3: number; reserveM3: number; dryM3: number; cementKg: number; cementBags: number; sandM3: number; sandTon: number; glueM3: number }
+export interface FloorCalc { floorId: string; name: string; confirmed: boolean; height: number | null; walls: WallCalc[]; groups: GroupTotal[]; units: UnitTotal[]; mortar: MortarTotal | null; complete: boolean }
+export interface MasonryCalc { floors: FloorCalc[]; house: { groups: GroupTotal[]; units: UnitTotal[]; mortar: MortarTotal | null }; final: boolean; issues: string[]; assumptions: string[] }
 export interface EstimateListItem { id: string; name: string; kind: string; status: string; openQuestions: number; itemCount: number; total: number; homeId: string | null; updatedAt: string }
 
 export const estimatesKey = ['ai-estimates'];
