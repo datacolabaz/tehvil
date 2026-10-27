@@ -64,6 +64,8 @@ export const homesTable = pgTable("homes", {
   /** construction | renovation | living */
   stage: varchar("stage", { length: 16 }).notNull().default("living"),
   coverMediaId: uuid("cover_media_id"),
+  /** The construction stage the owner is working on now (photos from the big camera button go there). */
+  currentWorkId: uuid("current_work_id"),
   notes: text("notes").notNull().default(""),
   /** QR page: off | basic | history */
   publicLevel: varchar("public_level", { length: 12 }).notNull().default("basic"),
@@ -182,6 +184,10 @@ export const homeMediaTable = pgTable("home_media", {
   sha256: varchar("sha256", { length: 64 }).notNull().default(""),
   /** Uploaded through a photo invitation link (no account); uploaded_by_user_id is then "invite:<id>". */
   inviteId: uuid("invite_id"),
+  /** Construction diary: floor (0 basement, 1–9, 10 roof), room kind and which template shot — all optional. */
+  floorLevel: integer("floor_level"),
+  roomKind: varchar("room_kind", { length: 24 }),
+  shotKey: varchar("shot_key", { length: 32 }),
 }, (t) => [
   uniqueIndex("home_media_object_idx").on(t.objectPath),
   index("home_media_home_idx").on(t.homeId, t.createdAt),
@@ -221,6 +227,10 @@ export const workRecordsTable = pgTable("work_records", {
   smetaProjectId: uuid("smeta_project_id"),
   /** Order chosen by the owner on the history timeline (null: by date). */
   sortOrder: integer("sort_order"),
+  /** Construction diary template this stage came from (photo checklist and hint); null for own stages. */
+  templateKey: varchar("template_key", { length: 32 }),
+  /** Hidden from the diary by the owner (not deleted: its photos stay). */
+  hiddenAt: timestamp("hidden_at", { withTimezone: true }),
   createdByUserId: user("created_by_user_id").notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
@@ -376,7 +386,8 @@ export const homeSharesTable = pgTable("home_shares", {
 export const stagePhotoInvitesTable = pgTable("stage_photo_invites", {
   id: uuid("id").primaryKey().defaultRandom(),
   homeId: uuid("home_id").notNull().references(() => homesTable.id, { onDelete: "cascade" }),
-  workId: uuid("work_id").notNull().references(() => workRecordsTable.id, { onDelete: "cascade" }),
+  /** null = the whole construction diary: the person picks the stage (photos only). */
+  workId: uuid("work_id").references(() => workRecordsTable.id, { onDelete: "cascade" }),
   tokenHash: varchar("token_hash", { length: 64 }).notNull(),
   permission: varchar("permission", { length: 16 }).notNull().default("photos"),
   label: varchar("label", { length: 120 }).notNull().default(""),
