@@ -1,4 +1,4 @@
-# Çertyojdan hörgü və suvaq (1-ci və 2-ci mərhələ, 27.10.2026)
+# Çertyojdan hörgü və suvaq (1–3-cü mərhələ, 27.10.2026)
 
 AI Smeta-da yeni növ var: **"Hörgü və suvaq (çertyojdan)"** (`kind = masonry_plaster`). 1-ci mərhələdə çertyoj yüklənir, səhifələr seçilir, AI ölçüləri oxuyur və istifadəçi hər mərtəbəni yoxlayıb təsdiqləyir. Hesablama (hörgü, suvaq, qiymət, Excel/PDF) növbəti mərhələlərdədir.
 
@@ -84,6 +84,43 @@ Hər divarın hesabı açılıb baxıla bilir ("L 10 m × H 3 m − boşluqlar �
 - Unit: 9 yeni test, əllə hesablanmış nümunələrlə. Məsələn, 10 m xarici divar, 25 sm, 2 künc, 1,5×1,5 m pəncərə, qoşa kərpic: xalis 27 m², 2 769,2 ədəd, ehtiyatla 2 908, məhlul 1,35 m³, 12 kisə sement. API unit testləri cəmi 34/34.
 - `masonry-e2e`: 26/26. Brauzer (`masonry-flow`, 1280 və 390 px): 46/46.
 
+## 3-cü mərhələ: suvaq hesabı
+"Suvaq hesabı" bölməsi hörgü hesabının altındadır. Bu bölmə də yalnız təsdiqlənmiş mərtəbələri hesablayır və bütün mərtəbələr təsdiqlənənə qədər nəticə "İlkin" kimi göstərilir. Hesablamanı server aparır (`src/lib/wallsPlaster.ts`), AI iştirak etmir.
+
+**Divarların üzləri:**
+- **Xarici divar:** içəri üzü daxili suvaq, fasad isə xarici suvaq sayılır. Hər ikisi standart olaraq seçilidir.
+- **Daxili divar və arakəsmə:** 0, 1 və ya 2 tərəf suvaqlanır, standart olaraq 2 tərəf. Belə divarın fasadı olmur.
+- Tərəfləri divar növü üzrə seçmək olar, ayrı bir divar üçün dəyişmək də olar.
+
+**Düsturlar:**
+- **Hündürlük:**
+  - daxili suvaq: H = mərtəbə − plitə (döşəmədən tavana);
+  - fasad: mərtəbənin tam hündürlüyü (plitənin kənarı da suvaqlanır).
+- **Uzunluq:**
+  - fasad: xarici ölçü L;
+  - xarici divarın içəri üzü: L − künc × T;
+  - daxili divar: xalis uzunluq.
+- **Sahə:** üzün sahəsi = uzunluq × hündürlük − boşluqlar, hər üzdən bir dəfə çıxılır. Bu, suvaqlanan tərəflərin sayına vurulur.
+- **Yan səthlər:** yalnız dərinliyi yazılanda əlavə olunur: Σ say × (2h + w) × dərinlik, hər boşluq üçün bir dəfə (daxili və fasad üçün ayrıca).
+- **Sement-qum:**
+  - həcm = sahə × qalınlıq, sonra ehtiyat;
+  - quru həcm = × 1,3; sement : qum = 1 : N (standart 1:3);
+  - sement → 40 kq-lıq kisə (yuxarı yuvarlaqlaşdırılır), qum m³ və tonla.
+- **Gips:** kq = sahə × mm × sərfiyyat (0,9, fərziyyə) × (1 + ehtiyat) → kisə (30 kq). Sement və qum hesablanmır. Sərfiyyat yazılmasa, gips hesablanmır və bu, məsələ kimi göstərilir.
+- **Standart parametrlər:** daxili 15 mm, xarici 20 mm, ehtiyat 10%. Hamısı dəyişdirilə bilir.
+
+**Nəticə:**
+- Hər mərtəbədə divar növü üzrə daxili və fasad sahəsi göstərilir. Daxili və xarici suvağın həcmi, sementi, qumu və ya gipsi ayrıca verilir.
+- Hər divarın hesabı açılıb baxıla bilir.
+- "Bütün ev" bölməsində daxili və xarici ayrıca göstərilir, sonra ümumi sahə, sement (bir dəfə yuvarlaqlaşdırılır), qum və gips cəmi verilir.
+- Hörgü məhlulunun sementi bura daxil deyil.
+
+**API:** `PUT /ai-estimates/:id/plaster {plaster}`. Parametrlər `doc.walls.plaster` içində saxlanılır, nəticə `walls.plasterCalc`-dadır.
+
+**Testlər (3-cü mərhələ):**
+- Unit: 7 yeni test, əllə hesablanmış nümunələrlə. Məsələn: xarici divar 10 m, 40 sm, 2 künc, boşluqlar 6,6 m². İçəri üz 9,2 × 3 − 6,6 = 21 m², fasad 10 × 3,2 − 6,6 = 25,4 m². Daxili 44,82 m², 15 mm: 8 kisə sement. Fasad 20 mm: 6 kisə. Cəmi 14 kisə. API unit testləri cəmi 41/41.
+- `plaster-e2e`: 21/21. Brauzer (`plaster-flow`, 1280 və 390 px): 38/38.
+- Reqressiya: `walls-e2e` 29/29, `masonry-e2e` 26/26, `estimate-e2e` 55/55, `walls-flow`, `masonry-flow`, build.
+
 ## Növbəti mərhələlər
-- **3:** suvaq. Daxili/xarici, tərəflər, gips ayrıca.
 - **4:** qiymətlər, smeta bölmələri, Excel, "PDF kimi saxla".

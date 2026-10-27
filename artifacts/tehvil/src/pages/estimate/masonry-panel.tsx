@@ -12,13 +12,13 @@ import { estimateKey, type Estimate, type MasonryMethod, type MasonrySettings, t
 
 const uid = () => `s-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 /** 1 234,5 — space between thousands, comma for decimals. */
-const nf = (v: number | null | undefined, d = 2) => {
+export const nf = (v: number | null | undefined, d = 2) => {
   if (v == null || !Number.isFinite(v)) return '—';
   const [i, f] = (Math.round(v * 10 ** d) / 10 ** d).toFixed(d).split('.');
   const frac = (f ?? '').replace(/0+$/, '');
   return `${i.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}${frac ? `,${frac}` : ''}`;
 };
-const int = (v: number) => nf(Math.round(v), 0);
+export const int = (v: number) => nf(Math.round(v), 0);
 const KINDS: WallKind[] = ['external', 'internal', 'partition'];
 const METHODS: MasonryMethod[] = ['single', 'double', 'auto'];
 
@@ -142,7 +142,7 @@ function SpecCard({ s, info, methods, onChange, onRemove }: { s: MasonrySpec; in
   </div>;
 }
 
-function Num({ label, unit, v, onChange, testid, hint, need }: { label: string; unit?: string; v: number | null; onChange: (v: number | null) => void; testid: string; hint?: string; need?: boolean }) {
+export function Num({ label, unit, v, onChange, testid, hint, need }: { label: string; unit?: string; v: number | null; onChange: (v: number | null) => void; testid: string; hint?: string; need?: boolean }) {
   const [t, setT] = useState(v == null ? '' : String(v).replace('.', ','));
   useEffect(() => { const cur = t.replace(',', '.'); if ((v == null && cur !== '') || (v != null && Number(cur) !== v)) setT(v == null ? '' : String(v).replace('.', ',')); }, [v]); // eslint-disable-line react-hooks/exhaustive-deps
   const bad = t.trim() !== '' && !(Number(t.replace(',', '.')) >= 0);
