@@ -78,6 +78,8 @@ const HomeStagesPage = lazy(() => import('@/pages/home/stages-page').then(m => (
 const HomeFinancePage = lazy(() => import('@/pages/home/finance-page').then(m => ({ default: m.HomeFinancePage })));
 const ProjectFinancePage = lazy(() => import('@/pages/home/finance-page').then(m => ({ default: m.ProjectFinancePage })));
 const FinanceInvitePage = lazy(() => import('@/pages/home/finance-page').then(m => ({ default: m.FinanceInvitePage })));
+const DiaryPage = lazy(() => import('@/pages/home/diary-page').then(m => ({ default: m.DiaryPage })));
+const OtherInfoPage = lazy(() => import('@/pages/home/diary-page').then(m => ({ default: m.OtherInfoPage })));
 const PhotoStagesPage = lazy(() => import('@/pages/home/photo-stages-page').then(m => ({ default: m.PhotoStagesPage })));
 const ExpensesEntryPage = lazy(() => import('@/pages/expenses/expenses-page').then(m => ({ default: m.ExpensesEntryPage })));
 const ExpenseBookPage = lazy(() => import('@/pages/expenses/expenses-page').then(m => ({ default: m.ExpenseBookPage })));
@@ -122,19 +124,20 @@ const RentalInvitePage = lazy(() => import('@/pages/rental/rental-pages').then(m
 const VerifyPage = lazy(() => import('@/pages/protocol/verify-page').then(m => ({ default: m.VerifyPage })));
 const RentalStatsPage = lazy(() => import('@/pages/rental/rental-pages').then(m => ({ default: m.RentalStatsPage })));
 
-/** Sections of one home in the digital home passport (Azerbaijani, like the brief). */
+/**
+ * One home: the construction diary comes first; sharing; everything else under "Digər məlumatlar".
+ * The older sections keep their addresses (nothing removed) — HOME_SECTIONS names them for the breadcrumbs.
+ */
 const HOME_NAV = [
-  { path: '', key: 'profile', label: 'Ümumi məlumat', icon: House },
-  { path: '/tarixce', key: 'stages', label: 'Tikinti tarixçəsi', icon: ImagePlus },
-  { path: '/foto-merheleler', key: 'photoStages', label: 'Fotolar mərhələlər üzrə', icon: Layers },
-  { path: '/rooms', key: 'rooms', label: 'Otaqlar', icon: DoorOpen },
-  { path: '/history', key: 'history', label: 'İşlər və tarixçə', icon: History },
-  { path: '/map', key: 'map', label: 'Texniki məlumatlar', icon: Cable },
-  { path: '/equipment', key: 'equipment', label: 'Materiallar və avadanlıqlar', icon: Boxes },
-  { path: '/maliyye', key: 'finance', label: 'Maliyyə', icon: Wallet },
-  { path: '/documents', key: 'documents', label: 'Sənədlər', icon: FileText },
-  { path: '/sharing', key: 'sharing', label: 'Paylaşım və giriş', icon: QrCode },
+  { path: '', key: 'diary', label: 'Tikinti tarixçəsi', icon: ImagePlus },
+  { path: '/sharing', key: 'sharing', label: 'Usta və ailəni dəvət et', icon: QrCode },
+  { path: '/diger', key: 'other', label: 'Digər məlumatlar', icon: Layers },
 ] as const;
+const HOME_SECTIONS: Record<string, string> = {
+  diary: 'Tikinti tarixçəsi', other: 'Digər məlumatlar', profile: 'Ümumi məlumat', stages: 'Mərhələlər — ətraflı', photoStages: 'Fotolar mərhələlər üzrə', rooms: 'Otaqlar',
+  history: 'İşlər və tarixçə', map: 'Texniki məlumatlar', equipment: 'Materiallar və avadanlıqlar', finance: 'Maliyyə', documents: 'Sənədlər', sharing: 'Usta və ailəni dəvət et',
+};
+const navSection = (section: string) => (section === 'diary' || section === 'sharing' ? section : 'other');
 
 /** Realtor panel sections (the brief's sidebar). Labels are Azerbaijani, like the AI Smeta module. */
 const REALTOR_NAV = [
@@ -218,7 +221,7 @@ function AppShell({ children, project, projectId, active, crumbs, lang, change, 
         <button className="side-link side-more" onClick={() => setMoreOpen(!moreOpen)} aria-expanded={moreOpen} data-testid="nav-more"><ChevronDown size={17} style={{ transform: moreOpen ? 'rotate(180deg)' : undefined }}/><span>Digər</span></button>
         {moreOpen && navList(moreNav)}
       </>}
-      {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => (n.key !== 'sharing' && n.key !== 'documents' && n.key !== 'finance') || !!home.member).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${home.section === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{home.section === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
+      {home && <><div className="sidebar-label hp-side-label">{home.name}</div><nav className="side-nav rl-side-nav">{HOME_NAV.filter(n => n.key !== 'sharing' || !!home.member).map(({ path, key, label, icon: Icon }) => <Link key={key} href={`/homes/${home.id}${path}`} onClick={() => setOpen(false)} className={`side-link ${navSection(home.section) === key ? 'selected' : ''}`} data-testid={`nav-home-${key}`}><Icon size={17}/><span>{label}</span>{navSection(home.section) === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       {realtorSection && <><div className="sidebar-label">{t('realtor')}</div><nav className="side-nav rl-side-nav">{REALTOR_NAV.map(({ href, key, label, icon: Icon }) => <Link key={key} href={href} onClick={() => setOpen(false)} className={`side-link ${realtorSection === key ? 'selected' : ''}`} data-testid={`nav-realtor-${key}`}><Icon size={17}/><span>{label}</span>{realtorSection === key && <span className="nav-active-dot"/>}</Link>)}</nav></>}
       {projectId && <><div className="sidebar-label">{t('extraServices')}</div>{navList([{ href: '/homes', icon: House, key: 'myHomes' }, { href: '/dashboard', icon: LayoutDashboard, key: 'dashboard' }])}</>}
       <div className="sidebar-bottom"><Link href="/settings" onClick={() => setOpen(false)} className={`side-link ${active === 'settingsNav' ? 'selected' : ''}`} data-testid="nav-settingsNav"><Settings size={17}/><span>{t('settingsNav')}</span></Link><button className="side-link logout" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={17}/>{t('signOut')}</button></div>
@@ -380,10 +383,16 @@ function HomeShell({ homeId, section, crumbs, children, ...shell }: ShellProps &
 function HomeShellInner({ homeId, section, crumbs, children, ...shell }: ShellProps & { homeId: string; section: string; crumbs?: Crumb[]; children: ReactNode }) {
   const q = useGetHomeOverview(homeId);
   const h = q.data?.home;
-  const label = HOME_NAV.find(n => n.key === section)?.label;
+  const label = HOME_SECTIONS[section];
+  const sub = section !== 'diary' && section !== 'other' && section !== 'sharing';
   return <AppShell {...shell} active="myHomes" home={h ? { id: homeId, name: h.name, section, owner: h.permissions.manageSharing, audit: h.permissions.viewAudit, member: h.myRole !== 'performer' } : undefined}
-    crumbs={[{ label: shell.t('myHomes'), href: '/homes' }, ...(h ? [{ label: h.name, href: section === 'profile' && !crumbs?.length ? undefined : `/homes/${homeId}` }] : []), ...(section !== 'profile' && label ? [{ label }] : []), ...(crumbs || [])]}>
+    crumbs={[{ label: shell.t('myHomes'), href: '/homes' }, ...(h ? [{ label: h.name, href: section === 'diary' && !crumbs?.length ? undefined : `/homes/${homeId}` }] : []), ...(sub ? [{ label: 'Digər məlumatlar', href: `/homes/${homeId}/diger` }] : []), ...(section !== 'diary' && label ? [{ label }] : []), ...(crumbs || [])]}>
     <Suspense fallback={<Loading t={shell.t}/>}>{children}</Suspense></AppShell>;
+}
+function OtherHome({ homeId }: { homeId: string }) {
+  const q = useGetHomeOverview(homeId);
+  const h = q.data?.home;
+  return <OtherInfoPage homeId={homeId} member={!!h && h.myRole !== 'performer'} audit={!!h?.permissions.viewAudit} />;
 }
 function WorkShell({ workId, ...shell }: ShellProps & { workId: string }) {
   return <Protected t={shell.t}><WorkShellInner workId={workId} {...shell}/></Protected>;
@@ -500,7 +509,9 @@ function ClerkRoutes() {
       <Route path="/interest/:kind">{params => <PlainShell active="myHomes" crumbs={[{ label: 'Xidmətlər' }]} lang={lang} change={changeLang} t={t}><InterestPage kind={params.kind}/></PlainShell>}</Route>
       <Route path="/settings">{() => <PlainShell active="settingsNav" crumbs={[{ label: t('settingsNav') }]} lang={lang} change={changeLang} t={t}><SettingsPage lang={lang} change={changeLang}/></PlainShell>}</Route>
       <Route path="/homes/:homeId/audit">{params => <HomeShell homeId={params.homeId} section="sharing" lang={lang} change={changeLang} t={t}><HomeAuditPage homeId={params.homeId}/></HomeShell>}</Route>
-      <Route path="/homes/:homeId">{params => <HomeShell homeId={params.homeId} section="profile" lang={lang} change={changeLang} t={t}><HomeProfilePage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/umumi">{params => <HomeShell homeId={params.homeId} section="profile" lang={lang} change={changeLang} t={t}><HomeProfilePage homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId/diger">{params => <HomeShell homeId={params.homeId} section="other" lang={lang} change={changeLang} t={t}><OtherHome homeId={params.homeId}/></HomeShell>}</Route>
+      <Route path="/homes/:homeId">{params => <HomeShell homeId={params.homeId} section="diary" lang={lang} change={changeLang} t={t}><DiaryPage homeId={params.homeId}/></HomeShell>}</Route>
       <Route path="/works/:workId">{params => <WorkShell workId={params.workId} lang={lang} change={changeLang} t={t}/>}</Route>
       <Route path="/my-works">{() => <PlainShell active={new URLSearchParams(window.location.search).get('tab') === 'done' ? 'doneWorks' : 'myWorks'} crumbs={[{ label: t('myWorks') }]} lang={lang} change={changeLang} t={t}><MyWorksPage/></PlainShell>}</Route>
       <Route path="/workers/:workerId">{params => <PlainShell active="workersNav" crumbs={[{ label: t('workersNav'), href: '/workers' }, { label: 'Profil' }]} lang={lang} change={changeLang} t={t}><WorkerProfilePage workerId={params.workerId}/></PlainShell>}</Route>

@@ -3,6 +3,8 @@ import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { AddInvitePhotoBody, CreatePhotoInviteBody, RequestInviteUploadUrlBody, SetInviteStageStatusBody } from "@workspace/api-zod";
 import { db, evidenceUploadsTable, homeMediaTable, homesTable, stagePhotoInvitesTable, workApprovalsTable, workRecordsTable } from "@workspace/db";
+import { photoTags } from "../lib/buildDiary";
+import { templateOf } from "../lib/buildTemplates";
 import { audit, getHomeAccess, getWorkAccess, homePermissions } from "../lib/homeAccess";
 import { attachHomeMedia, HomeMediaError } from "../lib/homeMedia";
 import { ObjectStorageService } from "../lib/objectStorage";
@@ -14,6 +16,8 @@ import { hashToken, newToken, publicOrigin } from "../lib/realtorCore";
  * and it lands in that stage — no account, no choosing a home or stage. The token is the only key: it is
  * checked on the server for every request, stored only as SHA-256, revocable, optionally limited in time and
  * number of uploads, and never opens anything else of the home. A stage is never accepted through a link.
+ * A link without a stage (work_id null) covers the whole construction diary: the person picks one of the visible
+ * stages (titles only) and can only add photos — never change a status.
  */
 export const photoInvitePublicRouter: IRouter = Router();
 const router: IRouter = Router();
@@ -27,8 +31,8 @@ const uid = (req: Request) => getAuth(req).userId!;
 const bad = (res: Response, error: string, status = 400) => { res.status(status).json({ error }); };
 const actor = (inv: Invite) => `invite:${inv.id}`;
 const stateOf = (inv: Invite) => inv.revokedAt ? "revoked" : inv.expiresAt && inv.expiresAt <= new Date() ? "expired" : inv.maxUploads != null && inv.uploadCount >= inv.maxUploads ? "used_up" : "active";
-const dto = (inv: Invite, workTitle: string, url?: string) => ({
-  id: inv.id, workId: inv.workId, workTitle, permission: inv.permission, label: inv.label, createdAt: inv.createdAt.toISOString(),
+const dto = (inv: Invite, workTitle: string | null, url?: string) => ({
+  id: inv.id, workId: inv.workId, workTitle: workTitle ?? "Bütün tikinti", scope: inv.workId ? "stage" : "home", permission: inv.permission, label: inv.label, createdAt: inv.createdAt.toISOString(),
   expiresAt: inv.expiresAt?.toISOString() ?? null, maxUploads: inv.maxUploads ?? null, uploadCount: inv.uploadCount,
   revokedAt: inv.revokedAt?.toISOString() ?? null, lastUsedAt: inv.lastUsedAt?.toISOString() ?? null, state: stateOf(inv), ...(url ? { url } : {}),
 });
@@ -38,15 +42,28 @@ async function live(token: string) {
   if (!/^[A-Za-z0-9_-]{20,64}$/.test(token)) return null;
   const [inv] = await db.select().from(stagePhotoInvitesTable).where(eq(stagePhotoInvitesTable.tokenHash, hashToken(token)));
   if (!inv || inv.revokedAt || (inv.expiresAt && inv.expiresAt <= new Date())) return null;
-  const [work] = await db.select().from(workRecordsTable).where(and(eq(workRecordsTable.id, inv.workId), eq(workRecordsTable.homeId, inv.homeId)));
   const [home] = await db.select().from(homesTable).where(eq(homesTable.id, inv.homeId));
-  if (!work || !home || home.archivedAt) return null;
+  if (!home || home.archivedAt) return null;
+  if (!inv.workId) return { inv, work: null, home };
+  const [work] = await db.select().from(workRecordsTable).where(and(eq(workRecordsTable.id, inv.workId), eq(workRecordsTable.homeId, inv.homeId)));
+  if (!work) return null;
   return { inv, work, home };
 }
-const preview = (x: NonNullable<Awaited<ReturnType<typeof live>>>) => ({
+type Live = NonNullable<Awaited<ReturnType<typeof live>>>;
+/** Stages a whole-diary link may add to: titles, templates and status only. */
+async function linkStages(homeId: string) {
+  const rows = await db.select().from(workRecordsTable).where(and(eq(workRecordsTable.homeId, homeId), isNull(workRecordsTable.hiddenAt)));
+  return rows.sort((a, b) => (a.sortOrder ?? 1e9) - (b.sortOrder ?? 1e9) || a.createdAt.getTime() - b.createdAt.getTime()).map((w) => {
+    const t = templateOf(w.templateKey);
+    return { id: w.id, title: w.title, status: w.status, hint: t?.hint ?? null, shots: t?.shots ?? [], perFloor: t?.perFloor ?? true, perRoom: t?.perRoom ?? false };
+  });
+}
+const preview = async (x: Live) => ({
   // Only the home's own name (the owner chose it) — never the address or the owner's details.
-  homeName: x.home.name, stageTitle: x.work.title, stageStatus: x.work.status, permission: x.inv.permission,
+  homeName: x.home.name, scope: x.work ? "stage" : "home",
+  stageTitle: x.work?.title ?? "Tikinti tarixçəsi", stageStatus: x.work?.status ?? "in_progress", permission: x.work ? x.inv.permission : "photos",
   expiresAt: x.inv.expiresAt?.toISOString() ?? null, remaining: x.inv.maxUploads == null ? null : Math.max(0, x.inv.maxUploads - x.inv.uploadCount), uploadCount: x.inv.uploadCount,
+  ...(x.work ? { stage: { id: x.work.id, hint: templateOf(x.work.templateKey)?.hint ?? null, shots: templateOf(x.work.templateKey)?.shots ?? [], perFloor: templateOf(x.work.templateKey)?.perFloor ?? true, perRoom: templateOf(x.work.templateKey)?.perRoom ?? false } } : { stages: await linkStages(x.home.id), currentWorkId: x.home.currentWorkId }),
 });
 const noStore = (res: Response) => { res.setHeader("Cache-Control", "private, no-store"); res.setHeader("X-Robots-Tag", "noindex, nofollow"); res.setHeader("Referrer-Policy", "no-referrer"); };
 
@@ -70,12 +87,31 @@ router.post("/works/:workId/photo-invites", async (req, res): Promise<void> => {
   res.json(dto(inv, a.work.title, `${publicOrigin(req)}/f/${token}`));
 });
 
+/** A link for the whole construction diary (photos only; the person picks the stage). */
+router.post("/homes/:homeId/photo-invites", async (req, res): Promise<void> => {
+  const ha = await getHomeAccess(uid(req), String(req.params.homeId));
+  if (!ha) return bad(res, "Ev tapılmadı", 404);
+  if (!homePermissions(ha).edit) return bad(res, "Dəvət linkini yalnız evi idarə edən yarada bilər", 403);
+  const b = CreatePhotoInviteBody.safeParse(req.body ?? {});
+  if (!b.success) return bad(res, "Dəvətin seçimlərini yoxlayın");
+  const d = b.data;
+  const days = d.expiresInDays === undefined ? 30 : d.expiresInDays;
+  const token = newToken();
+  const [inv] = await db.insert(stagePhotoInvitesTable).values({
+    homeId: ha.home.id, workId: null, tokenHash: hashToken(token), permission: "photos", label: (d.label ?? "").trim(), createdByUserId: uid(req),
+    expiresAt: days == null ? null : new Date(Date.now() + Math.max(1, Math.min(365, Math.round(days))) * 86_400_000),
+    maxUploads: d.maxUploads == null ? null : Math.max(1, Math.min(500, Math.round(d.maxUploads))),
+  }).returning();
+  await audit({ homeId: ha.home.id, actorUserId: uid(req), actorRole: ha.role, action: "photo_invite.created", entityType: "home", entityId: ha.home.id, summary: `Bütün tikinti: photos${inv.label ? ` (${inv.label})` : ""}` });
+  res.json(dto(inv, null, `${publicOrigin(req)}/f/${token}`));
+});
+
 router.get("/homes/:homeId/photo-invites", async (req, res): Promise<void> => {
   const ha = await getHomeAccess(uid(req), String(req.params.homeId));
   if (!ha) return bad(res, "Ev tapılmadı", 404);
   if (!homePermissions(ha).edit) return bad(res, "Bu əməliyyat üçün icazəniz yoxdur", 403);
   const rows = await db.select({ inv: stagePhotoInvitesTable, title: workRecordsTable.title }).from(stagePhotoInvitesTable)
-    .innerJoin(workRecordsTable, eq(workRecordsTable.id, stagePhotoInvitesTable.workId))
+    .leftJoin(workRecordsTable, eq(workRecordsTable.id, stagePhotoInvitesTable.workId))
     .where(eq(stagePhotoInvitesTable.homeId, ha.home.id)).orderBy(desc(stagePhotoInvitesTable.createdAt));
   res.json(rows.map((r) => dto(r.inv, r.title)));
 });
@@ -89,9 +125,9 @@ router.delete("/homes/:homeId/photo-invites/:inviteId", async (req, res): Promis
   const [cur] = await db.select().from(stagePhotoInvitesTable).where(and(eq(stagePhotoInvitesTable.id, id), eq(stagePhotoInvitesTable.homeId, ha.home.id)));
   if (!cur) return bad(res, "Dəvət tapılmadı", 404);
   const [inv] = cur.revokedAt ? [cur] : await db.update(stagePhotoInvitesTable).set({ revokedAt: new Date() }).where(eq(stagePhotoInvitesTable.id, cur.id)).returning();
-  const [w] = await db.select({ title: workRecordsTable.title }).from(workRecordsTable).where(eq(workRecordsTable.id, inv.workId));
-  if (!cur.revokedAt) await audit({ homeId: ha.home.id, actorUserId: uid(req), actorRole: ha.role, action: "photo_invite.revoked", entityType: "work", entityId: inv.workId, summary: w?.title ?? "" });
-  res.json(dto(inv, w?.title ?? ""));
+  const [w] = inv.workId ? await db.select({ title: workRecordsTable.title }).from(workRecordsTable).where(eq(workRecordsTable.id, inv.workId)) : [];
+  if (!cur.revokedAt) await audit({ homeId: ha.home.id, actorUserId: uid(req), actorRole: ha.role, action: "photo_invite.revoked", entityType: inv.workId ? "work" : "home", entityId: inv.workId ?? ha.home.id, summary: w?.title ?? "Bütün tikinti" });
+  res.json(dto(inv, inv.workId ? w?.title ?? "" : null));
 });
 
 /* ------------------------------------------------------------------ the link (no account) */
@@ -100,7 +136,7 @@ photoInvitePublicRouter.get("/photo-invites/:token", openLimit, async (req, res)
   noStore(res);
   const x = await live(String(req.params.token));
   if (!x) return bad(res, "Link etibarsızdır, müddəti bitib və ya ləğv edilib. Ev sahibindən yeni link istəyin.", 404);
-  res.json(preview(x));
+  res.json(await preview(x));
 });
 
 photoInvitePublicRouter.post("/photo-invites/:token/upload-url", openLimit, async (req, res): Promise<void> => {
@@ -126,6 +162,16 @@ photoInvitePublicRouter.post("/photo-invites/:token/photos", openLimit, async (r
   // A repeated tap or a retry after a lost response: the same upload is returned, not added twice.
   const [dup] = await db.select().from(homeMediaTable).where(and(eq(homeMediaTable.objectPath, d.file.objectPath), eq(homeMediaTable.inviteId, x.inv.id)));
   if (dup) return void res.json({ id: dup.id, createdAt: dup.createdAt.toISOString(), uploadCount: x.inv.uploadCount, duplicate: true });
+  // A whole-diary link: the stage comes from the person's choice, and must be a visible stage of this home.
+  const raw = (req.body ?? {}) as Record<string, unknown>;
+  let work = x.work;
+  if (!work) {
+    const wid = typeof raw.workId === "string" ? raw.workId : "";
+    const [w] = /^[0-9a-f-]{36}$/i.test(wid) ? await db.select().from(workRecordsTable).where(and(eq(workRecordsTable.id, wid), eq(workRecordsTable.homeId, x.home.id), isNull(workRecordsTable.hiddenAt))) : [];
+    if (!w) return bad(res, "Mərhələni seçin");
+    work = w;
+  }
+  const tags = photoTags(raw, work.templateKey);
   // Reserve one upload within the limit first, so two parallel requests cannot pass it.
   const [counted] = await db.update(stagePhotoInvitesTable).set({ uploadCount: sql`${stagePhotoInvitesTable.uploadCount} + 1`, lastUsedAt: new Date() })
     .where(and(eq(stagePhotoInvitesTable.id, x.inv.id), isNull(stagePhotoInvitesTable.revokedAt), or(isNull(stagePhotoInvitesTable.maxUploads), sql`${stagePhotoInvitesTable.uploadCount} < ${stagePhotoInvitesTable.maxUploads}`))).returning();
@@ -137,9 +183,9 @@ photoInvitePublicRouter.post("/photo-invites/:token/photos", openLimit, async (r
   const clientMeta = Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && (lat !== 0 || lon !== 0)
     ? { gps: { lat: Math.round(lat * 1e5) / 1e5, lon: Math.round(lon * 1e5) / 1e5 }, gpsSource: cm?.gpsSource === "device" ? "device" : "exif" } : null;
   try {
-    const [m] = await attachHomeMedia(actor(x.inv), [d.file], { homeId: x.home.id, workId: x.work.id, roomId: x.work.roomId, workerId: null, caption: (d.note ?? "").trim().slice(0, 300), phase: "during", takenAt, takenSource: d.takenSource ?? null, clientMeta });
-    await db.update(homeMediaTable).set({ inviteId: x.inv.id }).where(eq(homeMediaTable.id, m.id));
-    await audit({ homeId: x.home.id, actorUserId: actor(x.inv), actorRole: "invite", action: "media.added_via_invite", entityType: "work", entityId: x.work.id, summary: `${x.work.title}: 1 foto (dəvət linki)` });
+    const [m] = await attachHomeMedia(actor(x.inv), [d.file], { homeId: x.home.id, workId: work.id, roomId: work.roomId, workerId: null, caption: (d.note ?? "").trim().slice(0, 300), phase: "during", takenAt, takenSource: d.takenSource ?? null, clientMeta });
+    await db.update(homeMediaTable).set({ inviteId: x.inv.id, ...tags }).where(eq(homeMediaTable.id, m.id));
+    await audit({ homeId: x.home.id, actorUserId: actor(x.inv), actorRole: "invite", action: "media.added_via_invite", entityType: "work", entityId: work.id, summary: `${work.title}: 1 foto (dəvət linki)` });
     res.json({ id: m.id, createdAt: m.createdAt.toISOString(), uploadCount: counted.uploadCount, duplicate: false });
   } catch (err) {
     await db.update(stagePhotoInvitesTable).set({ uploadCount: sql`greatest(${stagePhotoInvitesTable.uploadCount} - 1, 0)` }).where(eq(stagePhotoInvitesTable.id, x.inv.id));
@@ -153,11 +199,12 @@ photoInvitePublicRouter.post("/photo-invites/:token/status", openLimit, async (r
   noStore(res);
   const x = await live(String(req.params.token));
   if (!x) return bad(res, "Link etibarsızdır, müddəti bitib və ya ləğv edilib", 404);
-  if (x.inv.permission !== "photos_status") return bad(res, "Bu link yalnız foto əlavə etməyə icazə verir", 403);
+  if (!x.work || x.inv.permission !== "photos_status") return bad(res, "Bu link yalnız foto əlavə etməyə icazə verir", 403);
+  const xw = { ...x, work: x.work };
   const b = SetInviteStageStatusBody.safeParse(req.body);
   if (!b.success) return bad(res, "Statusu seçin");
   const t = b.data.action === "start" ? { from: ["planned", "revision"], to: "in_progress" } : { from: ["planned", "in_progress", "revision"], to: "completed" };
-  if (x.work.status === t.to) return void res.json(preview(x));
+  if (x.work.status === t.to) return void res.json(await preview(x));
   if (!t.from.includes(x.work.status)) return bad(res, x.work.status === "confirmed" ? "Mərhələ artıq ev sahibi tərəfindən qəbul edilib" : "Bu statusdan bu addım mümkün deyil", 409);
   const now = new Date();
   const [w] = await db.update(workRecordsTable).set({ status: t.to, updatedAt: now, ...(t.to === "completed" ? { completedAt: now } : {}) })
@@ -165,7 +212,7 @@ photoInvitePublicRouter.post("/photo-invites/:token/status", openLimit, async (r
   if (!w) return bad(res, "Mərhələ bu anda dəyişdi. Yenidən cəhd edin", 409);
   await db.insert(workApprovalsTable).values({ workId: w.id, action: b.data.action, fromStatus: x.work.status, toStatus: t.to, actorUserId: actor(x.inv), actorRole: "invite", note: "" });
   await audit({ homeId: x.home.id, actorUserId: actor(x.inv), actorRole: "invite", action: `work.${b.data.action}_via_invite`, entityType: "work", entityId: w.id, summary: `${w.title}: ${x.work.status} → ${t.to}`, changes: { status: { from: x.work.status, to: t.to } } });
-  res.json(preview({ ...x, work: w }));
+  res.json(await preview({ ...xw, work: w }));
 });
 
 export default router;

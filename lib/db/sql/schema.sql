@@ -661,7 +661,10 @@ CREATE TABLE IF NOT EXISTS "home_media" (
 	"taken_source" varchar(8),
 	"client_meta" jsonb,
 	"sha256" varchar(64) DEFAULT '' NOT NULL,
-	"invite_id" uuid
+	"invite_id" uuid,
+	"floor_level" integer,
+	"room_kind" varchar(24),
+	"shot_key" varchar(32)
 );
 --> statement
 CREATE TABLE IF NOT EXISTS "home_members" (
@@ -717,6 +720,7 @@ CREATE TABLE IF NOT EXISTS "homes" (
 	"built_year" integer,
 	"stage" varchar(16) DEFAULT 'living' NOT NULL,
 	"cover_media_id" uuid,
+	"current_work_id" uuid,
 	"notes" text DEFAULT '' NOT NULL,
 	"public_level" varchar(12) DEFAULT 'basic' NOT NULL,
 	"public_show_address" boolean DEFAULT false NOT NULL,
@@ -759,7 +763,7 @@ CREATE TABLE IF NOT EXISTS "service_interests" (
 CREATE TABLE IF NOT EXISTS "stage_photo_invites" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"home_id" uuid NOT NULL,
-	"work_id" uuid NOT NULL,
+	"work_id" uuid,
 	"token_hash" varchar(64) NOT NULL,
 	"permission" varchar(16) DEFAULT 'photos' NOT NULL,
 	"label" varchar(120) DEFAULT '' NOT NULL,
@@ -835,6 +839,8 @@ CREATE TABLE IF NOT EXISTS "work_records" (
 	"warranty_note" text DEFAULT '' NOT NULL,
 	"smeta_project_id" uuid,
 	"sort_order" integer,
+	"template_key" varchar(32),
+	"hidden_at" timestamp with time zone,
 	"created_by_user_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -2446,6 +2452,12 @@ ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "sha256" varchar(64) DEFAULT '
 --> statement
 ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "invite_id" uuid;
 --> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "floor_level" integer;
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "room_kind" varchar(24);
+--> statement
+ALTER TABLE "home_media" ADD COLUMN IF NOT EXISTS "shot_key" varchar(32);
+--> statement
 ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
 ALTER TABLE "home_members" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
@@ -2532,6 +2544,8 @@ ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "stage" varchar(16) DEFAULT 'living
 --> statement
 ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "cover_media_id" uuid;
 --> statement
+ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "current_work_id" uuid;
+--> statement
 ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "notes" text DEFAULT '' NOT NULL;
 --> statement
 ALTER TABLE "homes" ADD COLUMN IF NOT EXISTS "public_level" varchar(12) DEFAULT 'basic' NOT NULL;
@@ -2598,7 +2612,7 @@ ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen
 --> statement
 ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
 --> statement
-ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "work_id" uuid NOT NULL;
+ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "work_id" uuid;
 --> statement
 ALTER TABLE "stage_photo_invites" ADD COLUMN IF NOT EXISTS "token_hash" varchar(64) NOT NULL;
 --> statement
@@ -2725,6 +2739,10 @@ ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "warranty_note" text DEFAULT
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "smeta_project_id" uuid;
 --> statement
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "sort_order" integer;
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "template_key" varchar(32);
+--> statement
+ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "hidden_at" timestamp with time zone;
 --> statement
 ALTER TABLE "work_records" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
 --> statement
@@ -4426,3 +4444,5 @@ CREATE UNIQUE INDEX IF NOT EXISTS "ai_estimate_files_object_idx" ON "ai_estimate
 CREATE UNIQUE INDEX IF NOT EXISTS "ai_estimate_versions_idx" ON "ai_estimate_versions" USING btree ("estimate_id","version");
 --> statement
 CREATE INDEX IF NOT EXISTS "ai_estimates_owner_idx" ON "ai_estimates" USING btree ("owner_user_id","updated_at");
+--> statement
+ALTER TABLE "stage_photo_invites" ALTER COLUMN "work_id" DROP NOT NULL;

@@ -27,6 +27,7 @@ import financeRouter from "./finance";
 import photoStagesRouter from "./photoStages";
 import expenseBooksRouter from "./expenseBooks";
 import aiEstimatesRouter from "./aiEstimates";
+import buildDiaryRouter from "./buildDiary";
 
 const router: IRouter = Router();
 
@@ -62,5 +63,6 @@ router.use(financeRouter);
 router.use(photoStagesRouter);
 router.use(expenseBooksRouter);
 router.use(aiEstimatesRouter);
+router.use(buildDiaryRouter);
 
 export default router;
