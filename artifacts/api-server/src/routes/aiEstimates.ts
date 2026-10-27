@@ -12,6 +12,7 @@ import { aiConfigured, AiNotConfigured } from "../lib/invoiceAi";
 import { analyzeDrawings, architecturalOnly, mergeElements } from "../lib/drawingAi";
 import { analyzeWalls, MAX_PAGES } from "../lib/wallsAi";
 import { defaultMasonry, masonryCalc, METHOD_LABEL, sanitizeMasonry, UNIT_MATERIALS } from "../lib/wallsCalc";
+import { defaultPlaster, PLASTER_MATERIAL_LABEL, plasterCalc, sanitizePlaster } from "../lib/wallsPlaster";
 import { applyEdit, emptyWalls, KIND_LABEL, mergeWalls, PARAM_LABEL, wallsState, type WallsDoc } from "../lib/wallsModel";
 import {
   CATEGORY_LABEL, computeEstimate, DEFAULT_SETTINGS, questionsFor, STATUS_LABEL, type Category, type Element, type EstimateDoc, type ManualItem, type Param,
@@ -138,6 +139,7 @@ function wallsView(w: WallsDoc) {
   return {
     ...w, masonry, state: wallsState(w), maxPages: MAX_PAGES, kindLabels: KIND_LABEL, paramLabels: PARAM_LABEL,
     masonryCalc: masonryCalc(w, masonry), unitMaterials: UNIT_MATERIALS, methodLabels: METHOD_LABEL,
+    plaster: w.plaster ?? defaultPlaster(), plasterCalc: plasterCalc(w, w.plaster ?? defaultPlaster()), plasterMaterials: PLASTER_MATERIAL_LABEL,
   };
 }
 
@@ -180,6 +182,18 @@ router.put("/ai-estimates/:estimateId/walls", async (req, res): Promise<void> =>
   const confirmed = r.doc.floors.filter((f) => f.confirmed).length;
   await snapshot(e, doc, confirmed === r.doc.floors.length && confirmed > 0 ? "walls-ok" : "walls-edited", uid(req));
   res.json({ status, state: wallsState(r.doc) });
+});
+
+/** Stage 3: plaster sides per wall kind (or per wall), thickness and mix for internal and external plaster. */
+router.put("/ai-estimates/:estimateId/plaster", async (req, res): Promise<void> => {
+  const e = await own(req, res); if (!e) return;
+  if (!isWalls(e)) return bad(res, "Bu smeta növü üçün deyil");
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  if (typeof body.plaster !== "object" || body.plaster == null || Array.isArray(body.plaster)) return bad(res, "Suvaq parametrlərini göndərin");
+  const w = wallsOf(e);
+  w.plaster = sanitizePlaster(body.plaster, w);
+  await db.update(aiEstimatesTable).set({ doc: withWalls(e, w) as unknown as Record<string, unknown>, updatedAt: new Date() }).where(eq(aiEstimatesTable.id, e.id));
+  res.json({ plaster: w.plaster, plasterCalc: plasterCalc(w, w.plaster) });
 });
 
 router.get("/ai-estimates/:estimateId/files/:fileId", async (req, res): Promise<void> => {

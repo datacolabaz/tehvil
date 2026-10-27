@@ -18,6 +18,8 @@ export interface WallsDoc {
   drawingKinds: string[]; scaleNote: string | null; unreadable: string[]; notes: string | null; analyzedAt: string | null;
   /** Stage 2: materials and mortar chosen by the person (see wallsCalc.ts). */
   masonry?: import("./wallsCalc").MasonrySettings;
+  /** Stage 3: plaster sides, thickness and mix (see wallsPlaster.ts). */
+  plaster?: import("./wallsPlaster").PlasterSettings;
 }
 export const emptyWalls = (): WallsDoc => ({ floors: [], pages: {}, drawingKinds: [], scaleNote: null, unreadable: [], notes: null, analyzedAt: null });
 

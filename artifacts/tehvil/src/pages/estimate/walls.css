@@ -28,7 +28,7 @@
 .wr-seg button { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid #d8d5ca; background: #fff; font: inherit; font-weight: 600; font-size: 14px; color: #29473f; cursor: pointer; }
 .wr-seg button.on { background: #1f3d33; border-color: #1f3d33; color: #fff; }
 .wr-open { display: grid; gap: 8px; padding: 10px; border-radius: 12px; background: #f6f4ed; }
-.wr-p { display: grid; gap: 4px; min-width: 0; font-size: 13px; color: #4c5d56; }
+.wr-p { display: grid; gap: 4px; align-content: start; min-width: 0; font-size: 13px; color: #4c5d56; }
 .wr-p > span:first-child { font-weight: 600; }
 .wr-in { display: flex; align-items: center; border: 1px solid #d8d5ca; border-radius: 12px; background: #fff; padding: 0 10px; }
 .wr-in input { flex: 1; width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 17px; font-weight: 600; padding: 10px 0; color: #213a34; }
@@ -90,3 +90,9 @@
 .mp-trace.risk { color: #a9433d; }
 .mp-note { margin: 0; font-size: 12.5px; color: #4c5d56; }
 .mp-note.warn { color: #8a5a00; }
+
+/* Stage 3 — plaster */
+.pp-sides { display: flex; flex-wrap: wrap; gap: 6px; }
+.pp-toggle { display: inline-flex; gap: 6px; align-items: center; padding: 7px 12px; border-radius: 999px; border: 1px solid #d8d5ca; background: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.pp-toggle.on { background: #1f3d33; border-color: #1f3d33; color: #fff; }
+.pp-toggle input { accent-color: #fff; margin: 0; }

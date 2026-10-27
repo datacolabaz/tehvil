@@ -44,7 +44,17 @@ export interface WallsView {
   maxPages: number; kindLabels: Record<WallKind, string>; paramLabels: Record<string, string>;
   masonry: MasonrySettings; masonryCalc: MasonryCalc;
   unitMaterials: UnitMaterialInfo[]; methodLabels: Record<MasonryMethod, string>;
+  plaster: PlasterSettings; plasterCalc: PlasterCalc; plasterMaterials: Record<PlasterMaterial, string>;
 }
+/* Stage 3 — mirrors lib/wallsPlaster.ts */
+export type PlasterMaterial = 'cement_sand' | 'gypsum';
+export interface PlasterSystem { material: PlasterMaterial; thicknessMm: number; ratioSand: number; consumption: number | null; bagKg: number; reservePct: number; revealCm: number | null }
+export interface Sides { inner: number; facade: number }
+export interface PlasterSettings { internal: PlasterSystem; external: PlasterSystem; sides: Record<WallKind, Sides>; byWall: Record<string, Sides>; cementBagKg: number; dryFactor: number; cementDensity: number; sandDensity: number }
+export interface PlasterWallCalc { wallId: string; name: string; kind: WallKind; status: 'ok' | 'error'; inner: number; facade: number; openings: number; innerLen: number; innerH: number; innerFace: number; innerReveal: number; innerArea: number; facadeLen: number; facadeH: number; facadeFace: number; facadeReveal: number; facadeArea: number; notes: string[] }
+export interface PlasterTotal { system: 'internal' | 'external'; material: PlasterMaterial; thicknessMm: number; area: number; volumeM3: number; reserveM3: number; cementKg: number | null; cementBags: number | null; sandM3: number | null; sandTon: number | null; gypsumKg: number | null; gypsumBags: number | null }
+export interface FloorPlaster { floorId: string; name: string; confirmed: boolean; walls: PlasterWallCalc[]; byKind: { kind: WallKind; innerArea: number; facadeArea: number }[]; internal: PlasterTotal | null; external: PlasterTotal | null }
+export interface PlasterCalc { floors: FloorPlaster[]; house: { internal: PlasterTotal | null; external: PlasterTotal | null; total: { area: number; cementKg: number; cementBags: number; sandM3: number; sandTon: number; gypsumKg: number; gypsumBags: number } }; final: boolean; issues: string[]; assumptions: string[] }
 /* Stage 2 — mirrors lib/wallsCalc.ts */
 export type UnitMaterial = 'red_brick' | 'silicate_brick' | 'misar' | 'concrete_block' | 'aerated' | 'custom';
 export type MasonryMethod = 'single' | 'double' | 'auto';

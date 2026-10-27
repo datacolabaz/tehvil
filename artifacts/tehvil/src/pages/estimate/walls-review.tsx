@@ -5,6 +5,7 @@ import { AlertTriangle, Check, CheckCircle2, FileText, Info, LoaderCircle, Plus,
 import { api, errorText } from '@/lib/finance/api';
 import { estimateKey, KIND, type Estimate, type WallKind, type WallsView, type WFloor, type WOpening, type WParam, type WWall } from '@/lib/estimate/api';
 import { MasonryPanel } from './masonry-panel';
+import { PlasterPanel } from './plaster-panel';
 import './walls.css';
 
 /*
@@ -42,7 +43,8 @@ export function WallsEstimatePage({ e, banner }: { e: Estimate; banner: React.Re
     {w.analyzedAt && <div className="es-ai-note"><Sparkles size={14} /><span>AI {w.drawingKinds.length ? `gördü: ${w.drawingKinds.map((k) => DK[k] ?? k).join(', ')}` : 'çertyojları oxudu'}.{w.scaleNote ? ` Miqyas: ${w.scaleNote}.` : ''}{w.unreadable.length ? ` Oxunmayan: ${w.unreadable.slice(0, 5).join(', ')}.` : ''}{w.notes ? ` ${w.notes}` : ''}</span></div>}
     <Review e={e} w={w} onSaved={refresh} />
     <MasonryPanel e={e} w={w} />
-    <p className="fn-note"><Info size={14} />AI yalnız ölçüləri oxuyur — hesablamanı proqram aparır. Növbəti mərhələdə daxili və xarici suvaq (sement 40 kq, qum, gips ayrıca) hesablanacaq.</p>
+    <PlasterPanel e={e} w={w} />
+    <p className="fn-note"><Info size={14} />AI yalnız ölçüləri oxuyur — hesablamanı proqram aparır.</p>
   </>;
 }
 const DK: Record<string, string> = { floor_plan: 'mərtəbə planı', section: 'kəsik', elevation: 'fasad', structural_plan: 'konstruktiv plan', site_plan: 'baş plan', detail: 'detal', other: 'digər' };
