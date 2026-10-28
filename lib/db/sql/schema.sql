@@ -1237,6 +1237,7 @@ CREATE TABLE IF NOT EXISTS "finance_expenses" (
 	"invoice_id" uuid,
 	"entry_id" uuid,
 	"work_id" uuid,
+	"agreement_id" uuid,
 	"note" text DEFAULT '' NOT NULL,
 	"status" varchar(10) DEFAULT 'pending' NOT NULL,
 	"approved_by_user_id" varchar(128),
@@ -1310,6 +1311,7 @@ CREATE TABLE IF NOT EXISTS "finance_payments" (
 	"confirmed_by_user_id" varchar(128),
 	"confirmed_at" timestamp with time zone,
 	"cancel_reason" text,
+	"counterparty_note" text,
 	"idempotency_key" varchar(64),
 	"created_by_user_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -1326,6 +1328,42 @@ CREATE TABLE IF NOT EXISTS "home_projects" (
 	"status" varchar(10) DEFAULT 'active' NOT NULL,
 	"currency" varchar(3) DEFAULT 'AZN' NOT NULL,
 	"smeta_project_id" uuid,
+	"created_by_user_id" varchar(128) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "work_agreement_plan" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"agreement_id" uuid NOT NULL,
+	"position" integer DEFAULT 0 NOT NULL,
+	"due_date" date,
+	"label" varchar(120) DEFAULT '' NOT NULL,
+	"amount" numeric(14, 2),
+	"rest" boolean DEFAULT false NOT NULL
+);
+--> statement
+CREATE TABLE IF NOT EXISTS "work_agreements" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" uuid NOT NULL,
+	"home_id" uuid NOT NULL,
+	"title" varchar(200) NOT NULL,
+	"work_type" varchar(40) DEFAULT '' NOT NULL,
+	"contractor_name" varchar(160) NOT NULL,
+	"contractor_phone" varchar(32) DEFAULT '' NOT NULL,
+	"basis" varchar(10) NOT NULL,
+	"rate" numeric(14, 2),
+	"units" numeric(14, 3),
+	"total" numeric(14, 2) NOT NULL,
+	"start_date" date,
+	"end_date" date,
+	"status" varchar(10) DEFAULT 'active' NOT NULL,
+	"note" text DEFAULT '' NOT NULL,
+	"work_id" uuid,
+	"share_token_hash" varchar(64),
+	"share_created_at" timestamp with time zone,
+	"share_revoked_at" timestamp with time zone,
+	"share_opened_at" timestamp with time zone,
 	"created_by_user_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -3387,6 +3425,8 @@ ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "entry_id" uuid;
 --> statement
 ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "work_id" uuid;
 --> statement
+ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "agreement_id" uuid;
+--> statement
 ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
 --> statement
 ALTER TABLE "finance_expenses" ADD COLUMN IF NOT EXISTS "status" varchar(10) DEFAULT 'pending' NOT NULL;
@@ -3515,6 +3555,8 @@ ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "confirmed_at" timestamp
 --> statement
 ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "cancel_reason" text;
 --> statement
+ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "counterparty_note" text;
+--> statement
 ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "idempotency_key" varchar(64);
 --> statement
 ALTER TABLE "finance_payments" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
@@ -3546,6 +3588,66 @@ ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "created_by_user_id" varcha
 ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
 ALTER TABLE "home_projects" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "work_agreement_plan" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "work_agreement_plan" ADD COLUMN IF NOT EXISTS "agreement_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "work_agreement_plan" ADD COLUMN IF NOT EXISTS "position" integer DEFAULT 0 NOT NULL;
+--> statement
+ALTER TABLE "work_agreement_plan" ADD COLUMN IF NOT EXISTS "due_date" date;
+--> statement
+ALTER TABLE "work_agreement_plan" ADD COLUMN IF NOT EXISTS "label" varchar(120) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_agreement_plan" ADD COLUMN IF NOT EXISTS "amount" numeric(14, 2);
+--> statement
+ALTER TABLE "work_agreement_plan" ADD COLUMN IF NOT EXISTS "rest" boolean DEFAULT false NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "project_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "home_id" uuid NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "title" varchar(200) NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "work_type" varchar(40) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "contractor_name" varchar(160) NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "contractor_phone" varchar(32) DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "basis" varchar(10) NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "rate" numeric(14, 2);
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "units" numeric(14, 3);
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "total" numeric(14, 2) NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "start_date" date;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "end_date" date;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "status" varchar(10) DEFAULT 'active' NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "work_id" uuid;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "share_token_hash" varchar(64);
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "share_created_at" timestamp with time zone;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "share_revoked_at" timestamp with time zone;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "share_opened_at" timestamp with time zone;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "created_by_user_id" varchar(128) NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement
+ALTER TABLE "work_agreements" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
 --> statement
 ALTER TABLE "media_stage_tags" ADD COLUMN IF NOT EXISTS "id" uuid DEFAULT gen_random_uuid() NOT NULL;
 --> statement
@@ -4182,6 +4284,21 @@ EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
 --> statement
 DO $$ BEGIN
+  ALTER TABLE "work_agreement_plan" ADD CONSTRAINT "work_agreement_plan_agreement_id_work_agreements_id_fk" FOREIGN KEY ("agreement_id") REFERENCES "public"."work_agreements"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "work_agreements" ADD CONSTRAINT "work_agreements_project_id_home_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."home_projects"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
+  ALTER TABLE "work_agreements" ADD CONSTRAINT "work_agreements_home_id_homes_id_fk" FOREIGN KEY ("home_id") REFERENCES "public"."homes"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
+END $$;
+--> statement
+DO $$ BEGIN
   ALTER TABLE "media_stage_tags" ADD CONSTRAINT "media_stage_tags_media_id_home_media_id_fk" FOREIGN KEY ("media_id") REFERENCES "public"."home_media"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION WHEN duplicate_object OR duplicate_table THEN NULL;
 END $$;
@@ -4433,6 +4550,12 @@ CREATE INDEX IF NOT EXISTS "finance_payments_project_idx" ON "finance_payments" 
 CREATE UNIQUE INDEX IF NOT EXISTS "finance_payments_idem_idx" ON "finance_payments" USING btree ("project_id","idempotency_key");
 --> statement
 CREATE INDEX IF NOT EXISTS "home_projects_home_idx" ON "home_projects" USING btree ("home_id","created_at");
+--> statement
+CREATE INDEX IF NOT EXISTS "work_agreement_plan_idx" ON "work_agreement_plan" USING btree ("agreement_id","position");
+--> statement
+CREATE INDEX IF NOT EXISTS "work_agreements_project_idx" ON "work_agreements" USING btree ("project_id");
+--> statement
+CREATE UNIQUE INDEX IF NOT EXISTS "work_agreements_share_idx" ON "work_agreements" USING btree ("share_token_hash");
 --> statement
 CREATE UNIQUE INDEX IF NOT EXISTS "media_stage_tags_media_idx" ON "media_stage_tags" USING btree ("media_id");
 --> statement

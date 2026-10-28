@@ -45,7 +45,7 @@ const fixed = (c: number) => (c / 100).toFixed(2).replace('.', ',');
 /** "2.000" → "2", "0.500" → "0,5" */
 export const qtyText = (q: string | null | undefined) => (q == null || q === '' ? '—' : String(Number(q)).replace('.', ','));
 
-export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }: { lines: DayLine[]; onChange: (l: DayLine[]) => void; showPaid?: boolean; testid?: string }) {
+export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day', only }: { lines: DayLine[]; onChange: (l: DayLine[]) => void; showPaid?: boolean; testid?: string; only?: 'material' }) {
   const set = (k: string, p: Partial<DayLine>) => onChange(lines.map((l) => (l.key === k ? { ...l, ...p, weak: false } : l)));
   return <div className="dl-lines" data-testid={`${testid}-lines`}>
     {lines.map((l, i) => {
@@ -62,8 +62,8 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
           <button type="button" className="icon-button" aria-label="Sətri sil" onClick={() => onChange(lines.filter((x) => x.key !== l.key))} data-testid={`${testid}-remove`}><Trash2 size={15} /></button>
         </div>
         <div className="dl-kind-row">
-          <button type="button" className={`dl-kind ${service ? 'service' : 'material'}`} onClick={() => set(l.key, service ? { kind: 'material', byQty: false } : { kind: 'service', byQty: !!(l.quantity || l.unitPrice) })}
-            title={service ? 'Material sətrinə çevir' : 'İş / xidmət sətrinə çevir'} aria-label={`${service ? 'İş / xidmət' : 'Material'} — dəyişmək üçün toxunun`} data-testid={`${testid}-kind`}>{service ? 'İş / xidmət' : 'Material'} ⇄</button>
+          {!only && <button type="button" className={`dl-kind ${service ? 'service' : 'material'}`} onClick={() => set(l.key, service ? { kind: 'material', byQty: false } : { kind: 'service', byQty: !!(l.quantity || l.unitPrice) })}
+            title={service ? 'Material sətrinə çevir' : 'İş / xidmət sətrinə çevir'} aria-label={`${service ? 'İş / xidmət' : 'Material'} — dəyişmək üçün toxunun`} data-testid={`${testid}-kind`}>{service ? 'İş / xidmət' : 'Material'} ⇄</button>}
           <select value={l.category} onChange={(e) => set(l.key, { category: e.target.value, kind: lineKind(l) })} aria-label="Kateqoriya" data-testid={`${testid}-cat`}>
             {service ? <>
               <optgroup label="İş və ödənişlər">{LINE_CATEGORIES.filter((c) => c[2] !== 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
@@ -103,7 +103,7 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
     <datalist id="dl-units">{UNITS.map((u) => <option key={u} value={u} />)}</datalist>
     <div className="dl-adds">
       <button type="button" className="button button-secondary dl-add" onClick={() => { const last = [...lines].reverse().find((x) => lineKind(x) === 'material'); onChange([...lines, newLine({ kind: 'material', category: last?.category ?? 'building_materials', paid: lines[lines.length - 1]?.paid ?? true })]); }} data-testid={`${testid}-add`}><Plus size={15} />Material əlavə et</button>
-      <button type="button" className="button button-secondary dl-add" onClick={() => onChange([...lines, newLine({ kind: 'service', category: 'labor', paid: lines[lines.length - 1]?.paid ?? true })])} data-testid={`${testid}-add-service`}><Plus size={15} />İş və ya xidmət haqqı</button>
+      {!only && <button type="button" className="button button-secondary dl-add" onClick={() => onChange([...lines, newLine({ kind: 'service', category: 'labor', paid: lines[lines.length - 1]?.paid ?? true })])} data-testid={`${testid}-add-service`}><Plus size={15} />İş və ya xidmət haqqı</button>}
     </div>
   </div>;
 }

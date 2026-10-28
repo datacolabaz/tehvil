@@ -10,6 +10,7 @@ import {
   type AiInvoice, type Book, type Expense, type Finance, type HistoryRow, type Invoice,
 } from '@/lib/finance/api';
 import { DailyEntryModal, type DailyMode } from '../home/quick-work';
+import { AgreementsSection, WorkEntryModal } from './work-entry';
 import { LinesEditor, lineCents, lineKind, lineProblem, newLine, qtyText, type DayLine } from '@/components/daily/lines-editor';
 import '../home/finance.css';
 import './expenses.css';
@@ -151,8 +152,8 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
 
     <div className="ex-actions">
       <label className="button button-primary ex-add" data-testid="ex-add-receipt"><input type="file" hidden accept="image/*,application/pdf" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) setDaily({ mode: 'receipt', file }); }} data-testid="ex-receipt-input" /><ReceiptText size={22} /><span>Qaimə çək və ya yüklə<small>Kamera, qalereya və ya PDF — AI oxuyur, siz yoxlayırsınız</small></span></label>
-      <button className="button button-secondary ex-add2" onClick={() => setDaily({ mode: 'manual' })} data-testid="ex-add"><Plus size={20} /><span>Əl ilə xərc əlavə et<small>Material, usta haqqı, texnika</small></span></button>
-      <button className="button button-secondary ex-add2" onClick={() => setDaily({ mode: 'work' })} data-testid="ex-add-work"><Hammer size={20} /><span>Görülən işi qeyd et<small>Foto, təsvir, dəyəri</small></span></button>
+      <button className="button button-secondary ex-add2" onClick={() => setDaily({ mode: 'manual' })} data-testid="ex-add"><Plus size={20} /><span>Əl ilə xərc əlavə et<small>Material: miqdar, vahid, qiymət</small></span></button>
+      <button className="button button-secondary ex-add2" onClick={() => setDaily({ mode: 'work' })} data-testid="ex-add-work"><Hammer size={20} /><span>Görülən işi qeyd et<small>Usta, xidmət, ödəniş planı</small></span></button>
     </div>
 
     <div className="ex-figs" data-testid="ex-figs">
@@ -163,6 +164,8 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
       <div className={`ex-fig ${budget != null && budget - total < 0 ? 'risk' : ''}`}><small>Büdcədən qalan</small><b data-testid="ex-left">{budget == null ? '—' : azn(budget - total)}</b>{budget == null && <small className="ex-muted">büdcə yazılmayıb</small>}</div>
       {unpaid > 0 && <button className="ex-fig warn" onClick={() => setPay('unpaid')} data-testid="ex-unpaid-fig"><small>Ödənilməyib</small><b data-testid="ex-unpaid">{azn(unpaid)}</b><small className="ex-muted">ümumi xərcə daxildir — göstər</small></button>}
     </div>
+
+    <AgreementsSection projectId={projectId} />
 
     {pendingReceipts.length > 0 && <div className="ex-pending">{pendingReceipts.map((i) => <button key={i.id} onClick={() => setDaily({ mode: 'receipt', invoice: i })} data-testid="ex-pending-receipt">
       {i.status === 'reading' ? <LoaderCircle className="spin" size={16} /> : <Sparkles size={16} />}
@@ -188,7 +191,8 @@ function Book({ book, others }: { book: Book; others: Book[] }) {
 
     <Link href={`/homes/${book.homeId}/maliyye/${projectId}`} className="ex-more"><Settings2 size={15} />Ətraflı: podratçı, usta, ödəniş, avans və borc hesabları</Link>
 
-    {daily && <DailyEntryModal homeId={book.homeId} mode={daily.mode} heading={daily.mode === 'manual' ? 'Əl ilə xərc əlavə et' : daily.mode === 'work' ? 'Görülən işi qeyd et' : 'Qaimədən xərc əlavə et'} receiptFile={daily.file} invoice={daily.invoice} onClose={() => { setDaily(null); void refresh(); }} onSaved={() => { setDaily(null); void refresh(); }} />}
+    {daily?.mode === 'work' && <WorkEntryModal homeId={book.homeId} projectId={projectId} onClose={() => { setDaily(null); void refresh(); }} onSaved={() => { setDaily(null); void refresh(); }} />}
+    {daily && daily.mode !== 'work' && <DailyEntryModal homeId={book.homeId} mode={daily.mode} heading={daily.mode === 'manual' ? 'Əl ilə xərc əlavə et' : 'Qaimədən xərc əlavə et'} receiptFile={daily.file} invoice={daily.invoice} onClose={() => { setDaily(null); void refresh(); }} onSaved={() => { setDaily(null); void refresh(); }} />}
     {form && <SimpleExpenseForm d={d} projectId={projectId} invoice={null} existing={form.existing} onClose={() => setForm(null)} onSaved={refresh} />}
     {detail && <ExpenseDetail d={d} projectId={projectId} e={d.expenses.find((x) => x.id === detail.id) ?? detail} onClose={() => setDetail(null)} onEdit={(e) => { setDetail(null); setForm({ existing: e }); }} onChanged={refresh} />}
     {budgetOpen && <BudgetModal projectId={projectId} current={budget} onClose={() => setBudgetOpen(false)} onSaved={refresh} />}
