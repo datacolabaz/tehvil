@@ -10,7 +10,7 @@ import { Modal, toast } from '@/components/home/ui';
 import { CURRENCY, QUICK_CATEGORIES, WORK_CATEGORY, clearDraft, loadDraft, refreshHomeData, saveDraft, today } from '@/lib/home/labels';
 import { uploadHomeMedia } from '@/lib/home/upload';
 import { api, azDate, azn, booksKey, errorText, financeKey, newKey, putFile, shrinkImage, type Finance, type Invoice } from '@/lib/finance/api';
-import { DayTotals, LinesEditor, lineCents, lineProblem, newLine, type DayLine } from '@/components/daily/lines-editor';
+import { DayTotals, LinesEditor, lineCents, lineKind, lineProblem, newLine, type DayLine } from '@/components/daily/lines-editor';
 
 type Doer = { key: string; name: string; workerId?: string; phone?: string; kind?: 'individual' | 'company'; note?: string };
 type Draft = {
@@ -48,11 +48,11 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
   const qc = useQueryClient();
   const prefilled = !!(roomId || category || equipmentId || smetaProjectId || title || receiptFile || pendingInvoice);
   const draftKey = `day:${homeId || 'any'}`;
-  const startLines = () => (mode === 'manual' ? [newLine()] : mode === 'work' ? [newLine({ category: 'labor' })] : []);
+  const startLines = () => (mode === 'manual' ? [newLine()] : mode === 'work' ? [newLine({ kind: 'service', category: 'labor' })] : []);
   const fresh = (): Draft => ({ ...empty({ category, roomId, title }), lines: startLines() });
   const [f, setF] = useState<Draft>(() => {
     const d = (!prefilled && loadDraft<Draft>(draftKey)) || empty({ category, roomId, title });
-    return { ...empty(), ...d, lines: d.lines?.length ? d.lines : (mode === 'manual' ? [newLine()] : mode === 'work' && !prefilled ? [newLine({ category: 'labor' })] : []) };
+    return { ...empty(), ...d, lines: d.lines?.length ? d.lines : (mode === 'manual' ? [newLine()] : mode === 'work' && !prefilled ? [newLine({ kind: 'service', category: 'labor' })] : []) };
   });
   // A draft left from an earlier, unsaved form is never restored silently: the person sees it and can clear it.
   const [restored, setRestored] = useState<null | { lines: number; date: string }>(() => {
@@ -190,7 +190,7 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
           saved = await api<{ total: string; unpaid: string }>(`/home-projects/${pid}/daily-entries`, 'POST', {
             date, description: name.slice(0, 300), vendorName: f.vendorName.trim(), note: f.description.trim().slice(0, 2000), roomId: f.roomId || null,
             workId, invoiceId: receipt?.invoice.id ?? null, discount: discountC ? (discountC / 100).toFixed(2) : null, tax: taxC ? (taxC / 100).toFixed(2) : null, dateSource: receipt ? (receipt.dateChoice === 'receipt' ? (receipt.aiDateLabel.includes('əl ilə') ? 'handwritten' : 'printed') : 'manual') : undefined,
-            lines: lines.map(l => ({ name: l.name.trim(), category: l.category, quantity: l.quantity || null, unit: l.unit, unitPrice: l.unitPrice || null, lineTotal: l.lineTotal || null, note: l.note, paid: l.paid })),
+            lines: lines.map(l => ({ name: l.name.trim(), category: l.category, kind: lineKind(l), quantity: l.quantity || null, unit: l.unit, unitPrice: l.unitPrice || null, lineTotal: l.lineTotal || null, note: l.note, paid: l.paid })),
             idempotencyKey: key,
           });
         } catch (x) {

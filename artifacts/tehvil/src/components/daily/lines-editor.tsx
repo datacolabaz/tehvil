@@ -16,9 +16,13 @@ export interface DayLine {
   receiptTotal?: string | null;
   /** A service line shown with quantity × price (days, hours, trips) instead of one fee. */
   byQty?: boolean;
+  /** Which button added it: a material (quantity × price) or work / a service (one amount). Older lines: from the category. */
+  kind?: 'material' | 'service';
 }
 /** Work, fees and services: one amount is enough (quantity and unit only when asked for). */
 export const isService = (category: string) => (LINE_CATEGORIES.find((c) => c[0] === category)?.[2] ?? 'other') !== 'material';
+/** A line is work / a service because of how it was added — the category (e.g. "Taxta və qəlib" for formwork) never changes that. */
+export const lineKind = (l: Pick<DayLine, 'kind' | 'category'>): 'material' | 'service' => l.kind ?? (isService(l.category) ? 'service' : 'material');
 
 const UNITS = ['ədəd', 'kisə', 'ton', 'kq', 'm', 'm²', 'm³', 'l', 'gün', 'saat', 'reys', 'dəst'];
 export const num = (s: string) => { const t = String(s ?? '').replace(/\s/g, '').replace(',', '.'); if (!t) return null; const v = Number(t); return Number.isFinite(v) && v >= 0 ? v : NaN; };
@@ -49,19 +53,29 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
       const cents = lineCents(l);
       const problem = l.name || l.quantity || l.unitPrice || l.lineTotal ? lineProblem(l) : null;
       const receiptDiff = l.receiptTotal && cents != null && Math.round(Number(l.receiptTotal) * 100) !== cents;
-      const simple = isService(l.category) && !l.byQty && !l.quantity && !l.unitPrice;
+      const service = lineKind(l) === 'service';
+      const simple = service && !l.byQty && !l.quantity && !l.unitPrice;
       return <div key={l.key} className={`dl-line ${l.weak ? 'weak' : ''} ${problem ? 'bad' : ''}`} data-testid={`${testid}-line`}>
         <div className="dl-row1">
           <span className="dl-no">{i + 1}</span>
-          <input className="dl-name" value={l.name} onChange={(e) => set(l.key, { name: e.target.value })} placeholder={isService(l.category) ? 'İş və ya xidmət, məs. Topoqrafiya, fəhlə haqqı' : 'Material, məs. Sement M400'} aria-label="Məhsulun və ya işin adı" data-testid={`${testid}-name`} />
+          <input className="dl-name" value={l.name} onChange={(e) => set(l.key, { name: e.target.value })} placeholder={service ? 'İş və ya xidmət, məs. Lenta üçün qazıntı' : 'Material, məs. Sement M400'} aria-label="Məhsulun və ya işin adı" data-testid={`${testid}-name`} />
           <button type="button" className="icon-button" aria-label="Sətri sil" onClick={() => onChange(lines.filter((x) => x.key !== l.key))} data-testid={`${testid}-remove`}><Trash2 size={15} /></button>
         </div>
-        <select value={l.category} onChange={(e) => set(l.key, { category: e.target.value })} aria-label="Kateqoriya" data-testid={`${testid}-cat`}>
-          <optgroup label="Material">{LINE_CATEGORIES.filter((c) => c[2] === 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
-          <optgroup label="İş və ödənişlər">{LINE_CATEGORIES.filter((c) => c[2] !== 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
-        </select>
+        <div className="dl-kind-row">
+          <button type="button" className={`dl-kind ${service ? 'service' : 'material'}`} onClick={() => set(l.key, service ? { kind: 'material', byQty: false } : { kind: 'service', byQty: !!(l.quantity || l.unitPrice) })}
+            title={service ? 'Material sətrinə çevir' : 'İş / xidmət sətrinə çevir'} aria-label={`${service ? 'İş / xidmət' : 'Material'} — dəyişmək üçün toxunun`} data-testid={`${testid}-kind`}>{service ? 'İş / xidmət' : 'Material'} ⇄</button>
+          <select value={l.category} onChange={(e) => set(l.key, { category: e.target.value, kind: lineKind(l) })} aria-label="Kateqoriya" data-testid={`${testid}-cat`}>
+            {service ? <>
+              <optgroup label="İş və ödənişlər">{LINE_CATEGORIES.filter((c) => c[2] !== 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
+              <optgroup label="Hansı işə aiddir">{LINE_CATEGORIES.filter((c) => c[2] === 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
+            </> : <>
+              <optgroup label="Material">{LINE_CATEGORIES.filter((c) => c[2] === 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
+              <optgroup label="İş və ödənişlər">{LINE_CATEGORIES.filter((c) => c[2] !== 'material').map(([k, lb]) => <option key={k} value={k}>{lb}</option>)}</optgroup>
+            </>}
+          </select>
+        </div>
         {simple ? <div className="dl-fee">
-          <label><span>Xidmət haqqı, AZN</span><input inputMode="decimal" value={l.lineTotal} onChange={(e) => set(l.key, { lineTotal: e.target.value })} placeholder="məs. 100" data-testid={`${testid}-fee`} /></label>
+          <label><span>Məbləğ (ödəniş), AZN</span><input inputMode="decimal" value={l.lineTotal} onChange={(e) => set(l.key, { lineTotal: e.target.value })} placeholder="məs. 100" data-testid={`${testid}-fee`} /></label>
           <button type="button" className="text-link" onClick={() => set(l.key, { byQty: true })} data-testid={`${testid}-byqty`}>Gün, saat və ya reys ilə hesabla</button>
         </div> : <div className="dl-nums">
           <label><span>Miqdar</span><input inputMode="decimal" value={l.quantity} onChange={(e) => set(l.key, { quantity: e.target.value })} placeholder="50" data-testid={`${testid}-qty`} /></label>
@@ -71,7 +85,7 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
             {auto ? <output data-testid={`${testid}-line-total`}>{azn(cents)}</output>
               : <input inputMode="decimal" value={l.lineTotal} onChange={(e) => set(l.key, { lineTotal: e.target.value })} placeholder="0,00" data-testid={`${testid}-total-input`} />}
           </label>
-          {isService(l.category) && <button type="button" className="text-link dl-back" onClick={() => set(l.key, { byQty: false, quantity: '', unit: '', unitPrice: '' })}>Yalnız ümumi məbləğ yaz</button>}
+          {service && <button type="button" className="text-link dl-back" onClick={() => set(l.key, { byQty: false, quantity: '', unit: '', unitPrice: '' })}>Yalnız ümumi məbləğ yaz</button>}
         </div>}
         <div className="dl-row3">
           <input className="dl-note" value={l.note} onChange={(e) => set(l.key, { note: e.target.value })} placeholder="Qeyd (istəyə bağlı)" aria-label="Qeyd" />
@@ -88,8 +102,8 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
     })}
     <datalist id="dl-units">{UNITS.map((u) => <option key={u} value={u} />)}</datalist>
     <div className="dl-adds">
-      <button type="button" className="button button-secondary dl-add" onClick={() => { const last = [...lines].reverse().find((x) => !isService(x.category)); onChange([...lines, newLine({ category: last?.category ?? 'building_materials', paid: lines[lines.length - 1]?.paid ?? true })]); }} data-testid={`${testid}-add`}><Plus size={15} />Material əlavə et</button>
-      <button type="button" className="button button-secondary dl-add" onClick={() => onChange([...lines, newLine({ category: 'labor', paid: lines[lines.length - 1]?.paid ?? true })])} data-testid={`${testid}-add-service`}><Plus size={15} />İş və ya xidmət haqqı</button>
+      <button type="button" className="button button-secondary dl-add" onClick={() => { const last = [...lines].reverse().find((x) => lineKind(x) === 'material'); onChange([...lines, newLine({ kind: 'material', category: last?.category ?? 'building_materials', paid: lines[lines.length - 1]?.paid ?? true })]); }} data-testid={`${testid}-add`}><Plus size={15} />Material əlavə et</button>
+      <button type="button" className="button button-secondary dl-add" onClick={() => onChange([...lines, newLine({ kind: 'service', category: 'labor', paid: lines[lines.length - 1]?.paid ?? true })])} data-testid={`${testid}-add-service`}><Plus size={15} />İş və ya xidmət haqqı</button>
     </div>
   </div>;
 }
@@ -97,14 +111,13 @@ export function LinesEditor({ lines, onChange, showPaid = true, testid = 'day' }
 /** The day's totals: all, paid and unpaid, material vs work. */
 export function DayTotals({ lines, discount = 0, tax = 0 }: { lines: DayLine[]; discount?: number; tax?: number }) {
   const sum = (f: (l: DayLine) => boolean) => lines.filter(f).reduce((s, l) => s + (lineCents(l) ?? 0), 0);
-  const group = (k: string) => LINE_CATEGORIES.find((c) => c[0] === k)?.[2] ?? 'other';
   const linesTotal = sum(() => true), total = linesTotal - discount + tax, unpaid = sum((l) => !l.paid);
-  const mat = sum((l) => group(l.category) === 'material'), lab = sum((l) => group(l.category) === 'labor');
+  const mat = sum((l) => lineKind(l) === 'material'), lab = sum((l) => lineKind(l) === 'service');
   if (!lines.length) return null;
   return <div className="dl-totals" data-testid="day-totals">
     <div className="dl-total-main"><span>Günün ümumi xərci</span><b data-testid="day-total">{azn(total)}</b></div>
     <div className="dl-total-split">
-      <span>Material: <b>{azn(mat)}</b></span><span>Usta və işlər: <b>{azn(lab)}</b></span>{linesTotal - mat - lab > 0 && <span>Digər: <b>{azn(linesTotal - mat - lab)}</b></span>}
+      <span>Material: <b data-testid="day-total-material">{azn(mat)}</b></span><span>İş və xidmətlər: <b data-testid="day-total-service">{azn(lab)}</b></span>
       {(discount > 0 || tax > 0) && <span>Sətirlər {azn(linesTotal)}{discount > 0 ? ` − endirim ${azn(discount)}` : ''}{tax > 0 ? ` + vergi ${azn(tax)}` : ''}</span>}
       {unpaid > 0 && <span className="dl-unpaid">Ödənilməyib: <b data-testid="day-unpaid">{azn(unpaid)}</b></span>}
     </div>

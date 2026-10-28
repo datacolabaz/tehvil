@@ -9,7 +9,7 @@ export interface Party {
   linked: boolean; isMe: boolean; invitePending: boolean; archived: boolean;
   balance: null | { basis: 'contract' | 'invoices'; contract: number; approvedChangeOrders: number; invoicedExpenses: number; obligation: number; paid: number; advanceGiven: number; advanceSpent: number; advanceBalance: number; refunds: number; credited: number; remaining: number; status: string; disputedPayments: number };
 }
-export interface ExpenseItem { id?: string; name: string; quantity: string | null; unit: string; unitPrice: string | null; lineTotal: string | null; category?: string | null; note?: string }
+export interface ExpenseItem { id?: string; name: string; quantity: string | null; unit: string; unitPrice: string | null; lineTotal: string | null; category?: string | null; kind?: 'material' | 'service' | null; note?: string }
 export interface Expense {
   id: string; date: string; category: string; description: string; partyId: string | null; vendorName: string; roomId: string | null;
   subtotal: string; discount: string; tax: string; total: string; paymentMethod: string; fundedByPartyId: string | null; invoiceId: string | null; entryId?: string | null; workId?: string | null; note: string;

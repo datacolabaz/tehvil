@@ -1214,6 +1214,7 @@ CREATE TABLE IF NOT EXISTS "finance_expense_items" (
 	"unit_price" numeric(14, 2),
 	"line_total" numeric(14, 2) NOT NULL,
 	"category" varchar(24),
+	"kind" varchar(8),
 	"note" text DEFAULT '' NOT NULL
 );
 --> statement
@@ -3345,6 +3346,8 @@ ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "unit_price" numeri
 ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "line_total" numeric(14, 2) NOT NULL;
 --> statement
 ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "category" varchar(24);
+--> statement
+ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "kind" varchar(8);
 --> statement
 ALTER TABLE "finance_expense_items" ADD COLUMN IF NOT EXISTS "note" text DEFAULT '' NOT NULL;
 --> statement
