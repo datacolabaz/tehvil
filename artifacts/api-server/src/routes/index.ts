@@ -28,6 +28,7 @@ import photoStagesRouter from "./photoStages";
 import expenseBooksRouter from "./expenseBooks";
 import aiEstimatesRouter from "./aiEstimates";
 import buildDiaryRouter from "./buildDiary";
+import agreementsRouter, { agreementPublicRouter } from "./agreements";
 
 const router: IRouter = Router();
 
@@ -39,6 +40,7 @@ router.use(pricesPublicRouter);
 router.use(protocolPublicRouter);
 router.use(rentalPublicRouter);
 router.use(photoInvitePublicRouter);
+router.use(agreementPublicRouter);
 router.use(storageRouter);
 router.use(lifecycleRouter);
 router.use(requireAuth);
@@ -64,5 +66,6 @@ router.use(photoStagesRouter);
 router.use(expenseBooksRouter);
 router.use(aiEstimatesRouter);
 router.use(buildDiaryRouter);
+router.use(agreementsRouter);
 
 export default router;

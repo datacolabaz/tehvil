@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   index,
   integer,
@@ -174,6 +175,8 @@ export const financeExpensesTable = pgTable("finance_expenses", {
   entryId: uuid("entry_id"),
   /** Work record (work_records) done that day, when the entry also described work. Its cost stays empty: money lives here. */
   workId: uuid("work_id"),
+  /** A payment under a work agreement with a tradesperson (work_agreements). */
+  agreementId: uuid("agreement_id"),
   note: text("note").notNull().default(""),
   /** pending | approved | disputed | void */
   status: varchar("status", { length: 10 }).notNull().default("pending"),
@@ -233,6 +236,8 @@ export const financePaymentsTable = pgTable("finance_payments", {
   confirmedByUserId: user("confirmed_by_user_id"),
   confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
   cancelReason: text("cancel_reason"),
+  /** What the other side wrote when confirming or disputing (e.g. the tradesperson through the agreement link). */
+  counterpartyNote: text("counterparty_note"),
   idempotencyKey: varchar("idempotency_key", { length: 64 }),
   createdByUserId: user("created_by_user_id").notNull(),
   createdAt: createdAt(),
@@ -250,3 +255,49 @@ export type FinancePaymentRow = typeof financePaymentsTable.$inferSelect;
 export type FinanceChangeOrderRow = typeof financeChangeOrdersTable.$inferSelect;
 export type FinanceBudgetVersionRow = typeof financeBudgetVersionsTable.$inferSelect;
 export type FinanceInvoiceRow = typeof financeInvoicesTable.$inferSelect;
+
+/**
+ * A longer job agreed with a tradesperson / team: what, for how much, how it is paid and on which dates.
+ * Real payments are ordinary expenses (finance_expenses.agreement_id) — counted once in every total.
+ * The tradesperson can open a link (token, only its SHA-256 stored) that shows this agreement only and confirm or dispute
+ * each payment; they never see the home's other expenses.
+ */
+export const workAgreementsTable = pgTable("work_agreements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  projectId: uuid("project_id").notNull().references(() => homeProjectsTable.id, { onDelete: "cascade" }),
+  homeId: uuid("home_id").notNull().references(() => homesTable.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 200 }).notNull(),
+  workType: varchar("work_type", { length: 40 }).notNull().default(""),
+  contractorName: varchar("contractor_name", { length: 160 }).notNull(),
+  contractorPhone: varchar("contractor_phone", { length: 32 }).notNull().default(""),
+  /** contract (one price for the job) | monthly | daily | hourly */
+  basis: varchar("basis", { length: 10 }).notNull(),
+  /** Price per month / day / hour and how many (for those bases). */
+  rate: money("rate"),
+  units: qty("units"),
+  total: money("total").notNull(),
+  startDate: date("start_date", { mode: "string" }),
+  endDate: date("end_date", { mode: "string" }),
+  /** active | closed */
+  status: varchar("status", { length: 10 }).notNull().default("active"),
+  note: text("note").notNull().default(""),
+  workId: uuid("work_id"),
+  shareTokenHash: varchar("share_token_hash", { length: 64 }),
+  shareCreatedAt: timestamp("share_created_at", { withTimezone: true }),
+  shareRevokedAt: timestamp("share_revoked_at", { withTimezone: true }),
+  shareOpenedAt: timestamp("share_opened_at", { withTimezone: true }),
+  createdByUserId: user("created_by_user_id").notNull(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [index("work_agreements_project_idx").on(t.projectId), uniqueIndex("work_agreements_share_idx").on(t.shareTokenHash)]);
+
+/** Planned payments of an agreement. `rest` = whatever is left of the total (the last "qalan məbləğ"). */
+export const workAgreementPlanTable = pgTable("work_agreement_plan", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  agreementId: uuid("agreement_id").notNull().references(() => workAgreementsTable.id, { onDelete: "cascade" }),
+  position: integer("position").notNull().default(0),
+  dueDate: date("due_date", { mode: "string" }),
+  label: varchar("label", { length: 120 }).notNull().default(""),
+  amount: money("amount"),
+  rest: boolean("rest").notNull().default(false),
+}, (t) => [index("work_agreement_plan_idx").on(t.agreementId, t.position)]);

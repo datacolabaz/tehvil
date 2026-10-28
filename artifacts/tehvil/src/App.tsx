@@ -87,6 +87,7 @@ const StartPage = lazy(() => import('@/pages/expenses/start-page').then(m => ({ 
 const EstimateListPage = lazy(() => import('@/pages/estimate/estimate-pages').then(m => ({ default: m.EstimateListPage })));
 const EstimateNewPage = lazy(() => import('@/pages/estimate/estimate-pages').then(m => ({ default: m.EstimateNewPage })));
 const EstimatePage = lazy(() => import('@/pages/estimate/estimate-pages').then(m => ({ default: m.EstimatePage })));
+const AgreementLinkPage = lazy(() => import('@/pages/expenses/agreement-link-page').then(m => ({ default: m.AgreementLinkPage })));
 const PhotoInvitePage = lazy(() => import('@/pages/home/photo-invite-page').then(m => ({ default: m.PhotoInvitePage })));
 const HomeRoomsPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.HomeRoomsPage })));
 const RoomPage = lazy(() => import('@/pages/home/home-pages').then(m => ({ default: m.RoomPage })));
@@ -475,6 +476,7 @@ function ClerkRoutes() {
       <Route path="/kiraye/yeni">{() => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Yeni' }]} lang={lang} change={changeLang} t={t}><RentalNewPage/></ProtocolShell>}</Route>
       <Route path="/kiraye/:id">{params => <ProtocolShell active="rentalsNav" crumbs={[{ label: 'Kirayələr', href: '/kiraye' }, { label: 'Kirayə' }]} lang={lang} change={changeLang} t={t}><RentalPage id={params.id}/></ProtocolShell>}</Route>
       <Route path="/k/:token">{params => <PublicSuspense t={t}><RentalInvitePage token={params.token}/></PublicSuspense>}</Route>
+      <Route path="/razilasma/:token">{params => <PublicSuspense t={t}><AgreementLinkPage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/f/:token">{params => <PublicSuspense t={t}><PhotoInvitePage token={params.token}/></PublicSuspense>}</Route>
       <Route path="/armatur-konvertor">{() => <PublicSuspense t={t}><RebarPage/></PublicSuspense>}</Route>
       <Route path="/taxta-kalkulyator">{() => <PublicSuspense t={t}><TimberPage/></PublicSuspense>}</Route>

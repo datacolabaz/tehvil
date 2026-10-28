@@ -9,7 +9,7 @@
     "start": "node ../../lib/db/scripts/apply-schema.mjs || echo '[apply-schema] some statements failed — see the lines above; the server still starts'; node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start:server": "node --enable-source-maps ./dist/index.mjs",
-    "test": "tsx --test src/lib/estimateEngine.test.ts src/lib/aiClient.test.ts src/lib/wallsModel.test.ts src/lib/wallsCalc.test.ts src/lib/wallsPlaster.test.ts"
+    "test": "tsx --test src/lib/estimateEngine.test.ts src/lib/aiClient.test.ts src/lib/wallsModel.test.ts src/lib/wallsCalc.test.ts src/lib/wallsPlaster.test.ts src/lib/agreements.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1145.0",

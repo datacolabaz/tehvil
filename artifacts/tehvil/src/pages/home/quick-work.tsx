@@ -47,12 +47,13 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
   const create = useCreateWork();
   const qc = useQueryClient();
   const prefilled = !!(roomId || category || equipmentId || smetaProjectId || title || receiptFile || pendingInvoice);
-  const draftKey = `day:${homeId || 'any'}`;
-  const startLines = () => (mode === 'manual' ? [newLine()] : mode === 'work' ? [newLine({ kind: 'service', category: 'labor' })] : []);
+  const draftKey = `day:${mode === 'manual' ? 'mat:' : ''}${homeId || 'any'}`;
+  const materialsOnly = mode === 'manual';
+  const startLines = () => (mode === 'manual' ? [newLine({ kind: 'material' })] : mode === 'work' ? [newLine({ kind: 'service', category: 'labor' })] : []);
   const fresh = (): Draft => ({ ...empty({ category, roomId, title }), lines: startLines() });
   const [f, setF] = useState<Draft>(() => {
     const d = (!prefilled && loadDraft<Draft>(draftKey)) || empty({ category, roomId, title });
-    return { ...empty(), ...d, lines: d.lines?.length ? d.lines : (mode === 'manual' ? [newLine()] : mode === 'work' && !prefilled ? [newLine({ kind: 'service', category: 'labor' })] : []) };
+    return { ...empty(), ...d, lines: d.lines?.length ? (mode === 'manual' ? d.lines.filter((l) => lineKind(l) === 'material') : d.lines) : (mode === 'manual' ? [newLine({ kind: 'material' })] : mode === 'work' && !prefilled ? [newLine({ kind: 'service', category: 'labor' })] : []) };
   });
   // A draft left from an earlier, unsaved form is never restored silently: the person sees it and can clear it.
   const [restored, setRestored] = useState<null | { lines: number; date: string }>(() => {
@@ -148,9 +149,9 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
     if (!homeId) { setError('Qeydin hansı evə aid olduğunu seçin.'); return; }
     const roomName = home.data?.rooms.find(r => r.id === f.roomId)?.name;
     const name = f.title.trim() || (f.category ? `${WORK_CATEGORY[f.category]}${roomName ? ` — ${roomName}` : ''}` : '');
-    const wantsWork = name.length > 0 || files.length > 0 || !finance;
+    const wantsWork = !materialsOnly && (name.length > 0 || files.length > 0 || !finance);
     if (wantsWork && name.length < 2) { setError(files.length && finance ? 'Fotolar görülən işə bağlanır — işin adını yazın, məsələn “Armatur bağlandı”.' : 'Görülən işi qısa yazın, məsələn “Kondisioner quraşdırıldı”.'); return; }
-    if (!wantsWork && !lines.length) { setError('Görülən işi yazın və ya ən azı bir material / iş sətri əlavə edin.'); return; }
+    if (!wantsWork && !lines.length) { setError(materialsOnly ? 'Ən azı bir material yazın: adı, miqdarı, vahidi və qiyməti.' : 'Görülən işi yazın və ya ən azı bir material / iş sətri əlavə edin.'); return; }
     if (bad) { setError('Sətirləri yoxlayın: hər sətirdə ad və məbləğ olmalıdır.'); return; }
     if (dateOpen) { setError('Qaimədəki tarixlə seçdiyiniz tarix fərqlidir — hansını yazaq, seçin.'); return; }
     const cost = !finance && f.cost.trim() ? Number(f.cost.replace(',', '.')) : null;
@@ -224,14 +225,15 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
       </div>}
 
       <div className="field-grid">
-        <Field label="Qeyd tarixi" name="work-date" type="date" value={f.date} onChange={v => { set('date', v); setReceipt(r => r && { ...r, dateChoice: null }); }} />
-        <div className="field"><span>Vəziyyət</span><div className="rl-seg" role="radiogroup" aria-label="Vəziyyət">
+        <Field label={materialsOnly ? 'Alış tarixi' : 'Qeyd tarixi'} name="work-date" type="date" value={f.date} onChange={v => { set('date', v); setReceipt(r => r && { ...r, dateChoice: null }); }} />
+        {materialsOnly ? <label className="field"><span>Satıcı / mağaza (istəyə bağlı)</span><input value={f.vendorName} onChange={e => set('vendorName', e.target.value)} placeholder="məs. Bakı Tikinti Materialları" data-testid="day-vendor-manual" /></label> : <div className="field"><span>Vəziyyət</span><div className="rl-seg" role="radiogroup" aria-label="Vəziyyət">
           <button type="button" role="radio" aria-checked={f.done} className={f.done ? 'on' : ''} onClick={() => set('done', true)}>Görülüb</button>
           <button type="button" role="radio" aria-checked={!f.done} className={!f.done ? 'on' : ''} onClick={() => set('done', false)}>Planlaşdırılır</button>
-        </div></div>
+        </div></div>}
       </div>
       <small className="rl-hint">Köhnə günü də yaza bilərsiniz — sadəcə əsl tarixini seçin.</small>
 
+      {!materialsOnly && <>
       <Field label={finance ? 'Görülən iş (istəyə bağlı)' : 'Nə edildi?'} name="work-title" value={f.title} onChange={v => set('title', v)} placeholder="məs. Fundament üçün qazıntı aparıldı" />
       <Field label="Qısa təsvir" name="work-description"><textarea rows={2} maxLength={6000} value={f.description} onChange={e => set('description', e.target.value)} placeholder="məs. Armatur bağlandı, sabah beton töküləcək" /></Field>
 
@@ -243,9 +245,10 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
         {files.length > 0 && <div className="hp-chipset">{files.map((p, i) => <span key={i} className="hp-tag">{p.name}<button type="button" aria-label="Sil" onClick={() => setFiles(ps => ps.filter((_, j) => j !== i))}><X size={12} /></button></span>)}</div>}
         <small className="rl-hint">Görülən işin foto və videosu. Divarlar bağlanmazdan əvvəl xətlərin fotosu xüsusilə dəyərlidir.</small>
       </div>
+      </>}
 
       {finance && <section className="dl-section" aria-labelledby="dl-h">
-        <div className="dl-head"><h3 id="dl-h">Material və işlər</h3>
+        <div className="dl-head"><h3 id="dl-h">{materialsOnly ? 'Alınan materiallar' : 'Material və işlər'}</h3>
           <button type="button" className="button button-secondary" onClick={() => receiptInput.current?.click()} disabled={!!reading} data-testid="button-receipt">{reading ? <LoaderCircle className="spin" size={15} /> : <ReceiptText size={15} />}Qaimə çək və ya yüklə</button>
           <input ref={receiptInput} type="file" hidden accept="image/*,application/pdf" onChange={e => { void uploadReceipt(e.target.files?.[0]); e.target.value = ''; }} data-testid="input-receipt" />
         </div>
@@ -267,14 +270,15 @@ export function DailyEntryModal({ homeId: fixedHome, roomId, category, equipment
           <button type="button" className="button button-secondary" onClick={() => setReceipt(r => r && { ...r, dateChoice: 'mine' })} data-testid="day-date-mine">Seçdiyim tarix</button>
         </div>}
         {receipt?.dateChoice === 'receipt' && receipt.aiDate && <p className="fn-note"><CalendarDays size={14} />Xərc qaimənin tarixi ilə yazılacaq: {azDate(receipt.aiDate)}</p>}
-        <LinesEditor lines={f.lines} onChange={l => set('lines', l)} />
+        <LinesEditor lines={f.lines} onChange={l => set('lines', l)} only={materialsOnly ? 'material' : undefined} />
         <DayTotals lines={lines} discount={discountC} tax={taxC} />
         {receiptDiff ? <p className="fn-mismatch" role="alert" data-testid="day-receipt-diff"><AlertTriangle size={14} /><span>Qaimədə yekun {receipt!.total} AZN-dir, sətirlərin cəmi isə {(dayTotal / 100).toFixed(2)} AZN. Məbləğ avtomatik dəyişdirilmir — qaimə ilə yoxlayın.</span></p> : null}
-        {!lines.length && !receipt && <small className="rl-hint">Həmin gün alınan materialları, usta və fəhlə haqqını, texnika və daşınmanı sətir-sətir yazın. Hər sətir evin xərc jurnalına və Excel-ə düşür.</small>}
+        {materialsOnly && <small className="rl-hint">Usta, fəhlə, texnika və digər xidmətlər üçün “Görülən işi qeyd et” düyməsindən istifadə edin.</small>}
+        {!materialsOnly && !lines.length && !receipt && <small className="rl-hint">Həmin gün alınan materialları, usta və fəhlə haqqını, texnika və daşınmanı sətir-sətir yazın. Hər sətir evin xərc jurnalına və Excel-ə düşür.</small>}
       </section>}
 
-      <button type="button" className={`hp-more ${more ? 'open' : ''}`} onClick={() => setMore(!more)} aria-expanded={more} data-testid="button-more"><ChevronDown size={15} />Əlavə məlumat (istəyə bağlı): otaq, işin növü, usta, zəmanət</button>
-      {more && <div className="hp-more-body">
+      {!materialsOnly && <button type="button" className={`hp-more ${more ? 'open' : ''}`} onClick={() => setMore(!more)} aria-expanded={more} data-testid="button-more"><ChevronDown size={15} />Əlavə məlumat (istəyə bağlı): otaq, işin növü, usta, zəmanət</button>}
+      {more && !materialsOnly && <div className="hp-more-body">
         {!!home.data?.rooms.length && <div className="field"><span>Otaq və ya zona</span>
           <div className="hp-chipset">{[{ id: '', name: 'Bütün ev' }, ...home.data.rooms].map(r => <button key={r.id || 'all'} type="button" className={f.roomId === r.id ? 'on' : ''} onClick={() => set('roomId', r.id)}>{r.name}</button>)}</div>
         </div>}
