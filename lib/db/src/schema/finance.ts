@@ -202,6 +202,8 @@ export const financeExpenseItemsTable = pgTable("finance_expense_items", {
   lineTotal: money("line_total").notNull(),
   /** Category of this line (material vs labour on one receipt); null = the expense's category. */
   category: varchar("category", { length: 24 }),
+  /** material (quantity × price) | service (work or fee: one amount). null = older line, decided by its category. */
+  kind: varchar("kind", { length: 8 }),
   note: text("note").notNull().default(""),
 }, (t) => [index("finance_expense_items_expense_idx").on(t.expenseId)]);
 

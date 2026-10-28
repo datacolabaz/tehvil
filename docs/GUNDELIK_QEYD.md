@@ -59,3 +59,16 @@
 - **Brauzer `daily-flow`** (telefon, 8 ssenari və ev səhifəsi): hamısı keçir.
 - **Regressiya:** finance 80, books 26, estimate 55, stages 28, home 193, history 23, integrity 30, invite 35, unit 19. Brauzer: hf, hh, fn, fi, two-flow.
 - **Excel faylları LibreOffice ilə yenidən hesablandı:** 105 və 79 düstur, xəta yoxdur.
+
+
+## İş və xidmət sətirləri (28.10.2026)
+- **Sətrin növü düymədən asılıdır:** "Material əlavə et" material sətri, "İş və ya xidmət haqqı" iş/xidmət sətri yaradır. Növ sətrin üstündə yazılır ("Material" / "İş / xidmət"). Səhv düymə basılıbsa, bu yazıya toxunanda növ dəyişir.
+- **Kateqoriya növü dəyişmir.** Məsələn, "Lenta üçün qazıntı" işinə "Beton və sement", qəlib işinə "Taxta və qəlib" seçmək olar. İş sətri yenə tək məbləğlə qalır, miqdar və vahid soruşulmur.
+- **İş sətri:** yalnız "Məbləğ (ödəniş), AZN" yazılır. İstəsəniz, "Gün, saat və ya reys ilə hesabla" seçə bilərsiniz (məs. 2 gün × 50).
+- **Material sətri:** miqdar, vahid, vahid qiymət və ümumi məbləğ.
+- **Günün yekunu:** "Günün ümumi xərci" bütün sətirlərin cəmidir. Altında "Material" və "İş və xidmətlər" ayrıca göstərilir. Məsələn: qazıntı 100 + su çəni 200 = 300 AZN.
+- **Baza:** `finance_expense_items.kind` (`material` / `service`) yeni sütundur. Köhnə sətirlərdə bu sütun boşdur, onların növü əvvəlki kimi kateqoriyadan götürülür.
+- **Testlər:**
+  - `svc-flow`: telefonda 15 yoxlama;
+  - `daily-flow`, `budget-flow`, `xl-flow`, `two-flow`;
+  - API: `daily-e2e` 37, `finance-e2e` 80, `books-e2e` 26.

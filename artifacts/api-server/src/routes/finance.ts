@@ -271,7 +271,7 @@ function expenseDto(e: FinanceExpenseRow, items: ProjectData["items"]) {
     subtotal: e.subtotal, discount: e.discount, tax: e.tax, total: e.total, paymentMethod: e.paymentMethod, fundedByPartyId: e.fundedByPartyId,
     invoiceId: e.invoiceId, entryId: e.entryId, workId: e.workId, note: e.note, status: e.status, approvedAt: e.approvedAt?.toISOString() ?? null, voidReason: e.voidReason,
     createdAt: e.createdAt.toISOString(),
-    items: items.map((i) => ({ id: i.id, name: i.name, quantity: i.quantity, unit: i.unit, unitPrice: i.unitPrice, lineTotal: i.lineTotal, category: i.category, note: i.note })),
+    items: items.map((i) => ({ id: i.id, name: i.name, quantity: i.quantity, unit: i.unit, unitPrice: i.unitPrice, lineTotal: i.lineTotal, category: i.category, kind: i.kind, note: i.note })),
     mismatch: expenseMismatch(e, items),
   };
 }
@@ -406,6 +406,8 @@ const ItemBody = z.object({
   unitPrice: optAmount,
   lineTotal: optAmount,
   category: z.string().refine(isCategory, "category").nullable().optional(),
+  /** material: quantity × price; service: work or a fee — one amount (quantity only if the person gave one). */
+  kind: z.enum(["material", "service"]).nullable().optional(),
   note: z.string().trim().max(500).default(""),
 });
 const ExpenseBody = z.object({
@@ -454,7 +456,7 @@ function normalizeItems(items: ExpenseInput["items"]) {
   return items.map((i, position) => {
     const quantity = parseQty(i.quantity);
     const lineTotal = i.lineTotal ?? (quantity && i.unitPrice ? fromCents(lineCents(quantity, i.unitPrice)) : null);
-    return { position, name: i.name, quantity, unit: i.unit, unitPrice: i.unitPrice ?? null, lineTotal: lineTotal ?? "0.00", category: i.category ?? null, note: i.note ?? "" };
+    return { position, name: i.name, quantity, unit: i.unit, unitPrice: i.unitPrice ?? null, lineTotal: lineTotal ?? "0.00", category: i.category ?? null, kind: i.kind ?? null, note: i.note ?? "" };
   });
 }
 
@@ -562,14 +564,14 @@ router.post("/home-projects/:projectId/daily-entries", async (req, res): Promise
     if (!w) return bad(res, "Görülən iş bu evə aid deyil");
   }
   // Every line needs a real amount: quantity × price, or the total typed in. Nothing is guessed.
-  const lines: { name: string; quantity: string | null; unit: string; unitPrice: string | null; lineTotal: string; category: string | null; note: string; paid: boolean }[] = [];
+  const lines: { name: string; quantity: string | null; unit: string; unitPrice: string | null; lineTotal: string; category: string | null; kind: string | null; note: string; paid: boolean }[] = [];
   for (const [k, l] of d.lines.entries()) {
     const quantity = parseQty(l.quantity);
     if (l.quantity != null && l.quantity !== "" && !quantity) return bad(res, `${k + 1}-ci sətir: miqdarı rəqəmlə yazın`);
     const computed = quantity && l.unitPrice ? fromCents(lineCents(quantity, l.unitPrice)) : null;
     const lineTotal = computed ?? l.lineTotal ?? null;
     if (!lineTotal) return bad(res, `“${l.name}”: məbləği yazın (və ya miqdar və vahid qiyməti)`);
-    lines.push({ name: l.name, quantity, unit: l.unit, unitPrice: l.unitPrice ?? null, lineTotal, category: l.category ?? null, note: l.note ?? "", paid: l.paid });
+    lines.push({ name: l.name, quantity, unit: l.unit, unitPrice: l.unitPrice ?? null, lineTotal, category: l.category ?? null, kind: l.kind ?? null, note: l.note ?? "", paid: l.paid });
   }
   const userId = uid(req);
   if (d.idempotencyKey) {
@@ -611,7 +613,7 @@ router.post("/home-projects/:projectId/daily-entries", async (req, res): Promise
           idempotencyKey: d.idempotencyKey ? `${d.idempotencyKey}:${paid ? "p" : "u"}` : null, createdByUserId: userId,
         }).returning();
         await tx.insert(financeExpenseItemsTable).values(g.map((l, position) => ({
-          expenseId: e.id, position, name: l.name, quantity: l.quantity, unit: l.unit, unitPrice: l.unitPrice, lineTotal: l.lineTotal, category: l.category, note: l.note,
+          expenseId: e.id, position, name: l.name, quantity: l.quantity, unit: l.unit, unitPrice: l.unitPrice, lineTotal: l.lineTotal, category: l.category, kind: l.kind, note: l.note,
         })));
         if (paid && totalC > 0) {
           await tx.insert(financePaymentsTable).values({

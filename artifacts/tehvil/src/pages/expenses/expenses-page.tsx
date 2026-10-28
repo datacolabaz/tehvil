@@ -10,7 +10,7 @@ import {
   type AiInvoice, type Book, type Expense, type Finance, type HistoryRow, type Invoice,
 } from '@/lib/finance/api';
 import { DailyEntryModal, type DailyMode } from '../home/quick-work';
-import { LinesEditor, lineCents, lineProblem, newLine, qtyText, type DayLine } from '@/components/daily/lines-editor';
+import { LinesEditor, lineCents, lineKind, lineProblem, newLine, qtyText, type DayLine } from '@/components/daily/lines-editor';
 import '../home/finance.css';
 import './expenses.css';
 
@@ -218,7 +218,7 @@ function SimpleExpenseForm({ d, projectId, existing, onClose, onSaved }: { d: Fi
   const [f, setF] = useState(() => ({
     total: existing.total, description: existing.description, category: existing.category, date: existing.date, note: existing.note, vendorName: existing.vendorName,
     paymentMethod: existing.paymentMethod, reason: '',
-    lines: existing.items.map((i) => newLine({ name: i.name, quantity: i.quantity != null ? String(Number(i.quantity)) : '', unit: i.unit, unitPrice: i.unitPrice ?? '', lineTotal: i.quantity && i.unitPrice ? '' : i.lineTotal ?? '', category: i.category || existing.category, note: i.note ?? '' })) as DayLine[],
+    lines: existing.items.map((i) => newLine({ name: i.name, quantity: i.quantity != null ? String(Number(i.quantity)) : '', unit: i.unit, unitPrice: i.unitPrice ?? '', lineTotal: i.quantity && i.unitPrice ? '' : i.lineTotal ?? '', category: i.category || existing.category, ...(i.kind ? { kind: i.kind } : {}), note: i.note ?? '' })) as DayLine[],
   }));
   const [more, setMore] = useState(existing.items.length > 0 || !!existing.vendorName);
   const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
@@ -229,7 +229,7 @@ function SimpleExpenseForm({ d, projectId, existing, onClose, onSaved }: { d: Fi
   const bad = lines.map(lineProblem).find(Boolean);
   const save = async () => {
     setBusy(true); setErr('');
-    const items = lines.map((l) => ({ name: l.name.trim(), quantity: l.quantity || null, unit: l.unit, unitPrice: l.unitPrice || null, lineTotal: lineCents(l) != null ? (lineCents(l)! / 100).toFixed(2) : null, category: l.category, note: l.note }));
+    const items = lines.map((l) => ({ name: l.name.trim(), quantity: l.quantity || null, unit: l.unit, unitPrice: l.unitPrice || null, lineTotal: lineCents(l) != null ? (lineCents(l)! / 100).toFixed(2) : null, category: l.category, kind: lineKind(l), note: l.note }));
     const total = autoTotal != null ? (autoTotal / 100).toFixed(2) : f.total;
     const body = {
       date: f.date, category: f.category, description: f.description, vendorName: f.vendorName, note: f.note, total, paymentMethod: f.paymentMethod, items,

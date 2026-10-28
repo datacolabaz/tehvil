@@ -49,3 +49,11 @@
 .dl-fee .text-link, .dl-back { justify-self: start; font-size: 13px; padding: 0; }
 .dl-back { grid-column: 1 / -1; }
 .dl-adds { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Material vs work / service: decided by the button, shown on the line. */
+.dl-kind-row { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.dl-kind-row select { flex: 1; min-width: 0; }
+.dl-kind { flex: 0 0 auto; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 10px; }
+.dl-kind.material { background: #eef3f0; color: #23523c; }
+.dl-kind.service { background: #fdf0dc; color: #6b4204; }
+.dl-kind { border: 0; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
