@@ -38,28 +38,54 @@ router.post("/storage/uploads/request-url", async (req, res): Promise<void> => {
     return;
   }
 
+  // Two steps that can fail for different reasons: the storage link (configuration) and recording the upload (database).
+  let uploadURL: string, objectPath: string;
   try {
-    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-    const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+    uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+  } catch (error) {
+    req.log.error({ err: error, stage: "storage-url" }, "Failed to create private upload URL");
+    res.status(503).json({ error: storageErrorText(error) });
+    return;
+  }
+  try {
     await db.insert(evidenceUploadsTable).values({
       objectPath,
       userId,
-      originalName: parsed.data.name,
+      originalName: parsed.data.name.slice(0, 255),
       contentType: parsed.data.contentType,
       size: parsed.data.size,
       expiresAt: new Date(Date.now() + 30 * 60 * 1000),
     });
-    res.json(
-      RequestUploadUrlResponse.parse({
-        uploadURL,
-        objectPath,
-        metadata: parsed.data,
-      }),
-    );
   } catch (error) {
-    req.log.error({ err: error }, "Failed to create private upload URL");
-    res.status(500).json({ error: "Failed to create upload URL" });
+    req.log.error({ err: error, stage: "record" }, "Failed to record the upload");
+    res.status(500).json({ error: "Fayl qeydə alınmadı (verilənlər bazası cavab vermədi). Bir az sonra yenidən cəhd edin." });
+    return;
   }
+  res.json(RequestUploadUrlResponse.parse({ uploadURL, objectPath, metadata: parsed.data }));
+});
+
+/** What went wrong with the storage configuration, in words — never a value or a key, only which setting. */
+function storageErrorText(error: unknown) {
+  const msg = error instanceof Error ? error.message : String(error);
+  const missing = msg.match(/Missing required storage configuration: ([A-Z_]+)/);
+  if (missing) return `Fayl yaddaşı qoşulmayıb: serverdə ${missing[1]} dəyişəni yoxdur. Railway → backend → Variables bölməsini yoxlayın.`;
+  if (/Invalid storage upload URL|Invalid evidence object key/.test(msg)) return "Fayl yaddaşının ünvanı (BUCKET_ENDPOINT) bucket-ın ünvanı ilə uyğun gəlmir. Railway → backend → Variables bölməsini yoxlayın.";
+  if (/OBJECT_STORAGE_PROVIDER|PRIVATE_OBJECT_DIR|External hosting/.test(msg)) return "Fayl yaddaşı seçilməyib: serverdə OBJECT_STORAGE_PROVIDER=s3 və bucket dəyişənləri lazımdır.";
+  return "Fayl yaddaşı hazırda cavab vermir. Bir az sonra yenidən cəhd edin.";
+}
+
+/** Diagnostics for the owner: is file storage configured? Shows only yes / no per setting, never values. */
+router.get("/storage/status", async (req, res): Promise<void> => {
+  if (!getAuth(req).userId) { res.status(401).json({ error: "Authentication required" }); return; }
+  const provider = process.env.OBJECT_STORAGE_PROVIDER || "replit";
+  const names = provider === "s3" ? ["BUCKET_NAME", "BUCKET_ENDPOINT", "BUCKET_ACCESS_KEY_ID", "BUCKET_SECRET_ACCESS_KEY", "BUCKET_REGION", "BUCKET_FORCE_PATH_STYLE"] : ["PRIVATE_OBJECT_DIR"];
+  const settings = Object.fromEntries(names.map((n) => [n, !!process.env[n]]));
+  let uploadLink: { ok: boolean; problem?: string };
+  try { const u = await objectStorageService.getObjectEntityUploadURL(); objectStorageService.normalizeObjectEntityPath(u); uploadLink = { ok: true }; }
+  catch (e) { uploadLink = { ok: false, problem: storageErrorText(e) }; }
+  res.setHeader("Cache-Control", "no-store");
+  res.json({ provider, settings, uploadLink });
 });
 
 router.get(
