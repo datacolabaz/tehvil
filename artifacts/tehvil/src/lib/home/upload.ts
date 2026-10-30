@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { putErrorText } from '@/lib/finance/api';
 import { attachHomeMedia, requestUploadUrl, type HomeMedia, type HomeMediaAttachInput } from '@workspace/api-client-react';
 
 const IMAGES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -35,7 +36,7 @@ export async function uploadHomeMedia(files: File[], target: Omit<HomeMediaAttac
     if (file.size > 50 * 1024 * 1024) throw new UploadError(`"${file.name}" 50 MB-dan böyükdür.`);
     const meta = await requestUploadUrl({ name: file.name, size: file.size, contentType: file.type });
     const put = await fetch(meta.uploadURL, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file }).catch(() => null);
-    if (!put?.ok) throw new UploadError('Fayl yüklənmədi. İnternet bağlantısını yoxlayıb yenidən cəhd edin.');
+    if (!put?.ok) throw new UploadError(await putErrorText(put));
     inputs.push({ objectPath: meta.objectPath, originalName: file.name, contentType: file.type, size: file.size });
   }
   return attachHomeMedia({ files: inputs, ...target });

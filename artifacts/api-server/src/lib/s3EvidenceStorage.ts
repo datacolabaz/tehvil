@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { PassThrough, Readable } from "node:stream";
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 let client: S3Client | undefined;
@@ -26,6 +26,22 @@ function s3() {
 export async function createS3EvidenceUpload() {
   const key = `private/uploads/${randomUUID()}`;
   return getSignedUrl(s3(), new PutObjectCommand({ Bucket: bucket(), Key: key }), { expiresIn: 900 });
+}
+
+/**
+ * Writes an upload through the server. Browsers send files here (same origin) instead of straight to the bucket,
+ * so the bucket needs no CORS rules — Railway buckets do not accept browser requests from another site.
+ */
+export async function putS3EvidenceObject(objectPath: string, body: Readable, length: number, contentType: string) {
+  if (!/^\/objects\/uploads\/[a-f0-9-]{36}$/.test(objectPath)) throw new Error("Invalid evidence object path");
+  await s3().send(new PutObjectCommand({ Bucket: bucket(), Key: `private/${objectPath.slice("/objects/".length)}`, Body: body, ContentLength: length, ContentType: contentType }));
+}
+
+/** Can the server really write to the bucket with these keys? A tiny object is written and removed. */
+export async function checkS3Write() {
+  const Key = `private/status-check/${randomUUID()}`;
+  await s3().send(new PutObjectCommand({ Bucket: bucket(), Key, Body: "ok", ContentType: "text/plain" }));
+  await s3().send(new DeleteObjectCommand({ Bucket: bucket(), Key })).catch(() => undefined);
 }
 
 export function normalizeS3EvidencePath(raw: string) {

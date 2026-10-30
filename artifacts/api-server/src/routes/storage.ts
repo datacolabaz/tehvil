@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 import { getAuth } from "@clerk/express";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import { Router, type IRouter } from "express";
 import {
   GetProjectMediaParams,
@@ -16,6 +16,8 @@ import {
   ObjectNotFoundError,
   ObjectStorageService,
 } from "../lib/objectStorage";
+import { checkS3Write, putS3EvidenceObject } from "../lib/s3EvidenceStorage";
+import { clientUploadURL } from "../lib/uploadUrl";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -62,8 +64,48 @@ router.post("/storage/uploads/request-url", async (req, res): Promise<void> => {
     res.status(500).json({ error: "Fayl qeydə alınmadı (verilənlər bazası cavab vermədi). Bir az sonra yenidən cəhd edin." });
     return;
   }
-  res.json(RequestUploadUrlResponse.parse({ uploadURL, objectPath, metadata: parsed.data }));
+  res.json(RequestUploadUrlResponse.parse({ uploadURL: clientUploadURL(req, uploadURL, objectPath), objectPath, metadata: parsed.data }));
 });
+
+/**
+ * Receives a file for an upload that was just requested (row in evidence_uploads, not expired, not attached yet) and
+ * writes it to the bucket. The id is a random UUID handed out by request-url (also to photo-invite visitors without
+ * an account), so knowing it is the permission; the declared type and size must match.
+ */
+router.put("/storage/uploads/:id", async (req, res): Promise<void> => {
+  const id = String(req.params.id);
+  if (!/^[a-f0-9-]{36}$/.test(id)) { res.status(400).json({ error: "Yükləmə linki düzgün deyil." }); return; }
+  const objectPath = `/objects/uploads/${id}`;
+  const [row] = await db.select().from(evidenceUploadsTable)
+    .where(and(eq(evidenceUploadsTable.objectPath, objectPath), gt(evidenceUploadsTable.expiresAt, new Date()), isNull(evidenceUploadsTable.attachedAt))).limit(1);
+  if (!row) { res.status(404).json({ error: "Yükləmə linkinin vaxtı bitib. Faylı yenidən seçin." }); return; }
+  const type = String(req.headers["content-type"] || "").split(";")[0].trim().toLowerCase();
+  if (type !== row.contentType.toLowerCase()) { res.status(400).json({ error: "Faylın növü əvvəl bildiriləndən fərqlidir." }); return; }
+  const length = Number(req.headers["content-length"]);
+  if (!Number.isInteger(length) || length < 1 || length > row.size) { res.status(400).json({ error: "Faylın ölçüsü əvvəl bildiriləndən fərqlidir." }); return; }
+  try {
+    await putS3EvidenceObject(objectPath, req, length, row.contentType);
+  } catch (error) {
+    req.log.error({ err: error, stage: "storage-put" }, "Failed to write upload to the bucket");
+    res.status(502).json({ error: storagePutErrorText(error) });
+    return;
+  }
+  res.json({ ok: true });
+});
+
+/** Why the bucket refused the file, in words — which setting to check, never a value. */
+function storagePutErrorText(error: unknown) {
+  const e = error as { name?: string; Code?: string; $metadata?: { httpStatusCode?: number }; code?: string; message?: string };
+  const code = e.name || e.Code || "";
+  const status = e.$metadata?.httpStatusCode;
+  if (/InvalidAccessKeyId/.test(code)) return "Fayl yaddaşı açarı qəbul etmədi: BUCKET_ACCESS_KEY_ID səhvdir. Railway → backend → Variables bölməsini yoxlayın.";
+  if (/SignatureDoesNotMatch/.test(code)) return "Fayl yaddaşı açarı qəbul etmədi: BUCKET_SECRET_ACCESS_KEY səhvdir. Railway → backend → Variables bölməsini yoxlayın.";
+  if (/NoSuchBucket/.test(code)) return "Fayl yaddaşında belə bucket yoxdur: BUCKET_NAME səhvdir. Railway → backend → Variables bölməsini yoxlayın.";
+  if (/AccessDenied/.test(code) || status === 403) return "Fayl yaddaşı yazmağa icazə vermədi (açarlar və ya BUCKET_NAME). Railway → backend → Variables bölməsini yoxlayın.";
+  if (/ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ETIMEDOUT/.test(`${e.code ?? ""} ${e.message ?? ""}`)) return "Fayl yaddaşına qoşulmaq olmadı: BUCKET_ENDPOINT ünvanını yoxlayın.";
+  if (/PermanentRedirect|AuthorizationHeaderMalformed/.test(code)) return "Fayl yaddaşının ünvanı və ya regionu uyğun deyil: BUCKET_ENDPOINT, BUCKET_REGION və BUCKET_FORCE_PATH_STYLE-ı yoxlayın.";
+  return "Fayl yaddaşa yazılmadı. Bir az sonra yenidən cəhd edin.";
+}
 
 /** What went wrong with the storage configuration, in words — never a value or a key, only which setting. */
 function storageErrorText(error: unknown) {
@@ -84,8 +126,14 @@ router.get("/storage/status", async (req, res): Promise<void> => {
   let uploadLink: { ok: boolean; problem?: string };
   try { const u = await objectStorageService.getObjectEntityUploadURL(); objectStorageService.normalizeObjectEntityPath(u); uploadLink = { ok: true }; }
   catch (e) { uploadLink = { ok: false, problem: storageErrorText(e) }; }
+  // A link can be made with any keys; only a real write shows the keys and the bucket name are right.
+  let write: { ok: boolean; problem?: string } | undefined;
+  if (provider === "s3" && uploadLink.ok) {
+    try { await checkS3Write(); write = { ok: true }; }
+    catch (e) { req.log.error({ err: e, stage: "status-write" }, "Bucket write check failed"); write = { ok: false, problem: storagePutErrorText(e) }; }
+  }
   res.setHeader("Cache-Control", "no-store");
-  res.json({ provider, settings, uploadLink });
+  res.json({ provider, settings, uploadLink, ...(write ? { write } : {}) });
 });
 
 router.get(

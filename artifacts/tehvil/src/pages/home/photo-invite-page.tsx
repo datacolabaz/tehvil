@@ -3,7 +3,7 @@ import { Camera, Check, CheckCircle2, ImagePlus, LoaderCircle, MapPin, PlayCircl
 import { addInvitePhoto, requestInviteUploadUrl, setInviteStageStatus, useGetPhotoInvite, type PhotoInvitePreview } from '@workspace/api-client-react';
 import { PhotoError, photoMeta, preparePhoto } from '@/lib/protocol/model';
 import { floorLabel, FLOORS } from '@/lib/home/floors';
-import { ROOM_KIND } from '@/lib/finance/api';
+import { putErrorText, ROOM_KIND } from '@/lib/finance/api';
 import './stages.css';
 import './diary.css';
 
@@ -65,7 +65,7 @@ export function PhotoInvitePage({ token }: { token: string }) {
       if (!pending.current) {
         const u = await requestInviteUploadUrl(token, { name: prepared.name, size: prepared.size, contentType: prepared.type });
         const put = await fetch(u.uploadURL, { method: 'PUT', headers: { 'Content-Type': prepared.type }, body: prepared }).catch(() => null);
-        if (!put?.ok) throw new PhotoError(navigator.onLine ? 'Foto yüklənmədi. Yenidən cəhd edin.' : 'İnternet bağlantısı yoxdur. Bağlantı bərpa olunanda yenidən cəhd edin.');
+        if (!put?.ok) throw new PhotoError(put ? await putErrorText(put) : navigator.onLine ? 'Foto yüklənmədi. Yenidən cəhd edin.' : 'İnternet bağlantısı yoxdur. Bağlantı bərpa olunanda yenidən cəhd edin.');
         pending.current = { objectPath: u.objectPath, originalName: prepared.name, contentType: prepared.type, size: prepared.size };
       }
       // Location only if the person ticked it — not even the photo's own GPS otherwise.
