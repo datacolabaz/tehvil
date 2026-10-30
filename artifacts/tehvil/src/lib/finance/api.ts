@@ -58,11 +58,17 @@ export function useRefresh(projectId: string) {
   return () => qc.invalidateQueries({ queryKey: financeKey(projectId) });
 }
 
+/** Why the file did not reach storage: the server's own words when it answered, otherwise the connection. */
+export async function putErrorText(put: Response | null) {
+  const own = put ? ((await put.json().catch(() => null)) as { error?: string } | null)?.error : null;
+  return own || (put ? 'Fayl yüklənmədi. Yenidən cəhd edin.' : 'Fayl yüklənmədi. İnternet bağlantısını yoxlayıb yenidən cəhd edin.');
+}
+
 /** Uploads one file to storage (presigned PUT) and returns the descriptor the finance routes accept. */
 export async function putFile(file: File) {
   const meta = await requestUploadUrl({ name: file.name, size: file.size, contentType: file.type });
   const put = await fetch(meta.uploadURL, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file }).catch(() => null);
-  if (!put?.ok) throw new Error('Fayl yüklənmədi. İnternet bağlantısını yoxlayıb yenidən cəhd edin.');
+  if (!put?.ok) throw new Error(await putErrorText(put));
   return { objectPath: meta.objectPath, originalName: file.name, contentType: file.type, size: file.size };
 }
 

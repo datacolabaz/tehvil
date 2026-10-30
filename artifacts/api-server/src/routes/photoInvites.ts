@@ -8,6 +8,7 @@ import { templateOf } from "../lib/buildTemplates";
 import { audit, getHomeAccess, getWorkAccess, homePermissions } from "../lib/homeAccess";
 import { attachHomeMedia, HomeMediaError } from "../lib/homeMedia";
 import { ObjectStorageService } from "../lib/objectStorage";
+import { clientUploadURL } from "../lib/uploadUrl";
 import { rateLimit } from "../lib/rateLimit";
 import { hashToken, newToken, publicOrigin } from "../lib/realtorCore";
 
@@ -149,7 +150,7 @@ photoInvitePublicRouter.post("/photo-invites/:token/upload-url", openLimit, asyn
   const uploadURL = await storage.getObjectEntityUploadURL();
   const objectPath = storage.normalizeObjectEntityPath(uploadURL);
   await db.insert(evidenceUploadsTable).values({ objectPath, userId: actor(x.inv), originalName: b.data.name.slice(0, 255), contentType: b.data.contentType, size: b.data.size, expiresAt: new Date(Date.now() + 30 * 60_000) });
-  res.json({ uploadURL, objectPath });
+  res.json({ uploadURL: clientUploadURL(req, uploadURL, objectPath), objectPath });
 });
 
 photoInvitePublicRouter.post("/photo-invites/:token/photos", openLimit, async (req, res): Promise<void> => {
